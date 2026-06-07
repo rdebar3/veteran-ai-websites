@@ -1,26 +1,147 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans);
+  background-color: #0F172A;
+  color: #E2E8F0;
+}
+
+/* Faint WV mountain landscape background layer across the site */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/natural-beauty-in-west-virginia.webp');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0.1;
+  z-index: -2;
+  pointer-events: none;
+  mix-blend-mode: luminosity;
+}
+
+/* Subtle patriotic texture overlay (very faint flag-like) */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.015) 0px,
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(200, 16, 46, 0.01) 0px,
+      rgba(200, 16, 46, 0.01) 2px,
+      transparent 2px,
+      transparent 6px
+    );
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Additional subtle patriotic stripes for Hero only */
+.hero-patriotic {
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 3px,
+      transparent 3px,
+      transparent 8px
+    );
+  mix-blend-mode: overlay;
+}
+
+/* Professional button styles - red accents kept */
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-lg bg-[#B91C1C] px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-[#991B1B] active:bg-[#7F1D1D] focus:outline-none focus:ring-2 focus:ring-[#B91C1C] focus:ring-offset-2;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-lg bg-[#B91C1C] px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-[#991B1B] active:bg-[#7F1D1D] focus:outline-none focus:ring-2 focus:ring-[#B91C1C] focus:ring-offset-2;
+}
+
+/* Dark theme card base */
+.card {
+  @apply rounded-2xl border border-[#475569]/40 bg-[#1E2937]/30 backdrop-blur-md p-8 shadow-sm transition-all;
+}
+
+/* Form styles - dark theme */
+.form-input {
+  @apply w-full rounded-lg border border-[#475569]/40 bg-[#1E2937]/40 px-4 py-3 text-base text-[#E2E8F0] placeholder:text-[#94A3B8] transition focus:border-[#B91C1C] focus:outline-none focus:ring-1 focus:ring-[#B91C1C];
+}
+
+.form-textarea {
+  @apply w-full rounded-lg border border-[#475569]/40 bg-[#1E2937]/40 px-4 py-3 text-base text-[#E2E8F0] placeholder:text-[#94A3B8] transition focus:border-[#B91C1C] focus:outline-none focus:ring-1 focus:ring-[#B91C1C] resize-y min-h-[120px];
+}
+
+.form-label {
+  @apply block text-sm font-medium text-[#CBD5E1] mb-1.5;
+}
+
+/* Trust bar - dark */
+.trust-bar {
+  @apply bg-[#1E2937]/40 border-y border-[#475569]/40 backdrop-blur-sm;
+}
+
+/* Section headers - light text */
+.section-header {
+  @apply text-center mb-10 md:mb-14;
+}
+
+.section-title {
+  @apply text-4xl md:text-5xl font-bold tracking-tighter text-[#E2E8F0];
+}
+
+.section-subtitle {
+  @apply mt-4 text-xl text-[#94A3B8] max-w-2xl mx-auto;
+}
+
+/* Success state - dark */
+.success-box {
+  @apply rounded-2xl border border-[#475569]/40 bg-[#1E2937]/30 backdrop-blur-md p-8 text-center;
+}
+
+/* Footer - dark */
+.footer {
+  @apply bg-[#0F172A]/80 text-[#94A3B8];
+}
+
+/* Small utility */
+.eyebrow {
+  @apply text-xs font-semibold tracking-[1.5px] text-[#B91C1C] uppercase;
+}
+
+/* Hero background styles */
+#hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.7));
+  z-index: 1;
 }
