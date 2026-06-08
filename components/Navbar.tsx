@@ -52,7 +52,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center gap-2">
             <a
               href="#build"
-              className="btn-primary text-sm px-4 py-2 shadow-sm"
+              className="btn-primary text-sm px-3 py-1.5 shadow-sm"
             >
               Start Your Order
             </a>
