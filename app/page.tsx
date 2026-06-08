@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Check,
   Award,
@@ -8,144 +8,15 @@ import {
   Clock,
   ClipboardList,
   CheckCircle,
-  Send,
-  Phone,
-  Zap,
-  Eye,
-  CreditCard,
-  Globe,
 } from 'lucide-react';
 import PricingCard from '@/components/PricingCard';
-
-// Exact packages
-const pricingTiers = [
-  {
-    name: 'Starter',
-    price: 297,
-    popular: false,
-    delivery: 'Delivered in 1 day',
-    revisions: '1 revision included',
-    features: [
-      '1-page website',
-      'Up to 5 sections',
-      'Basic contact form',
-      'Google Business embed',
-      '1 revision',
-      'Delivered in 1 day',
-    ],
-  },
-  {
-    name: 'Complete',
-    price: 497,
-    popular: true,
-    delivery: 'Delivered in 1 day',
-    revisions: '1 revision included',
-    features: [
-      'Up to 5 pages',
-      'Professional multi-section design',
-      'Contact + inquiry forms',
-      'Google Business integration',
-      'Basic SEO',
-      'Social links',
-      'Delivered in 1 day',
-    ],
-  },
-  {
-    name: 'Premium',
-    price: 797,
-    popular: false,
-    delivery: 'Delivered in 1-2 days (priority)',
-    revisions: '1 revision round',
-    features: [
-      'Up to 8 pages',
-      'Advanced design & branding',
-      'Blog or news section ready',
-      'Stronger SEO foundation',
-      '1 revision round',
-      '30 days of support',
-      'Delivered in 1-2 days (priority)',
-    ],
-  },
-];
-
-const allPackagesInclude = [
-  'Fully mobile responsive design',
-  'Fast, secure hosting setup',
-  '100% ownership of your website and files',
-  'No long-term contracts or hidden fees',
-];
-
-// Simplified 4 add-ons
-const addOnsList = [
-  {
-    id: 'google-business-boost',
-    name: 'Google Business Boost',
-    price: 97,
-    period: 'one-time',
-    desc: 'Professional Google Business Profile optimization including photos, posts, categories, and review generation prompts.',
-  },
-  {
-    id: 'shoppable-store',
-    name: 'Shoppable Store (Clerk + Stripe)',
-    price: 350,
-    period: 'one-time',
-    desc: 'Add a simple product catalog with secure checkout. Includes Clerk authentication and Stripe payments integration.',
-  },
-  {
-    id: 'monthly-website-care',
-    name: 'Monthly Website Care',
-    price: 97,
-    period: '/month',
-    desc: 'Monthly updates, security checks, backups, minor content changes, and priority support.',
-  },
-  {
-    id: 'launch-content-pack',
-    name: 'Launch Content Pack',
-    price: 147,
-    period: 'one-time',
-    desc: 'Ready-to-post social media announcements and captions to promote your new website on launch day.',
-  },
-];
-
-// 6-step process
-const howItWorksSteps = [
-  {
-    number: '1',
-    icon: Send,
-    title: 'Submit Your Order',
-    desc: 'Choose your package and add-ons on this website and submit your request with basic business info.',
-  },
-  {
-    number: '2',
-    icon: Phone,
-    title: 'Consultation Call',
-    desc: 'We’ll schedule a quick 15-minute call to discuss your goals and details.',
-  },
-  {
-    number: '3',
-    icon: Zap,
-    title: 'We Build Your Site',
-    desc: 'I build your professional website the same day (or 1-2 days with priority for Premium).',
-  },
-  {
-    number: '4',
-    icon: Eye,
-    title: 'Review & Feedback',
-    desc: 'You review the preview and request any included revisions.',
-  },
-  {
-    number: '5',
-    icon: CreditCard,
-    title: 'Approve & Pay',
-    desc: 'Once you’re happy, complete payment securely on our site.',
-  },
-  {
-    number: '6',
-    icon: Globe,
-    title: 'Launch & Handoff',
-    desc: 'We deploy your live site, do a final check, and hand over full ownership.',
-  },
-];
+import FAQAccordion, { type FAQ } from '@/components/FAQAccordion';
+import { 
+  pricingTiers, 
+  addOnsList, 
+  howItWorksSteps, 
+  allPackagesInclude 
+} from '@/lib/data';
 
 interface BuilderForm {
   businessName: string;
@@ -153,6 +24,33 @@ interface BuilderForm {
   phone: string;
   description: string;
 }
+
+const faqs: FAQ[] = [
+  {
+    question: "How quickly can I really get my website?",
+    answer: "Most Starter and Complete sites are delivered the same day you approve the design with premium quality and craftsmanship. Premium sites with priority are usually ready in 1-2 business days. We move fast because we keep scopes clear and focused, delivering exceptional speed, quality, and full ownership at these investment levels.",
+  },
+  {
+    question: "Do I own the website and files?",
+    answer: "Yes — 100% ownership. You receive all files, login credentials, and we hand everything over. No lock-in, no hidden fees, and no middlemen.",
+  },
+  {
+    question: "What if I need changes after launch?",
+    answer: "Starter and Complete include 1 round of revisions for your peace of mind. Premium includes 2 rounds of revisions plus 30 days of support after launch. After that, we offer affordable Monthly Website Care to maintain your premium site and protect your investment.",
+  },
+  {
+    question: "Is this only for businesses in West Virginia?",
+    answer: "We are proudly based in West Virginia and love serving local businesses, but we work with clients across the U.S. The mountain roots and veteran-owned values stay the same no matter where you are.",
+  },
+  {
+    question: "Do you offer ongoing maintenance or updates?",
+    answer: "Yes. Our Monthly Website Care plan includes up to 2 hours of minor content updates per month, security checks, backups, plugin updates, and priority support for a low monthly fee.",
+  },
+  {
+    question: "Why work with a veteran-owned service?",
+    answer: "We bring discipline, clear communication, and pride in our work. No upselling, no fluff — just fast, fair, high-quality websites with full transparency and ownership for you.",
+  },
+];
 
 export default function Home() {
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
@@ -165,6 +63,29 @@ export default function Home() {
   });
   const [isBuilderSubmitting, setIsBuilderSubmitting] = useState(false);
   const [isBuilderSubmitted, setIsBuilderSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isPaying, setIsPaying] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  const successRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment_success') === 'true') {
+      const saved = sessionStorage.getItem('pendingOrder');
+      if (saved) {
+        const details = JSON.parse(saved);
+        setSelectedBuilderPackage(details.selectedBuilderPackage);
+        setSelectedAddOnIds(details.selectedAddOnIds);
+        setBuilderForm(details.builderForm);
+        setIsBuilderSubmitted(true);
+        setPaymentSuccess(true);
+        sessionStorage.removeItem('pendingOrder');
+        // Clear query params
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
 
   const selectedAddOns = addOnsList.filter((addon) => selectedAddOnIds.includes(addon.id));
 
@@ -172,19 +93,23 @@ export default function Home() {
     setSelectedAddOnIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
+    setSubmitError(null);
   };
 
   const handleBuilderPackageSelect = (packageName: string) => {
     setSelectedBuilderPackage(packageName);
+    setSubmitError(null);
   };
 
   const handleBuilderInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setBuilderForm((prev) => ({ ...prev, [name]: value }));
+    setSubmitError(null);
   };
 
   const handleBuilderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Submission started');
 
     if (!builderForm.businessName || !builderForm.email) {
       alert('Please provide your business name and email.');
@@ -192,26 +117,71 @@ export default function Home() {
     }
 
     setIsBuilderSubmitting(true);
+    setSubmitError(null);
 
     const selectedAddOnsDetails = addOnsList.filter((a) => selectedAddOnIds.includes(a.id));
 
-    const order = {
+    const estimatedTotal = (pricingTiers.find(p => p.name === selectedBuilderPackage)?.price || 0) + 
+      selectedAddOnIds.reduce((sum, id) => {
+        const addon = addOnsList.find(a => a.id === id);
+        return sum + (addon ? addon.price : 0);
+      }, 0);
+
+    const orderParams = {
       package: selectedBuilderPackage,
-      addOns: selectedAddOnsDetails,
-      ...builderForm,
+      addOns: selectedAddOnsDetails.length > 0 
+        ? selectedAddOnsDetails.map(a => `${a.name} (+$${a.price})`).join(', ') 
+        : 'None',
+      businessName: builderForm.businessName,
+      email: builderForm.email,
+      phone: builderForm.phone || 'Not provided',
+      description: builderForm.description || 'Not provided',
+      estimatedTotal: `$${estimatedTotal} (one-time + any recurring)`,
       timestamp: new Date().toISOString(),
     };
 
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    try {
+      const formData = new FormData(e.currentTarget as HTMLFormElement);
+      formData.append('package', orderParams.package);
+      formData.append('addOns', orderParams.addOns);
+      formData.append('estimatedTotal', orderParams.estimatedTotal);
 
-    console.log('Order request submitted from Build Your Website:', order);
+      const response = await fetch('https://formspree.io/f/mwvjoklj', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
 
-    setIsBuilderSubmitting(false);
-    setIsBuilderSubmitted(true);
+      if (response.ok) {
+        console.log('Formspree submission successful, showing success screen');
+        setIsBuilderSubmitted(true);
+        setIsBuilderSubmitting(false);
+
+        // Smoothly scroll to the success screen
+        setTimeout(() => {
+          document.getElementById('order-success')?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }, 100);
+      } else {
+        throw new Error('Formspree submission failed');
+      }
+    } catch (error) {
+      console.error('Failed to send order via Formspree:', error);
+      console.log('Formspree submission failed, showing error');
+      setIsBuilderSubmitting(false);
+      setSubmitError('Failed to send your order. Please try again later or contact us directly.');
+    }
   };
 
   const resetBuilder = () => {
     setIsBuilderSubmitted(false);
+    setSubmitError(null);
+    setIsPaying(false);
+    setPaymentSuccess(false);
     setBuilderForm({
       businessName: '',
       email: '',
@@ -220,12 +190,47 @@ export default function Home() {
     });
   };
 
+  const handlePayNow = async () => {
+    setIsPaying(true);
+    try {
+      const selectedAddOnNames = selectedAddOnIds
+        .map((id) => addOnsList.find((a) => a.id === id)?.name)
+        .filter(Boolean) as string[];
+
+      const orderDetails = {
+        selectedBuilderPackage,
+        selectedAddOnIds,
+        builderForm,
+      };
+      sessionStorage.setItem('pendingOrder', JSON.stringify(orderDetails));
+
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          package: selectedBuilderPackage,
+          addOns: selectedAddOnNames,
+        }),
+      });
+
+      const { url } = await response.json();
+
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (err) {
+      console.error(err);
+      setIsPaying(false);
+      sessionStorage.removeItem('pendingOrder');
+    }
+  };
+
   return (
     <main className="flex-1">
       {/* HERO */}
       <section 
         id="hero" 
-        className="relative min-h-[90vh] flex items-center border-b border-[#334155] pt-12 pb-16 md:pt-16 md:pb-20"
+        className="relative min-h-[85vh] flex items-center border-b border-[#334155] pt-10 pb-12 md:pt-12 md:pb-16"
         style={{
           backgroundImage: "url('/natural-beauty-in-west-virginia.webp')",
           backgroundSize: "cover",
@@ -254,24 +259,27 @@ export default function Home() {
             No long waits. No huge bills. Full ownership.
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="#build" className="btn-primary w-full sm:w-auto text-lg px-10">
               Start Your Order
             </a>
-            <a href="#pricing" className="inline-flex items-center justify-center rounded-lg bg-[#B91C1C] px-10 py-3.5 text-lg font-semibold text-white transition-all hover:bg-[#991B1B] active:bg-[#7F1D1D] focus:outline-none focus:ring-2 focus:ring-[#B91C1C] focus:ring-offset-2 w-full sm:w-auto">
+            <a 
+              href="#pricing" 
+              className="inline-flex items-center justify-center rounded-lg border border-[#B91C1C]/70 text-[#E2E8F0] hover:bg-[#B91C1C] hover:text-white hover:border-[#B91C1C] text-lg px-10 w-full sm:w-auto py-3.5 font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[#B91C1C] focus:ring-offset-2"
+            >
               See Pricing
             </a>
           </div>
 
-          <div className="mt-6 text-sm text-[#94A3B8]">
-            Most sites delivered the same day you reach out
+          <div className="mt-4 text-sm text-[#94A3B8]">
+            Most sites delivered the same day you reach out with premium quality and full ownership
           </div>
         </div>
       </section>
 
       {/* TRUST BAR */}
       <div className="trust-bar">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-6 py-6 md:py-8">
           <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-medium text-[#CBD5E1]">
             <div className="flex items-center gap-2.5">
               <Award className="h-5 w-5 text-[#B91C1C]" />
@@ -297,24 +305,24 @@ export default function Home() {
       </div>
 
       {/* BUILD YOUR WEBSITE - Prominent Order Builder */}
-      <section id="build" className="max-w-5xl mx-auto px-6 py-16 md:py-20 border-b border-[#334155] bg-transparent">
-        <div className="text-center mb-8">
+      <section id="build" className="max-w-5xl mx-auto px-6 py-12 md:py-16 border-b border-[#334155] bg-transparent">
+        <div className="text-center mb-8 md:mb-6">
           <div className="eyebrow mb-3">Get Started Today</div>
           <h2 className="section-title">Build Your Website</h2>
           <p className="section-subtitle max-w-2xl">
-            Select your package and add-ons, then submit your request. We'll start your professional website fast.
+            Select your package and add-ons, then submit your request. We'll deliver your premium website fast with exceptional quality and full ownership.
           </p>
         </div>
 
         {!isBuilderSubmitted ? (
-          <form onSubmit={handleBuilderSubmit} className="space-y-8">
+          <form action="https://formspree.io/f/mwvjoklj" method="POST" onSubmit={handleBuilderSubmit} className="space-y-6">
             {/* Package Selection */}
             <div>
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-5 md:mb-4 flex items-center justify-between">
                 <label className="text-lg font-semibold text-[#E2E8F0]">1. Choose Your Package</label>
                 <a href="#pricing" className="text-sm text-[#B91C1C] hover:underline">Compare full details →</a>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-4">
                 {pricingTiers.map((tier) => {
                   const isSelected = selectedBuilderPackage === tier.name;
                   return (
@@ -322,7 +330,7 @@ export default function Home() {
                       type="button"
                       key={tier.name}
                       onClick={() => handleBuilderPackageSelect(tier.name)}
-                      className={`text-left rounded-2xl border p-6 transition-all focus:outline-none focus:ring-2 focus:ring-[#B91C1C] focus:ring-offset-2 ${
+                      className={`text-left rounded-2xl border p-6 md:p-8 transition-all focus:outline-none focus:ring-2 focus:ring-[#B91C1C] focus:ring-offset-2 ${
                         isSelected
                           ? 'border-[#B91C1C] bg-[#1E2937]/30 backdrop-blur-md shadow-lg ring-1 ring-[#B91C1C]'
                           : 'border-[#475569] bg-[#0F172A]/30 backdrop-blur-sm hover:border-[#64748B] hover:shadow-sm'
@@ -353,14 +361,14 @@ export default function Home() {
 
             {/* Add-Ons Selection */}
             <div>
-              <label className="mb-4 block text-lg font-semibold text-[#E2E8F0]">2. Add Optional Upgrades</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <label className="mb-5 md:mb-4 block text-lg font-semibold text-[#E2E8F0]">2. Add Optional Upgrades</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-3">
                 {addOnsList.map((addon) => {
                   const isSelected = selectedAddOnIds.includes(addon.id);
                   return (
                     <label
                       key={addon.id}
-                      className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border p-6 md:p-8 transition ${
                         isSelected ? 'border-[#B91C1C] bg-[#1E2937]/30 backdrop-blur-md' : 'border-[#475569] bg-[#0F172A]/30 backdrop-blur-sm hover:border-[#64748B]'
                       }`}
                     >
@@ -388,8 +396,8 @@ export default function Home() {
 
             {/* Short Order Form */}
             <div>
-              <label className="mb-4 block text-lg font-semibold text-[#E2E8F0]">3. Your Business Details</label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 rounded-2xl border border-[#475569] bg-[#1E2937]/30 backdrop-blur-md p-8">
+              <label className="mb-5 md:mb-4 block text-lg font-semibold text-[#E2E8F0]">3. Your Business Details</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-5 rounded-2xl border border-[#475569] bg-[#1E2937]/30 backdrop-blur-md p-6 md:p-8">
                 <div>
                   <label htmlFor="businessName" className="form-label">Business Name *</label>
                   <input
@@ -443,27 +451,39 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="text-center">
+            <div className="mt-6 md:mt-0 text-center">
               {/* Live cost summary */}
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#1E2937]/30 backdrop-blur-md border border-[#475569] px-5 py-2 text-sm">
-                <span className="text-[#94A3B8]">Estimated total:</span>
-                <span className="font-semibold text-[#E2E8F0] text-lg">
-                  ${(pricingTiers.find(p => p.name === selectedBuilderPackage)?.price || 0) + 
-                    selectedAddOnIds.reduce((sum, id) => {
-                      const addon = addOnsList.find(a => a.id === id);
-                      return sum + (addon ? addon.price : 0);
-                    }, 0)}
-                </span>
-                <span className="text-[#64748B] text-xs">(one-time + any recurring)</span>
-              </div>
+              <div className="flex flex-col items-center gap-6 md:gap-4">
+                <div className="inline-flex items-center gap-1 rounded-full bg-[#1E2937]/30 backdrop-blur-md border border-[#475569] px-3 py-1 text-sm">
+                  <span className="text-[#94A3B8]">Estimated total:</span>
+                  <span className="font-semibold text-[#E2E8F0] text-lg">
+                    ${(pricingTiers.find(p => p.name === selectedBuilderPackage)?.price || 0) + 
+                      selectedAddOnIds.reduce((sum, id) => {
+                        const addon = addOnsList.find(a => a.id === id);
+                        return sum + (addon ? addon.price : 0);
+                      }, 0)}
+                  </span>
+                  <span className="text-[#64748B] text-xs">(one-time + any recurring)</span>
+                </div>
 
-              <button
-                type="submit"
-                disabled={isBuilderSubmitting}
-                className="btn-primary w-full max-w-md text-xl py-4 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isBuilderSubmitting ? 'Submitting Your Order Request...' : 'Submit My Order Request'}
-              </button>
+                <div>
+                  <p className="text-xs text-[#94A3B8] leading-relaxed text-center max-w-[260px] mb-2">
+                    No payment is required today.<br />
+                    We will only process payment after we build your website and you have reviewed and approved the final design.
+                  </p>
+
+                  <button
+                    type="submit"
+                    disabled={isBuilderSubmitting}
+                    className="btn-primary text-xl py-4 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {isBuilderSubmitting ? 'Submitting Your Order Request...' : 'Submit My Order Request'}
+                  </button>
+                </div>
+              </div>
+              {submitError && (
+                <p className="mt-2 text-red-400 text-sm text-center">{submitError}</p>
+              )}
               <p className="mt-3 text-xs text-[#94A3B8]">
                 We'll contact you within 24 hours to schedule the consultation call and confirm details.
               </p>
@@ -471,7 +491,7 @@ export default function Home() {
           </form>
         ) : (
           /* Builder Success State */
-          <div className="mx-auto max-w-2xl rounded-3xl border border-[#475569] bg-[#1E2937]/30 backdrop-blur-md p-10 text-center">
+          <div id="order-success" ref={successRef} className="mx-auto max-w-2xl rounded-2xl border border-[#475569] bg-[#1E2937]/30 backdrop-blur-md p-8 md:p-10 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-700">
               <CheckCircle className="h-9 w-9" />
             </div>
@@ -484,29 +504,41 @@ export default function Home() {
               I'll personally review your request and contact you within 24 hours. No spam, ever.
             </p>
 
-            <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
-              <button onClick={resetBuilder} className="inline-flex items-center justify-center rounded-lg bg-[#B91C1C] px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-[#991B1B] active:bg-[#7F1D1D] focus:outline-none focus:ring-2 focus:ring-[#B91C1C] focus:ring-offset-2">
+            <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+              <button onClick={resetBuilder} className="btn-primary">
                 Start Another Order
               </button>
-              <a href="#how-it-works" className="btn-primary">
-                See the 6-Step Process
+              {!paymentSuccess && (
+                <button 
+                  onClick={handlePayNow} 
+                  disabled={isPaying}
+                  className="btn-primary"
+                >
+                  {isPaying ? 'Processing...' : 'Pay Now'}
+                </button>
+              )}
+              <a href="#how-it-works" className="text-[#B91C1C] hover:underline font-medium inline-flex items-center justify-center py-2">
+                See the 6-Step Process →
               </a>
             </div>
+            {paymentSuccess && (
+              <p className="mt-4 text-emerald-400 font-semibold">Payment successful! Thank you. We'll proceed with your order.</p>
+            )}
           </div>
         )}
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="max-w-7xl mx-auto px-6 py-16 md:py-20 bg-[#0F172A]/60 backdrop-blur-sm">
-        <div className="section-header mb-8 md:mb-12">
+      <section id="pricing" className="max-w-7xl mx-auto px-6 py-12 md:py-16 bg-transparent">
+        <div className="section-header mb-10 md:mb-12">
           <div className="eyebrow mb-3">Transparent Pricing</div>
-          <h2 className="section-title">One-day websites. Clear prices. No hidden costs.</h2>
+          <h2 className="section-title">Premium one-day websites. Clear prices. No hidden costs.</h2>
           <p className="section-subtitle">
-            Choose the package that fits your business. All sites are mobile-first, fast, and you own everything.
+            Choose the package that fits your business. All sites are mobile-first, fast, premium quality, and you own everything — built to last at these investment levels.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-4 max-w-6xl mx-auto">
           {pricingTiers.map((tier) => (
             <PricingCard key={tier.name} tier={tier} onSelect={(name) => {
               setSelectedBuilderPackage(name);
@@ -516,8 +548,8 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mt-8 max-w-3xl mx-auto">
-          <div className="rounded-2xl border border-[#475569] bg-[#1E2937]/30 backdrop-blur-md p-8">
+        <div className="mt-8 md:mt-6 max-w-3xl mx-auto">
+          <div className="rounded-2xl border border-[#475569] bg-[#1E2937]/30 backdrop-blur-md p-6 md:p-8">
             <div className="font-semibold text-[#E2E8F0] mb-4 text-center">Every package includes</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
               {allPackagesInclude.map((item, i) => (
@@ -530,19 +562,19 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mt-6 text-center text-sm text-[#94A3B8]">
+        <div className="mt-6 md:mt-4 text-center text-sm text-[#94A3B8]">
           Need something custom? <a href="#contact" className="text-[#B91C1C] hover:underline font-medium">Reach out</a> — we’ll build the right solution.
         </div>
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" className="bg-[#0F172A]/60 backdrop-blur-sm py-16 md:py-20 border-y border-[#334155]">
+      <section id="how-it-works" className="bg-transparent py-12 md:py-16 border-y border-[#334155]">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="section-header mb-8 md:mb-12">
+          <div className="section-header mb-8 md:mb-10">
             <div className="eyebrow mb-3">Clear &amp; Simple</div>
             <h2 className="section-title">How It Works – Our Simple 6-Step Process</h2>
             <p className="section-subtitle max-w-3xl">
-              From order to launch — transparent, fast, and built for West Virginia small businesses.
+              From order to launch — transparent, fast, premium quality, and built for West Virginia small businesses with full ownership and lasting value.
             </p>
           </div>
 
@@ -550,7 +582,7 @@ export default function Home() {
             {howItWorksSteps.map((step, index) => {
               const Icon = step.icon;
               return (
-                <div key={index} className="flex gap-5 rounded-2xl border border-[#475569] bg-[#1E2937]/30 backdrop-blur-md p-6">
+                <div key={index} className="flex gap-5 rounded-2xl border border-[#475569] bg-[#1E2937]/30 backdrop-blur-md p-6 md:p-8">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#B91C1C] text-white text-xl font-semibold">
                     {step.number}
                   </div>
@@ -566,16 +598,16 @@ export default function Home() {
             })}
           </div>
 
-          <div className="mt-8 text-center">
+          <div className="mt-8 md:mt-6 text-center">
             <a href="#build" className="btn-primary text-lg px-10">Start Your Order</a>
           </div>
         </div>
       </section>
 
       {/* ADD-ONS */}
-      <section id="addons" className="bg-[#0F172A]/60 backdrop-blur-sm py-16 md:py-20 border-t border-[#334155]">
+      <section id="addons" className="bg-transparent py-12 md:py-16 border-t border-[#334155]">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="section-header mb-8 md:mb-12">
+          <div className="section-header mb-8 md:mb-10">
             <div className="eyebrow mb-3">Optional Upgrades</div>
             <h2 className="section-title">Add-Ons</h2>
             <p className="section-subtitle">
@@ -583,9 +615,9 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-4">
             {addOnsList.map((addon) => (
-              <div key={addon.id} className="rounded-xl border border-[#475569] bg-[#1E2937]/30 backdrop-blur-md p-5">
+              <div key={addon.id} className="rounded-xl border border-[#475569] bg-[#1E2937]/30 backdrop-blur-md p-6 md:p-8">
                 <div className="flex items-baseline justify-between gap-2">
                   <div className="font-semibold text-[#E2E8F0]">{addon.name}</div>
                   <div className="font-semibold text-[#E2E8F0] whitespace-nowrap">
@@ -597,33 +629,38 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 md:mt-4 text-center">
             <a href="#build" className="btn-primary">Add to Your Order</a>
           </div>
         </div>
       </section>
 
-      {/* ABOUT */}
-      <section id="about" className="max-w-5xl mx-auto px-6 py-16 md:py-20 bg-[#0F172A]/60 backdrop-blur-sm">
-        <div className="text-center">
-          <div className="eyebrow mb-3">The Founder</div>
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#E2E8F0] mb-4">Built by a West Virginia veteran who understands local business.</h2>
-          <p className="max-w-3xl mx-auto text-[15px] leading-relaxed text-[#CBD5E1]">
-            I’m Tom Caldwell, a U.S. Army veteran and proud resident of West Virginia. After seeing too many local businesses struggle without professional websites, I started Veteran AI Websites to deliver fast, clean, high-quality sites at fair prices—usually the same day—with full ownership and no markups. No middlemen, just a veteran helping West Virginia businesses succeed online.
-          </p>
-          <p className="mt-3 text-xs tracking-wide text-[#94A3B8] opacity-80">
-            Built with pride for American small businesses. God Bless America.
-          </p>
+      {/* FAQ */}
+      <section id="faq" className="bg-transparent py-12 md:py-16 border-y border-[#334155]">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="section-header mb-8 md:mb-10">
+            <div className="eyebrow mb-3">Common Questions</div>
+            <h2 className="section-title">Frequently Asked Questions</h2>
+            <p className="section-subtitle max-w-2xl">
+              Straight answers about pricing, timelines, ownership, and working with a veteran-owned web studio.
+            </p>
+          </div>
+
+          <FAQAccordion faqs={faqs} />
+
+          <div className="mt-8 md:mt-6 text-center">
+            <a href="#build" className="btn-primary">Start Your Order</a>
+          </div>
         </div>
       </section>
 
       {/* CONTACT */}
-      <section id="contact" className="max-w-3xl mx-auto px-6 py-16 md:py-20 bg-[#0F172A]/60 backdrop-blur-sm">
-        <div className="text-center mb-10">
+      <section id="contact" className="max-w-3xl mx-auto px-6 py-12 md:py-16 bg-transparent">
+        <div className="text-center mb-8 md:mb-10">
           <div className="eyebrow mb-3">Have Questions?</div>
           <h2 className="text-4xl font-semibold tracking-tight text-[#E2E8F0]">Let’s talk about your project.</h2>
           <p className="mt-3 text-lg text-[#CBD5E1]">
-            Or use the <a href="#build" className="text-[#B91C1C] font-medium hover:underline">Build Your Website</a> tool above to submit your full order request.
+            Or use the <a href="#build" className="text-[#B91C1C] font-medium hover:underline">Build Your Website</a> tool above to submit your full order request for premium results and exceptional value.
           </p>
         </div>
 
@@ -636,7 +673,7 @@ export default function Home() {
             alert('Thank you! Your message has been received. We will contact you soon.');
             form.reset();
           }}
-          className="space-y-6 bg-[#1E2937]/30 backdrop-blur-md border border-[#475569]/40 rounded-2xl p-8 md:p-10"
+          className="space-y-6 bg-[#1E2937]/30 backdrop-blur-md border border-[#475569]/40 rounded-2xl p-6 md:p-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>

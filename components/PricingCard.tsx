@@ -21,15 +21,15 @@ export default function PricingCard({ tier, onSelect }: PricingCardProps) {
 
   return (
     <div
-      className={`relative flex flex-col rounded-2xl border bg-[#1E2937]/30 backdrop-blur-md p-8 transition-all ${
+      className={`relative flex flex-col rounded-2xl border bg-[#1E2937]/30 backdrop-blur-md p-6 md:p-8 transition-all ${
         isPopular
           ? 'border-[#B91C1C] shadow-xl scale-[1.01] md:scale-105 z-10'
           : 'border-[#475569]/40 shadow-sm hover:shadow-md'
       }`}
     >
       {isPopular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <div className="bg-[#B91C1C] text-white text-xs font-semibold tracking-[1px] px-5 py-1 rounded-full shadow">
+        <div className="md:absolute md:-top-3 md:left-1/2 md:-translate-x-1/2 mb-3 md:mb-0">
+          <div className="inline-block bg-[#B91C1C] text-white text-xs font-semibold tracking-[1px] px-4 py-0.5 md:px-5 md:py-1 rounded-full shadow">
             MOST POPULAR
           </div>
         </div>
