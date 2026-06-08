@@ -1,13 +1,13 @@
 import Stripe from 'stripe';
 
 const PRICE_MAP: { [key: string]: string } = {
-  Starter: 'price_1TfryGC6lneqHM32Tmq1Zuwy',
-  Complete: 'price_1TfryZC6lneqHM32O14AkTfm',
-  Premium: 'price_1TfryyC6lneqHM32cKEVc3XG',
-  'Google Business Boost': 'price_1TfrzNC6lneqHM3229TsNscb',
-  'Shoppable Store': 'price_1TfrzgC6lneqHM32hoE3cajy',
-  'Launch Content Pack': 'price_1Tfs03C6lneqHM32A1Etqmg6',
-  'Monthly Website Care': 'price_1Tfs0NC6lneqHM3214VIKKeu',
+  Starter: 'price_1TgASjCTbp3NSdllDBUWanvj',
+  Complete: 'price_1TgATHCTbp3NSdllVTUlZC5E',
+  Premium: 'price_1TgATdCTbp3NSdll0omW9UOC',
+  'Google Business Boost': 'price_1TgAU4CTbp3NSdlliSbKE3Jf',
+  'Shoppable Store': 'price_1TgAUaCTbp3NSdllHPiOlYft',
+  'Launch Content Pack': 'price_1TgAV0CTbp3NSdllxKIWfg9Q',
+  'Monthly Website Care': 'price_1TgAVICTbp3NSdllsVMoy5ys',
 };
 
 export async function POST(request: Request) {
