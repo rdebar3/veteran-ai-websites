@@ -68,8 +68,6 @@ export default function HeroBackground() {
     };
   }, []);
 
-  const showKenBurns = !useVideo || !videoReady;
-
   return (
     <div className="hero-bg" aria-hidden="true">
       <Image
@@ -78,8 +76,8 @@ export default function HeroBackground() {
         fill
         priority
         sizes="100vw"
-        unoptimized
-        className={`hero-bg__image ${showKenBurns ? 'hero-bg__image--cinematic' : ''} ${useVideo && videoReady ? 'hero-bg__image--hidden' : ''}`}
+        quality={92}
+        className={`hero-bg__image ${useVideo && videoReady ? 'hero-bg__image--hidden' : ''}`}
       />
 
       {useVideo && (

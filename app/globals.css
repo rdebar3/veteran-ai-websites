@@ -3445,14 +3445,46 @@ label.card:focus-within {
   contain: style;
 }
 
-.hero__content,
-.hero__image-wrap,
+/* Pause decorative motion while the user is actively scrolling */
+html.is-scrolling .hero-bg__image,
+html.is-scrolling .circuit-overlay__paths,
+html.is-scrolling .circuit-overlay__pulse circle,
+html.is-scrolling .patriotic-overlay__stripe,
+html.is-scrolling .patriotic-overlay__flag-wave,
+html.is-scrolling .patriotic-overlay__stars,
+html.is-scrolling .hero__offer-shimmer,
+html.is-scrolling .hero__gate-dot,
+html.is-scrolling .hero__badge-dot,
+html.is-scrolling .hero__scroll-line,
+html.is-scrolling .base-room__status-dot {
+  animation-play-state: paused !important;
+}
+
+html.is-scrolling .nav,
+html.is-scrolling .base-room__floor,
+html.is-scrolling .card,
+html.is-scrolling .hero__badge,
+html.is-scrolling .hero__offer {
+  backdrop-filter: none;
+}
+
+html.is-scrolling .hero__visual,
+html.is-scrolling .base-room__environment {
+  pointer-events: none;
+}
+
+html.is-scrolling .interlude__img,
+html.is-scrolling .why-choose__card-img,
+html.is-scrolling .base-room__vista-img,
+html.is-scrolling .h-showcase__img {
+  filter: none;
+}
+
 .hero-bg__image,
 .base-room__vista-wrap,
 .interlude__img,
 .h-showcase__img,
 .why-choose__card-img {
-  transform: translateZ(0);
   backface-visibility: hidden;
 }
 
@@ -3470,14 +3502,8 @@ label.card:focus-within {
 .hero-bg__image {
   object-fit: cover;
   object-position: center 32%;
-  filter: contrast(1.12) saturate(1.14) brightness(0.94);
-  transform: translate3d(0, 0, 0) scale(1.02);
-  image-rendering: -webkit-optimize-contrast;
-}
-
-.hero-bg__image--cinematic {
-  animation: hero-ken-burns 28s ease-in-out infinite alternate;
-  will-change: transform;
+  filter: contrast(1.08) saturate(1.1) brightness(0.96);
+  transform: translate3d(0, 0, 0) scale(1.04);
 }
 
 .hero-bg__image--hidden {
@@ -3520,10 +3546,9 @@ label.card:focus-within {
   position: absolute;
   inset: 0;
   z-index: 2;
-  opacity: 0.55;
+  opacity: 0.45;
   pointer-events: none;
   mix-blend-mode: screen;
-  will-change: transform, opacity;
 }
 
 .hero__ken-burns {
@@ -4075,10 +4100,6 @@ label.card:focus-within {
     backdrop-filter: none;
   }
 
-  .hero-bg__image--cinematic {
-    animation-duration: 36s;
-  }
-
   .circuit-overlay__paths,
   .circuit-overlay__pulse {
     animation: none;
@@ -4163,7 +4184,6 @@ label.card:focus-within {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-bg__image--cinematic,
   .circuit-overlay__paths,
   .circuit-overlay__pulse circle,
   .patriotic-overlay__stripe,

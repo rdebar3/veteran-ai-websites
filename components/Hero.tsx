@@ -1,68 +1,20 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import HeroBackground from '@/components/HeroBackground';
 import CircuitOverlay from '@/components/CircuitOverlay';
 import PatrioticOverlay from '@/components/PatrioticOverlay';
 import NeuralOverlay from '@/components/NeuralOverlay';
 import { baseRooms } from '@/lib/base-rooms';
-import { getViewProgress } from '@/lib/scroll-cinema';
-import { isInViewport, registerScrollTask } from '@/lib/scroll-driver';
 
 interface HeroProps {
   onClaimOffer?: () => void;
 }
 
 export default function Hero({ onClaimOffer }: HeroProps) {
-  const heroRef = useRef<HTMLElement>(null);
   const room = baseRooms['main-gate'];
 
-  useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) return;
-
-    const content = hero.querySelector<HTMLElement>('.hero__content');
-    const circuit = hero.querySelector<HTMLElement>('.hero__circuit');
-    const badge = hero.querySelector<HTMLElement>('.hero__landmark-badge');
-
-    const run = () => {
-      const scrollP = hero.offsetHeight > 0
-        ? Math.min(1, Math.max(0, window.scrollY / hero.offsetHeight))
-        : 0;
-
-      if (content) {
-        content.style.transform = `translate3d(0, ${scrollP * 24}px, 0) scale(${1 - scrollP * 0.05})`;
-        content.style.opacity = String(1 - scrollP * 0.28);
-        content.style.willChange = scrollP < 1 ? 'transform, opacity' : 'auto';
-      }
-
-      if (circuit) {
-        circuit.style.transform = `translate3d(0, ${scrollP * 12}px, 0)`;
-        circuit.style.opacity = String(0.5 - scrollP * 0.16);
-      }
-
-      if (badge) {
-        badge.style.transform = `translate3d(0, ${scrollP * 8}px, 0)`;
-      }
-
-      hero.style.setProperty('--hero-scroll', String(scrollP));
-      hero.style.setProperty('--hero-view', String(getViewProgress(hero)));
-    };
-
-    const unregister = registerScrollTask({
-      isActive: () => isInViewport(hero, 80),
-      run,
-    });
-
-    run();
-
-    return unregister;
-  }, []);
-
   return (
-    <section id="hero" ref={heroRef} className="hero hero--cinematic hero--driven hero--outpost hero--gate">
+    <section id="hero" className="hero hero--cinematic hero--outpost hero--gate">
       <div className="hero__visual" aria-hidden="true">
         <HeroBackground />
         <div className="hero__ken-burns" />

@@ -38,7 +38,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     const mobile = narrow.matches;
 
     const lenis = new Lenis({
-      lerp: mobile ? 0.12 : 0.1,
+      lerp: mobile ? 0.13 : 0.11,
       smoothWheel: true,
       syncTouch: mobile,
       syncTouchLerp: 0.12,
@@ -50,6 +50,17 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     setLenisInstance(lenis);
     document.documentElement.classList.add('lenis', 'lenis-smooth');
+
+    let scrollIdleTimer = 0;
+    const markScrolling = () => {
+      document.documentElement.classList.add('is-scrolling');
+      window.clearTimeout(scrollIdleTimer);
+      scrollIdleTimer = window.setTimeout(() => {
+        document.documentElement.classList.remove('is-scrolling');
+      }, 120);
+    };
+
+    lenis.on('scroll', markScrolling);
 
     let raf = 0;
     const loop = (time: number) => {
@@ -92,6 +103,8 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(scrollIdleTimer);
+      document.documentElement.classList.remove('is-scrolling');
       document.removeEventListener('click', onAnchorClick);
       window.removeEventListener('resize', onResize);
       reducedMotion.removeEventListener('change', onReducedChange);
