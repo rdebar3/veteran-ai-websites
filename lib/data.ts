@@ -7,26 +7,42 @@ import {
   Globe 
 } from 'lucide-react';
 
+export const FACEBOOK_URL = 'https://www.facebook.com/profile.php?id=61590561850536';
+
 export interface PricingTier {
   name: string;
   price: number;
+  promoPrice?: number;
+  promoActive?: boolean;
+  promoLabel?: string;
+  promoEnds?: string;
   popular?: boolean;
   features: string[];
   delivery: string;
   revisions: string;
 }
 
+export function getDisplayPrice(tier: PricingTier): number {
+  if (tier.promoActive && tier.promoPrice != null) {
+    return tier.promoPrice;
+  }
+  return tier.price;
+}
+
 export const pricingTiers: PricingTier[] = [
   {
     name: 'Starter',
     price: 497,
+    promoPrice: 397,
+    promoActive: true,
+    promoLabel: 'Limited Time Offer',
+    promoEnds: 'July 4th',
     popular: false,
     delivery: 'Delivered in 1 day',
     revisions: '1 round of revisions',
     features: [
       '1-page website (Hero + up to 5 sections)',
       'Basic contact form',
-      'Google Business embed',
       'Fully mobile responsive',
       '1 round of revisions',
       'Delivered in 1 day',
@@ -83,32 +99,18 @@ export interface AddOn {
 
 export const addOnsList: AddOn[] = [
   {
-    id: 'google-business-boost',
-    name: 'Google Business Boost',
-    price: 97,
-    period: 'one-time',
-    desc: 'Professional optimization of your Google Business Profile (photos, categories, posts, review prompts).',
-  },
-  {
     id: 'shoppable-store',
-    name: 'Shoppable Store (Clerk + Stripe)',
+    name: 'Shoppable Store',
     price: 497,
-    period: 'one-time',
-    desc: 'Basic product catalog with secure checkout. Includes Clerk authentication + Stripe payments integration. Up to 20 products. Delivered alongside your main website.',
+    period: ' one-time',
+    desc: 'Sell online with a secure product catalog and checkout — up to 20 products, built alongside your site.',
   },
   {
     id: 'monthly-website-care',
     name: 'Monthly Website Care',
     price: 97,
     period: '/month',
-    desc: 'Up to 2 hours of minor content updates per month. Security checks, backups, and plugin updates. Priority support.',
-  },
-  {
-    id: 'launch-content-pack',
-    name: 'Launch Content Pack',
-    price: 147,
-    period: 'one-time',
-    desc: '10 ready-to-post social media announcements and captions. Optimized for launch day and first week promotion.',
+    desc: 'Up to 2 hours of updates monthly, plus security checks, backups, and priority support.',
   },
 ];
 

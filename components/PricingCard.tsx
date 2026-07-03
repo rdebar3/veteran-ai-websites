@@ -1,72 +1,73 @@
 'use client';
 
 import { Check } from 'lucide-react';
-
-export interface PricingTier {
-  name: string;
-  price: number;
-  popular?: boolean;
-  features: string[];
-  delivery: string;
-  revisions: string;
-}
+import { getDisplayPrice } from '@/lib/data';
+import type { PricingTier } from '@/lib/data';
+import ScrollReveal from '@/components/ScrollReveal';
 
 interface PricingCardProps {
   tier: PricingTier;
   onSelect: (packageName: string) => void;
+  index?: number;
 }
 
-export default function PricingCard({ tier, onSelect }: PricingCardProps) {
+export default function PricingCard({ tier, onSelect, index = 0 }: PricingCardProps) {
   const isPopular = tier.popular;
+  const hasPromo = tier.promoActive && tier.promoPrice != null;
+  const displayPrice = getDisplayPrice(tier);
 
   return (
-    <div
-      className={`relative flex flex-col rounded-2xl border bg-[#1E2937]/30 backdrop-blur-md p-6 md:p-8 transition-all ${
-        isPopular
-          ? 'border-[#B91C1C] shadow-xl scale-[1.01] md:scale-105 z-10'
-          : 'border-[#475569]/40 shadow-sm hover:shadow-md'
-      }`}
-    >
-      {isPopular && (
-        <div className="md:absolute md:-top-3 md:left-1/2 md:-translate-x-1/2 mb-3 md:mb-0">
-          <div className="inline-block bg-[#B91C1C] text-white text-xs font-semibold tracking-[1px] px-4 py-0.5 md:px-5 md:py-1 rounded-full shadow">
-            MOST POPULAR
-          </div>
-        </div>
-      )}
-
-      <div className="mb-6">
-        <div className="text-xl font-semibold tracking-tight text-[#E2E8F0]">{tier.name}</div>
-        <div className="mt-4 flex items-baseline">
-          <span className="text-5xl font-semibold tracking-tighter text-[#E2E8F0]">
-            ${tier.price}
-          </span>
-          <span className="ml-1.5 text-[#94A3B8]">one-time</span>
-        </div>
-        <div className="mt-1 text-sm text-[#B91C1C] font-medium">{tier.delivery}</div>
-      </div>
-
-      <ul className="mb-8 space-y-3.5 text-[15px] flex-1">
-        {tier.features.map((feature, idx) => (
-          <li key={idx} className="flex items-start gap-3 text-[#CBD5E1]">
-            <Check className="mt-0.5 h-5 w-5 shrink-0 text-[#B91C1C]" />
-            <span>{feature}</span>
-          </li>
-        ))}
-      </ul>
-
-      <button
-        onClick={() => onSelect(tier.name)}
-        className={`w-full rounded-lg py-3.5 text-base font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-          isPopular
-            ? 'bg-[#B91C1C] text-white hover:bg-[#991B1B] focus:ring-[#B91C1C]'
-            : 'border border-[#B91C1C] text-[#B91C1C] hover:bg-[#B91C1C] hover:text-white focus:ring-[#B91C1C]'
+    <ScrollReveal delay={index * 0.1}>
+      <div
+        className={`glass-card relative h-full ${
+          isPopular ? 'glass-card--popular' : hasPromo ? 'glass-card--selected' : ''
         }`}
       >
-        Start with {tier.name}
-      </button>
+        {isPopular && (
+          <span className="pricing-card-premium__badge pricing-card-premium__badge--popular">
+            Most Popular
+          </span>
+        )}
+        {hasPromo && !isPopular && (
+          <span className="pricing-card-premium__badge pricing-card-premium__badge--promo">
+            Limited Offer
+          </span>
+        )}
 
-      <p className="mt-4 text-center text-xs text-[#CBD5E1]">{tier.revisions}</p>
-    </div>
+        <div className="pricing-card-premium">
+          <div className="pricing-card-premium__name">{tier.name}</div>
+          <div className="pricing-card-premium__price">
+            {hasPromo && (
+              <span className="pricing-card-premium__strike">${tier.price}</span>
+            )}
+            ${displayPrice}
+            <span className="pricing-card-premium__period">one-time</span>
+          </div>
+          {hasPromo && (
+            <p className="pricing-card-premium__promo">
+              ${tier.promoPrice} until {tier.promoEnds}
+            </p>
+          )}
+          <p className="pricing-card-premium__delivery">{tier.delivery}</p>
+
+          <ul className="pricing-card-premium__features">
+            {tier.features.map((feature, idx) => (
+              <li key={idx} className="pricing-card-premium__feature">
+                <Check className="pricing-card-premium__check h-4 w-4" />
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+
+          <button
+            onClick={() => onSelect(tier.name)}
+            className={`btn-premium w-full ${!isPopular && !hasPromo ? 'btn-premium--outline' : ''}`}
+          >
+            {hasPromo ? `Claim $${tier.promoPrice}` : `Choose ${tier.name}`}
+          </button>
+          <p className="text-center text-xs text-[var(--text-dim)] mt-4">{tier.revisions}</p>
+        </div>
+      </div>
+    </ScrollReveal>
   );
 }

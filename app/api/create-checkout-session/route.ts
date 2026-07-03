@@ -1,12 +1,10 @@
 import Stripe from 'stripe';
 
 const PRICE_MAP: { [key: string]: string } = {
-  Starter: 'price_1TgASjCTbp3NSdllDBUWanvj',
+  Starter: 'price_1Tjm9JCTbp3NSdllxWJkKb6A',
   Complete: 'price_1TgATHCTbp3NSdllVTUlZC5E',
   Premium: 'price_1TgATdCTbp3NSdll0omW9UOC',
-  'Google Business Boost': 'price_1TgAU4CTbp3NSdlliSbKE3Jf',
   'Shoppable Store': 'price_1TgAUaCTbp3NSdllHPiOlYft',
-  'Launch Content Pack': 'price_1TgAV0CTbp3NSdllxKIWfg9Q',
   'Monthly Website Care': 'price_1TgAVICTbp3NSdllsVMoy5ys',
 };
 
