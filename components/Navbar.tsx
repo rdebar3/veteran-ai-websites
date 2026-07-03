@@ -1,21 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
 import FacebookIcon from '@/components/FacebookIcon';
 import { FACEBOOK_URL } from '@/lib/data';
 import { navLinks } from '@/lib/navigation';
+import { registerScrollTask } from '@/lib/scroll-driver';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState('hero');
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 32);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    const nav = navRef.current;
+    if (!nav) return;
+
+    let scrolled = false;
+    const run = () => {
+      const next = window.scrollY > 32;
+      if (next === scrolled) return;
+      scrolled = next;
+      nav.classList.toggle('nav--scrolled', next);
+    };
+
+    run();
+    return registerScrollTask({ isActive: () => true, run });
   }, []);
 
   useEffect(() => {
@@ -36,7 +46,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
+    <nav ref={navRef} className="nav">
       <div className="nav__inner">
         <a href="#hero" className="nav__logo">
           Veteran <span className="nav__logo-accent">AI</span> Websites

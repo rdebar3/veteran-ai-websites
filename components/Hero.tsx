@@ -7,7 +7,7 @@ import PatrioticOverlay from '@/components/PatrioticOverlay';
 import NeuralOverlay from '@/components/NeuralOverlay';
 import { baseRooms } from '@/lib/base-rooms';
 import { getViewProgress } from '@/lib/scroll-cinema';
-import { isInViewport, notifyScroll, registerScrollTask } from '@/lib/scroll-driver';
+import { isInViewport, registerScrollTask } from '@/lib/scroll-driver';
 
 interface HeroProps {
   onClaimOffer?: () => void;
@@ -33,17 +33,18 @@ export default function Hero({ onClaimOffer }: HeroProps) {
         : 0;
 
       if (content) {
-        content.style.transform = `translate3d(0, ${scrollP * 28}px, 0) scale(${1 - scrollP * 0.06})`;
-        content.style.opacity = String(1 - scrollP * 0.3);
+        content.style.transform = `translate3d(0, ${scrollP * 24}px, 0) scale(${1 - scrollP * 0.05})`;
+        content.style.opacity = String(1 - scrollP * 0.28);
+        content.style.willChange = scrollP < 1 ? 'transform, opacity' : 'auto';
       }
 
       if (circuit) {
-        circuit.style.transform = `translate3d(0, ${scrollP * 14}px, 0)`;
-        circuit.style.opacity = String(0.5 - scrollP * 0.18);
+        circuit.style.transform = `translate3d(0, ${scrollP * 12}px, 0)`;
+        circuit.style.opacity = String(0.5 - scrollP * 0.16);
       }
 
       if (badge) {
-        badge.style.transform = `translate3d(0, ${scrollP * 10}px, 0)`;
+        badge.style.transform = `translate3d(0, ${scrollP * 8}px, 0)`;
       }
 
       hero.style.setProperty('--hero-scroll', String(scrollP));
@@ -55,15 +56,9 @@ export default function Hero({ onClaimOffer }: HeroProps) {
       run,
     });
 
-    const onScroll = () => notifyScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
     run();
-    notifyScroll();
 
-    return () => {
-      unregister();
-      window.removeEventListener('scroll', onScroll);
-    };
+    return unregister;
   }, []);
 
   return (

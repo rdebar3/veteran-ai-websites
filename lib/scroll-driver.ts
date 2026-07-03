@@ -4,48 +4,32 @@ type ScrollTask = {
 };
 
 const tasks = new Set<ScrollTask>();
-let rafId = 0;
 let enabled = true;
 
-function frame() {
-  rafId = 0;
+/** Run all active scroll tasks synchronously (call from Lenis rAF loop). */
+export function runScrollFrame() {
   if (!enabled) return;
 
-  let anyActive = false;
   for (const task of tasks) {
     if (task.isActive()) {
       task.run();
-      anyActive = true;
     }
-  }
-
-  if (anyActive && tasks.size > 0) {
-    rafId = requestAnimationFrame(frame);
   }
 }
 
 export function setScrollDriverEnabled(value: boolean) {
   enabled = value;
-  if (!value && rafId) {
-    cancelAnimationFrame(rafId);
-    rafId = 0;
-  }
 }
 
-/** Schedule scroll-driven updates. Runs one rAF loop shared by all subscribers. */
+/** @deprecated Prefer runScrollFrame inside the Lenis loop. Kept for resize hooks. */
 export function notifyScroll() {
-  if (!enabled || rafId || tasks.size === 0) return;
-  rafId = requestAnimationFrame(frame);
+  runScrollFrame();
 }
 
 export function registerScrollTask(task: ScrollTask): () => void {
   tasks.add(task);
   return () => {
     tasks.delete(task);
-    if (tasks.size === 0 && rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = 0;
-    }
   };
 }
 

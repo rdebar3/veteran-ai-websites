@@ -4,7 +4,7 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import Image from 'next/image';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import type { BaseRoomConfig } from '@/lib/base-rooms';
-import { isInViewport, notifyScroll, registerScrollTask } from '@/lib/scroll-driver';
+import { isInViewport, registerScrollTask } from '@/lib/scroll-driver';
 
 interface BaseRoomProps {
   room: BaseRoomConfig;
@@ -56,19 +56,12 @@ export default function BaseRoom({
       }
     };
 
-    const unregister = registerScrollTask({
+    run();
+
+    return registerScrollTask({
       isActive: () => isInViewport(section, 100),
       run,
     });
-
-    const onScroll = () => notifyScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    notifyScroll();
-
-    return () => {
-      unregister();
-      window.removeEventListener('scroll', onScroll);
-    };
   }, [prefersReducedMotion, isFunctional]);
 
   const displayTitle = title ?? room.title;
