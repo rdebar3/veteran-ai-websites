@@ -73,13 +73,13 @@ export default function HeroBackground() {
   return (
     <div className="hero-bg" aria-hidden="true">
       <Image
-        src={heroMedia.poster}
+        src={heroMedia.posterHd}
         alt=""
         fill
         priority
         sizes="100vw"
+        unoptimized
         className={`hero-bg__image ${showKenBurns ? 'hero-bg__image--cinematic' : ''} ${useVideo && videoReady ? 'hero-bg__image--hidden' : ''}`}
-        quality={95}
       />
 
       {useVideo && (
