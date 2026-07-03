@@ -28,30 +28,90 @@
   z-index: 200;
   background: #010102;
   overflow: hidden;
+  cursor: default;
+}
+
+.sp-intro__stage {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
 }
 
 .sp-intro__scene {
   position: absolute;
-  inset: -8%;
+  inset: -10%;
   background-size: cover;
   background-position: center;
-  will-change: transform, opacity, filter;
+  transform-origin: center 42%;
+  backface-visibility: hidden;
 }
 
 .sp-intro__scene--exterior {
   z-index: 1;
 }
 
-.sp-intro__scene--leak {
-  z-index: 3;
+.sp-intro__scene--doorway {
+  z-index: 2;
 }
 
-.sp-intro__door-flash {
+.sp-intro__scene--leak {
+  z-index: 4;
+  transform-origin: center 55%;
+}
+
+.sp-intro__tunnel {
   position: absolute;
   inset: 0;
-  z-index: 2;
-  background: radial-gradient(ellipse 40% 50% at 50% 55%, rgba(34, 211, 238, 0.5), rgba(2, 2, 3, 0.95) 70%);
+  z-index: 3;
+  display: grid;
+  place-items: center;
   pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.sp-intro__tunnel-frame {
+  position: relative;
+  width: min(42vw, 280px);
+  height: min(58vh, 380px);
+  border: 3px solid rgba(34, 211, 238, 0.55);
+  border-radius: 4px;
+  box-shadow:
+    0 0 40px rgba(34, 211, 238, 0.35),
+    inset 0 0 60px rgba(34, 211, 238, 0.12);
+  background: transparent;
+}
+
+.sp-intro__tunnel-frame::before,
+.sp-intro__tunnel-frame::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 6px;
+}
+
+.sp-intro__speedlines {
+  position: absolute;
+  inset: -20%;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg 7deg,
+    rgba(34, 211, 238, 0.04) 7deg 8deg
+  );
+  transition: opacity 0.35s ease;
+}
+
+.sp-intro--penetrating .sp-intro__speedlines {
+  opacity: 0.35;
+  animation: sp-speedlines 0.45s linear infinite;
+}
+
+@keyframes sp-speedlines {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(6deg) scale(1.05); }
 }
 
 .sp-intro__hud {
@@ -78,6 +138,11 @@
   animation: sp-pulse 2s ease-in-out infinite;
 }
 
+.sp-intro__hud-alert {
+  color: var(--sp-crimson);
+  animation: sp-pulse 1.2s ease-in-out infinite;
+}
+
 .sp-intro__skip {
   position: absolute;
   top: 1.25rem;
@@ -100,11 +165,128 @@
   border-color: rgba(34, 211, 238, 0.35);
 }
 
+/* Leak Detected alert — overlays house before fly-in */
+.sp-intro__alert-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 12;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 26rem);
+  padding: 1.5rem 1.75rem;
+  text-align: center;
+  background: rgba(2, 2, 3, 0.82);
+  border: 1px solid rgba(220, 38, 38, 0.45);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 0 48px rgba(220, 38, 38, 0.2),
+    0 24px 64px rgba(0, 0, 0, 0.45);
+}
+
+.sp-intro__alert-pulse {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  padding: 0.4rem 0.9rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, var(--sp-crimson), #991b1b);
+  border-radius: 6px;
+  box-shadow: 0 0 24px rgba(220, 38, 38, 0.45);
+}
+
+.sp-intro__alert-title {
+  font-size: clamp(1.125rem, 4vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.35rem;
+}
+
+.sp-intro__alert-sub {
+  font-size: 0.8125rem;
+  color: var(--sp-muted);
+  margin-bottom: 1.25rem;
+}
+
+.sp-intro__alert-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.8rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #020203;
+  background: linear-gradient(135deg, var(--sp-cyan), var(--sp-blue));
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 28px rgba(34, 211, 238, 0.35);
+  transition: transform 0.25s var(--sp-ease), box-shadow 0.25s ease;
+}
+
+.sp-intro__alert-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 40px rgba(34, 211, 238, 0.5);
+}
+
+.sp-intro__alert-hint {
+  margin-top: 0.75rem;
+  font-size: 0.6875rem;
+  color: var(--sp-muted);
+  font-family: var(--font-geist-mono), monospace;
+  letter-spacing: 0.06em;
+}
+
+.sp-intro__radar {
+  position: absolute;
+  top: 38%;
+  left: 58%;
+  z-index: 9;
+  width: 5rem;
+  height: 5rem;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.sp-intro__radar-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(220, 38, 38, 0.5);
+  border-radius: 50%;
+  animation: sp-radar 2s ease-out infinite;
+}
+
+.sp-intro__radar-ring--2 {
+  animation-delay: 0.65s;
+}
+
+.sp-intro__radar-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--sp-crimson);
+  box-shadow: 0 0 16px var(--sp-crimson);
+}
+
+@keyframes sp-radar {
+  0% { transform: scale(0.35); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
 .sp-intro__caption {
   position: absolute;
   left: 50%;
-  bottom: 12%;
-  z-index: 8;
+  bottom: 14%;
+  z-index: 12;
   transform: translateX(-50%);
   text-align: center;
   width: min(90vw, 32rem);
@@ -162,8 +344,46 @@
   animation: sp-drip 1.2s ease-in infinite;
 }
 
-.sp-intro__drip span:nth-child(2) { animation-delay: 0.35s; }
-.sp-intro__drip span:nth-child(3) { animation-delay: 0.7s; }
+.sp-intro__drip span:nth-child(2) { animation-delay: 0.3s; }
+.sp-intro__drip span:nth-child(3) { animation-delay: 0.6s; }
+.sp-intro__drip span:nth-child(4) { animation-delay: 0.9s; }
+
+.sp-intro__progress {
+  position: absolute;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 1.25rem;
+  z-index: 14;
+}
+
+.sp-intro__progress-fill {
+  height: 2px;
+  background: linear-gradient(90deg, var(--sp-cyan), var(--sp-blue));
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.45);
+  transition: width 0.6s var(--sp-ease);
+}
+
+.sp-intro__progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.sp-intro__progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.35s ease, transform 0.35s ease;
+}
+
+.sp-intro__progress-dot--on {
+  background: var(--sp-cyan);
+  box-shadow: 0 0 8px var(--sp-cyan);
+  transform: scale(1.15);
+}
 
 .sp-intro__scanlines {
   position: absolute;
