@@ -3,7 +3,7 @@
 import { Check } from 'lucide-react';
 import { getDisplayPrice } from '@/lib/data';
 import type { PricingTier } from '@/lib/data';
-import RoomEnter from '@/components/RoomEnter';
+import Reveal from '@/components/Reveal';
 
 interface PricingCardProps {
   tier: PricingTier;
@@ -15,59 +15,56 @@ export default function PricingCard({ tier, onSelect, index = 0 }: PricingCardPr
   const isPopular = tier.popular;
   const hasPromo = tier.promoActive && tier.promoPrice != null;
   const displayPrice = getDisplayPrice(tier);
+  const delays = ['none', '1', '2', '3', '4', '5'] as const;
+  const delay = delays[Math.min(index, delays.length - 1)];
 
   return (
-    <RoomEnter variant="depth" delay={index * 0.1}>
+    <Reveal variant="scale" delay={delay}>
       <div
-        className={`glass-card relative h-full ${
-          isPopular ? 'glass-card--popular' : hasPromo ? 'glass-card--selected' : ''
+        className={`card h-full ${
+          isPopular ? 'card--featured' : hasPromo ? 'card--selected' : ''
         }`}
       >
         {isPopular && (
-          <span className="pricing-card-premium__badge pricing-card-premium__badge--popular">
-            Most Popular
-          </span>
+          <span className="pricing-card__badge pricing-card__badge--popular">Most Popular</span>
         )}
         {hasPromo && !isPopular && (
-          <span className="pricing-card-premium__badge pricing-card-premium__badge--promo">
-            Limited Offer
-          </span>
+          <span className="pricing-card__badge pricing-card__badge--promo">Limited Offer</span>
         )}
 
-        <div className="pricing-card-premium">
-          <div className="pricing-card-premium__name">{tier.name}</div>
-          <div className="pricing-card-premium__price">
-            {hasPromo && (
-              <span className="pricing-card-premium__strike">${tier.price}</span>
-            )}
+        <div className="pricing-card">
+          <div className="pricing-card__name">{tier.name}</div>
+          <div className="pricing-card__price">
+            {hasPromo && <span className="pricing-card__strike">${tier.price}</span>}
             ${displayPrice}
-            <span className="pricing-card-premium__period">one-time</span>
+            <span className="pricing-card__period">one-time</span>
           </div>
           {hasPromo && (
-            <p className="pricing-card-premium__promo">
+            <p className="pricing-card__promo">
               ${tier.promoPrice} until {tier.promoEnds}
             </p>
           )}
-          <p className="pricing-card-premium__delivery">{tier.delivery}</p>
+          <p className="pricing-card__delivery">{tier.delivery}</p>
 
-          <ul className="pricing-card-premium__features">
+          <ul className="pricing-card__features">
             {tier.features.map((feature, idx) => (
-              <li key={idx} className="pricing-card-premium__feature">
-                <Check className="pricing-card-premium__check h-4 w-4" />
+              <li key={idx} className="pricing-card__feature">
+                <Check className="pricing-card__check h-4 w-4" />
                 <span>{feature}</span>
               </li>
             ))}
           </ul>
 
           <button
+            type="button"
             onClick={() => onSelect(tier.name)}
-            className={`btn-premium w-full ${!isPopular && !hasPromo ? 'btn-premium--outline' : ''}`}
+            className={`btn w-full ${isPopular || hasPromo ? 'btn--primary' : 'btn--ghost'}`}
           >
             {hasPromo ? `Claim $${tier.promoPrice}` : `Choose ${tier.name}`}
           </button>
           <p className="text-center text-xs text-[var(--text-dim)] mt-4">{tier.revisions}</p>
         </div>
       </div>
-    </RoomEnter>
+    </Reveal>
   );
 }

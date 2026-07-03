@@ -4,92 +4,73 @@ import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import FacebookIcon from '@/components/FacebookIcon';
 import { FACEBOOK_URL } from '@/lib/data';
-import { navRooms, scrollToRoom } from '@/lib/base-rooms';
+import { navLinks } from '@/lib/navigation';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState('hero');
+  const [active, setActive] = useState('hero');
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 32);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
-    const sections = ['hero', ...navRooms.map((r) => r.sectionId)];
+    const ids = ['hero', ...navLinks.map((l) => l.href.slice(1))];
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
         });
       },
-      { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
     );
-    sections.forEach((id) => {
+    ids.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
   }, []);
 
-  const handleNav = (sectionId: string) => {
-    setIsOpen(false);
-    scrollToRoom(sectionId);
-  };
-
   return (
-    <nav className={`nav-premium ${scrolled ? 'nav-premium--scrolled' : ''}`}>
-      <div className="nav-premium__inner">
-        <a
-          href="#hero"
-          onClick={(e) => {
-            e.preventDefault();
-            handleNav('hero');
-          }}
-          className="nav-premium__logo"
-        >
+    <nav className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
+      <div className="nav__inner">
+        <a href="#hero" className="nav__logo">
           Veteran AI Websites
         </a>
 
-        <div className="nav-premium__links">
-          {navRooms.map((room) => (
-            <button
-              key={room.sectionId}
-              type="button"
-              onClick={() => handleNav(room.sectionId)}
-              className={`nav-premium__link nav-premium__room-link ${
-                activeSection === room.sectionId ? 'nav-premium__room-link--active' : ''
-              }`}
-            >
-              <span className="nav-premium__room-name">{room.navLabel}</span>
-              <span className="nav-premium__room-sector">{room.codename.split('—')[1]?.trim()}</span>
-            </button>
-          ))}
+        <div className="nav__links">
+          {navLinks.map((link) => {
+            const id = link.href.slice(1);
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                className={`nav__link ${active === id ? 'nav__link--active' : ''}`}
+              >
+                {link.label}
+              </a>
+            );
+          })}
           <a
             href={FACEBOOK_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="nav-premium__link"
-            aria-label="Facebook"
+            className="nav__link"
           >
-            <FacebookIcon className="h-3.5 w-3.5 inline-block mr-1 -mt-0.5" />
+            <FacebookIcon className="h-3 w-3 inline-block mr-1 -mt-px" />
             Social
           </a>
-          <button
-            type="button"
-            onClick={() => handleNav('build')}
-            className="nav-premium__cta"
-          >
+          <a href="#build" className="nav__cta">
             $397 Offer
-          </button>
+          </a>
         </div>
 
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="md:hidden p-2 text-[var(--text-muted)]"
           aria-label="Toggle menu"
@@ -99,24 +80,20 @@ export default function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="md:hidden border-t border-[var(--border-subtle)] bg-[rgba(8,12,18,0.95)] backdrop-blur-xl px-6 py-6 flex flex-col gap-3">
-          {navRooms.map((room) => (
-            <button
-              key={room.sectionId}
-              type="button"
-              onClick={() => handleNav(room.sectionId)}
-              className="nav-premium__link text-left text-sm py-2"
+        <div className="md:hidden border-t border-[var(--border)] bg-[var(--surface)] px-6 py-5 flex flex-col gap-3">
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsOpen(false)}
+              className="nav__link text-sm py-1"
             >
-              {room.navLabel} — {room.title}
-            </button>
+              {link.label}
+            </a>
           ))}
-          <button
-            type="button"
-            onClick={() => handleNav('build')}
-            className="nav-premium__cta text-center mt-2"
-          >
-            $397 Offer — Ends July 4th
-          </button>
+          <a href="#build" onClick={() => setIsOpen(false)} className="nav__cta text-center mt-2">
+            $397 Offer
+          </a>
         </div>
       )}
     </nav>

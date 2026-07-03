@@ -9,10 +9,9 @@ import {
   ClipboardList,
   CheckCircle,
 } from 'lucide-react';
-import MainGateHero from '@/components/MainGateHero';
-import BaseRoom from '@/components/BaseRoom';
-import RoomEnter from '@/components/RoomEnter';
-import { baseRooms } from '@/lib/base-rooms';
+import Hero from '@/components/Hero';
+import SectionHeader from '@/components/SectionHeader';
+import Reveal from '@/components/Reveal';
 import PricingCard from '@/components/PricingCard';
 import FAQAccordion, { type FAQ } from '@/components/FAQAccordion';
 import {
@@ -214,47 +213,48 @@ export default function Home() {
   })();
 
   return (
-    <main className="relative flex-1 tour-canvas">
-        <MainGateHero onClaimOffer={() => setSelectedBuilderPackage('Starter')} />
+    <main className="relative flex-1">
+      <Hero onClaimOffer={() => setSelectedBuilderPackage('Starter')} />
 
-        <div className="corridor-strip trust-bar-premium">
-          <div className="trust-bar-premium__inner">
-            {[
-              { icon: Award, text: 'U.S. Veteran Owned & Operated' },
-              { icon: MapPin, text: 'Based in West Virginia' },
-              { icon: Clock, text: 'Delivered in 1 Day — Guaranteed' },
-              { icon: ClipboardList, text: 'Clear Scopes & Pricing' },
-            ].map(({ icon: Icon, text }) => (
-              <div key={text} className="trust-bar-premium__item">
-                <Icon className="trust-bar-premium__icon h-4 w-4" />
-                <span>{text}</span>
-              </div>
-            ))}
-          </div>
+      <div className="trust">
+        <div className="trust__inner">
+          {[
+            { icon: Award, text: 'U.S. Veteran Owned & Operated' },
+            { icon: MapPin, text: 'Based in West Virginia' },
+            { icon: Clock, text: 'Delivered in 1 Day — Guaranteed' },
+            { icon: ClipboardList, text: 'Clear Scopes & Pricing' },
+          ].map(({ icon: Icon, text }) => (
+            <div key={text} className="trust__item">
+              <Icon className="trust__icon h-4 w-4" />
+              <span>{text}</span>
+            </div>
+          ))}
         </div>
+      </div>
 
-        <BaseRoom
-          room={baseRooms.armoury}
-          eyebrow="Equip & Deploy"
-          title="The Armoury"
-          subtitle="Select your package, add upgrades, and submit your mission order."
-          wide
-        >
-          <RoomEnter variant="scale">
-            <div className="services-strip">
+      <section id="build" className="section">
+        <div className="section__container section__container--wide">
+          <SectionHeader
+            index="01"
+            eyebrow="Build"
+            title="Build Your Website"
+            subtitle="Pick your package, add upgrades, and submit. Fast delivery, clear pricing, full ownership."
+          />
+          <Reveal variant="scale">
+            <div className="grid-stats">
               {[
                 { label: 'One-Day Delivery', icon: Clock },
-                { label: 'Mobile-First Design', icon: Check },
+                { label: 'Mobile-First', icon: Check },
                 { label: '100% Ownership', icon: Award },
                 { label: 'Veteran Built', icon: MapPin },
               ].map(({ label, icon: Icon }) => (
-                <div key={label} className="services-strip__item">
-                  <Icon className="services-strip__icon h-5 w-5" />
+                <div key={label} className="stat-pill">
+                  <Icon className="stat-pill__icon h-4 w-4" />
                   {label}
                 </div>
               ))}
             </div>
-          </RoomEnter>
+          </Reveal>
           {!isBuilderSubmitted ? (
             <form
               action="https://formspree.io/f/mwvjoklj"
@@ -262,14 +262,12 @@ export default function Home() {
               onSubmit={handleBuilderSubmit}
               className="space-y-10"
             >
-              <RoomEnter variant="depth">
+              <Reveal variant="up">
                 <div className="flex items-center justify-between mb-6">
-                  <label className="premium-eyebrow mb-0">01 — Choose Package</label>
-                  <a href="#pricing" className="text-xs tracking-widest uppercase text-[var(--cyan)] hover:text-[var(--text-cream)] transition-colors">
-                    Compare →
-                  </a>
+                  <span className="field-label mb-0">Choose Package</span>
+                  <a href="#pricing" className="text-link">Compare →</a>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid-3">
                   {pricingTiers.map((tier) => {
                     const isSelected = selectedBuilderPackage === tier.name;
                     const hasPromo = tier.promoActive && tier.promoPrice != null;
@@ -279,11 +277,9 @@ export default function Home() {
                         type="button"
                         key={tier.name}
                         onClick={() => handleBuilderPackageSelect(tier.name)}
-                        className={`glass-card text-left p-6 transition-all ${
-                          isSelected ? 'glass-card--selected' : ''
-                        }`}
+                        className={`card text-left p-6 ${isSelected ? 'card--selected' : ''}`}
                       >
-                        <div className="font-[family-name:var(--font-display)] text-xl text-[var(--text-cream)]">
+                        <div className="text-xl font-semibold">
                           {tier.name}
                         </div>
                         <div className="mt-2 flex items-baseline gap-2">
@@ -292,7 +288,7 @@ export default function Home() {
                               ${tier.price}
                             </span>
                           )}
-                          <span className="text-2xl text-[var(--text-cream)]">${displayPrice}</span>
+                          <span className="text-2xl font-bold">${displayPrice}</span>
                         </div>
                         {hasPromo && (
                           <p className="text-xs text-[var(--crimson-bright)] mt-1 font-medium">
@@ -304,20 +300,18 @@ export default function Home() {
                     );
                   })}
                 </div>
-              </RoomEnter>
+              </Reveal>
 
-              <RoomEnter variant="slide-left" delay={0.1}>
-                <label className="premium-eyebrow block mb-6">
-                  02 — Optional Upgrades
-                </label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+              <Reveal variant="left" delay="1">
+                <span className="field-label block mb-6">Optional Upgrades</span>
+                <div className="grid-2 max-w-3xl mx-auto">
                   {addOnsList.map((addon) => {
                     const isSelected = selectedAddOnIds.includes(addon.id);
                     return (
                       <label
                         key={addon.id}
-                        className={`glass-card flex cursor-pointer items-start gap-4 p-6 ${
-                          isSelected ? 'glass-card--selected' : ''
+                        className={`card flex cursor-pointer items-start gap-4 p-6 ${
+                          isSelected ? 'card--selected' : ''
                         }`}
                       >
                         <input
@@ -338,67 +332,67 @@ export default function Home() {
                     );
                   })}
                 </div>
-              </RoomEnter>
+              </Reveal>
 
-              <RoomEnter variant="slide-right" delay={0.15}>
-                <label className="premium-eyebrow block mb-6">03 — Your Details</label>
-                <div className="glass-card p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Reveal variant="right" delay="2">
+                <span className="field-label block mb-6">Your Details</span>
+                <div className="card p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="businessName" className="form-label-premium">Business Name *</label>
+                    <label htmlFor="businessName" className="field-label">Business Name *</label>
                     <input
                       type="text"
                       id="businessName"
                       name="businessName"
                       value={builderForm.businessName}
                       onChange={handleBuilderInputChange}
-                      className="form-input-premium"
+                      className="field-input"
                       placeholder="Smith Family Bakery"
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="form-label-premium">Email *</label>
+                    <label htmlFor="email" className="field-label">Email *</label>
                     <input
                       type="email"
                       id="email"
                       name="email"
                       value={builderForm.email}
                       onChange={handleBuilderInputChange}
-                      className="form-input-premium"
+                      className="field-input"
                       placeholder="you@yourbusiness.com"
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="phone" className="form-label-premium">Phone</label>
+                    <label htmlFor="phone" className="field-label">Phone</label>
                     <input
                       type="tel"
                       id="phone"
                       name="phone"
                       value={builderForm.phone}
                       onChange={handleBuilderInputChange}
-                      className="form-input-premium"
+                      className="field-input"
                       placeholder="(304) 555-0123"
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label htmlFor="description" className="form-label-premium">About Your Business</label>
+                    <label htmlFor="description" className="field-label">About Your Business</label>
                     <textarea
                       id="description"
                       name="description"
                       value={builderForm.description}
                       onChange={handleBuilderInputChange}
-                      className="form-textarea-premium"
+                      className="field-textarea"
                       placeholder="Family-owned bakery in West Virginia. Need a clean site with menu, hours, and contact form."
                       rows={3}
                     />
                   </div>
                 </div>
-              </RoomEnter>
+              </Reveal>
 
-              <RoomEnter variant="scale" delay={0.2}>
+              <Reveal variant="scale" delay="3">
                 <div className="text-center space-y-6">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 glass-card text-sm">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 card text-sm">
                     <span className="text-[var(--text-dim)]">Estimated total:</span>
                     <span className="text-xl text-[var(--text-cream)] font-medium">${estimatedTotal}</span>
                     <span className="text-xs text-[var(--text-dim)]">(one-time + recurring)</span>
@@ -414,7 +408,7 @@ export default function Home() {
                   <button
                     type="submit"
                     disabled={isBuilderSubmitting}
-                    className="btn-premium disabled:opacity-60"
+                    className="btn btn--primary disabled:opacity-60"
                   >
                     {isBuilderSubmitting ? 'Submitting...' : 'Submit Order Request'}
                   </button>
@@ -423,19 +417,15 @@ export default function Home() {
                     We&apos;ll contact you within 24 hours to schedule your consultation.
                   </p>
                 </div>
-              </RoomEnter>
+              </Reveal>
             </form>
           ) : (
-            <RoomEnter variant="scale">
-              <div
-                id="order-success"
-                ref={successRef}
-                className="glass-card max-w-2xl mx-auto p-10 text-center"
-              >
+            <Reveal variant="scale">
+              <div id="order-success" ref={successRef} className="card max-w-2xl mx-auto p-10 text-center">
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--forest)] text-emerald-400">
                   <CheckCircle className="h-8 w-8" />
                 </div>
-                <h3 className="premium-title text-3xl">Order Request Received</h3>
+                <h3 className="text-3xl font-bold">Order Request Received</h3>
                 <p className="mt-4 text-[var(--text-muted)] leading-relaxed">
                   Thank you, {builderForm.businessName.split(' ')[0] || 'friend'}. We have your{' '}
                   <span className="text-[var(--text-cream)]">{selectedBuilderPackage}</span> package
@@ -447,11 +437,11 @@ export default function Home() {
                   I&apos;ll personally review your request and contact you within 24 hours.
                 </p>
                 <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-                  <button onClick={resetBuilder} className="btn-premium">
+                  <button type="button" onClick={resetBuilder} className="btn btn--primary">
                     Start Another Order
                   </button>
                   {!paymentSuccess && (
-                    <button onClick={handlePayNow} disabled={isPaying} className="btn-premium btn-premium--outline">
+                    <button type="button" onClick={handlePayNow} disabled={isPaying} className="btn btn--ghost">
                       {isPaying ? 'Processing...' : 'Pay Now'}
                     </button>
                   )}
@@ -462,18 +452,20 @@ export default function Home() {
                   </p>
                 )}
               </div>
-            </RoomEnter>
+            </Reveal>
           )}
-        </BaseRoom>
+        </div>
+      </section>
 
-        <BaseRoom
-          room={baseRooms['command-center']}
-          eyebrow="Transparent Pricing"
-          title="Command Center"
-          subtitle="Mobile-first sites built in one day. You own everything."
-          wide
-        >
-          <div className="grid-pricing">
+      <section id="pricing" className="section">
+        <div className="section__container section__container--wide">
+          <SectionHeader
+            index="02"
+            eyebrow="Pricing"
+            title="Clear Prices. No Hidden Costs."
+            subtitle="Mobile-first sites built in one day. You own everything."
+          />
+          <div className="grid-3">
             {pricingTiers.map((tier, i) => (
               <PricingCard
                 key={tier.name}
@@ -486,9 +478,9 @@ export default function Home() {
               />
             ))}
           </div>
-          <RoomEnter variant="depth" delay={0.2}>
-            <div className="glass-card max-w-3xl mx-auto mt-10 p-8">
-              <p className="text-center text-sm tracking-widest uppercase text-[var(--gold)] mb-6">
+          <Reveal variant="up" delay="2">
+            <div className="card max-w-3xl mx-auto mt-10 p-8">
+              <p className="text-center field-label mb-6">
                 Every package includes
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -500,48 +492,52 @@ export default function Home() {
                 ))}
               </div>
             </div>
-          </RoomEnter>
-        </BaseRoom>
+          </Reveal>
+        </div>
+      </section>
 
-        <BaseRoom
-          room={baseRooms['mission-planning']}
-          eyebrow="Clear & Simple"
-          title="Mission Planning Room"
-          subtitle="Six refined steps from order to live deployment."
-          wide
-        >
-          <div className="grid-steps">
+      <section id="how-it-works" className="section">
+        <div className="section__container section__container--wide">
+          <SectionHeader
+            index="03"
+            eyebrow="Process"
+            title="How It Works"
+            subtitle="Six simple steps from order to launch."
+          />
+          <div className="grid-2">
             {howItWorksSteps.map((step, index) => {
               const Icon = step.icon;
               return (
-                <RoomEnter key={index} variant={index % 2 === 0 ? 'slide-left' : 'slide-right'} delay={index * 0.08}>
-                  <div className="glass-card step-card h-full">
-                    <div className="step-card__number">{step.number}</div>
+                <Reveal key={index} variant={index % 2 === 0 ? 'left' : 'right'} delay={index % 2 === 0 ? '1' : '2'}>
+                  <div className="card step h-full">
+                    <div className="step__num">{step.number}</div>
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <Icon className="h-4 w-4 text-[var(--cyan)]" />
-                        <h3 className="step-card__title">{step.title}</h3>
+                        <h3 className="step__title">{step.title}</h3>
                       </div>
-                      <p className="step-card__desc">{step.desc}</p>
+                      <p className="step__desc">{step.desc}</p>
                     </div>
                   </div>
-                </RoomEnter>
+                </Reveal>
               );
             })}
           </div>
           <div className="section-cta">
-            <a href="#build" className="btn-premium">Start Your Order</a>
+            <a href="#build" className="btn btn--primary">Start Your Order</a>
           </div>
-        </BaseRoom>
+        </div>
+      </section>
 
-        <BaseRoom
-          room={baseRooms['observation-deck']}
-          eyebrow="See The Quality"
-          title="Live Intel · Observation Deck"
-          subtitle="Survey live demos across every deployment tier."
-          wide
-        >
-          <div className="grid-examples">
+      <section id="examples" className="section">
+        <div className="section__container section__container--wide">
+          <SectionHeader
+            index="04"
+            eyebrow="Examples"
+            title="Live Examples"
+            subtitle="Explore live demos for each package tier."
+          />
+          <div className="grid-3">
             {[
               {
                 tier: 'Starter',
@@ -568,13 +564,13 @@ export default function Home() {
                 features: ['7 custom pages', 'Advanced branding', 'Portfolio sections', 'Priority polish'],
               },
             ].map((ex, i) => (
-              <RoomEnter key={ex.tier} variant="depth" delay={i * 0.1}>
-                <div className="glass-card example-card">
+              <Reveal key={ex.tier} variant="scale" delay={i === 0 ? 'none' : i === 1 ? '1' : '2'}>
+                <div className="card p-6 flex flex-col h-full">
                   <div>
-                    <span className="example-card__tier">{ex.tier}</span>
-                    <span className="example-card__pages">{ex.pages}</span>
+                    <span className="field-label text-[var(--blue)]">{ex.tier}</span>
+                    <span className="field-label ml-2">{ex.pages}</span>
                   </div>
-                  <h3 className="example-card__title">{ex.title}</h3>
+                  <h3 className="text-xl font-semibold mt-3">{ex.title}</h3>
                   <p className="mt-3 text-sm text-[var(--text-muted)] leading-relaxed flex-1">{ex.desc}</p>
                   <ul className="mt-5 mb-8 space-y-2">
                     {ex.features.map((f) => (
@@ -584,75 +580,75 @@ export default function Home() {
                       </li>
                     ))}
                   </ul>
-                  <a href={ex.href} className="btn-premium btn-premium--outline w-full mt-auto">
+                  <a href={ex.href} className="btn btn--ghost w-full mt-auto">
                     View Live Demo
                   </a>
                 </div>
-              </RoomEnter>
+              </Reveal>
             ))}
           </div>
-        </BaseRoom>
+        </div>
+      </section>
 
-        <BaseRoom
-          room={baseRooms['after-action-lounge']}
-          eyebrow="Client Voices"
-          title="After Action Lounge"
-          subtitle="Field reports from West Virginia business owners."
-          wide
-        >
-          <div className="grid-testimonials">
+      <section id="testimonials" className="section">
+        <div className="section__container section__container--wide">
+          <SectionHeader
+            index="05"
+            eyebrow="Testimonials"
+            title="Trusted by Local Businesses"
+            subtitle="Real results from West Virginia business owners."
+          />
+          <div className="grid-3">
             {testimonials.map((t, i) => (
-              <RoomEnter key={t.author} variant="rise" delay={i * 0.1}>
-                <div className="glass-card testimonial-card h-full">
-                  <p className="testimonial-card__quote">{t.quote}</p>
-                  <p className="testimonial-card__author">{t.author}</p>
-                  <p className="testimonial-card__meta">
-                    {t.business} · {t.location}
-                  </p>
+              <Reveal key={t.author} variant="up" delay={i === 0 ? 'none' : i === 1 ? '1' : '2'}>
+                <div className="card quote-card h-full">
+                  <p className="quote-card__text">&ldquo;{t.quote}&rdquo;</p>
+                  <p className="quote-card__author">{t.author}</p>
+                  <p className="quote-card__meta">{t.business} · {t.location}</p>
                 </div>
-              </RoomEnter>
+              </Reveal>
             ))}
           </div>
-        </BaseRoom>
+        </div>
+      </section>
 
-        <BaseRoom
-          room={baseRooms.debrief}
-          eyebrow="Final Phase"
-          title="Debrief · Extraction Point"
-          subtitle="Upgrades, answers, and mission contact — your final stop before launch."
-          wide
-        >
-          <div className="debrief-grid">
-            <RoomEnter variant="slide-left" className="debrief-panel">
-              <p className="debrief-panel__label">Intel Brief — FAQ</p>
-              <FAQAccordion faqs={faqs} />
-            </RoomEnter>
+      <section id="contact" className="section">
+        <div className="section__container section__container--wide stack stack-lg">
+          <SectionHeader
+            index="06"
+            eyebrow="Contact"
+            title="Let's Build Your Website"
+            subtitle="FAQ, upgrades, and direct contact — everything you need to launch."
+          />
 
-            <RoomEnter variant="slide-right" delay={0.1} className="debrief-panel">
-              <p className="debrief-panel__label">Equipment Upgrades</p>
-              <div className="space-y-4">
-                {addOnsList.map((addon) => (
-                  <div key={addon.id} className="glass-card p-6">
-                    <div className="flex justify-between items-baseline gap-4">
-                      <h3 className="font-[family-name:var(--font-display)] text-lg text-[var(--text-cream)]">
-                        {addon.name}
-                      </h3>
-                      <span className="text-[var(--gold)] font-medium whitespace-nowrap text-sm">
-                        +${addon.price}
-                        <span className="text-[var(--text-dim)]">{addon.period}</span>
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm text-[var(--text-muted)] leading-relaxed">{addon.desc}</p>
+          <Reveal variant="left">
+            <span className="field-label block mb-4">FAQ</span>
+            <FAQAccordion faqs={faqs} />
+          </Reveal>
+
+          <Reveal variant="right" delay="1">
+            <span className="field-label block mb-4">Add-Ons</span>
+            <div className="grid-2">
+              {addOnsList.map((addon) => (
+                <div key={addon.id} className="card p-6">
+                  <div className="flex justify-between items-baseline gap-4">
+                    <h3 className="text-lg font-semibold">{addon.name}</h3>
+                    <span className="text-[var(--cyan)] font-medium text-sm whitespace-nowrap">
+                      +${addon.price}
+                      <span className="text-[var(--text-dim)]">{addon.period}</span>
+                    </span>
                   </div>
-                ))}
-              </div>
-              <div className="mt-6 text-center">
-                <a href="#build" className="btn-premium btn-premium--outline">Add to Your Order</a>
-              </div>
-            </RoomEnter>
+                  <p className="mt-2 text-sm text-[var(--text-muted)] leading-relaxed">{addon.desc}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 text-center">
+              <a href="#build" className="btn btn--ghost">Add to Your Order</a>
+            </div>
+          </Reveal>
 
-            <RoomEnter variant="depth" delay={0.2} className="debrief-panel debrief-grid__extraction">
-              <p className="debrief-panel__label">Extraction — Contact Command</p>
+          <Reveal variant="scale" delay="2">
+            <span className="field-label block mb-4">Get In Touch</span>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -660,31 +656,31 @@ export default function Home() {
                 alert('Thank you! Your message has been received. We will contact you soon.');
                 form.reset();
               }}
-              className="space-y-6"
+              className="card p-8 space-y-6"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="name" className="form-label-premium">Your Name *</label>
-                  <input type="text" id="name" name="name" className="form-input-premium" placeholder="Jane Smith" required />
+                  <label htmlFor="name" className="field-label">Your Name *</label>
+                  <input type="text" id="name" name="name" className="field-input" placeholder="Jane Smith" required />
                 </div>
                 <div>
-                  <label htmlFor="business" className="form-label-premium">Business Name *</label>
-                  <input type="text" id="business" name="business" className="form-input-premium" placeholder="Smith Family Bakery" required />
+                  <label htmlFor="business" className="field-label">Business Name *</label>
+                  <input type="text" id="business" name="business" className="field-input" placeholder="Smith Family Bakery" required />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="contact-email" className="form-label-premium">Email *</label>
-                  <input type="email" id="contact-email" name="email" className="form-input-premium" placeholder="you@yourbusiness.com" required />
+                  <label htmlFor="contact-email" className="field-label">Email *</label>
+                  <input type="email" id="contact-email" name="email" className="field-input" placeholder="you@yourbusiness.com" required />
                 </div>
                 <div>
-                  <label htmlFor="contact-phone" className="form-label-premium">Phone</label>
-                  <input type="tel" id="contact-phone" name="phone" className="form-input-premium" placeholder="(304) 555-0123" />
+                  <label htmlFor="contact-phone" className="field-label">Phone</label>
+                  <input type="tel" id="contact-phone" name="phone" className="field-input" placeholder="(304) 555-0123" />
                 </div>
               </div>
               <div>
-                <label htmlFor="package" className="form-label-premium">Interested Package</label>
-                <select id="package" name="package" className="form-input-premium">
+                <label htmlFor="package" className="field-label">Interested Package</label>
+                <select id="package" name="package" className="field-input">
                   {pricingTiers.map((tier) => (
                     <option key={tier.name} value={tier.name}>
                       {tier.name} — ${tier.price}
@@ -694,27 +690,28 @@ export default function Home() {
                 </select>
               </div>
               <div>
-                <label htmlFor="message" className="form-label-premium">Tell us about your project</label>
+                <label htmlFor="message" className="field-label">Tell us about your project</label>
                 <textarea
                   id="message"
                   name="message"
-                  className="form-textarea-premium"
+                  className="field-textarea"
                   placeholder="We're a family-owned plumbing company in West Virginia..."
                 />
               </div>
-              <button type="submit" className="btn-premium w-full">
-                Initiate Extraction — Send Message
+              <button type="submit" className="btn btn--primary w-full">
+                Send Message
               </button>
               <p className="text-center text-xs text-[var(--text-dim)]">
                 I&apos;ll personally review your request within 24 hours. No spam, ever.
               </p>
             </form>
-            </RoomEnter>
-          </div>
+          </Reveal>
+
           <div className="section-cta">
-            <a href="#build" className="btn-premium">Begin Your Mission</a>
+            <a href="#build" className="btn btn--primary">Start Your Order</a>
           </div>
-        </BaseRoom>
-      </main>
+        </div>
+      </section>
+    </main>
   );
 }

@@ -1,67 +1,73 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import Image from 'next/image';
 
 interface HeroProps {
   onClaimOffer?: () => void;
 }
 
 export default function Hero({ onClaimOffer }: HeroProps) {
-  const prefersReducedMotion = useReducedMotion();
-
-  const motionProps = (delay: number) =>
-    prefersReducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 28 } as const,
-          animate: { opacity: 1, y: 0 } as const,
-          transition: { duration: 1, delay, ease: [0.22, 1, 0.36, 1] as const },
-        };
-
   return (
-    <section id="hero" className="cinematic-hero">
-      <motion.div className="cinematic-hero__badge" {...motionProps(0.1)}>
-        <span className="cinematic-hero__badge-star">★</span>
-        West Virginia Veteran Owned
-        <span className="cinematic-hero__badge-star">★</span>
-      </motion.div>
+    <section id="hero" className="hero">
+      <div className="hero__visual" aria-hidden="true">
+        <div className="hero__image-wrap">
+          <Image
+            src="/mountains/hero-vista.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="hero__image"
+            quality={90}
+          />
+        </div>
+        <div className="hero__veil" />
+        <div className="hero__grid" />
+        <div className="hero__glow" />
+      </div>
 
-      <motion.h1 className="cinematic-hero__brand" {...motionProps(0.25)}>
-        Veteran AI Websites
-        <span className="cinematic-hero__tagline">Professional Websites · Built in One Day</span>
-      </motion.h1>
+      <div className="hero__content">
+        <div className="hero__badge reveal reveal--up">
+          <span className="hero__badge-dot" />
+          WV Veteran Owned · AI-Powered Web Systems
+        </div>
 
-      <motion.p className="cinematic-hero__lead" {...motionProps(0.4)}>
-        One-day websites by a local West Virginia builder — built with the discipline,
-        precision, and pride of a U.S. veteran.
-      </motion.p>
+        <h1 className="hero__title reveal reveal--up reveal--d1">
+          Veteran AI
+          <span className="hero__title-accent">Websites</span>
+        </h1>
 
-      <motion.div className="cinematic-hero__offer" {...motionProps(0.55)}>
-        <div className="cinematic-hero__offer-label">Limited Time Offer</div>
-        <p className="cinematic-hero__offer-title">First Starter 1-Page Website</p>
-        <p className="cinematic-hero__offer-price">
-          <span className="cinematic-hero__price-strike">$497</span>
-          <span className="cinematic-hero__price-now">$397</span>
+        <p className="hero__lead reveal reveal--up reveal--d2">
+          Professional one-day websites for West Virginia businesses.
+          Built with veteran discipline, modern AI craft, and full ownership.
         </p>
-        <p className="cinematic-hero__offer-urgency">Ends July 4th — Single-page Starter only</p>
-      </motion.div>
 
-      <motion.div className="cinematic-hero__cta-group" {...motionProps(0.7)}>
-        <a href="#build" onClick={onClaimOffer} className="btn-premium">
-          Claim My $397 Website
-        </a>
-        <a href="#pricing" className="btn-premium btn-premium--outline">
-          View Packages
-        </a>
-      </motion.div>
+        <div className="hero__offer reveal reveal--scale reveal--d3">
+          <p className="hero__offer-label">Limited Time · July 4th</p>
+          <p className="hero__offer-headline">First Starter 1-Page Website</p>
+          <p className="hero__offer-price">
+            <span className="hero__price-was">$497</span>
+            <span className="hero__price-now">$397</span>
+          </p>
+        </div>
 
-      <motion.p className="cinematic-hero__footnote" {...motionProps(0.85)}>
-        Same-day delivery · 100% ownership · Pay only after you approve the design
-      </motion.p>
+        <div className="hero__cta reveal reveal--up reveal--d4">
+          <a href="#build" onClick={onClaimOffer} className="btn btn--primary">
+            Claim $397 Website
+          </a>
+          <a href="#pricing" className="btn btn--ghost">
+            View Packages
+          </a>
+        </div>
 
-      <div className="cinematic-hero__scroll-hint" aria-hidden="true">
-        <span>Begin the ascent</span>
-        <div className="cinematic-hero__scroll-line" />
+        <p className="hero__note reveal reveal--up reveal--d5">
+          Same-day delivery · 100% ownership · Pay after approval
+        </p>
+      </div>
+
+      <div className="hero__scroll" aria-hidden="true">
+        <span>Scroll</span>
+        <div className="hero__scroll-line" />
       </div>
     </section>
   );
