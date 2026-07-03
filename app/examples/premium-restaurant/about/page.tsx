@@ -1,51 +1,89 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import BistroShell from '@/components/ridge-bistro/BistroShell';
 
 export default function AboutPage() {
   useEffect(() => {
-    document.title = 'About Us | Mountain View Grill & Tavern | Ridgeview, WV';
+    document.title = 'About | The Ridge Bistro | Ridgeview, WV';
   }, []);
 
   return (
-    <div className="bg-[#fdf6e3]">
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        <div className="text-center mb-10">
-          <div className="text-[#8b4513] text-xs tracking-[2px] font-semibold mb-2">EST. 2013</div>
-          <h1 className="font-serif text-5xl tracking-tight text-[#3e2723]">Our Story</h1>
+    <BistroShell>
+      <section className="rb-hero rb-hero--page">
+        <div className="rb-hero__bg">
+          <Image
+            src="/demos/ridge-bistro/interior.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            quality={88}
+            className="rb-hero__img"
+          />
+          <div className="rb-hero__veil" />
         </div>
+        <div className="rb-hero__content">
+          <p className="rb-hero__eyebrow">Our Story</p>
+          <h1 className="rb-hero__title">Rooted in the ridge</h1>
+          <p className="rb-hero__lead">
+            A destination for those who appreciate restraint, craft, and the quiet beauty of these mountains.
+          </p>
+        </div>
+      </section>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="rb-section">
+        <div className="rb-section__inner rb-split rb-reveal">
           <div>
-            <div className="space-y-5 text-lg leading-relaxed text-[#5c4033]">
-              <p>Mountain View Grill &amp; Tavern was founded in 2013 by a local U.S. Army veteran who returned home to Ridgeview after his service and wanted to create a place where good friends could gather over great food with one of the best views in the county.</p>
-              
-              <p>What started as a small 40-seat tavern has grown into a beloved community spot. We focus on classic American comfort food done right — using fresh, local ingredients from West Virginia farms and producers whenever possible.</p>
-
-              <p>Our team takes pride in warm hospitality, generous portions, and making sure every guest — whether it's a family celebrating a birthday or a couple enjoying date night — feels right at home.</p>
-            </div>
-
-            <div className="mt-8 p-6 bg-white rounded-2xl border border-[#8b7355]/20">
-              <div className="font-semibold text-[#3e2723] mb-2">Veteran Owned &amp; Operated</div>
-              <p className="text-sm text-[#5c4033]">We proudly offer a 10% military discount every day as a small thank you to those who have served.</p>
-            </div>
+            <p className="rb-section__eyebrow">Philosophy</p>
+            <h2 className="rb-section__title">Appalachian luxury, thoughtfully composed</h2>
+            <p className="rb-section__lead">
+              The Ridge Bistro opened with a singular vision: to create a fine dining experience
+              that honors West Virginia&apos;s landscape without pretense. Our kitchen works closely
+              with local farmers, foragers, and artisans to build a menu that changes with the seasons.
+            </p>
+            <p className="text-[var(--rb-muted)] leading-relaxed mb-6">
+              The dining room was designed around materials found in these hills — reclaimed oak
+              from century-old barns, stone quarried nearby, and lighting warm enough to feel like
+              an embrace. Every detail was considered. Nothing is accidental.
+            </p>
+            <p className="text-[var(--rb-muted)] leading-relaxed">
+              Executive Chef Elena Marsh brings fifteen years of experience from kitchens in
+              Charleston, Asheville, and New York, returning home to cook the food of her upbringing
+              with the precision of classical training.
+            </p>
           </div>
-
-          <div>
-            <img 
-              src="https://images.unsplash.com/photo-1552566626-52f8b828add9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-              alt="Warm interior of Mountain View Grill & Tavern with wooden tables and mountain views" 
-              className="rounded-3xl shadow-md w-full" 
-            />
-            <p className="text-xs text-center text-[#8b7355] mt-3">Our dining room with views of the Appalachian mountains</p>
-          </div>
+          <Image
+            src="/demos/ridge-bistro/dish-trout.jpg"
+            alt="Pan-seared Appalachian trout"
+            width={700}
+            height={520}
+            className="rb-split__img"
+          />
         </div>
+      </section>
 
-        <div className="mt-16 text-center">
-          <Link href="/examples/premium-restaurant/reservations" className="inline-flex rounded-lg bg-[#8b4513] text-[#fdf6e3] px-8 py-3 font-semibold">Join us for dinner — reserve your table today</Link>
+      <section className="rb-section rb-section--dark">
+        <div className="rb-section__inner text-center rb-reveal">
+          <p className="rb-section__eyebrow">Craft &amp; Provenance</p>
+          <h2 className="rb-section__title">Ingredients with a sense of place</h2>
+          <div className="rb-divider" />
+          <p className="rb-section__lead" style={{ margin: '0 auto' }}>
+            Trout from cold mountain streams. Mushrooms foraged from Monongahela forest.
+            Beef aged in-house. Wine selected to complement, never overpower.
+            This is dining that tastes like where we are.
+          </p>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <section className="rb-section">
+        <div className="rb-section__inner text-center rb-reveal">
+          <Link href="/examples/premium-restaurant/reservations" className="rb-btn rb-btn--gold">
+            Join Us for Dinner
+          </Link>
+        </div>
+      </section>
+    </BistroShell>
   );
 }

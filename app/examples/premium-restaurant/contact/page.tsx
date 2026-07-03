@@ -1,90 +1,156 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import BistroShell from '@/components/ridge-bistro/BistroShell';
+import {
+  BISTRO_PHONE,
+  BISTRO_PHONE_HREF,
+  BISTRO_EMAIL,
+  BISTRO_ADDRESS,
+  hours,
+} from '@/lib/ridge-bistro-data';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
 
   useEffect(() => {
-    document.title = 'Contact | Mountain View Grill & Tavern | Ridgeview, WV';
+    document.title = 'Contact | The Ridge Bistro | Ridgeview, WV';
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.message) {
-      alert('Please fill out your name and a message.');
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      alert('Please complete your name, email, and message.');
       return;
     }
     setSubmitted(true);
   };
 
   return (
-    <div className="bg-[#fdf6e3]">
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="font-serif text-5xl tracking-tight text-[#3e2723] mb-6 text-center">Get in Touch</h1>
+    <BistroShell>
+      <section className="rb-hero rb-hero--page">
+        <div className="rb-hero__bg">
+          <Image
+            src="/demos/ridge-bistro/interior.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            quality={88}
+            className="rb-hero__img"
+          />
+          <div className="rb-hero__veil" />
+        </div>
+        <div className="rb-hero__content">
+          <p className="rb-hero__eyebrow">Contact</p>
+          <h1 className="rb-hero__title">We&apos;d love to hear from you</h1>
+          <p className="rb-hero__lead">
+            For reservations, private dining inquiries, or general questions.
+          </p>
+        </div>
+      </section>
 
-        <div className="grid md:grid-cols-2 gap-10">
-          {/* Contact Form */}
-          <div>
-            {!submitted ? (
-              <form onSubmit={handleSubmit} className="space-y-5 bg-white p-8 rounded-2xl border border-[#8b7355]/10">
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[#5c4033]">Name *</label>
-                  <input name="name" value={form.name} onChange={handleChange} required className="w-full border border-[#8b7355]/30 rounded-lg px-4 py-2.5 bg-[#fdf6e3]" />
-                </div>
-                <div className="grid grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-sm font-medium mb-1 text-[#5c4033]">Email</label>
-                    <input name="email" type="email" value={form.email} onChange={handleChange} className="w-full border border-[#8b7355]/30 rounded-lg px-4 py-2.5 bg-[#fdf6e3]" />
+      <section className="rb-section">
+        <div className="rb-section__inner">
+          <div className="grid lg:grid-cols-12 gap-10">
+            <div className="lg:col-span-7 rb-reveal">
+              <div className="rb-form">
+                {!submitted ? (
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="rb-label">Name *</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={form.name}
+                          onChange={handleChange}
+                          required
+                          className="rb-input"
+                        />
+                      </div>
+                      <div>
+                        <label className="rb-label">Email *</label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={form.email}
+                          onChange={handleChange}
+                          required
+                          className="rb-input"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="rb-label">Subject</label>
+                      <select
+                        name="subject"
+                        value={form.subject}
+                        onChange={handleChange}
+                        className="rb-select"
+                      >
+                        <option value="">Select a topic</option>
+                        <option value="Reservation">Reservation</option>
+                        <option value="Private Dining">Private Dining</option>
+                        <option value="General">General Inquiry</option>
+                        <option value="Event">Special Event</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="rb-label">Message *</label>
+                      <textarea
+                        name="message"
+                        value={form.message}
+                        onChange={handleChange}
+                        required
+                        rows={5}
+                        className="rb-textarea"
+                      />
+                    </div>
+                    <button type="submit" className="rb-btn rb-btn--gold w-full">
+                      Send Message
+                    </button>
+                  </form>
+                ) : (
+                  <div className="text-center py-10">
+                    <p className="rb-section__eyebrow">Received</p>
+                    <h2 className="rb-section__title" style={{ fontSize: '1.75rem' }}>
+                      Thank you, {form.name.split(' ')[0]}
+                    </h2>
+                    <p className="text-[var(--rb-muted)] mt-4">
+                      We will respond to your message at {form.email} within one business day.
+                    </p>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1 text-[#5c4033]">Phone</label>
-                    <input name="phone" type="tel" value={form.phone} onChange={handleChange} className="w-full border border-[#8b7355]/30 rounded-lg px-4 py-2.5 bg-[#fdf6e3]" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[#5c4033]">Message *</label>
-                  <textarea name="message" value={form.message} onChange={handleChange} rows={5} required className="w-full border border-[#8b7355]/30 rounded-lg px-4 py-2.5 bg-[#fdf6e3] resize-y" placeholder="Private event inquiry, feedback, catering questions..." />
-                </div>
-                <button type="submit" className="w-full bg-[#8b4513] text-[#fdf6e3] py-3 rounded-lg font-semibold">Send Message</button>
-              </form>
-            ) : (
-              <div className="bg-white p-8 rounded-2xl border border-[#8b7355]/10 text-center">
-                <h3 className="text-2xl font-semibold text-[#3e2723] mb-3">Thank you!</h3>
-                <p className="text-[#5c4033]">We’ve received your message and will get back to you within 24 hours.</p>
-                <button onClick={() => { setSubmitted(false); setForm({ name: '', email: '', phone: '', message: '' }); }} className="mt-6 text-sm text-[#8b4513] hover:underline">Send another message</button>
+                )}
               </div>
-            )}
-          </div>
-
-          {/* Contact Info */}
-          <div className="space-y-8 text-[#3e2723]">
-            <div>
-              <div className="font-semibold text-lg mb-1">Mountain View Grill &amp; Tavern</div>
-              <div>123 Mountain View Lane<br />Ridgeview, WV 26501</div>
             </div>
 
-            <div>
-              <a href="tel:3045550381" className="block font-semibold text-xl text-[#8b4513] hover:underline">(304) 555-0381</a>
-              <a href="mailto:info@mountainviewgrillwv.com" className="text-[#8b4513] hover:underline">info@mountainviewgrillwv.com</a>
-            </div>
-
-            <div>
-              <div className="font-semibold mb-1">Hours</div>
-              <div className="text-sm text-[#5c4033]">Tue–Thu 11am–9pm<br />Fri–Sat 11am–10pm<br />Sun 11am–8pm<br />Closed Mondays</div>
-            </div>
-
-            <div className="text-sm text-[#5c4033]">
-              For large parties, private events, or catering, please call us directly. We love hosting celebrations with a view!
+            <div className="lg:col-span-5 space-y-5 rb-reveal">
+              <div className="rb-form">
+                <p className="rb-section__eyebrow">Visit</p>
+                <p className="text-[var(--rb-cream)] mb-2">{BISTRO_ADDRESS}</p>
+                <a href={BISTRO_PHONE_HREF} className="rb-footer__link">{BISTRO_PHONE}</a>
+                <a href={`mailto:${BISTRO_EMAIL}`} className="rb-footer__link">{BISTRO_EMAIL}</a>
+              </div>
+              <div className="rb-form">
+                <p className="rb-section__eyebrow">Hours</p>
+                {hours.map((h) => (
+                  <p key={h.days} className="rb-footer__text">
+                    <span className="text-[var(--rb-cream)]">{h.days}</span> · {h.time}
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </BistroShell>
   );
 }

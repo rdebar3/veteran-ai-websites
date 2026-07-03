@@ -148,13 +148,13 @@ export const showcaseDemos: ShowcaseDemo[] = [
     tier: 'Premium',
     pages: '7 Pages',
     title: 'Premium Demo',
-    desc: 'Advanced 7-page site with portfolio, location details, FAQ, and premium design.',
+    desc: 'Advanced 7-page site with portfolio, private dining, reservations, and premium design.',
     href: '/examples/premium-restaurant',
     image: '/demos/premium-restaurant-hero.jpg',
-    imageAlt: 'Mountain View Grill demo — warm restaurant dining room',
-    imageFocus: 'center 48%',
-    landmark: 'Mountain View Grill',
-    features: ['7 custom pages', 'Advanced branding', 'Portfolio sections', 'Priority polish'],
+    imageAlt: 'The Ridge Bistro demo — moody Appalachian fine dining',
+    imageFocus: 'center 45%',
+    landmark: 'The Ridge Bistro',
+    features: ['7 custom pages', 'Advanced branding', 'Gallery & private dining', 'Priority polish'],
   },
 ];
 

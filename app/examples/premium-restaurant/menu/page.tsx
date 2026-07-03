@@ -1,87 +1,89 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import BistroShell from '@/components/ridge-bistro/BistroShell';
+import { menuSections } from '@/lib/ridge-bistro-data';
 
 export default function MenuPage() {
   useEffect(() => {
-    document.title = 'Menu | Mountain View Grill & Tavern | Ridgeview, WV';
+    document.title = 'Menu | The Ridge Bistro | Ridgeview, WV';
   }, []);
 
-  const menuSections = [
-    {
-      title: "Appetizers",
-      items: [
-        { name: "Mountain Nachos", desc: "Tortilla chips, cheddar, jalapeños, black beans, pico, sour cream, guac", price: "13" },
-        { name: "Crispy Fried Pickles", desc: "House dill pickles, buttermilk ranch", price: "10" },
-        { name: "Smoked Wings", desc: "Choice of buffalo, BBQ, or garlic parm (6pc / 12pc)", price: "14 / 25" },
-        { name: "Tavern Pretzel", desc: "Warm soft pretzel, beer cheese & whole grain mustard", price: "12" },
-      ],
-    },
-    {
-      title: "Entrees & Sandwiches",
-      items: [
-        { name: "Classic Tavern Burger", desc: "Two 4oz patties, American, lettuce, tomato, onion, special sauce, fries", price: "17" },
-        { name: "Black & Bleu Burger", desc: "Cajun seasoned, bleu cheese crumbles, caramelized onions, fries", price: "19" },
-        { name: "Grilled Ribeye", desc: "14oz choice cut, garlic mashed potatoes, roasted asparagus, herb butter", price: "32" },
-        { name: "BBQ Baby Back Ribs", desc: "Half rack, house BBQ, coleslaw, cornbread, fries", price: "24" },
-        { name: "Pan-Seared Salmon", desc: "Lemon caper sauce, wild rice, grilled zucchini", price: "26" },
-        { name: "Chicken Fried Chicken", desc: "Crispy chicken, country gravy, mashed potatoes, green beans", price: "20" },
-      ],
-    },
-    {
-      title: "Desserts",
-      items: [
-        { name: "Warm Apple Crisp", desc: "Cinnamon apples, oat crumble, vanilla bean ice cream", price: "9" },
-        { name: "Chocolate Bourbon Pecan Pie", desc: "House-made, whipped cream", price: "9" },
-        { name: "New York Cheesecake", desc: "Fresh berries, graham cracker crust", price: "8" },
-      ],
-    },
-    {
-      title: "Drinks",
-      items: [
-        { name: "Local Craft Beer", desc: "Rotating taps from WV breweries (16oz)", price: "7" },
-        { name: "Mountain Mule", desc: "Ginger beer, lime, choice of whiskey or vodka", price: "10" },
-        { name: "House Wine", desc: "Red or white by the glass", price: "8" },
-        { name: "Fresh Lemonade / Iced Tea", desc: "Classic or flavored (strawberry, peach)", price: "4" },
-        { name: "Milkshakes", desc: "Vanilla, chocolate, or strawberry", price: "6" },
-      ],
-    },
-  ];
-
   return (
-    <div className="bg-[#fdf6e3]">
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        <div className="text-center mb-10">
-          <div className="text-[#8b4513] text-xs tracking-[2px] font-semibold mb-2">FRESH • LOCAL • DELICIOUS</div>
-          <h1 className="font-serif text-5xl tracking-tight text-[#3e2723]">Our Menu</h1>
-          <p className="mt-2 text-[#5c4033]">All items made fresh daily with ingredients from local farms and purveyors.</p>
+    <BistroShell>
+      <section className="rb-hero rb-hero--page">
+        <div className="rb-hero__bg">
+          <Image
+            src="/demos/ridge-bistro/dish-charcuterie.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            quality={88}
+            className="rb-hero__img"
+          />
+          <div className="rb-hero__veil" />
         </div>
+        <div className="rb-hero__content">
+          <p className="rb-hero__eyebrow">Seasonal · Local · Refined</p>
+          <h1 className="rb-hero__title">The Menu</h1>
+          <p className="rb-hero__lead">
+            Our menu evolves with the Appalachian seasons. All prices per person unless noted.
+          </p>
+        </div>
+      </section>
 
-        <div className="space-y-12">
-          {menuSections.map((section, idx) => (
-            <div key={idx}>
-              <h2 className="font-serif text-3xl tracking-tight text-[#3e2723] mb-6 pb-2 border-b border-[#8b7355]/30">{section.title}</h2>
-              <div className="grid md:grid-cols-2 gap-x-10 gap-y-6">
-                {section.items.map((item, i) => (
-                  <div key={i} className="flex justify-between gap-4 border-b border-[#8b7355]/10 pb-4">
+      <section className="rb-section">
+        <div className="rb-section__inner">
+          <nav className="rb-menu-nav rb-reveal" aria-label="Menu sections">
+            {menuSections.map((s) => (
+              <a key={s.id} href={`#${s.id}`}>
+                {s.title}
+              </a>
+            ))}
+          </nav>
+
+          {menuSections.map((section) => (
+            <div key={section.id} id={section.id} className="rb-menu-section rb-reveal">
+              <div className="rb-menu-section__head">
+                <h2 className="rb-menu-section__title">{section.title}</h2>
+                <p className="rb-menu-section__sub">{section.subtitle}</p>
+              </div>
+
+              <div>
+                {section.items.map((item) => (
+                  <div key={item.name} className="rb-menu-item">
                     <div>
-                      <div className="font-semibold text-lg text-[#3e2723]">{item.name}</div>
-                      <div className="text-sm text-[#5c4033] leading-snug pr-2">{item.desc}</div>
+                      <div className="rb-menu-item__top">
+                        <span className="rb-menu-item__name">{item.name}</span>
+                        {item.note && (
+                          <span className="rb-menu-item__note">{item.note}</span>
+                        )}
+                      </div>
+                      <p className="rb-menu-item__desc">{item.desc}</p>
                     </div>
-                    <div className="font-mono text-lg text-[#8b4513] whitespace-nowrap pt-1">${item.price}</div>
+                    <span
+                      className={`rb-menu-item__price${item.price === 'Complimentary' ? ' rb-menu-item__price--plain' : ''}`}
+                    >
+                      {item.price}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
           ))}
-        </div>
 
-        <div className="mt-12 text-center text-sm text-[#5c4033]">
-          Ask your server about gluten-free options, daily specials, and kids' menu.
-          <br />Prices subject to change. 18% gratuity added to parties of 8 or more.
+          <div className="text-center mt-8 rb-reveal">
+            <p className="text-sm text-[var(--rb-muted)] mb-6 italic">
+              Please inform your server of any allergies or dietary restrictions.
+            </p>
+            <Link href="/examples/premium-restaurant/reservations" className="rb-btn rb-btn--gold">
+              Reserve a Table
+            </Link>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </BistroShell>
   );
 }
