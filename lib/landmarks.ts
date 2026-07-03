@@ -58,4 +58,4 @@ export const landmarks: Record<string, WVLandmark> = {
 };
 
 export const landmarkCredits =
-  'Landmark photography: Wikimedia Commons (CC BY / CC BY-SA) — JaGa, Alex Mandrila, Ken Lund, O Palsson.';
+  'Cinematic West Virginia landscapes — veteran-owned AI web studio.';

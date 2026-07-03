@@ -527,7 +527,7 @@ export default function Home() {
       </BaseRoom>
 
       <VisualInterlude
-        image="/natural-beauty-in-west-virginia.webp"
+        image="/natural-beauty-in-west-virginia.jpg"
         imageAlt="Natural beauty across the mountains of West Virginia"
         landmark="West Virginia Highlands"
         outpost="Local Business Sector"

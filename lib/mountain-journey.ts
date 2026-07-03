@@ -11,7 +11,7 @@ export interface MountainLayer {
 export const mountainLayers: MountainLayer[] = [
   {
     id: 'hero-vista',
-    src: '/mountains/hero-vista.webp',
+    src: '/mountains/hero-vista.jpg',
     alt: 'Golden hour vista over West Virginia Appalachian mountains',
     label: 'Summit Vista',
     elevation: '4,100 ft',
