@@ -70,7 +70,7 @@ export default function VisualInterlude({
             fill
             sizes="(max-width: 768px) 100vw, 480px"
             className="interlude__img"
-            quality={82}
+            quality={92}
             loading="lazy"
           />
           {landmark && (

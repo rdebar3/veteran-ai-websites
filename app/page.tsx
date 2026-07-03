@@ -223,8 +223,8 @@ export default function Home() {
       <WhyChooseSection />
 
       <VisualInterlude
-        image="/mountains/foothills.jpg"
-        imageAlt="Rolling foothills of the Appalachian Mountains in West Virginia"
+        image="/interludes/promo-foothills.jpg"
+        imageAlt="Appalachian foothills at dusk in West Virginia"
         landmark="Appalachian Foothills"
         outpost="Starter Package Sector"
         eyebrow={promoInterlude.eyebrow}
