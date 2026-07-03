@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import Image from 'next/image';
+import HeroBackground from '@/components/HeroBackground';
+import CircuitOverlay from '@/components/CircuitOverlay';
+import PatrioticOverlay from '@/components/PatrioticOverlay';
+import NeuralOverlay from '@/components/NeuralOverlay';
+import { baseRooms } from '@/lib/base-rooms';
 import { getViewProgress } from '@/lib/scroll-cinema';
-import { landmarks } from '@/lib/landmarks';
-
-const heroLandmark = landmarks.newRiverGorge;
 
 interface HeroProps {
   onClaimOffer?: () => void;
@@ -13,6 +14,7 @@ interface HeroProps {
 
 export default function Hero({ onClaimOffer }: HeroProps) {
   const heroRef = useRef<HTMLElement>(null);
+  const room = baseRooms['main-gate'];
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -20,9 +22,9 @@ export default function Hero({ onClaimOffer }: HeroProps) {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
 
-    const imgWrap = hero.querySelector<HTMLElement>('.hero__image-wrap');
-    const horizon = hero.querySelector<HTMLElement>('.hero__horizon');
     const content = hero.querySelector<HTMLElement>('.hero__content');
+    const circuit = hero.querySelector<HTMLElement>('.hero__circuit');
+    const badge = hero.querySelector<HTMLElement>('.hero__landmark-badge');
     let raf = 0;
 
     const tick = () => {
@@ -31,22 +33,22 @@ export default function Hero({ onClaimOffer }: HeroProps) {
         : 0;
       const viewP = getViewProgress(hero);
 
-      if (imgWrap) {
-        const y = scrollP * 18;
-        const scale = 1.02 + scrollP * 0.1;
-        imgWrap.style.transform = `translate3d(0, ${y}%, 0) scale(${scale})`;
-      }
-
-      if (horizon) {
-        horizon.style.transform = `translate3d(0, ${scrollP * 12}px, 0)`;
-        horizon.style.opacity = String(0.7 - scrollP * 0.35);
-      }
-
       if (content) {
-        const lift = 1 - viewP * 0.15;
-        content.style.transform = `translate3d(0, ${scrollP * 28}px, 0) scale(${lift})`;
-        content.style.opacity = String(1 - scrollP * 0.25);
+        content.style.transform = `translate3d(0, ${scrollP * 32}px, 0) scale(${1 - scrollP * 0.08})`;
+        content.style.opacity = String(1 - scrollP * 0.35);
       }
+
+      if (circuit) {
+        circuit.style.transform = `translate3d(0, ${scrollP * 18}px, 0)`;
+        circuit.style.opacity = String(0.55 - scrollP * 0.2);
+      }
+
+      if (badge) {
+        badge.style.transform = `translate3d(0, ${scrollP * 12}px, 0)`;
+      }
+
+      hero.style.setProperty('--hero-scroll', String(scrollP));
+      hero.style.setProperty('--hero-view', String(viewP));
 
       raf = requestAnimationFrame(tick);
     };
@@ -56,44 +58,33 @@ export default function Hero({ onClaimOffer }: HeroProps) {
   }, []);
 
   return (
-    <section id="hero" ref={heroRef} className="hero hero--cinematic hero--driven hero--outpost">
+    <section id="hero" ref={heroRef} className="hero hero--cinematic hero--driven hero--outpost hero--gate">
       <div className="hero__visual" aria-hidden="true">
-        <div className="hero__image-wrap">
-          <Image
-            src={heroLandmark.image}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="hero__image"
-            quality={95}
-          />
-        </div>
-        {heroLandmark.roomAccent && (
-          <div className="hero__room-accent">
-            <Image
-              src={heroLandmark.roomAccent}
-              alt=""
-              fill
-              sizes="100vw"
-              className="hero__room-img"
-              quality={75}
-            />
-          </div>
-        )}
+        <HeroBackground />
+        <div className="hero__ken-burns" />
         <div className="hero__sharpen" />
         <div className="hero__veil" />
         <div className="hero__vignette" />
         <div className="hero__horizon" />
+        <div className="hero__circuit">
+          <CircuitOverlay />
+        </div>
+        <NeuralOverlay />
+        <PatrioticOverlay />
         <div className="hero__outpost-frame" />
         <div className="hero__outpost-hud" />
         <div className="hero__grid" />
         <div className="hero__glow" />
         <div className="hero__glow-patriotic" />
         <div className="hero__landmark-badge">
-          <span className="hero__landmark-name">{heroLandmark.name}</span>
-          <span className="hero__landmark-outpost">{heroLandmark.outpost}</span>
+          <span className="hero__landmark-name">{room.vistaName}</span>
+          <span className="hero__landmark-outpost">{room.vistaOutpost}</span>
         </div>
+      </div>
+
+      <div className="hero__gate-status" aria-hidden="true">
+        <span className="hero__gate-dot" />
+        <span>{room.codename}</span>
       </div>
 
       <div className="hero__content">
@@ -152,7 +143,7 @@ export default function Hero({ onClaimOffer }: HeroProps) {
       </div>
 
       <div className="hero__scroll hero-animate hero-animate--6" aria-hidden="true">
-        <span>Scroll</span>
+        <span>Enter the command base</span>
         <div className="hero__scroll-line" />
       </div>
     </section>

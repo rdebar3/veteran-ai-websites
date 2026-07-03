@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import CircuitOverlay from '@/components/CircuitOverlay';
 import { getViewProgress } from '@/lib/scroll-cinema';
 
 interface VisualInterludeProps {
@@ -97,6 +98,9 @@ export default function VisualInterlude({
         </div>
         <div className="interlude__outpost-frame" />
         <div className="interlude__outpost-hud" />
+        <div className="interlude__circuit">
+          <CircuitOverlay />
+        </div>
         <div className="interlude__veil" />
         <div className="interlude__glow" />
         {landmark && (

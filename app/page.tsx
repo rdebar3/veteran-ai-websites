@@ -9,9 +9,9 @@ import {
   ClipboardList,
   CheckCircle,
 } from 'lucide-react';
-import Image from 'next/image';
+
 import Hero from '@/components/Hero';
-import SectionHeader from '@/components/SectionHeader';
+import BaseRoom from '@/components/BaseRoom';
 import Reveal from '@/components/Reveal';
 import PricingCard from '@/components/PricingCard';
 import FAQAccordion, { type FAQ } from '@/components/FAQAccordion';
@@ -21,7 +21,7 @@ import MarqueeBand from '@/components/MarqueeBand';
 import HorizontalShowcase from '@/components/HorizontalShowcase';
 import ScrollLift from '@/components/ScrollLift';
 import { storyChapters, processChapters, showcaseDemos } from '@/lib/cinematic';
-import { landmarks } from '@/lib/landmarks';
+import { baseRooms } from '@/lib/base-rooms';
 import {
   pricingTiers,
   addOnsList,
@@ -229,11 +229,11 @@ export default function Home() {
       <CinematicScroll id="story" chapters={storyChapters} />
 
       <VisualInterlude
-        image={landmarks.wvCapitol.image}
-        imageAlt={landmarks.wvCapitol.imageAlt}
-        landmark={landmarks.wvCapitol.name}
-        outpost={landmarks.wvCapitol.outpost}
-        eyebrow="Limited Time · Capitol Sector HQ"
+        image="/mountains/foothills.jpg"
+        imageAlt="Rolling foothills of the Appalachian Mountains in West Virginia"
+        landmark="Appalachian Foothills"
+        outpost="Promo Transit Corridor"
+        eyebrow="Limited Time · Transit Corridor"
         title="$397 Starter Website"
         subtitle="Professional one-page site — delivered in one day. Veteran-owned. Full ownership. Ends July 4th."
         ctaHref="#build"
@@ -256,14 +256,14 @@ export default function Home() {
         </div>
       </div>
 
-      <section id="build" className="section section--on-canvas">
-        <div className="section__container section__container--wide">
-          <SectionHeader
-            index="01"
-            eyebrow="Build"
-            title="Build Your Website"
-            subtitle="Pick your package, add upgrades, and submit. Fast delivery, clear pricing, full ownership."
-          />
+      <BaseRoom
+        room={baseRooms.armoury}
+        index="01"
+        eyebrow="Build"
+        title="Build Your Website"
+        subtitle="Pick your package, add upgrades, and submit. Fast delivery, clear pricing, full ownership."
+        wide
+      >
           <Reveal variant="scale">
             <div className="grid-stats">
               {[
@@ -479,17 +479,16 @@ export default function Home() {
               </div>
             </Reveal>
           )}
-        </div>
-      </section>
+      </BaseRoom>
 
-      <section id="pricing" className="section">
-        <div className="section__container section__container--wide">
-          <SectionHeader
-            index="02"
-            eyebrow="Pricing"
-            title="Clear Prices. No Hidden Costs."
-            subtitle="Mobile-first sites built in one day. You own everything."
-          />
+      <BaseRoom
+        room={baseRooms['command-center']}
+        index="02"
+        eyebrow="Pricing"
+        title="Clear Prices. No Hidden Costs."
+        subtitle="Mobile-first sites built in one day. You own everything."
+        wide
+      >
           <div className="grid-3">
             {pricingTiers.map((tier, i) => (
               <PricingCard
@@ -518,19 +517,18 @@ export default function Home() {
               </div>
             </div>
           </Reveal>
-        </div>
-      </section>
+      </BaseRoom>
 
       <CinematicScroll id="process-cinema" chapters={processChapters} />
 
-      <section id="how-it-works" className="section section--on-canvas">
-        <div className="section__container section__container--wide">
-          <SectionHeader
-            index="03"
-            eyebrow="Process"
-            title="How It Works"
-            subtitle="Six simple steps from order to launch."
-          />
+      <BaseRoom
+        room={baseRooms['mission-planning']}
+        index="03"
+        eyebrow="Process"
+        title="How It Works"
+        subtitle="Six simple steps from order to launch."
+        wide
+      >
           <div className="grid-2">
             {howItWorksSteps.map((step, index) => {
               const Icon = step.icon;
@@ -551,29 +549,28 @@ export default function Home() {
           <div className="section-cta">
             <a href="#build" className="btn btn--primary btn--lg btn--glow">Start Your Order</a>
           </div>
-        </div>
-      </section>
+      </BaseRoom>
 
-      <section id="examples" className="section">
-        <div className="section__container section__container--wide">
-          <SectionHeader
-            index="04"
-            eyebrow="Examples"
-            title="Live Examples"
-            subtitle="Explore live demos for each package tier."
-          />
-        </div>
+      <BaseRoom
+        room={baseRooms['observation-deck']}
+        index="04"
+        eyebrow="Examples"
+        title="Live Examples"
+        subtitle="Explore live demos for each package tier."
+        wide
+        hideHeader={false}
+      >
         <Reveal variant="up">
           <HorizontalShowcase demos={showcaseDemos} />
         </Reveal>
-      </section>
+      </BaseRoom>
 
       <VisualInterlude
-        image={landmarks.appalachianRidges.image}
-        imageAlt={landmarks.appalachianRidges.imageAlt}
-        landmark={landmarks.appalachianRidges.name}
-        outpost={landmarks.appalachianRidges.outpost}
-        eyebrow="West Virginia Proud · Highland Perimeter Base"
+        image="/natural-beauty-in-west-virginia.webp"
+        imageAlt="Natural beauty across the mountains of West Virginia"
+        landmark="West Virginia Highlands"
+        outpost="Patriot Observation Wing"
+        eyebrow="West Virginia Proud · Patriot Wing"
         title="Built for Local Business"
         subtitle="Real demos. Real results. Websites you will be proud to show customers — and post on Facebook."
         ctaHref="#build"
@@ -581,25 +578,14 @@ export default function Home() {
         align="left"
       />
 
-      <section id="testimonials" className="section section--testimonials">
-        <div className="testimonials-bg" aria-hidden="true">
-          <Image
-            src={landmarks.spruceKnob.image}
-            alt=""
-            fill
-            sizes="100vw"
-            className="testimonials-bg__img"
-            quality={85}
-          />
-          <div className="testimonials-bg__veil" />
-        </div>
-        <div className="section__container section__container--wide">
-          <SectionHeader
-            index="05"
-            eyebrow="Testimonials"
-            title="Trusted by Local Businesses"
-            subtitle="Real results from West Virginia business owners."
-          />
+      <BaseRoom
+        room={baseRooms['after-action-lounge']}
+        index="05"
+        eyebrow="Testimonials"
+        title="Trusted by Local Businesses"
+        subtitle="Real results from West Virginia business owners."
+        wide
+      >
           <div className="grid-3">
             {testimonials.map((t, i) => (
               <ScrollLift key={t.author} delay={i * 0.08} className="card quote-card h-full">
@@ -609,18 +595,17 @@ export default function Home() {
               </ScrollLift>
             ))}
           </div>
-        </div>
-      </section>
+      </BaseRoom>
 
-      <section id="contact" className="section">
-        <div className="section__container section__container--wide stack stack-lg">
-          <SectionHeader
-            index="06"
-            eyebrow="Contact"
-            title="Let's Build Your Website"
-            subtitle="FAQ, upgrades, and direct contact — everything you need to launch."
-          />
-
+      <BaseRoom
+        room={baseRooms.debrief}
+        index="06"
+        eyebrow="Contact"
+        title="Let's Build Your Website"
+        subtitle="FAQ, upgrades, and direct contact — everything you need to launch."
+        wide
+      >
+          <div className="stack stack-lg">
           <Reveal variant="left">
             <span className="field-label block mb-4">FAQ</span>
             <FAQAccordion faqs={faqs} />
@@ -710,8 +695,8 @@ export default function Home() {
           <div className="section-cta">
             <a href="#build" className="btn btn--primary btn--lg btn--glow">Start Your Order</a>
           </div>
-        </div>
-      </section>
+          </div>
+      </BaseRoom>
     </main>
   );
 }
