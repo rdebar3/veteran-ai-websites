@@ -13,7 +13,7 @@ import PricingCard from '@/components/PricingCard';
 import FAQAccordion, { type FAQ } from '@/components/FAQAccordion';
 import WhyChooseSection from '@/components/WhyChooseSection';
 import VisualInterlude from '@/components/VisualInterlude';
-import TrustStrip from '@/components/TrustStrip';
+
 import HorizontalShowcase from '@/components/HorizontalShowcase';
 import ScrollLift from '@/components/ScrollLift';
 import { showcaseDemos } from '@/lib/cinematic';
@@ -221,8 +221,6 @@ export default function Home() {
     <main className="relative flex-1">
       <Hero onClaimOffer={() => setSelectedBuilderPackage('Starter')} />
 
-      <TrustStrip />
-
       <WhyChooseSection />
 
       <VisualInterlude
@@ -241,8 +239,8 @@ export default function Home() {
 
       <BaseRoom
         room={baseRooms.armoury}
-        index="01"
         eyebrow="Build"
+        className="base-room--functional"
         title="Build Your Website"
         subtitle="Pick your package, add upgrades, and submit. Fast delivery, clear pricing, full ownership."
         wide
@@ -451,8 +449,8 @@ export default function Home() {
 
       <BaseRoom
         room={baseRooms['command-center']}
-        index="02"
         eyebrow="Pricing"
+        className="base-room--functional"
         title="Clear Prices. No Hidden Costs."
         subtitle="Mobile-first sites built in one day. You own everything."
         wide
@@ -489,8 +487,8 @@ export default function Home() {
 
       <BaseRoom
         room={baseRooms['mission-planning']}
-        index="03"
         eyebrow="Process"
+        className="base-room--functional"
         title="How It Works"
         subtitle="Six simple steps from order to launch."
         wide
@@ -519,16 +517,13 @@ export default function Home() {
 
       <BaseRoom
         room={baseRooms['observation-deck']}
-        index="04"
         eyebrow="Examples"
         title="Live Examples"
-        subtitle="Explore live demos for each package tier."
+        subtitle="Explore live demos for each package tier. Each card links to a working site built for a real business type."
         wide
-        hideHeader={false}
+        className="base-room--functional"
       >
-        <Reveal variant="up">
-          <HorizontalShowcase demos={showcaseDemos} />
-        </Reveal>
+        <HorizontalShowcase demos={showcaseDemos} />
       </BaseRoom>
 
       <VisualInterlude
@@ -548,8 +543,8 @@ export default function Home() {
 
       <BaseRoom
         room={baseRooms['after-action-lounge']}
-        index="05"
         eyebrow="Testimonials"
+        className="base-room--functional"
         title="Trusted by Local Businesses"
         subtitle="Real results from West Virginia business owners."
         wide
@@ -567,8 +562,8 @@ export default function Home() {
 
       <BaseRoom
         room={baseRooms.debrief}
-        index="06"
         eyebrow="Contact"
+        className="base-room--functional"
         title="Let's Build Your Website"
         subtitle="FAQ, upgrades, and direct contact — everything you need to launch."
         wide

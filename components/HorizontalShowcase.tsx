@@ -3,25 +3,37 @@
 import Image from 'next/image';
 import { Check } from 'lucide-react';
 import type { ShowcaseDemo } from '@/lib/cinematic';
+import ScrollLift from '@/components/ScrollLift';
 
 interface HorizontalShowcaseProps {
   demos: ShowcaseDemo[];
 }
 
+const imagePositions: Record<string, string> = {
+  Starter: 'center 42%',
+  Complete: 'center 35%',
+  Premium: 'center 55%',
+};
+
 export default function HorizontalShowcase({ demos }: HorizontalShowcaseProps) {
   return (
     <div className="h-showcase">
-      <div className="h-showcase__scroll" role="list">
-        {demos.map((demo) => (
-          <article key={demo.tier} className="h-showcase__card" role="listitem">
+      <p className="h-showcase__intro">
+        Each tier includes a live demo you can click through before ordering — so you know exactly
+        what your package delivers for your business.
+      </p>
+      <div className="h-showcase__grid" role="list">
+        {demos.map((demo, i) => (
+          <ScrollLift key={demo.tier} delay={i * 0.06} depth={false} className="h-showcase__card">
             <div className="h-showcase__visual">
               <Image
                 src={demo.image}
-                alt=""
+                alt={`${demo.landmark} — backdrop for ${demo.tier} demo`}
                 fill
-                sizes="(max-width: 768px) 88vw, 42vw"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="h-showcase__img"
-                quality={88}
+                style={{ objectPosition: imagePositions[demo.tier] ?? 'center' }}
+                quality={85}
               />
               <div className="h-showcase__veil" />
               <div className="h-showcase__badge">
@@ -29,7 +41,6 @@ export default function HorizontalShowcase({ demos }: HorizontalShowcaseProps) {
                 <span className="h-showcase__pages">{demo.pages}</span>
               </div>
               <div className="h-showcase__landmark">
-                <span className="h-showcase__landmark-label">WV Overlook</span>
                 <span className="h-showcase__landmark-name">{demo.landmark}</span>
               </div>
             </div>
@@ -44,14 +55,13 @@ export default function HorizontalShowcase({ demos }: HorizontalShowcaseProps) {
                   </li>
                 ))}
               </ul>
-              <a href={demo.href} className="btn btn--ghost btn--lg h-showcase__cta">
+              <a href={demo.href} className="btn btn--ghost h-showcase__cta">
                 View Live Demo
               </a>
             </div>
-          </article>
+          </ScrollLift>
         ))}
       </div>
-      <p className="h-showcase__hint">Scroll horizontally to explore demos</p>
     </div>
   );
 }

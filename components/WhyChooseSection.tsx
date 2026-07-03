@@ -3,10 +3,16 @@
 import Image from 'next/image';
 import { Award, Clock, Shield, MapPin } from 'lucide-react';
 import Reveal from '@/components/Reveal';
-import ScrollLift from '@/components/ScrollLift';
 import { whyChooseLead, whyChoosePillars } from '@/lib/content-sections';
 
 const pillarIcons = [Award, Clock, Shield, MapPin];
+
+const imagePositions = [
+  'center 38%',
+  'center 30%',
+  'center 55%',
+  'center 40%',
+];
 
 export default function WhyChooseSection() {
   return (
@@ -16,13 +22,16 @@ export default function WhyChooseSection() {
           <p className="why-choose__eyebrow">Rooted in West Virginia</p>
           <h2 className="why-choose__title">Why Local Businesses Choose Us</h2>
           <p className="why-choose__lead">{whyChooseLead}</p>
+          <p className="why-choose__trust">
+            U.S. Veteran Owned · West Virginia Based · One-Day Delivery · 100% Ownership
+          </p>
         </Reveal>
 
         <div className="why-choose__grid">
           {whyChoosePillars.map((pillar, i) => {
             const Icon = pillarIcons[i] ?? Award;
             return (
-              <ScrollLift key={pillar.title} delay={i * 0.08} className="why-choose__card card">
+              <article key={pillar.title} className="why-choose__card card">
                 <div className="why-choose__card-visual">
                   <Image
                     src={pillar.image}
@@ -30,10 +39,11 @@ export default function WhyChooseSection() {
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className="why-choose__card-img"
-                    quality={88}
+                    style={{ objectPosition: imagePositions[i] ?? 'center' }}
+                    quality={85}
                   />
                   <div className="why-choose__card-veil" />
-                  <div className="why-choose__card-icon">
+                  <div className="why-choose__card-icon" aria-hidden="true">
                     <Icon className="h-4 w-4" />
                   </div>
                 </div>
@@ -42,7 +52,7 @@ export default function WhyChooseSection() {
                   <p className="why-choose__card-text">{pillar.body}</p>
                   <p className="why-choose__card-caption">{pillar.imageCaption}</p>
                 </div>
-              </ScrollLift>
+              </article>
             );
           })}
         </div>

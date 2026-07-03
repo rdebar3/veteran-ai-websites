@@ -17,6 +17,7 @@ interface BaseRoomProps {
   wide?: boolean;
   headerExtra?: ReactNode;
   hideHeader?: boolean;
+  className?: string;
 }
 
 export default function BaseRoom({
@@ -29,6 +30,7 @@ export default function BaseRoom({
   wide = false,
   headerExtra,
   hideHeader = false,
+  className = '',
 }: BaseRoomProps) {
   const ref = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -55,8 +57,9 @@ export default function BaseRoom({
       })();
 
       if (vista) {
-        const y = (0.5 - scrollP) * 14;
-        const scale = 1.1 + scrollP * 0.08;
+        const functional = section.classList.contains('base-room--functional');
+        const y = functional ? (0.5 - scrollP) * 6 : (0.5 - scrollP) * 14;
+        const scale = functional ? 1.02 + scrollP * 0.03 : 1.1 + scrollP * 0.08;
         vista.style.transform = `translate3d(0, ${y}%, 0) scale(${scale})`;
       }
 
@@ -71,10 +74,13 @@ export default function BaseRoom({
       }
 
       if (chamber) {
-        const lift = 1 - (1 - p) * 0.06;
-        const y = (1 - p) * 48;
-        chamber.style.opacity = String(0.5 + p * 0.5);
-        chamber.style.transform = `translate3d(0, ${y}px, 0) scale(${lift}) perspective(1400px) rotateX(${(1 - p) * 6}deg)`;
+        const functional = section.classList.contains('base-room--functional');
+        const lift = 1 - (1 - p) * 0.04;
+        const y = functional ? (1 - p) * 20 : (1 - p) * 48;
+        chamber.style.opacity = functional ? '1' : String(0.55 + p * 0.45);
+        chamber.style.transform = functional
+          ? `translate3d(0, ${y}px, 0)`
+          : `translate3d(0, ${y}px, 0) scale(${lift}) perspective(1400px) rotateX(${(1 - p) * 6}deg)`;
       }
 
       raf = requestAnimationFrame(tick);
@@ -91,7 +97,7 @@ export default function BaseRoom({
     <section
       id={room.sectionId}
       ref={ref}
-      className={`base-room base-room--${room.mood}`}
+      className={`base-room base-room--${room.mood} ${className}`.trim()}
       data-room={room.id}
       style={{ '--room-accent': room.accent, '--room-glow': room.glow } as CSSProperties}
     >
