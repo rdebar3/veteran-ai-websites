@@ -39,7 +39,7 @@ export default function Navbar() {
     <nav className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
       <div className="nav__inner">
         <a href="#hero" className="nav__logo">
-          Veteran AI Websites
+          Veteran <span className="nav__logo-accent">AI</span> Websites
         </a>
 
         <div className="nav__links">
@@ -64,7 +64,7 @@ export default function Navbar() {
             <FacebookIcon className="h-3 w-3 inline-block mr-1 -mt-px" />
             Social
           </a>
-          <a href="#build" className="nav__cta">
+          <a href="#build" className="nav__cta nav__cta--glow">
             $397 Offer
           </a>
         </div>

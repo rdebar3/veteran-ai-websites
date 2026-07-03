@@ -18,18 +18,20 @@ export default function Hero({ onClaimOffer }: HeroProps) {
             priority
             sizes="100vw"
             className="hero__image"
-            quality={92}
+            quality={95}
           />
         </div>
         <div className="hero__sharpen" />
         <div className="hero__veil" />
+        <div className="hero__vignette" />
+        <div className="hero__horizon" />
         <div className="hero__grid" />
         <div className="hero__glow" />
         <div className="hero__glow-patriotic" />
       </div>
 
       <div className="hero__content">
-        <div className="hero__badge reveal reveal--up">
+        <div className="hero__badge hero-animate hero-animate--1">
           <span className="hero__badge-dot" />
           <span className="hero__badge-star" aria-hidden="true">★</span>
           WV Veteran Owned
@@ -37,21 +39,22 @@ export default function Hero({ onClaimOffer }: HeroProps) {
           AI-Powered Web Systems
         </div>
 
-        <h1 className="hero__title reveal reveal--up reveal--d1">
+        <h1 className="hero__title hero-animate hero-animate--2">
           <span className="hero__title-line">Veteran AI</span>
           <span className="hero__title-accent">Websites</span>
         </h1>
 
-        <p className="hero__tagline reveal reveal--up reveal--d2">
+        <p className="hero__tagline hero-animate hero-animate--3">
           Professional websites. Built in one day.
         </p>
 
-        <p className="hero__lead reveal reveal--up reveal--d2">
+        <p className="hero__lead hero-animate hero-animate--3">
           Premium one-day sites for West Virginia businesses — veteran discipline,
           modern AI craft, and 100% ownership. No agency runaround.
         </p>
 
-        <div className="hero__offer reveal reveal--scale reveal--d3">
+        <div className="hero__offer hero-animate hero-animate--4">
+          <div className="hero__offer-shimmer" aria-hidden="true" />
           <div className="hero__offer-glow" aria-hidden="true" />
           <div className="hero__offer-header">
             <span className="hero__offer-label">Limited Time Offer</span>
@@ -66,7 +69,7 @@ export default function Hero({ onClaimOffer }: HeroProps) {
           <p className="hero__offer-note">Single-page Starter package only</p>
         </div>
 
-        <div className="hero__cta reveal reveal--up reveal--d4">
+        <div className="hero__cta hero-animate hero-animate--5">
           <a href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg btn--glow">
             Claim My $397 Website
           </a>
@@ -75,14 +78,14 @@ export default function Hero({ onClaimOffer }: HeroProps) {
           </a>
         </div>
 
-        <p className="hero__note reveal reveal--up reveal--d5">
+        <p className="hero__note hero-animate hero-animate--6">
           <span className="hero__note-item">Same-day delivery</span>
           <span className="hero__note-item">100% ownership</span>
           <span className="hero__note-item">Pay after approval</span>
         </p>
       </div>
 
-      <div className="hero__scroll" aria-hidden="true">
+      <div className="hero__scroll hero-animate hero-animate--6" aria-hidden="true">
         <span>Scroll</span>
         <div className="hero__scroll-line" />
       </div>

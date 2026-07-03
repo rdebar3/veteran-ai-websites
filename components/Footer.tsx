@@ -6,7 +6,9 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer__inner">
         <div>
-          <div className="footer__brand">Veteran AI Websites</div>
+          <div className="footer__brand">
+            Veteran <span className="footer__accent">AI</span> Websites
+          </div>
           <p className="footer__tagline">West Virginia · U.S. Veteran Owned</p>
           <a
             href={FACEBOOK_URL}

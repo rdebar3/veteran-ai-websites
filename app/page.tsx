@@ -480,8 +480,8 @@ export default function Home() {
             ))}
           </div>
           <Reveal variant="up" delay="2">
-            <div className="card max-w-3xl mx-auto mt-10 p-8">
-              <p className="text-center field-label mb-6">
+            <div className="card includes-card max-w-3xl mx-auto mt-10 p-8">
+              <p className="text-center includes-card__label mb-6">
                 Every package includes
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -566,12 +566,12 @@ export default function Home() {
               },
             ].map((ex, i) => (
               <Reveal key={ex.tier} variant="scale" delay={i === 0 ? 'none' : i === 1 ? '1' : '2'}>
-                <div className="card p-6 flex flex-col h-full">
-                  <div>
-                    <span className="field-label text-[var(--blue)]">{ex.tier}</span>
-                    <span className="field-label ml-2">{ex.pages}</span>
+                <div className={`card demo-card demo-card--${ex.tier.toLowerCase()} p-6 flex flex-col h-full`}>
+                  <div className="demo-card__meta">
+                    <span className="demo-card__tier">{ex.tier}</span>
+                    <span className="demo-card__pages">{ex.pages}</span>
                   </div>
-                  <h3 className="text-xl font-semibold mt-3">{ex.title}</h3>
+                  <h3 className="demo-card__title">{ex.title}</h3>
                   <p className="mt-3 text-sm text-[var(--text-muted)] leading-relaxed flex-1">{ex.desc}</p>
                   <ul className="mt-5 mb-8 space-y-2">
                     {ex.features.map((f) => (

@@ -20,7 +20,7 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
       {faqs.map((faq, index) => {
         const isOpen = openIndex === index;
         return (
-          <div key={index} className="faq__item">
+          <div key={index} className={`faq__item ${isOpen ? 'faq__item--open' : ''}`}>
             <button
               type="button"
               onClick={() => setOpenIndex(isOpen ? null : index)}
@@ -32,7 +32,9 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
                 className={`faq__chevron h-5 w-5 ${isOpen ? 'faq__chevron--open' : ''}`}
               />
             </button>
-            {isOpen && <div className="faq__answer">{faq.answer}</div>}
+            <div className="faq__panel">
+              <div className="faq__answer">{faq.answer}</div>
+            </div>
           </div>
         );
       })}
