@@ -3,6 +3,9 @@
 import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { getViewProgress } from '@/lib/scroll-cinema';
+import { landmarks } from '@/lib/landmarks';
+
+const heroLandmark = landmarks.newRiverGorge;
 
 interface HeroProps {
   onClaimOffer?: () => void;
@@ -53,11 +56,11 @@ export default function Hero({ onClaimOffer }: HeroProps) {
   }, []);
 
   return (
-    <section id="hero" ref={heroRef} className="hero hero--cinematic hero--driven">
+    <section id="hero" ref={heroRef} className="hero hero--cinematic hero--driven hero--outpost">
       <div className="hero__visual" aria-hidden="true">
         <div className="hero__image-wrap">
           <Image
-            src="/mountains/hero-vista.webp"
+            src={heroLandmark.image}
             alt=""
             fill
             priority
@@ -66,13 +69,31 @@ export default function Hero({ onClaimOffer }: HeroProps) {
             quality={95}
           />
         </div>
+        {heroLandmark.roomAccent && (
+          <div className="hero__room-accent">
+            <Image
+              src={heroLandmark.roomAccent}
+              alt=""
+              fill
+              sizes="100vw"
+              className="hero__room-img"
+              quality={75}
+            />
+          </div>
+        )}
         <div className="hero__sharpen" />
         <div className="hero__veil" />
         <div className="hero__vignette" />
         <div className="hero__horizon" />
+        <div className="hero__outpost-frame" />
+        <div className="hero__outpost-hud" />
         <div className="hero__grid" />
         <div className="hero__glow" />
         <div className="hero__glow-patriotic" />
+        <div className="hero__landmark-badge">
+          <span className="hero__landmark-name">{heroLandmark.name}</span>
+          <span className="hero__landmark-outpost">{heroLandmark.outpost}</span>
+        </div>
       </div>
 
       <div className="hero__content">

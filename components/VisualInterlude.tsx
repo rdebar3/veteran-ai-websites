@@ -7,6 +7,8 @@ import { getViewProgress } from '@/lib/scroll-cinema';
 interface VisualInterludeProps {
   image: string;
   imageAlt: string;
+  landmark?: string;
+  outpost?: string;
   eyebrow?: string;
   title: string;
   subtitle?: string;
@@ -18,6 +20,8 @@ interface VisualInterludeProps {
 export default function VisualInterlude({
   image,
   imageAlt,
+  landmark,
+  outpost,
   eyebrow,
   title,
   subtitle,
@@ -86,13 +90,21 @@ export default function VisualInterlude({
   }, []);
 
   return (
-    <section ref={ref} className={`interlude interlude--${align} interlude--driven`}>
+    <section ref={ref} className={`interlude interlude--${align} interlude--driven interlude--outpost`}>
       <div className="interlude__visual" aria-hidden="true">
         <div className="interlude__img-wrap">
           <Image src={image} alt="" fill sizes="100vw" className="interlude__img" quality={90} />
         </div>
+        <div className="interlude__outpost-frame" />
+        <div className="interlude__outpost-hud" />
         <div className="interlude__veil" />
         <div className="interlude__glow" />
+        {landmark && (
+          <div className="interlude__landmark-badge">
+            <span className="interlude__landmark-name">{landmark}</span>
+            {outpost && <span className="interlude__landmark-outpost">{outpost}</span>}
+          </div>
+        )}
       </div>
       <div className="interlude__content">
         {eyebrow && <span className="interlude__eyebrow">{eyebrow}</span>}

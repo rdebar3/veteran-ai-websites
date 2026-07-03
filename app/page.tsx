@@ -21,6 +21,7 @@ import MarqueeBand from '@/components/MarqueeBand';
 import HorizontalShowcase from '@/components/HorizontalShowcase';
 import ScrollLift from '@/components/ScrollLift';
 import { storyChapters, processChapters, showcaseDemos } from '@/lib/cinematic';
+import { landmarks } from '@/lib/landmarks';
 import {
   pricingTiers,
   addOnsList,
@@ -228,9 +229,11 @@ export default function Home() {
       <CinematicScroll id="story" chapters={storyChapters} />
 
       <VisualInterlude
-        image="/grok-image-11e0d2c5-115b-41ef-8811-2d3f53d43ca2.jpg"
-        imageAlt="Futuristic web technology visual"
-        eyebrow="Limited Time"
+        image={landmarks.wvCapitol.image}
+        imageAlt={landmarks.wvCapitol.imageAlt}
+        landmark={landmarks.wvCapitol.name}
+        outpost={landmarks.wvCapitol.outpost}
+        eyebrow="Limited Time · Capitol Sector HQ"
         title="$397 Starter Website"
         subtitle="Professional one-page site — delivered in one day. Veteran-owned. Full ownership. Ends July 4th."
         ctaHref="#build"
@@ -566,9 +569,11 @@ export default function Home() {
       </section>
 
       <VisualInterlude
-        image="/mountains/misty-ridges.jpg"
-        imageAlt="Misty ridges of West Virginia mountains"
-        eyebrow="West Virginia Proud"
+        image={landmarks.appalachianRidges.image}
+        imageAlt={landmarks.appalachianRidges.imageAlt}
+        landmark={landmarks.appalachianRidges.name}
+        outpost={landmarks.appalachianRidges.outpost}
+        eyebrow="West Virginia Proud · Highland Perimeter Base"
         title="Built for Local Business"
         subtitle="Real demos. Real results. Websites you will be proud to show customers — and post on Facebook."
         ctaHref="#build"
@@ -579,7 +584,7 @@ export default function Home() {
       <section id="testimonials" className="section section--testimonials">
         <div className="testimonials-bg" aria-hidden="true">
           <Image
-            src="/mountains/summit.jpg"
+            src={landmarks.spruceKnob.image}
             alt=""
             fill
             sizes="100vw"

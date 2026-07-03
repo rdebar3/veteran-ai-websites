@@ -375,6 +375,116 @@ body::after {
   pointer-events: none;
 }
 
+.hero__room-accent {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.28;
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(90deg, black 0%, transparent 32%, transparent 68%, black 100%),
+    linear-gradient(180deg, black 0%, transparent 25%, transparent 75%, black 100%);
+  mask-image:
+    linear-gradient(90deg, black 0%, transparent 32%, transparent 68%, black 100%),
+    linear-gradient(180deg, black 0%, transparent 25%, transparent 75%, black 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.hero__room-img {
+  object-fit: cover;
+  object-position: center;
+  filter: contrast(1.06) saturate(0.8) brightness(0.5);
+}
+
+.hero__outpost-frame {
+  position: absolute;
+  inset: clamp(0.75rem, 2.5vw, 1.75rem);
+  z-index: 2;
+  border: 1px solid rgba(34, 211, 238, 0.1);
+  pointer-events: none;
+}
+
+.hero__outpost-frame::before,
+.hero__outpost-frame::after {
+  content: '';
+  position: absolute;
+  width: 2rem;
+  height: 2rem;
+  border-color: rgba(34, 211, 238, 0.38);
+  border-style: solid;
+}
+
+.hero__outpost-frame::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.hero__outpost-frame::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.hero__outpost-hud {
+  position: absolute;
+  top: clamp(1rem, 3vw, 2rem);
+  left: clamp(1rem, 3vw, 2rem);
+  right: clamp(1rem, 3vw, 2rem);
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(34, 211, 238, 0.5);
+  pointer-events: none;
+}
+
+.hero__outpost-hud::before {
+  content: 'GORGE OVERLOOK STATION';
+}
+
+.hero__outpost-hud::after {
+  content: 'NRG BRIDGE · LIVE';
+  color: rgba(251, 191, 36, 0.42);
+}
+
+.hero__landmark-badge {
+  position: absolute;
+  right: clamp(1rem, 3vw, 2rem);
+  bottom: clamp(1.5rem, 4vw, 3rem);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  border-radius: var(--radius-sm);
+  background: rgba(2, 2, 3, 0.65);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+.hero__landmark-name {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.hero__landmark-outpost {
+  font-size: 0.4375rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
 .hero__horizon {
   position: absolute;
   left: 0;
@@ -1594,6 +1704,18 @@ body::after {
   opacity: 0.6;
 }
 
+.footer__credits {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.625rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+  opacity: 0.75;
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ── Utilities ─────────────────────────────────────────────────── */
 .section-cta {
   margin-top: clamp(3rem, 6vh, 4rem);
@@ -2057,6 +2179,132 @@ label.card:focus-within {
   pointer-events: none;
 }
 
+/* Command outpost overlays — landmark vista through secure mountain base */
+.cinema__room-accent {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  -webkit-mask-image:
+    linear-gradient(90deg, black 0%, transparent 28%, transparent 72%, black 100%),
+    linear-gradient(180deg, black 0%, transparent 22%, transparent 78%, black 100%);
+  mask-image:
+    linear-gradient(90deg, black 0%, transparent 28%, transparent 72%, black 100%),
+    linear-gradient(180deg, black 0%, transparent 22%, transparent 78%, black 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.cinema__room-img {
+  object-fit: cover;
+  object-position: center;
+  filter: contrast(1.08) saturate(0.85) brightness(0.55);
+}
+
+.cinema__outpost-frame {
+  position: absolute;
+  inset: clamp(0.75rem, 2.5vw, 1.75rem);
+  z-index: 3;
+  border: 1px solid rgba(34, 211, 238, 0.12);
+  pointer-events: none;
+}
+
+.cinema__outpost-frame::before,
+.cinema__outpost-frame::after {
+  content: '';
+  position: absolute;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-color: rgba(34, 211, 238, 0.42);
+  border-style: solid;
+}
+
+.cinema__outpost-frame::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.cinema__outpost-frame::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.cinema__outpost-hud {
+  position: absolute;
+  top: clamp(1rem, 3vw, 2rem);
+  left: clamp(1rem, 3vw, 2rem);
+  right: clamp(1rem, 3vw, 2rem);
+  z-index: 4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(34, 211, 238, 0.55);
+  pointer-events: none;
+}
+
+.cinema__outpost-hud::before {
+  content: 'SECURE LINK · WV SECTOR';
+}
+
+.cinema__outpost-hud::after {
+  content: 'ALT 4,863 FT · LIVE FEED';
+  color: rgba(251, 191, 36, 0.45);
+}
+
+.cinema__landmark-badge {
+  position: absolute;
+  right: clamp(1rem, 3vw, 2rem);
+  bottom: clamp(4.5rem, 8vw, 6rem);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  border-radius: var(--radius-sm);
+  background: rgba(2, 2, 3, 0.72);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+.cinema__landmark-name {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.cinema__landmark-outpost {
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.cinema__caption-landmark {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 0.625rem;
+  will-change: transform, opacity;
+}
+
 .cinema__captions {
   position: relative;
   z-index: 2;
@@ -2199,10 +2447,84 @@ label.card:focus-within {
 
 .cinema--driven .cinema__caption--0 .cinema__caption-index,
 .cinema--driven .cinema__caption--0 .cinema__caption-eyebrow,
+.cinema--driven .cinema__caption--0 .cinema__caption-landmark,
 .cinema--driven .cinema__caption--0 .cinema__caption-title,
 .cinema--driven .cinema__caption--0 .cinema__caption-body {
   opacity: 1;
   transform: none;
+}
+
+/* 5-panel scroll keyframes */
+@keyframes cinema-layer-5-0 {
+  0%, 16% { opacity: 1; }
+  20%, 100% { opacity: 0; }
+}
+@keyframes cinema-layer-5-1 {
+  0%, 16% { opacity: 0; }
+  20%, 36% { opacity: 1; }
+  40%, 100% { opacity: 0; }
+}
+@keyframes cinema-layer-5-2 {
+  0%, 36% { opacity: 0; }
+  40%, 56% { opacity: 1; }
+  60%, 100% { opacity: 0; }
+}
+@keyframes cinema-layer-5-3 {
+  0%, 56% { opacity: 0; }
+  60%, 76% { opacity: 1; }
+  80%, 100% { opacity: 0; }
+}
+@keyframes cinema-layer-5-4 {
+  0%, 76% { opacity: 0; }
+  80%, 100% { opacity: 1; }
+}
+
+@keyframes cinema-cap-5-0 {
+  0%, 16% { opacity: 1; transform: translate3d(0, 0, 0); }
+  20%, 100% { opacity: 0; transform: translate3d(0, -24px, 0); }
+}
+@keyframes cinema-cap-5-1 {
+  0%, 16% { opacity: 0; transform: translate3d(0, 32px, 0); }
+  20%, 36% { opacity: 1; transform: translate3d(0, 0, 0); }
+  40%, 100% { opacity: 0; transform: translate3d(0, -24px, 0); }
+}
+@keyframes cinema-cap-5-2 {
+  0%, 36% { opacity: 0; transform: translate3d(0, 32px, 0); }
+  40%, 56% { opacity: 1; transform: translate3d(0, 0, 0); }
+  60%, 100% { opacity: 0; transform: translate3d(0, -24px, 0); }
+}
+@keyframes cinema-cap-5-3 {
+  0%, 56% { opacity: 0; transform: translate3d(0, 32px, 0); }
+  60%, 76% { opacity: 1; transform: translate3d(0, 0, 0); }
+  80%, 100% { opacity: 0; transform: translate3d(0, -24px, 0); }
+}
+@keyframes cinema-cap-5-4 {
+  0%, 76% { opacity: 0; transform: translate3d(0, 32px, 0); }
+  80%, 100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes cinema-dot-5-0 {
+  0%, 16% { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+  20%, 100% { background: rgba(255, 255, 255, 0.15); box-shadow: none; }
+}
+@keyframes cinema-dot-5-1 {
+  0%, 16% { background: rgba(255, 255, 255, 0.15); }
+  20%, 36% { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+  40%, 100% { background: rgba(255, 255, 255, 0.15); box-shadow: none; }
+}
+@keyframes cinema-dot-5-2 {
+  0%, 36% { background: rgba(255, 255, 255, 0.15); }
+  40%, 56% { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+  60%, 100% { background: rgba(255, 255, 255, 0.15); box-shadow: none; }
+}
+@keyframes cinema-dot-5-3 {
+  0%, 56% { background: rgba(255, 255, 255, 0.15); }
+  60%, 76% { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+  80%, 100% { background: rgba(255, 255, 255, 0.15); box-shadow: none; }
+}
+@keyframes cinema-dot-5-4 {
+  0%, 76% { background: rgba(255, 255, 255, 0.15); }
+  80%, 100% { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
 }
 
 /* 4-panel scroll keyframes */
@@ -2343,6 +2665,24 @@ label.card:focus-within {
   .cinema--panels-3 .cinema__dot--0 { animation: cinema-dot-3-0 linear both; animation-timeline: scroll(nearest); }
   .cinema--panels-3 .cinema__dot--1 { animation: cinema-dot-3-1 linear both; animation-timeline: scroll(nearest); }
   .cinema--panels-3 .cinema__dot--2 { animation: cinema-dot-3-2 linear both; animation-timeline: scroll(nearest); }
+
+  .cinema--panels-5 .cinema__layer--0 { animation: cinema-layer-5-0 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__layer--1 { animation: cinema-layer-5-1 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__layer--2 { animation: cinema-layer-5-2 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__layer--3 { animation: cinema-layer-5-3 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__layer--4 { animation: cinema-layer-5-4 linear both; animation-timeline: scroll(nearest); }
+
+  .cinema--panels-5 .cinema__caption--0 { animation: cinema-cap-5-0 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__caption--1 { animation: cinema-cap-5-1 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__caption--2 { animation: cinema-cap-5-2 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__caption--3 { animation: cinema-cap-5-3 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__caption--4 { animation: cinema-cap-5-4 linear both; animation-timeline: scroll(nearest); }
+
+  .cinema--panels-5 .cinema__dot--0 { animation: cinema-dot-5-0 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__dot--1 { animation: cinema-dot-5-1 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__dot--2 { animation: cinema-dot-5-2 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__dot--3 { animation: cinema-dot-5-3 linear both; animation-timeline: scroll(nearest); }
+  .cinema--panels-5 .cinema__dot--4 { animation: cinema-dot-5-4 linear both; animation-timeline: scroll(nearest); }
 }
 
 .cinema__fallback {
@@ -2441,6 +2781,86 @@ label.card:focus-within {
   inset: 0;
   background: radial-gradient(ellipse 45% 35% at 50% 50%, rgba(34, 211, 238, 0.12), transparent 70%);
   pointer-events: none;
+}
+
+.interlude__outpost-frame {
+  position: absolute;
+  inset: clamp(0.75rem, 2vw, 1.5rem);
+  z-index: 2;
+  border: 1px solid rgba(34, 211, 238, 0.1);
+  pointer-events: none;
+}
+
+.interlude__outpost-frame::before,
+.interlude__outpost-frame::after {
+  content: '';
+  position: absolute;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-color: rgba(34, 211, 238, 0.35);
+  border-style: solid;
+}
+
+.interlude__outpost-frame::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.interlude__outpost-frame::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.interlude__outpost-hud {
+  position: absolute;
+  top: clamp(1rem, 2.5vw, 1.75rem);
+  left: clamp(1rem, 2.5vw, 1.75rem);
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: 0.4375rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(34, 211, 238, 0.45);
+  pointer-events: none;
+}
+
+.interlude__outpost-hud::before {
+  content: 'SECURE OUTPOST · WV SECTOR';
+}
+
+.interlude__landmark-badge {
+  position: absolute;
+  right: clamp(1rem, 2.5vw, 1.75rem);
+  bottom: clamp(1rem, 2.5vw, 1.75rem);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(34, 211, 238, 0.16);
+  border-radius: var(--radius-sm);
+  background: rgba(2, 2, 3, 0.68);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+.interlude__landmark-name {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.interlude__landmark-outpost {
+  font-size: 0.4375rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
 }
 
 .interlude__content {
@@ -2584,6 +3004,37 @@ label.card:focus-within {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-dim);
+}
+
+.h-showcase__landmark {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(34, 211, 238, 0.16);
+  border-radius: var(--radius-sm);
+  background: rgba(2, 2, 3, 0.72);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+.h-showcase__landmark-label {
+  font-family: var(--font-mono);
+  font-size: 0.4375rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+}
+
+.h-showcase__landmark-name {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-cream);
 }
 
 .h-showcase__body {

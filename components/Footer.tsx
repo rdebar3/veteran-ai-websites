@@ -1,5 +1,6 @@
 import FacebookIcon from '@/components/FacebookIcon';
 import { FACEBOOK_URL } from '@/lib/data';
+import { landmarkCredits } from '@/lib/landmarks';
 
 export default function Footer() {
   return (
@@ -34,6 +35,7 @@ export default function Footer() {
       <p className="footer__motto">
         WV Proud · America 250 · Veteran Built
       </p>
+      <p className="footer__credits">{landmarkCredits}</p>
     </footer>
   );
 }

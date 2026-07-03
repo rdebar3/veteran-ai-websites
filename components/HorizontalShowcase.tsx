@@ -28,6 +28,10 @@ export default function HorizontalShowcase({ demos }: HorizontalShowcaseProps) {
                 <span className="h-showcase__tier">{demo.tier}</span>
                 <span className="h-showcase__pages">{demo.pages}</span>
               </div>
+              <div className="h-showcase__landmark">
+                <span className="h-showcase__landmark-label">WV Overlook</span>
+                <span className="h-showcase__landmark-name">{demo.landmark}</span>
+              </div>
             </div>
             <div className="h-showcase__body">
               <h3 className="h-showcase__title">{demo.title}</h3>
