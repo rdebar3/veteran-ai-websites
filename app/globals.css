@@ -2023,6 +2023,169 @@ label.card:focus-within {
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Marquee band ──────────────────────────────────────────────── */
+/* ── Compact trust strip (replaces scrolling marquee) ──────────── */
+.trust-strip {
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: rgba(2, 2, 3, 0.85);
+  padding: 0.75rem 1.5rem;
+}
+
+.trust-strip__inner {
+  max-width: 76rem;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.trust-strip__dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--cyan);
+  opacity: 0.5;
+}
+
+/* ── Why choose us (content-rich story section) ───────────────── */
+.why-choose {
+  position: relative;
+  z-index: 2;
+  padding: 5rem 1.5rem 4rem;
+}
+
+.why-choose__inner {
+  max-width: 76rem;
+  margin: 0 auto;
+}
+
+.why-choose__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  margin-bottom: 0.75rem;
+}
+
+.why-choose__title {
+  font-size: clamp(2.25rem, 5.5vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  max-width: 28rem;
+}
+
+.why-choose__lead {
+  margin-top: 1.25rem;
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  line-height: 1.75;
+  color: var(--text-muted);
+  max-width: 48rem;
+}
+
+.why-choose__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+@media (min-width: 768px) {
+  .why-choose__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.why-choose__card {
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.why-choose__card-visual {
+  position: relative;
+  height: 11rem;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .why-choose__card-visual {
+    height: 12.5rem;
+  }
+}
+
+.why-choose__card-img {
+  object-fit: cover;
+  object-position: center;
+  filter: contrast(1.1) saturate(1.08) brightness(0.78);
+}
+
+.why-choose__card-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(2, 2, 3, 0.88) 100%);
+}
+
+.why-choose__card-icon {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  background: rgba(2, 2, 3, 0.75);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  color: var(--cyan);
+}
+
+.why-choose__card-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.why-choose__card-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-cream);
+}
+
+.why-choose__card-text {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+.why-choose__card-caption {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--text-dim);
+}
+
 .marquee {
   position: relative;
   z-index: 2;
@@ -2689,6 +2852,10 @@ label.card:focus-within {
   display: none;
 }
 
+.cinema--driven .cinema__fallback {
+  display: none !important;
+}
+
 @supports not (animation-timeline: scroll()) {
   .cinema__track,
   .cinema__stage,
@@ -2898,11 +3065,51 @@ label.card:focus-within {
 }
 
 .interlude__subtitle {
+  margin-top: 1rem;
+  font-size: clamp(1.0625rem, 2vw, 1.1875rem);
+  line-height: 1.55;
+  color: var(--text-cream);
+  font-weight: 500;
+  max-width: 36rem;
+}
+
+.interlude__body {
   margin-top: 1.25rem;
-  font-size: clamp(1rem, 2vw, 1.125rem);
-  line-height: 1.7;
+  font-size: clamp(0.9375rem, 1.8vw, 1.0625rem);
+  line-height: 1.75;
   color: var(--text-muted);
-  max-width: 32rem;
+  max-width: 40rem;
+}
+
+.interlude__caption {
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  font-style: italic;
+  color: var(--text-dim);
+  max-width: 38rem;
+}
+
+.interlude--rich {
+  min-height: auto;
+  padding: 5rem 1.5rem;
+}
+
+.interlude--rich .interlude__veil {
+  background:
+    linear-gradient(90deg, rgba(2, 2, 3, 0.94) 0%, rgba(2, 2, 3, 0.72) 42%, rgba(2, 2, 3, 0.82) 100%),
+    linear-gradient(180deg, rgba(2, 2, 3, 0.5) 0%, transparent 35%, rgba(2, 2, 3, 0.92) 100%);
+}
+
+.interlude--rich.interlude--center .interlude__content {
+  text-align: center;
+}
+
+.interlude--rich.interlude--center .interlude__body,
+.interlude--rich.interlude--center .interlude__caption,
+.interlude--rich.interlude--center .interlude__subtitle {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .interlude--center .interlude__subtitle {

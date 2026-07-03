@@ -3,10 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Check,
-  Award,
-  MapPin,
-  Clock,
-  ClipboardList,
   CheckCircle,
 } from 'lucide-react';
 
@@ -15,12 +11,13 @@ import BaseRoom from '@/components/BaseRoom';
 import Reveal from '@/components/Reveal';
 import PricingCard from '@/components/PricingCard';
 import FAQAccordion, { type FAQ } from '@/components/FAQAccordion';
-import CinematicScroll from '@/components/CinematicScroll';
+import WhyChooseSection from '@/components/WhyChooseSection';
 import VisualInterlude from '@/components/VisualInterlude';
-import MarqueeBand from '@/components/MarqueeBand';
+import TrustStrip from '@/components/TrustStrip';
 import HorizontalShowcase from '@/components/HorizontalShowcase';
 import ScrollLift from '@/components/ScrollLift';
-import { storyChapters, processChapters, showcaseDemos } from '@/lib/cinematic';
+import { showcaseDemos } from '@/lib/cinematic';
+import { promoInterlude, localBusinessInterlude } from '@/lib/content-sections';
 import { baseRooms } from '@/lib/base-rooms';
 import {
   pricingTiers,
@@ -224,37 +221,23 @@ export default function Home() {
     <main className="relative flex-1">
       <Hero onClaimOffer={() => setSelectedBuilderPackage('Starter')} />
 
-      <MarqueeBand />
+      <TrustStrip />
 
-      <CinematicScroll id="story" chapters={storyChapters} />
+      <WhyChooseSection />
 
       <VisualInterlude
         image="/mountains/foothills.jpg"
         imageAlt="Rolling foothills of the Appalachian Mountains in West Virginia"
         landmark="Appalachian Foothills"
-        outpost="Promo Transit Corridor"
-        eyebrow="Limited Time · Transit Corridor"
-        title="$397 Starter Website"
-        subtitle="Professional one-page site — delivered in one day. Veteran-owned. Full ownership. Ends July 4th."
+        outpost="Starter Package Sector"
+        eyebrow={promoInterlude.eyebrow}
+        title={promoInterlude.title}
+        subtitle={promoInterlude.subtitle}
+        body={promoInterlude.body}
+        imageCaption={promoInterlude.imageCaption}
         ctaHref="#build"
         ctaLabel="Claim My $397 Website"
       />
-
-      <div className="trust">
-        <div className="trust__inner">
-          {[
-            { icon: Award, text: 'U.S. Veteran Owned & Operated' },
-            { icon: MapPin, text: 'Based in West Virginia' },
-            { icon: Clock, text: 'Delivered in 1 Day — Guaranteed' },
-            { icon: ClipboardList, text: 'Clear Scopes & Pricing' },
-          ].map(({ icon: Icon, text }) => (
-            <div key={text} className="trust__item">
-              <Icon className="trust__icon h-4 w-4" />
-              <span>{text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
 
       <BaseRoom
         room={baseRooms.armoury}
@@ -264,21 +247,6 @@ export default function Home() {
         subtitle="Pick your package, add upgrades, and submit. Fast delivery, clear pricing, full ownership."
         wide
       >
-          <Reveal variant="scale">
-            <div className="grid-stats">
-              {[
-                { label: 'One-Day Delivery', icon: Clock },
-                { label: 'Mobile-First', icon: Check },
-                { label: '100% Ownership', icon: Award },
-                { label: 'Veteran Built', icon: MapPin },
-              ].map(({ label, icon: Icon }, i) => (
-                <ScrollLift key={label} delay={i * 0.06} className="stat-pill">
-                  <Icon className="stat-pill__icon h-4 w-4" />
-                  {label}
-                </ScrollLift>
-              ))}
-            </div>
-          </Reveal>
           {!isBuilderSubmitted ? (
             <form
               action="https://formspree.io/f/mwvjoklj"
@@ -519,8 +487,6 @@ export default function Home() {
           </Reveal>
       </BaseRoom>
 
-      <CinematicScroll id="process-cinema" chapters={processChapters} />
-
       <BaseRoom
         room={baseRooms['mission-planning']}
         index="03"
@@ -569,10 +535,12 @@ export default function Home() {
         image="/natural-beauty-in-west-virginia.webp"
         imageAlt="Natural beauty across the mountains of West Virginia"
         landmark="West Virginia Highlands"
-        outpost="Patriot Observation Wing"
-        eyebrow="West Virginia Proud · Patriot Wing"
-        title="Built for Local Business"
-        subtitle="Real demos. Real results. Websites you will be proud to show customers — and post on Facebook."
+        outpost="Local Business Sector"
+        eyebrow={localBusinessInterlude.eyebrow}
+        title={localBusinessInterlude.title}
+        subtitle={localBusinessInterlude.subtitle}
+        body={localBusinessInterlude.body}
+        imageCaption={localBusinessInterlude.imageCaption}
         ctaHref="#build"
         ctaLabel="Start Your Order"
         align="left"

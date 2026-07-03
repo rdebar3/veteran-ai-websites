@@ -13,6 +13,8 @@ interface VisualInterludeProps {
   eyebrow?: string;
   title: string;
   subtitle?: string;
+  body?: string;
+  imageCaption?: string;
   ctaHref?: string;
   ctaLabel?: string;
   align?: 'left' | 'center';
@@ -26,6 +28,8 @@ export default function VisualInterlude({
   eyebrow,
   title,
   subtitle,
+  body,
+  imageCaption,
   ctaHref,
   ctaLabel,
   align = 'center',
@@ -43,6 +47,7 @@ export default function VisualInterlude({
     const eyebrowEl = el.querySelector<HTMLElement>('.interlude__eyebrow');
     const titleEl = el.querySelector<HTMLElement>('.interlude__title');
     const subtitleEl = el.querySelector<HTMLElement>('.interlude__subtitle');
+    const bodyEl = el.querySelector<HTMLElement>('.interlude__body');
     const ctaEl = el.querySelector<HTMLElement>('.interlude__cta');
 
     let raf = 0;
@@ -52,36 +57,28 @@ export default function VisualInterlude({
       el.style.setProperty('--interlude-p', String(p));
 
       if (imgWrap) {
-        const y = (0.5 - p) * 10;
-        const scale = 1.08 + p * 0.06;
+        const y = (0.5 - p) * 8;
+        const scale = 1.06 + p * 0.04;
         imgWrap.style.transform = `translate3d(0, ${y}%, 0) scale(${scale})`;
       }
 
       if (content) {
-        content.style.opacity = String(0.35 + p * 0.65);
-        content.style.transform = `translate3d(0, ${(1 - p) * 36}px, 0)`;
+        content.style.opacity = String(0.4 + p * 0.6);
+        content.style.transform = `translate3d(0, ${(1 - p) * 28}px, 0)`;
       }
 
-      if (eyebrowEl) {
-        const ep = Math.min(1, p * 1.4);
-        eyebrowEl.style.opacity = String(ep);
-        eyebrowEl.style.transform = `translate3d(0, ${(1 - ep) * 16}px, 0)`;
-      }
-      if (titleEl) {
-        const tp = Math.min(1, Math.max(0, (p - 0.08) * 1.3));
-        titleEl.style.opacity = String(tp);
-        titleEl.style.transform = `translate3d(0, ${(1 - tp) * 40}px, 0) scale(${0.97 + tp * 0.03})`;
-      }
-      if (subtitleEl) {
-        const sp = Math.min(1, Math.max(0, (p - 0.18) * 1.2));
-        subtitleEl.style.opacity = String(sp);
-        subtitleEl.style.transform = `translate3d(0, ${(1 - sp) * 28}px, 0)`;
-      }
-      if (ctaEl) {
-        const cp = Math.min(1, Math.max(0, (p - 0.32) * 1.1));
-        ctaEl.style.opacity = String(cp);
-        ctaEl.style.transform = `translate3d(0, ${(1 - cp) * 20}px, 0)`;
-      }
+      const reveal = (node: HTMLElement | null, delay: number, y = 24) => {
+        if (!node) return;
+        const ep = Math.min(1, Math.max(0, (p - delay) * 1.25));
+        node.style.opacity = String(ep);
+        node.style.transform = `translate3d(0, ${(1 - ep) * y}px, 0)`;
+      };
+
+      reveal(eyebrowEl, 0, 16);
+      reveal(titleEl, 0.06, 32);
+      reveal(subtitleEl, 0.12, 24);
+      reveal(bodyEl, 0.2, 20);
+      reveal(ctaEl, 0.34, 16);
 
       raf = requestAnimationFrame(tick);
     };
@@ -91,13 +88,12 @@ export default function VisualInterlude({
   }, []);
 
   return (
-    <section ref={ref} className={`interlude interlude--${align} interlude--driven interlude--outpost`}>
+    <section ref={ref} className={`interlude interlude--${align} interlude--driven interlude--outpost interlude--rich`}>
       <div className="interlude__visual" aria-hidden="true">
         <div className="interlude__img-wrap">
           <Image src={image} alt="" fill sizes="100vw" className="interlude__img" quality={90} />
         </div>
         <div className="interlude__outpost-frame" />
-        <div className="interlude__outpost-hud" />
         <div className="interlude__circuit">
           <CircuitOverlay />
         </div>
@@ -114,6 +110,8 @@ export default function VisualInterlude({
         {eyebrow && <span className="interlude__eyebrow">{eyebrow}</span>}
         <h2 className="interlude__title">{title}</h2>
         {subtitle && <p className="interlude__subtitle">{subtitle}</p>}
+        {body && <p className="interlude__body">{body}</p>}
+        {imageCaption && <p className="interlude__caption">{imageCaption}</p>}
         {ctaHref && ctaLabel && (
           <a href={ctaHref} className="btn btn--primary btn--lg btn--glow interlude__cta">
             {ctaLabel}
