@@ -17,7 +17,7 @@ export default function ServicesPage() {
       <section className="hv-hero hv-hero--page">
         <div className="hv-hero__bg">
           <Image
-            src="/demos/complete-hvac/hero-tech.jpg"
+            src="/demos/complete-hvac/hero-fall.jpg"
             alt=""
             fill
             sizes="100vw"
@@ -25,19 +25,17 @@ export default function ServicesPage() {
             className="hv-hero__bg-img"
           />
           <div className="hv-hero__veil" />
-          <div className="hv-hero__grid" />
-          <div className="hv-hero__glow" />
         </div>
 
         <div className="hv-hero__content">
           <p className="hv-section__eyebrow">Expertise You Can Rely On</p>
           <h1 className="hv-hero__title" style={{ fontSize: 'clamp(2.25rem, 5vw, 3.5rem)' }}>
             Professional
-            <span className="hv-hero__title-accent">Smart HVAC Services</span>
+            <span className="hv-hero__title-accent">HVAC Services</span>
           </h1>
           <p className="hv-hero__lead">
-            From high-efficiency installations to ongoing care, we deliver climate solutions
-            engineered for Ridgeview homes and our Appalachian weather.
+            From high-efficiency installations to seasonal tune-ups, we deliver solutions
+            designed for Ridgeview homes and our mountain climate.
           </p>
         </div>
       </section>
@@ -63,7 +61,7 @@ export default function ServicesPage() {
                 <div>
                   <Image
                     src={service.image}
-                    alt={`${service.title} installation in Ridgeview, West Virginia`}
+                    alt={`${service.title} in Ridgeview, West Virginia`}
                     width={900}
                     height={500}
                     className="hv-service-block__img"
@@ -71,7 +69,7 @@ export default function ServicesPage() {
                   <div className="hv-feature-list">
                     {service.features.map((feature) => (
                       <span key={feature}>
-                        <CheckCircle className="h-4 w-4 mt-0.5 shrink-0 text-[var(--hv-cyan)]" />
+                        <CheckCircle className="h-4 w-4 mt-0.5 shrink-0 text-[var(--hv-orange)]" />
                         {feature}
                       </span>
                     ))}

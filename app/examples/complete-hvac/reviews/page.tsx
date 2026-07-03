@@ -18,7 +18,7 @@ export default function ReviewsPage() {
       <section className="hv-hero hv-hero--page">
         <div className="hv-hero__bg">
           <Image
-            src="/demos/complete-hvac/project-heat-pump.jpg"
+            src="/demos/complete-hvac/project-fall.jpg"
             alt=""
             fill
             sizes="100vw"
@@ -26,8 +26,6 @@ export default function ReviewsPage() {
             className="hv-hero__bg-img"
           />
           <div className="hv-hero__veil" />
-          <div className="hv-hero__grid" />
-          <div className="hv-hero__glow" />
         </div>
 
         <div className="hv-hero__content">
@@ -69,8 +67,8 @@ export default function ReviewsPage() {
       </section>
 
       <section
-        className="hv-section hv-section--vista"
-        style={{ '--hv-vista': "url('/mountains/summit.jpg')" } as React.CSSProperties}
+        className="hv-section hv-section--vista hv-section--warm"
+        style={{ '--hv-vista': "url('/mountains/misty-ridges.jpg')" } as React.CSSProperties}
       >
         <div className="hv-section__inner hv-reveal">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
@@ -100,7 +98,7 @@ export default function ReviewsPage() {
                     {p.title}
                   </h3>
                   <p className="text-sm text-[var(--hv-muted)] mb-2">{p.location}</p>
-                  <p className="text-sm leading-snug text-[var(--hv-cyan)]">{p.result}</p>
+                  <p className="text-sm leading-snug text-[var(--hv-rust)]">{p.result}</p>
                 </div>
               </article>
             ))}

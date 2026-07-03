@@ -18,7 +18,7 @@ export default function HvacHome() {
 
   useEffect(() => {
     document.title =
-      'Appalachian HVAC Solutions | Smart Climate for Ridgeview, WV';
+      'Appalachian HVAC Solutions | Warm Comfort for Ridgeview, WV';
   }, []);
 
   const handleIntroComplete = useCallback(() => setIntroDone(true), []);
@@ -30,35 +30,37 @@ export default function HvacHome() {
       <section className="hv-hero">
         <div className="hv-hero__bg">
           <Image
-            src="/demos/complete-hvac/hero-tech.jpg"
+            src="/demos/complete-hvac/entrance-fall-mountains.jpg"
             alt=""
             fill
             priority
             sizes="100vw"
             quality={90}
-            className="hv-hero__bg-img"
+            className="hv-hero__bg-img hv-hero__bg-img--mountains"
+          />
+          <div
+            className="hv-hero__overlay-room"
+            style={{ '--hv-room': "url('/demos/complete-hvac/entrance-fireplace.jpg')" } as React.CSSProperties}
           />
           <div className="hv-hero__veil" />
-          <div className="hv-hero__grid" />
-          <div className="hv-hero__glow" />
-          <div className="hv-hero__neural" />
+          <div className="hv-hero__fire-glow" aria-hidden />
         </div>
 
         <div className="hv-hero__content">
           <div className="hv-hero__badge">
-            <span className="hv-hero__badge-star">★</span>
-            Ridgeview, West Virginia · Veteran Owned · Smart Home HVAC
+            <span className="hv-hero__badge-leaf" aria-hidden>🍂</span>
+            Ridgeview, West Virginia · Veteran Owned
           </div>
 
           <h1 className="hv-hero__title">
-            Intelligent Comfort
+            Reliable Comfort
             <span className="hv-hero__title-accent">for Every Season</span>
           </h1>
 
           <p className="hv-hero__lead">
-            Appalachian HVAC Solutions delivers high-efficiency heating, cooling, and
-            smart climate control for Ridgeview homes — with AI-assisted diagnostics,
-            glowing precision, and mountain-tested reliability.
+            Appalachian HVAC Solutions keeps Ridgeview homes warm through crisp fall
+            nights and comfortable all year — with honest service, high-efficiency systems,
+            and the cozy reliability your family deserves.
           </p>
 
           <div className="hv-hero__cta-row">
@@ -72,13 +74,13 @@ export default function HvacHome() {
 
           <div className="hv-hero__trust">
             <span>
-              <CheckCircle className="h-3.5 w-3.5 text-[var(--hv-cyan)]" /> Same-day service available
+              <CheckCircle className="h-3.5 w-3.5 text-amber-300" /> Same-day service available
             </span>
             <span>
-              <CheckCircle className="h-3.5 w-3.5 text-[var(--hv-cyan)]" /> Smart thermostat integration
+              <CheckCircle className="h-3.5 w-3.5 text-amber-300" /> Licensed &amp; insured
             </span>
             <span>
-              <CheckCircle className="h-3.5 w-3.5 text-[var(--hv-cyan)]" /> 24/7 emergency response
+              <CheckCircle className="h-3.5 w-3.5 text-amber-300" /> 24/7 emergency response
             </span>
           </div>
         </div>
@@ -87,13 +89,13 @@ export default function HvacHome() {
       <div className="hv-trust-strip">
         <div className="hv-trust-strip__inner">
           <span>
-            <Shield className="inline h-3.5 w-3.5 text-[var(--hv-cyan)]" /> Licensed &amp; Insured · WV #HV-48291
+            <Shield className="inline h-3.5 w-3.5 text-[var(--hv-orange)]" /> Licensed &amp; Insured · WV #HV-48291
           </span>
           <span>
-            <Award className="inline h-3.5 w-3.5 text-[var(--hv-cyan)]" /> Veteran Owned &amp; Operated
+            <Award className="inline h-3.5 w-3.5 text-[var(--hv-orange)]" /> Veteran Owned &amp; Operated
           </span>
           <span>
-            <ThermometerSun className="inline h-3.5 w-3.5 text-[var(--hv-cyan)]" /> High-Efficiency Systems
+            <ThermometerSun className="inline h-3.5 w-3.5 text-[var(--hv-orange)]" /> High-Efficiency Systems
           </span>
           <span>24/7 Emergency Response</span>
         </div>
@@ -101,14 +103,14 @@ export default function HvacHome() {
 
       <section
         className="hv-section hv-section--vista"
-        style={{ '--hv-vista': "url('/mountains/misty-ridges.jpg')" } as React.CSSProperties}
+        style={{ '--hv-vista': "url('/mountains/golden-overlook.jpg')" } as React.CSSProperties}
       >
         <div className="hv-section__inner hv-reveal">
-          <p className="hv-section__eyebrow">Smart Climate Network</p>
+          <p className="hv-section__eyebrow">What We Deliver</p>
           <h2 className="hv-section__title">Comfort Solutions for Ridgeview Homes</h2>
           <p className="hv-section__lead">
-            From AI-assisted heat pumps to whole-home air purification, we engineer
-            systems that deliver consistent temperatures, lower energy bills, and cleaner air.
+            From furnace tune-ups before the first frost to whole-home air quality, we help
+            families stay cozy through West Virginia&apos;s beautiful — and demanding — seasons.
           </p>
 
           <div className="hv-grid-3">
@@ -131,10 +133,7 @@ export default function HvacHome() {
         </div>
       </section>
 
-      <section
-        className="hv-section hv-section--vista"
-        style={{ '--hv-vista': "url('/mountains/golden-overlook.jpg')" } as React.CSSProperties}
-      >
+      <section className="hv-section hv-section--warm">
         <div className="hv-section__inner hv-reveal">
           <div className="hv-grid-2" style={{ alignItems: 'center', gap: '2.5rem' }}>
             <div>
@@ -153,7 +152,7 @@ export default function HvacHome() {
                 ].map((text) => (
                   <div key={text} className="hv-card" style={{ padding: '1rem 1.25rem' }}>
                     <span className="flex gap-2 text-sm text-[var(--hv-muted)]">
-                      <CheckCircle className="h-4 w-4 mt-0.5 shrink-0 text-[var(--hv-cyan)]" />
+                      <CheckCircle className="h-4 w-4 mt-0.5 shrink-0 text-[var(--hv-orange)]" />
                       {text}
                     </span>
                   </div>
@@ -163,8 +162,8 @@ export default function HvacHome() {
 
             <div className="hv-card hv-reveal" style={{ padding: 0, overflow: 'hidden' }}>
               <Image
-                src="/demos/complete-hvac/entrance-hvac.jpg"
-                alt="Glowing smart HVAC system with climate monitoring"
+                src="/demos/complete-hvac/entrance-fireplace.jpg"
+                alt="Cozy living room with warm fireplace and comfortable HVAC"
                 width={800}
                 height={520}
                 className="w-full h-auto object-cover"

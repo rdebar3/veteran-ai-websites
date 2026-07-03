@@ -4,7 +4,7 @@ import {
   Wind,
   Calendar,
   Shield,
-  Cpu,
+  Home,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -31,35 +31,35 @@ export interface HvacService {
 export const services: HvacService[] = [
   {
     icon: Flame,
-    title: 'Smart Heating Systems',
-    desc: 'High-efficiency furnaces, heat pumps, and boilers with AI-assisted zoning sized for Appalachian winters.',
-    image: '/demos/complete-hvac/service-heating.jpg',
+    title: 'Heating Systems',
+    desc: 'High-efficiency furnaces, heat pumps, and boilers sized perfectly for cozy Appalachian winters.',
+    image: '/demos/complete-hvac/service-heating-fall.jpg',
     features: [
-      'Heat pump & furnace installation',
-      'Ducted and ductless zoning',
-      'Smart thermostat integration',
-      'Radiant & boiler systems',
+      'Furnace replacement & installation',
+      'Heat pump systems (ducted & ductless)',
+      'Boilers and radiant heating',
+      'Smart thermostats & zoning',
       'Annual safety inspections',
     ],
   },
   {
     icon: Snowflake,
-    title: 'Cooling & Climate Control',
-    desc: 'Central AC and mini-splits with humidity-aware controls built for West Virginia summers.',
-    image: '/demos/complete-hvac/service-cooling.jpg',
+    title: 'Air Conditioning & Cooling',
+    desc: 'Central air and ductless mini-splits that keep your home cool and comfortable through West Virginia summers.',
+    image: '/demos/complete-hvac/entrance-fall-home.jpg',
     features: [
       'High-SEER central AC units',
       'Ductless mini-split systems',
       'Whole-home dehumidification',
-      'Predictive cooling schedules',
+      'Programmable controls',
       'New construction & retrofits',
     ],
   },
   {
     icon: Wind,
     title: 'Indoor Air Quality',
-    desc: 'Whole-home purification, humidification, and ventilation monitored through smart-home dashboards.',
-    image: '/demos/complete-hvac/service-air-quality.jpg',
+    desc: 'Whole-home air purifiers, humidifiers, and ventilation for cleaner, healthier air in every season.',
+    image: '/demos/complete-hvac/service-air-fall.jpg',
     features: [
       'HEPA & UV air purification',
       'Whole-home humidifiers',
@@ -70,46 +70,46 @@ export const services: HvacService[] = [
   },
   {
     icon: Calendar,
-    title: 'Maintenance & Tune-Ups',
-    desc: 'Preventive care that keeps equipment efficient, with priority service for plan members.',
-    image: '/demos/complete-hvac/entrance-hvac.jpg',
+    title: 'Maintenance & Tune-Up Plans',
+    desc: 'Preventive maintenance that keeps your system running efficiently and catches small issues early.',
+    image: '/demos/complete-hvac/entrance-fireplace.jpg',
     features: [
       'Twice-yearly precision tune-ups',
       'Filter replacement program',
-      'Priority scheduling',
+      'Priority scheduling for members',
       '10% discount on repairs',
       'Extended equipment life',
     ],
   },
   {
-    icon: Cpu,
-    title: 'Smart Home Integration',
-    desc: 'Connect HVAC, air quality, and energy monitoring into one seamless climate command center.',
-    image: '/demos/complete-hvac/hero-tech.jpg',
+    icon: Home,
+    title: 'Whole-Home Comfort',
+    desc: 'Balanced heating, cooling, and humidity control designed for the way Ridgeview families live.',
+    image: '/demos/complete-hvac/hero-fall.jpg',
     features: [
-      'Whole-home climate dashboards',
-      'Remote temperature control',
-      'Energy usage analytics',
-      'Leak & fault alerts',
-      'Voice assistant compatibility',
+      'Whole-home comfort assessments',
+      'Zoned temperature control',
+      'Humidity balancing',
+      'Ductwork optimization',
+      'Energy efficiency upgrades',
     ],
   },
   {
     icon: Shield,
-    title: '24/7 Emergency Service',
-    desc: 'Fast response for no-heat, no-cool, and urgent system failures — trucks stocked for same-day fixes.',
-    image: '/demos/complete-hvac/project-heat-pump.jpg',
+    title: '24/7 Emergency HVAC Service',
+    desc: 'Fast, reliable response for no-heat, no-cool, and urgent situations when your family needs warmth most.',
+    image: '/demos/complete-hvac/project-fall.jpg',
     features: [
       '24/7 availability year-round',
       'No-heat & no-cool emergencies',
-      'Refrigerant & compressor issues',
+      'Refrigerant leaks & compressor issues',
       'Thermostat & control failures',
       'Priority for maintenance members',
     ],
   },
 ];
 
-export const homeServices = services.slice(0, 6).map(({ icon, title, desc }) => ({
+export const homeServices = services.map(({ icon, title, desc }) => ({
   icon,
   title,
   desc,
@@ -148,28 +148,28 @@ export const testimonials = [
 
 export const projects = [
   {
-    image: '/demos/complete-hvac/project-heat-pump.jpg',
+    image: '/demos/complete-hvac/project-fall.jpg',
     title: 'High-Efficiency Heat Pump Installation',
     location: 'Ridgeview Residence',
     result:
       'Replaced aging oil furnace. Family reports 32% lower heating costs and consistent temperatures throughout the home.',
   },
   {
-    image: '/demos/complete-hvac/service-cooling.jpg',
+    image: '/demos/complete-hvac/service-air-fall.jpg',
     title: 'Central AC & Air Purifier Upgrade',
     location: 'Oakdale Home',
     result:
       'New 16-SEER system with whole-home purification. Noticeably cleaner air and reduced humidity during summer months.',
   },
   {
-    image: '/demos/complete-hvac/hero-tech.jpg',
+    image: '/demos/complete-hvac/entrance-fall-home.jpg',
     title: 'Duct Sealing & Mini-Split Installation',
     location: 'Pine Hollow Addition',
     result:
       'Sealed existing ductwork and installed ductless mini-split for new addition. Balanced comfort and lower energy use.',
   },
   {
-    image: '/demos/complete-hvac/service-air-quality.jpg',
+    image: '/demos/complete-hvac/service-heating-fall.jpg',
     title: 'Furnace & Humidifier Install',
     location: 'Maple Fork Farmhouse',
     result:

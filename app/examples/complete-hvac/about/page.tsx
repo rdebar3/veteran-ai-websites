@@ -17,7 +17,7 @@ export default function AboutPage() {
       <section className="hv-hero hv-hero--page">
         <div className="hv-hero__bg">
           <Image
-            src="/demos/complete-hvac/entrance-home.jpg"
+            src="/demos/complete-hvac/entrance-fall-home.jpg"
             alt=""
             fill
             sizes="100vw"
@@ -25,8 +25,6 @@ export default function AboutPage() {
             className="hv-hero__bg-img"
           />
           <div className="hv-hero__veil" />
-          <div className="hv-hero__grid" />
-          <div className="hv-hero__glow" />
         </div>
 
         <div className="hv-hero__content">
@@ -61,15 +59,15 @@ export default function AboutPage() {
                   communities with the same values we started with.
                 </p>
               </div>
-              <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--hv-cyan)]">
+              <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--hv-orange)]">
                 <Award className="h-5 w-5" /> U.S. Army Veteran Owned &amp; Operated
               </div>
             </div>
 
             <div className="hv-card" style={{ padding: 0, overflow: 'hidden' }}>
               <Image
-                src="/demos/complete-hvac/about-team.jpg"
-                alt="Modern smart home with Appalachian mountain backdrop"
+                src="/demos/complete-hvac/service-heating-fall.jpg"
+                alt="Professional HVAC service in a warm Ridgeview home"
                 width={800}
                 height={520}
                 className="w-full h-auto object-cover"
@@ -80,8 +78,8 @@ export default function AboutPage() {
       </section>
 
       <section
-        className="hv-section hv-section--vista"
-        style={{ '--hv-vista': "url('/landmarks/appalachian-ridges.jpg')" } as React.CSSProperties}
+        className="hv-section hv-section--vista hv-section--warm"
+        style={{ '--hv-vista': "url('/mountains/foothills.jpg')" } as React.CSSProperties}
       >
         <div className="hv-section__inner hv-reveal">
           <div className="text-center mb-10">
@@ -122,7 +120,7 @@ export default function AboutPage() {
                   'Many customers have been with us for over a decade',
                 ].map((text) => (
                   <div key={text} className="flex gap-2">
-                    <CheckCircle className="h-4 w-4 mt-0.5 shrink-0 text-[var(--hv-cyan)]" />
+                    <CheckCircle className="h-4 w-4 mt-0.5 shrink-0 text-[var(--hv-orange)]" />
                     {text}
                   </div>
                 ))}

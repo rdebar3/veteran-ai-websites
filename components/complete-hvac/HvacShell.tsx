@@ -72,7 +72,7 @@ export default function HvacShell({ children, introActive = false }: HvacShellPr
             </span>
             <span>
               <div className="hv-nav__logo-text">Appalachian HVAC</div>
-              <div className="hv-nav__logo-sub">Smart Climate Solutions</div>
+              <div className="hv-nav__logo-sub">Comfort for Every Season</div>
             </span>
           </Link>
 
@@ -135,7 +135,7 @@ export default function HvacShell({ children, introActive = false }: HvacShellPr
               </span>
               Appalachian HVAC Solutions
             </div>
-            <p className="hv-footer__tag">Smart climate for Ridgeview homes.</p>
+            <p className="hv-footer__tag">Warm, reliable comfort for Ridgeview homes.</p>
           </div>
 
           <div>
@@ -151,7 +151,7 @@ export default function HvacShell({ children, introActive = false }: HvacShellPr
             <div className="hv-footer__label">Services</div>
             <div className="hv-footer__links">
               <Link href="/examples/complete-hvac/services">Heating &amp; Cooling</Link>
-              <Link href="/examples/complete-hvac/services">Smart Home HVAC</Link>
+              <Link href="/examples/complete-hvac/services">Whole-Home Comfort</Link>
               <Link href="/examples/complete-hvac/services">Indoor Air Quality</Link>
             </div>
           </div>

@@ -139,7 +139,7 @@ export const showcaseDemos: ShowcaseDemo[] = [
     desc: 'Multi-page website with home, about, services, gallery, and contact.',
     href: '/examples/complete-hvac',
     image: '/demos/complete-hvac-hero.jpg',
-    imageAlt: 'Appalachian HVAC demo — futuristic smart-home climate system with WV mountains',
+    imageAlt: 'Appalachian HVAC demo — warm fall WV mountains with cozy fireplace living room',
     imageFocus: 'center 36%',
     landmark: 'Appalachian HVAC',
     features: ['5 designed pages', 'Inquiry forms', 'Google Business', 'SEO-ready'],

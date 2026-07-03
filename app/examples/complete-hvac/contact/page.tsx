@@ -52,16 +52,14 @@ export default function ContactPage() {
       <section className="hv-hero hv-hero--page">
         <div className="hv-hero__bg">
           <Image
-            src="/demos/complete-hvac/entrance-mountains.jpg"
+            src="/demos/complete-hvac/entrance-fall-mountains.jpg"
             alt=""
             fill
             sizes="100vw"
             quality={85}
-            className="hv-hero__bg-img"
+            className="hv-hero__bg-img hv-hero__bg-img--mountains"
           />
           <div className="hv-hero__veil" />
-          <div className="hv-hero__grid" />
-          <div className="hv-hero__glow" />
         </div>
 
         <div className="hv-hero__content">
@@ -76,7 +74,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="hv-section">
+      <section className="hv-section hv-section--warm">
         <div className="hv-section__inner hv-reveal">
           <div className="grid lg:grid-cols-12 gap-8">
             <div className="lg:col-span-7">
@@ -148,7 +146,6 @@ export default function ContactPage() {
                         <option value="Cooling">Cooling / Air Conditioning</option>
                         <option value="Maintenance">Maintenance Plan or Tune-Up</option>
                         <option value="Air Quality">Indoor Air Quality</option>
-                        <option value="Smart Home">Smart Home Integration</option>
                         <option value="Emergency">Emergency Service</option>
                         <option value="Other">Other / Not Sure</option>
                       </select>
@@ -175,10 +172,10 @@ export default function ContactPage() {
                   </form>
                 ) : (
                   <div className="text-center py-10">
-                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[rgba(34,211,238,0.12)]">
-                      <CheckCircle className="h-9 w-9 text-[var(--hv-cyan)]" />
+                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[rgba(217,119,6,0.12)]">
+                      <CheckCircle className="h-9 w-9 text-[var(--hv-orange)]" />
                     </div>
-                    <h3 className="text-2xl font-bold tracking-tight">
+                    <h3 className="text-2xl font-bold tracking-tight text-[var(--hv-brown-deep)]">
                       Thank you, {formData.name.split(' ')[0] || 'friend'}!
                     </h3>
                     <p className="mt-3 text-[var(--hv-muted)] max-w-sm mx-auto">
@@ -189,7 +186,7 @@ export default function ContactPage() {
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="mt-6 text-sm font-medium text-[var(--hv-cyan)] hover:underline"
+                      className="mt-6 text-sm font-medium text-[var(--hv-orange)] hover:underline"
                     >
                       Submit another request
                     </button>
@@ -200,19 +197,23 @@ export default function ContactPage() {
 
             <div className="lg:col-span-5 space-y-5">
               <div className="hv-info-panel">
-                <div className="font-bold text-lg mb-5">Appalachian HVAC Solutions</div>
+                <div className="font-bold text-lg mb-5 text-[var(--hv-brown-deep)]">
+                  Appalachian HVAC Solutions
+                </div>
 
                 <div className="space-y-5 text-sm">
                   <a href={HVAC_PHONE_HREF} className="flex items-start gap-3 group">
-                    <Phone className="h-5 w-5 mt-0.5 text-[var(--hv-cyan)] shrink-0" />
+                    <Phone className="h-5 w-5 mt-0.5 text-[var(--hv-orange)] shrink-0" />
                     <div>
-                      <div className="font-semibold group-hover:underline">{HVAC_PHONE}</div>
+                      <div className="font-semibold text-[var(--hv-brown-deep)] group-hover:underline">
+                        {HVAC_PHONE}
+                      </div>
                       <div className="text-[var(--hv-muted)]">24/7 Emergency Line</div>
                     </div>
                   </a>
 
                   <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 mt-0.5 text-[var(--hv-cyan)] shrink-0" />
+                    <MapPin className="h-5 w-5 mt-0.5 text-[var(--hv-orange)] shrink-0" />
                     <div className="text-[var(--hv-muted)]">
                       <div>124 Mountain View Road</div>
                       <div>Ridgeview, WV 26501</div>
@@ -220,24 +221,24 @@ export default function ContactPage() {
                   </div>
 
                   <a href={`mailto:${HVAC_EMAIL}`} className="flex items-start gap-3 group">
-                    <Mail className="h-5 w-5 mt-0.5 text-[var(--hv-cyan)] shrink-0" />
+                    <Mail className="h-5 w-5 mt-0.5 text-[var(--hv-orange)] shrink-0" />
                     <span className="group-hover:underline">{HVAC_EMAIL}</span>
                   </a>
 
                   <div className="flex items-start gap-3 pt-3 border-t border-[var(--hv-border)]">
-                    <Clock className="h-5 w-5 mt-0.5 text-[var(--hv-cyan)] shrink-0" />
+                    <Clock className="h-5 w-5 mt-0.5 text-[var(--hv-orange)] shrink-0" />
                     <div className="text-[var(--hv-muted)] leading-relaxed">
-                      <div className="font-medium text-[var(--hv-text)]">Office Hours</div>
+                      <div className="font-medium text-[var(--hv-brown-deep)]">Office Hours</div>
                       Monday – Friday: 7:30am – 5:30pm
                       <br />
-                      <span className="text-[var(--hv-cyan)] font-medium">24/7 Emergency Response</span>
+                      <span className="text-[var(--hv-orange)] font-medium">24/7 Emergency Response</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="hv-info-panel">
-                <div className="font-semibold mb-3">Service Area</div>
+                <div className="font-semibold mb-3 text-[var(--hv-brown-deep)]">Service Area</div>
                 <p className="text-sm text-[var(--hv-muted)] leading-relaxed">
                   {serviceAreas.join(', ')}.
                 </p>
