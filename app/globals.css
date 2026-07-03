@@ -2126,20 +2126,22 @@ label.card:focus-within {
 
 .why-choose__card-visual {
   position: relative;
-  height: 11rem;
+  width: 100%;
+  aspect-ratio: 16 / 10;
   flex-shrink: 0;
-}
-
-@media (min-width: 768px) {
-  .why-choose__card-visual {
-    height: 12.5rem;
-  }
+  overflow: hidden;
+  background: rgba(8, 8, 12, 0.5);
 }
 
 .why-choose__card-img {
   object-fit: cover;
   object-position: center;
   filter: contrast(1.08) saturate(1.06) brightness(0.88);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.why-choose__card:hover .why-choose__card-img {
+  transform: translateZ(0) scale(1.03);
 }
 
 .why-choose__card-veil {
@@ -2939,13 +2941,18 @@ label.card:focus-within {
 
 .interlude__visual {
   position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
   min-height: 11rem;
   overflow: hidden;
+  background: rgba(8, 8, 12, 0.55);
 }
 
 @media (min-width: 768px) {
   .interlude__visual {
+    aspect-ratio: auto;
     min-height: 100%;
+    height: 100%;
   }
 }
 
@@ -3200,19 +3207,29 @@ label.card:focus-within {
 
 .h-showcase__visual {
   position: relative;
-  height: 9.5rem;
+  width: 100%;
+  aspect-ratio: 16 / 10;
   overflow: hidden;
   flex-shrink: 0;
+  background: rgba(8, 8, 12, 0.6);
 }
 
-@media (min-width: 768px) {
-  .h-showcase__visual {
-    height: 10.5rem;
-  }
+.h-showcase__img-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transform: translateZ(0);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.h-showcase__card:hover .h-showcase__img-wrap {
+  transform: translateZ(0) scale(1.04);
 }
 
 .h-showcase__img {
   object-fit: cover;
+  object-position: center;
+  filter: contrast(1.06) saturate(1.05) brightness(0.94);
 }
 
 .h-showcase__veil {
@@ -3435,6 +3452,10 @@ label.card:focus-within {
 .h-showcase__img,
 .why-choose__card-img {
   transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.h-showcase__img-wrap {
   backface-visibility: hidden;
 }
 
@@ -4072,7 +4093,12 @@ label.card:focus-within {
   }
 
   .why-choose__card-visual {
-    height: 9.5rem;
+    aspect-ratio: 16 / 9;
+  }
+
+  .h-showcase__card:hover .h-showcase__img-wrap,
+  .why-choose__card:hover .why-choose__card-img {
+    transform: none;
   }
 
   .why-choose__card-body {

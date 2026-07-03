@@ -113,6 +113,8 @@ export interface ShowcaseDemo {
   desc: string;
   href: string;
   image: string;
+  imageAlt: string;
+  imageFocus: string;
   landmark: string;
   features: string[];
 }
@@ -124,8 +126,10 @@ export const showcaseDemos: ShowcaseDemo[] = [
     title: 'Starter Demo',
     desc: 'Clean single-page site with hero, services, testimonials, and contact form.',
     href: '/examples/starter-plumbing',
-    image: landmarks.newRiverGorge.image,
-    landmark: landmarks.newRiverGorge.name,
+    image: '/demos/starter-plumbing-hero.jpg',
+    imageAlt: 'Ridgeview Plumbing demo — professional plumber at work',
+    imageFocus: 'center 42%',
+    landmark: 'Ridgeview Plumbing',
     features: ['Professional hero', 'Services + about', 'Contact form', 'Mobile-optimized'],
   },
   {
@@ -134,8 +138,10 @@ export const showcaseDemos: ShowcaseDemo[] = [
     title: 'Complete Demo',
     desc: 'Multi-page website with home, about, services, gallery, and contact.',
     href: '/examples/complete-hvac',
-    image: landmarks.senecaRocks.image,
-    landmark: landmarks.senecaRocks.name,
+    image: '/demos/complete-hvac-hero.jpg',
+    imageAlt: 'Appalachian HVAC demo — technician servicing an outdoor unit',
+    imageFocus: 'center 36%',
+    landmark: 'Appalachian HVAC',
     features: ['5 designed pages', 'Inquiry forms', 'Google Business', 'SEO-ready'],
   },
   {
@@ -144,8 +150,10 @@ export const showcaseDemos: ShowcaseDemo[] = [
     title: 'Premium Demo',
     desc: 'Advanced 7-page site with portfolio, location details, FAQ, and premium design.',
     href: '/examples/premium-restaurant',
-    image: landmarks.wvCapitol.image,
-    landmark: landmarks.wvCapitol.name,
+    image: '/demos/premium-restaurant-hero.jpg',
+    imageAlt: 'Mountain View Grill demo — warm restaurant dining room',
+    imageFocus: 'center 48%',
+    landmark: 'Mountain View Grill',
     features: ['7 custom pages', 'Advanced branding', 'Portfolio sections', 'Priority polish'],
   },
 ];

@@ -9,12 +9,6 @@ interface HorizontalShowcaseProps {
   demos: ShowcaseDemo[];
 }
 
-const imagePositions: Record<string, string> = {
-  Starter: 'center 42%',
-  Complete: 'center 35%',
-  Premium: 'center 55%',
-};
-
 export default function HorizontalShowcase({ demos }: HorizontalShowcaseProps) {
   return (
     <div className="h-showcase">
@@ -26,16 +20,18 @@ export default function HorizontalShowcase({ demos }: HorizontalShowcaseProps) {
         {demos.map((demo, i) => (
           <ScrollLift key={demo.tier} delay={i * 0.06} depth={false} className="h-showcase__card">
             <div className="h-showcase__visual">
-              <Image
-                src={demo.image}
-                alt={`${demo.landmark} — backdrop for ${demo.tier} demo`}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="h-showcase__img"
-                style={{ objectPosition: imagePositions[demo.tier] ?? 'center' }}
-                quality={78}
-                loading="lazy"
-              />
+              <div className="h-showcase__img-wrap">
+                <Image
+                  src={demo.image}
+                  alt={demo.imageAlt}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="h-showcase__img"
+                  style={{ objectPosition: demo.imageFocus }}
+                  quality={82}
+                  loading="lazy"
+                />
+              </div>
               <div className="h-showcase__veil" />
               <div className="h-showcase__badge">
                 <span className="h-showcase__tier">{demo.tier}</span>
