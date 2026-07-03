@@ -58,7 +58,9 @@ export default function PricingCard({ tier, onSelect, index = 0 }: PricingCardPr
           <button
             type="button"
             onClick={() => onSelect(tier.name)}
-            className={`btn w-full ${isPopular || hasPromo ? 'btn--primary' : 'btn--ghost'}`}
+            className={`btn w-full ${
+              isPopular || hasPromo ? 'btn--primary btn--glow' : 'btn--ghost'
+            }`}
           >
             {hasPromo ? `Claim $${tier.promoPrice}` : `Choose ${tier.name}`}
           </button>

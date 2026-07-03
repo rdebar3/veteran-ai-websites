@@ -260,11 +260,11 @@ export default function Home() {
               action="https://formspree.io/f/mwvjoklj"
               method="POST"
               onSubmit={handleBuilderSubmit}
-              className="space-y-10"
+              className="order-block"
             >
               <Reveal variant="up">
-                <div className="flex items-center justify-between mb-6">
-                  <span className="field-label mb-0">Choose Package</span>
+                <div className="order-step-header">
+                  <span className="order-step-label">Step 1 — Choose Package</span>
                   <a href="#pricing" className="text-link">Compare →</a>
                 </div>
                 <div className="grid-3">
@@ -277,18 +277,18 @@ export default function Home() {
                         type="button"
                         key={tier.name}
                         onClick={() => handleBuilderPackageSelect(tier.name)}
-                        className={`card text-left p-6 ${isSelected ? 'card--selected' : ''}`}
+                        className={`card order-package text-left p-6 ${isSelected ? 'card--selected' : ''}`}
                       >
-                        <div className="text-xl font-semibold">
+                        <div className="order-package__name">
                           {tier.name}
                         </div>
-                        <div className="mt-2 flex items-baseline gap-2">
+                        <div className="order-package__price-row">
                           {hasPromo && (
-                            <span className="text-sm text-[var(--text-dim)] line-through decoration-[var(--crimson)]">
+                            <span className="order-package__strike">
                               ${tier.price}
                             </span>
                           )}
-                          <span className="text-2xl font-bold">${displayPrice}</span>
+                          <span className="order-package__price">${displayPrice}</span>
                         </div>
                         {hasPromo && (
                           <p className="text-xs text-[var(--crimson-bright)] mt-1 font-medium">
@@ -303,7 +303,7 @@ export default function Home() {
               </Reveal>
 
               <Reveal variant="left" delay="1">
-                <span className="field-label block mb-6">Optional Upgrades</span>
+                <span className="order-step-label block mb-6">Step 2 — Optional Upgrades</span>
                 <div className="grid-2 max-w-3xl mx-auto">
                   {addOnsList.map((addon) => {
                     const isSelected = selectedAddOnIds.includes(addon.id);
@@ -335,7 +335,7 @@ export default function Home() {
               </Reveal>
 
               <Reveal variant="right" delay="2">
-                <span className="field-label block mb-6">Your Details</span>
+                <span className="order-step-label block mb-6">Step 3 — Your Details</span>
                 <div className="card p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="businessName" className="field-label">Business Name *</label>
@@ -391,29 +391,30 @@ export default function Home() {
               </Reveal>
 
               <Reveal variant="scale" delay="3">
-                <div className="text-center space-y-6">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 card text-sm">
-                    <span className="text-[var(--text-dim)]">Estimated total:</span>
-                    <span className="text-xl text-[var(--text-cream)] font-medium">${estimatedTotal}</span>
-                    <span className="text-xs text-[var(--text-dim)]">(one-time + recurring)</span>
+                <div className="order-submit">
+                  <span className="order-step-label">Step 4 — Review & Submit</span>
+                  <div className="order-total-pill">
+                    <span className="order-total-pill__label">Estimated total</span>
+                    <span className="order-total-pill__amount">${estimatedTotal}</span>
+                    <span className="order-total-pill__note">one-time + recurring</span>
                   </div>
                   {selectedBuilderPackage === 'Starter' && (
-                    <p className="text-xs text-[var(--crimson-bright)] max-w-sm mx-auto">
+                    <p className="order-promo-note">
                       Limited Time Offer — $397 until July 4th. Final amount confirmed at checkout.
                     </p>
                   )}
-                  <p className="text-xs text-[var(--text-dim)] max-w-xs mx-auto leading-relaxed">
+                  <p className="order-trust-line">
                     No payment required today. Pay only after you review and approve the final design.
                   </p>
                   <button
                     type="submit"
                     disabled={isBuilderSubmitting}
-                    className="btn btn--primary disabled:opacity-60"
+                    className="btn btn--primary btn--lg btn--glow"
                   >
                     {isBuilderSubmitting ? 'Submitting...' : 'Submit Order Request'}
                   </button>
-                  {submitError && <p className="text-red-400 text-sm">{submitError}</p>}
-                  <p className="text-xs text-[var(--text-dim)]">
+                  {submitError && <p className="order-error">{submitError}</p>}
+                  <p className="order-trust-line">
                     We&apos;ll contact you within 24 hours to schedule your consultation.
                   </p>
                 </div>
@@ -421,11 +422,11 @@ export default function Home() {
             </form>
           ) : (
             <Reveal variant="scale">
-              <div id="order-success" ref={successRef} className="card max-w-2xl mx-auto p-10 text-center">
-                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--forest)] text-emerald-400">
+              <div id="order-success" ref={successRef} className="card success-card">
+                <div className="success-card__icon">
                   <CheckCircle className="h-8 w-8" />
                 </div>
-                <h3 className="text-3xl font-bold">Order Request Received</h3>
+                <h3 className="success-card__title">Order Request Received</h3>
                 <p className="mt-4 text-[var(--text-muted)] leading-relaxed">
                   Thank you, {builderForm.businessName.split(' ')[0] || 'friend'}. We have your{' '}
                   <span className="text-[var(--text-cream)]">{selectedBuilderPackage}</span> package
@@ -436,12 +437,12 @@ export default function Home() {
                 <p className="mt-2 text-sm text-[var(--text-dim)]">
                   I&apos;ll personally review your request and contact you within 24 hours.
                 </p>
-                <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-                  <button type="button" onClick={resetBuilder} className="btn btn--primary">
+                <div className="success-card__actions">
+                  <button type="button" onClick={resetBuilder} className="btn btn--primary btn--lg btn--glow">
                     Start Another Order
                   </button>
                   {!paymentSuccess && (
-                    <button type="button" onClick={handlePayNow} disabled={isPaying} className="btn btn--ghost">
+                    <button type="button" onClick={handlePayNow} disabled={isPaying} className="btn btn--ghost btn--lg">
                       {isPaying ? 'Processing...' : 'Pay Now'}
                     </button>
                   )}
@@ -524,7 +525,7 @@ export default function Home() {
             })}
           </div>
           <div className="section-cta">
-            <a href="#build" className="btn btn--primary">Start Your Order</a>
+            <a href="#build" className="btn btn--primary btn--lg btn--glow">Start Your Order</a>
           </div>
         </div>
       </section>
@@ -580,7 +581,7 @@ export default function Home() {
                       </li>
                     ))}
                   </ul>
-                  <a href={ex.href} className="btn btn--ghost w-full mt-auto">
+                  <a href={ex.href} className="btn btn--ghost btn--lg w-full mt-auto">
                     View Live Demo
                   </a>
                 </div>
@@ -643,7 +644,7 @@ export default function Home() {
               ))}
             </div>
             <div className="mt-6 text-center">
-              <a href="#build" className="btn btn--ghost">Add to Your Order</a>
+              <a href="#build" className="btn btn--ghost btn--lg">Add to Your Order</a>
             </div>
           </Reveal>
 
@@ -698,7 +699,7 @@ export default function Home() {
                   placeholder="We're a family-owned plumbing company in West Virginia..."
                 />
               </div>
-              <button type="submit" className="btn btn--primary w-full">
+              <button type="submit" className="btn btn--primary btn--lg btn--glow w-full">
                 Send Message
               </button>
               <p className="text-center text-xs text-[var(--text-dim)]">
@@ -708,7 +709,7 @@ export default function Home() {
           </Reveal>
 
           <div className="section-cta">
-            <a href="#build" className="btn btn--primary">Start Your Order</a>
+            <a href="#build" className="btn btn--primary btn--lg btn--glow">Start Your Order</a>
           </div>
         </div>
       </section>

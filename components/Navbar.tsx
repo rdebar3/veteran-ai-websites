@@ -80,7 +80,7 @@ export default function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="md:hidden border-t border-[var(--border)] bg-[var(--surface)] px-6 py-5 flex flex-col gap-3">
+        <div className="nav__mobile md:hidden border-t border-[var(--border)] px-6 py-5 flex flex-col gap-3">
           {navLinks.map((link) => (
             <a
               key={link.href}
