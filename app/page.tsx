@@ -9,11 +9,17 @@ import {
   ClipboardList,
   CheckCircle,
 } from 'lucide-react';
+import Image from 'next/image';
 import Hero from '@/components/Hero';
 import SectionHeader from '@/components/SectionHeader';
 import Reveal from '@/components/Reveal';
 import PricingCard from '@/components/PricingCard';
 import FAQAccordion, { type FAQ } from '@/components/FAQAccordion';
+import CinematicScroll from '@/components/CinematicScroll';
+import VisualInterlude from '@/components/VisualInterlude';
+import MarqueeBand from '@/components/MarqueeBand';
+import HorizontalShowcase from '@/components/HorizontalShowcase';
+import { storyChapters, processChapters, showcaseDemos } from '@/lib/cinematic';
 import {
   pricingTiers,
   addOnsList,
@@ -216,6 +222,20 @@ export default function Home() {
     <main className="relative flex-1">
       <Hero onClaimOffer={() => setSelectedBuilderPackage('Starter')} />
 
+      <MarqueeBand />
+
+      <CinematicScroll id="story" chapters={storyChapters} />
+
+      <VisualInterlude
+        image="/grok-image-11e0d2c5-115b-41ef-8811-2d3f53d43ca2.jpg"
+        imageAlt="Futuristic web technology visual"
+        eyebrow="Limited Time"
+        title="$397 Starter Website"
+        subtitle="Professional one-page site — delivered in one day. Veteran-owned. Full ownership. Ends July 4th."
+        ctaHref="#build"
+        ctaLabel="Claim My $397 Website"
+      />
+
       <div className="trust">
         <div className="trust__inner">
           {[
@@ -232,7 +252,7 @@ export default function Home() {
         </div>
       </div>
 
-      <section id="build" className="section">
+      <section id="build" className="section section--on-canvas">
         <div className="section__container section__container--wide">
           <SectionHeader
             index="01"
@@ -497,7 +517,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="how-it-works" className="section">
+      <CinematicScroll id="process-cinema" chapters={processChapters} />
+
+      <section id="how-it-works" className="section section--on-canvas">
         <div className="section__container section__container--wide">
           <SectionHeader
             index="03"
@@ -538,60 +560,35 @@ export default function Home() {
             title="Live Examples"
             subtitle="Explore live demos for each package tier."
           />
-          <div className="grid-3">
-            {[
-              {
-                tier: 'Starter',
-                pages: '1 Page',
-                title: 'Starter Demo',
-                desc: 'Clean single-page site with hero, services, testimonials, and contact form.',
-                href: '/examples/starter-plumbing',
-                features: ['Professional hero', 'Services + about', 'Contact form', 'Mobile-optimized'],
-              },
-              {
-                tier: 'Complete',
-                pages: '5 Pages',
-                title: 'Complete Demo',
-                desc: 'Multi-page website with home, about, services, gallery, and contact.',
-                href: '/examples/complete-hvac',
-                features: ['5 designed pages', 'Inquiry forms', 'Google Business', 'SEO-ready'],
-              },
-              {
-                tier: 'Premium',
-                pages: '7 Pages',
-                title: 'Premium Demo',
-                desc: 'Advanced 7-page site with portfolio, location details, FAQ, and premium design.',
-                href: '/examples/premium-restaurant',
-                features: ['7 custom pages', 'Advanced branding', 'Portfolio sections', 'Priority polish'],
-              },
-            ].map((ex, i) => (
-              <Reveal key={ex.tier} variant="scale" delay={i === 0 ? 'none' : i === 1 ? '1' : '2'}>
-                <div className={`card demo-card demo-card--${ex.tier.toLowerCase()} p-6 flex flex-col h-full`}>
-                  <div className="demo-card__meta">
-                    <span className="demo-card__tier">{ex.tier}</span>
-                    <span className="demo-card__pages">{ex.pages}</span>
-                  </div>
-                  <h3 className="demo-card__title">{ex.title}</h3>
-                  <p className="mt-3 text-sm text-[var(--text-muted)] leading-relaxed flex-1">{ex.desc}</p>
-                  <ul className="mt-5 mb-8 space-y-2">
-                    {ex.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-xs text-[var(--text-dim)]">
-                        <Check className="h-3 w-3 text-[var(--gold)]" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <a href={ex.href} className="btn btn--ghost btn--lg w-full mt-auto">
-                    View Live Demo
-                  </a>
-                </div>
-              </Reveal>
-            ))}
-          </div>
         </div>
+        <Reveal variant="up">
+          <HorizontalShowcase demos={showcaseDemos} />
+        </Reveal>
       </section>
 
-      <section id="testimonials" className="section">
+      <VisualInterlude
+        image="/mountains/misty-ridges.jpg"
+        imageAlt="Misty ridges of West Virginia mountains"
+        eyebrow="West Virginia Proud"
+        title="Built for Local Business"
+        subtitle="Real demos. Real results. Websites you will be proud to show customers — and post on Facebook."
+        ctaHref="#build"
+        ctaLabel="Start Your Order"
+        align="left"
+      />
+
+      <section id="testimonials" className="section section--testimonials">
+        <div className="testimonials-bg" aria-hidden="true">
+          <Image
+            src="/mountains/summit.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            className="testimonials-bg__img"
+            quality={85}
+          />
+          <div className="testimonials-bg__veil" />
+        </div>
         <div className="section__container section__container--wide">
           <SectionHeader
             index="05"

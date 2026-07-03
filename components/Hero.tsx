@@ -8,7 +8,7 @@ interface HeroProps {
 
 export default function Hero({ onClaimOffer }: HeroProps) {
   return (
-    <section id="hero" className="hero">
+    <section id="hero" className="hero hero--cinematic">
       <div className="hero__visual" aria-hidden="true">
         <div className="hero__image-wrap">
           <Image
