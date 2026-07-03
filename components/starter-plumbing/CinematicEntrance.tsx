@@ -3,15 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
-const STORAGE_KEY = 'summit-plumbing-intro-v3';
-
 type Phase = 'establish' | 'alert' | 'penetrate' | 'leak' | 'outro';
 
 const PHASE_ORDER: Phase[] = ['establish', 'alert', 'penetrate', 'leak', 'outro'];
 
-const TIMINGS: Record<Phase, number> = {
+const TIMINGS: Record<Exclude<Phase, 'alert'>, number> = {
   establish: 2800,
-  alert: 3200,
   penetrate: 2200,
   leak: 3400,
   outro: 1400,
@@ -38,7 +35,6 @@ export default function CinematicEntrance({ onComplete }: CinematicEntranceProps
   const finish = useCallback(() => {
     clearTimers();
     setVisible(false);
-    sessionStorage.setItem(STORAGE_KEY, '1');
     onComplete();
   }, [clearTimers, onComplete]);
 
@@ -52,6 +48,9 @@ export default function CinematicEntrance({ onComplete }: CinematicEntranceProps
         timersRef.current.push(id);
         return;
       }
+
+      // Pause at alert until the user clicks Investigate (or presses Enter/Space).
+      if (next === 'alert') return;
 
       const upcoming = PHASE_ORDER[PHASE_ORDER.indexOf(next) + 1];
       if (upcoming) {
@@ -71,12 +70,6 @@ export default function CinematicEntrance({ onComplete }: CinematicEntranceProps
   useEffect(() => {
     if (prefersReduced) {
       finish();
-      return;
-    }
-
-    if (sessionStorage.getItem(STORAGE_KEY)) {
-      setVisible(false);
-      onComplete();
       return;
     }
 
@@ -285,7 +278,7 @@ export default function CinematicEntrance({ onComplete }: CinematicEntranceProps
                 <button type="button" className="sp-intro__alert-btn" onClick={investigate}>
                   Investigate Leak →
                 </button>
-                <p className="sp-intro__alert-hint">Auto-deploying in a moment…</p>
+                <p className="sp-intro__alert-hint">Click Investigate to enter the home</p>
               </motion.div>
             )}
           </AnimatePresence>
