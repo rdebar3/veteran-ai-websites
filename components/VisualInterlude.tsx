@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { getViewProgress } from '@/lib/scroll-cinema';
 
 interface VisualInterludeProps {
   image: string;
@@ -37,29 +36,31 @@ export default function VisualInterlude({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) return;
+    if (prefersReduced) {
+      el.classList.add('interlude--visible');
+      return;
+    }
 
-    const content = el.querySelector<HTMLElement>('.interlude__content');
-    let raf = 0;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add('interlude--visible');
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -6% 0px' }
+    );
 
-    const tick = () => {
-      const p = getViewProgress(el);
-      if (content) {
-        content.style.opacity = String(0.85 + p * 0.15);
-        content.style.transform = `translate3d(0, ${(1 - p) * 16}px, 0)`;
-      }
-      raf = requestAnimationFrame(tick);
-    };
-
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   return (
     <section
       ref={ref}
-      className={`interlude interlude--split interlude--${align} interlude--driven interlude--rich`}
+      className={`interlude interlude--split interlude--${align} interlude--rich`}
     >
       <div className="interlude__panel">
         <div className="interlude__visual">
@@ -67,9 +68,10 @@ export default function VisualInterlude({
             src={image}
             alt={imageAlt}
             fill
-            sizes="(max-width: 768px) 100vw, 42vw"
+            sizes="(max-width: 768px) 100vw, 480px"
             className="interlude__img"
-            quality={88}
+            quality={82}
+            loading="lazy"
           />
           {landmark && (
             <span className="interlude__landmark-tag">{landmark}</span>

@@ -7,6 +7,7 @@ import PatrioticOverlay from '@/components/PatrioticOverlay';
 import NeuralOverlay from '@/components/NeuralOverlay';
 import { baseRooms } from '@/lib/base-rooms';
 import { getViewProgress } from '@/lib/scroll-cinema';
+import { isInViewport, notifyScroll, registerScrollTask } from '@/lib/scroll-driver';
 
 interface HeroProps {
   onClaimOffer?: () => void;
@@ -25,36 +26,44 @@ export default function Hero({ onClaimOffer }: HeroProps) {
     const content = hero.querySelector<HTMLElement>('.hero__content');
     const circuit = hero.querySelector<HTMLElement>('.hero__circuit');
     const badge = hero.querySelector<HTMLElement>('.hero__landmark-badge');
-    let raf = 0;
 
-    const tick = () => {
+    const run = () => {
       const scrollP = hero.offsetHeight > 0
         ? Math.min(1, Math.max(0, window.scrollY / hero.offsetHeight))
         : 0;
-      const viewP = getViewProgress(hero);
 
       if (content) {
-        content.style.transform = `translate3d(0, ${scrollP * 32}px, 0) scale(${1 - scrollP * 0.08})`;
-        content.style.opacity = String(1 - scrollP * 0.35);
+        content.style.transform = `translate3d(0, ${scrollP * 28}px, 0) scale(${1 - scrollP * 0.06})`;
+        content.style.opacity = String(1 - scrollP * 0.3);
       }
 
       if (circuit) {
-        circuit.style.transform = `translate3d(0, ${scrollP * 18}px, 0)`;
-        circuit.style.opacity = String(0.55 - scrollP * 0.2);
+        circuit.style.transform = `translate3d(0, ${scrollP * 14}px, 0)`;
+        circuit.style.opacity = String(0.5 - scrollP * 0.18);
       }
 
       if (badge) {
-        badge.style.transform = `translate3d(0, ${scrollP * 12}px, 0)`;
+        badge.style.transform = `translate3d(0, ${scrollP * 10}px, 0)`;
       }
 
       hero.style.setProperty('--hero-scroll', String(scrollP));
-      hero.style.setProperty('--hero-view', String(viewP));
-
-      raf = requestAnimationFrame(tick);
+      hero.style.setProperty('--hero-view', String(getViewProgress(hero)));
     };
 
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    const unregister = registerScrollTask({
+      isActive: () => isInViewport(hero, 80),
+      run,
+    });
+
+    const onScroll = () => notifyScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    run();
+    notifyScroll();
+
+    return () => {
+      unregister();
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   return (

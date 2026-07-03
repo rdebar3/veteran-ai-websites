@@ -4,8 +4,7 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import Image from 'next/image';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import type { BaseRoomConfig } from '@/lib/base-rooms';
-import CircuitOverlay from '@/components/CircuitOverlay';
-import { getViewProgress } from '@/lib/scroll-cinema';
+import { isInViewport, notifyScroll, registerScrollTask } from '@/lib/scroll-driver';
 
 interface BaseRoomProps {
   room: BaseRoomConfig;
@@ -34,64 +33,72 @@ export default function BaseRoom({
 }: BaseRoomProps) {
   const ref = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const isInView = useInView(ref, { amount: 0.08, margin: '-8% 0px' });
+  const isInView = useInView(ref, { amount: 0.1, margin: '-5% 0px', once: true });
+  const isFunctional = className.includes('base-room--functional');
 
   useEffect(() => {
     const section = ref.current;
-    if (!section || prefersReducedMotion) return;
+    if (!section || prefersReducedMotion || isFunctional) return;
 
     const vista = section.querySelector<HTMLElement>('.base-room__vista-wrap');
-    const interior = section.querySelector<HTMLElement>('.base-room__interior-wrap');
-    const circuit = section.querySelector<HTMLElement>('.base-room__circuit');
-    const chamber = section.querySelector<HTMLElement>('.base-room__chamber');
-    let raf = 0;
 
-    const tick = () => {
-      const p = getViewProgress(section);
-      const scrollP = (() => {
-        const rect = section.getBoundingClientRect();
-        const vh = window.innerHeight;
-        const total = rect.height + vh;
-        const traveled = vh - rect.top;
-        return Math.min(1, Math.max(0, traveled / total));
-      })();
+    const run = () => {
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const total = rect.height + vh;
+      const traveled = vh - rect.top;
+      const scrollP = Math.min(1, Math.max(0, traveled / total));
 
       if (vista) {
-        const functional = section.classList.contains('base-room--functional');
-        const y = functional ? (0.5 - scrollP) * 6 : (0.5 - scrollP) * 14;
-        const scale = functional ? 1.02 + scrollP * 0.03 : 1.1 + scrollP * 0.08;
+        const y = (0.5 - scrollP) * 8;
+        const scale = 1.03 + scrollP * 0.04;
         vista.style.transform = `translate3d(0, ${y}%, 0) scale(${scale})`;
       }
-
-      if (interior) {
-        interior.style.opacity = String(0.35 + p * 0.45);
-        interior.style.transform = `translate3d(0, ${(1 - p) * 4}%, 0) scale(1.04)`;
-      }
-
-      if (circuit) {
-        circuit.style.opacity = String(0.25 + p * 0.35);
-        circuit.style.transform = `translate3d(${(scrollP - 0.5) * 3}%, 0, 0)`;
-      }
-
-      if (chamber) {
-        const functional = section.classList.contains('base-room--functional');
-        const lift = 1 - (1 - p) * 0.04;
-        const y = functional ? (1 - p) * 20 : (1 - p) * 48;
-        chamber.style.opacity = functional ? '1' : String(0.55 + p * 0.45);
-        chamber.style.transform = functional
-          ? `translate3d(0, ${y}px, 0)`
-          : `translate3d(0, ${y}px, 0) scale(${lift}) perspective(1400px) rotateX(${(1 - p) * 6}deg)`;
-      }
-
-      raf = requestAnimationFrame(tick);
     };
 
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [prefersReducedMotion]);
+    const unregister = registerScrollTask({
+      isActive: () => isInViewport(section, 100),
+      run,
+    });
+
+    const onScroll = () => notifyScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    notifyScroll();
+
+    return () => {
+      unregister();
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [prefersReducedMotion, isFunctional]);
 
   const displayTitle = title ?? room.title;
   const displaySubtitle = subtitle ?? room.subtitle;
+
+  const chamberClass = `base-room__chamber ${wide ? 'base-room__chamber--wide' : ''}`;
+  const chamberContent = (
+    <>
+      {!hideHeader && (
+        <div className="base-room__header">
+          {!isFunctional && (
+            <div className="base-room__status">
+              <span className="base-room__status-dot" />
+              <span className="base-room__codename">{room.codename}</span>
+            </div>
+          )}
+          {index && <span className="base-room__index">{index}</span>}
+          {eyebrow && <p className="base-room__eyebrow">{eyebrow}</p>}
+          <h2 className="base-room__title">{displayTitle}</h2>
+          <p className="base-room__subtitle">{displaySubtitle}</p>
+          {headerExtra}
+          <div className="base-room__threshold" aria-hidden="true" />
+        </div>
+      )}
+
+      <div className="base-room__floor">
+        <div className="base-room__content">{children}</div>
+      </div>
+    </>
+  );
 
   return (
     <section
@@ -107,80 +114,42 @@ export default function BaseRoom({
             src={room.vistaImage}
             alt=""
             fill
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, 1200px"
             className="base-room__vista-img"
-            quality={92}
+            quality={isFunctional ? 72 : 80}
+            loading="lazy"
           />
         </div>
-        <div className="base-room__interior-wrap">
-          <Image
-            src={room.image}
-            alt=""
-            fill
-            sizes="100vw"
-            className="base-room__interior-img"
-            quality={85}
-          />
-        </div>
-        <div className="base-room__window-frame" />
-        <div className="base-room__circuit">
-          <CircuitOverlay />
-        </div>
+        {!isFunctional && (
+          <div className="base-room__interior-wrap">
+            <Image
+              src={room.image}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, 1200px"
+              className="base-room__interior-img"
+              quality={72}
+              loading="lazy"
+            />
+          </div>
+        )}
         <div className="base-room__room-veil" />
         <div className="base-room__room-glow" />
-        <div className="base-room__vista-badge">
-          <span className="base-room__vista-label">Live Vista</span>
-          <span className="base-room__vista-name">{room.vistaName}</span>
-          <span className="base-room__vista-outpost">{room.vistaOutpost}</span>
-        </div>
-      </div>
-
-      <div className="base-room__corridor-entry" aria-hidden="true">
-        <span className="base-room__corridor-tag">Entering chamber</span>
-        <div className="base-room__corridor-line" />
       </div>
 
       <div className="base-room__perspective">
-        <motion.div
-          className={`base-room__chamber ${wide ? 'base-room__chamber--wide' : ''}`}
-          initial={prefersReducedMotion ? false : { opacity: 0.45, rotateX: 10, scale: 0.9 }}
-          animate={
-            prefersReducedMotion
-              ? undefined
-              : isInView
-                ? { opacity: 1, rotateX: 0, scale: 1 }
-                : { opacity: 0.55, rotateX: 6, scale: 0.94 }
-          }
-          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {!hideHeader && (
-            <motion.div
-              className="base-room__header"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 36 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.85, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className="base-room__status">
-                <span className="base-room__status-dot" />
-                <span className="base-room__codename">{room.codename}</span>
-              </div>
-              {index && <span className="base-room__index">{index}</span>}
-              {eyebrow && <p className="base-room__eyebrow">{eyebrow}</p>}
-              <h2 className="base-room__title">{displayTitle}</h2>
-              <p className="base-room__subtitle">{displaySubtitle}</p>
-              {headerExtra}
-              <div className="base-room__threshold" aria-hidden="true" />
-            </motion.div>
-          )}
-
-          <div className="base-room__floor">
-            <div className="base-room__content">{children}</div>
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="base-room__corridor-exit" aria-hidden="true">
-        <span className="base-room__corridor-label">Transit corridor → {room.navLabel}</span>
+        {prefersReducedMotion || isFunctional ? (
+          <div className={chamberClass}>{chamberContent}</div>
+        ) : (
+          <motion.div
+            className={chamberClass}
+            initial={{ opacity: 0.6, y: 24 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0.6, y: 24 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {chamberContent}
+          </motion.div>
+        )}
       </div>
     </section>
   );

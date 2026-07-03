@@ -40,7 +40,8 @@ export default function WhyChooseSection() {
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className="why-choose__card-img"
                     style={{ objectPosition: imagePositions[i] ?? 'center' }}
-                    quality={85}
+                    quality={80}
+                    loading={i === 0 ? 'eager' : 'lazy'}
                   />
                   <div className="why-choose__card-veil" />
                   <div className="why-choose__card-icon" aria-hidden="true">

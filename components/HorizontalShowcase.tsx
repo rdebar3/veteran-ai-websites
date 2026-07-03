@@ -33,7 +33,8 @@ export default function HorizontalShowcase({ demos }: HorizontalShowcaseProps) {
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="h-showcase__img"
                 style={{ objectPosition: imagePositions[demo.tier] ?? 'center' }}
-                quality={85}
+                quality={78}
+                loading="lazy"
               />
               <div className="h-showcase__veil" />
               <div className="h-showcase__badge">

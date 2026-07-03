@@ -2971,13 +2971,7 @@ label.card:focus-within {
   border-radius: var(--radius-sm);
 }
 
-.interlude--driven .interlude__content,
-.interlude--driven .interlude__eyebrow,
-.interlude--driven .interlude__title,
-.interlude--driven .interlude__subtitle,
-.interlude--driven .interlude__cta {
-  will-change: transform, opacity;
-}
+
 
 .interlude__veil {
   display: none;
@@ -3376,20 +3370,72 @@ label.card:focus-within {
   opacity: 0.25;
 }
 
-/* ── Scroll lift blocks ────────────────────────────────────────── */
+/* ── Scroll lift blocks (IntersectionObserver + CSS) ───────────── */
 .scroll-lift {
-  will-change: transform, opacity;
-}
-
-.card.scroll-lift,
-.step.scroll-lift,
-.stat-pill.scroll-lift {
-  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  opacity: 0;
+  transform: translate3d(0, 36px, 0);
+  transition:
+    opacity 0.65s var(--ease-out),
+    transform 0.65s var(--ease-out);
+  will-change: opacity, transform;
 }
 
 .scroll-lift--depth {
-  transform-style: preserve-3d;
-  transform-origin: center bottom;
+  transform: translate3d(0, 36px, 0) scale(0.97);
+}
+
+.scroll-lift--in {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.scroll-lift--depth.scroll-lift--in {
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.card.scroll-lift,
+.step.scroll-lift {
+  transition:
+    opacity 0.65s var(--ease-out),
+    transform 0.65s var(--ease-out),
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.scroll-lift--in {
+  will-change: auto;
+}
+
+/* ── Interlude entrance ────────────────────────────────────────── */
+.interlude--rich .interlude__content {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+}
+
+.interlude--visible .interlude__content {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ── Performance: content-visibility + GPU layers ────────────── */
+.why-choose,
+.base-room,
+.interlude,
+.h-showcase__card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+.hero__content,
+.hero__image-wrap,
+.hero-bg__image,
+.base-room__vista-wrap,
+.interlude__img,
+.h-showcase__img,
+.why-choose__card-img {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* ── Hero cinematic background (video + Ken Burns fallback) ───── */
@@ -3644,8 +3690,8 @@ label.card:focus-within {
 
 .base-room__vista-img {
   object-fit: cover;
-  object-position: center;
-  filter: contrast(1.14) saturate(1.12) brightness(0.72);
+  object-position: center 42%;
+  filter: contrast(1.08) saturate(1.06) brightness(0.82);
 }
 
 .base-room__interior-wrap {
@@ -3993,9 +4039,28 @@ label.card:focus-within {
 /* ── Mobile readability & layout ───────────────────────────────── */
 @media (max-width: 767px) {
   :root {
-    --text-muted: #b8b8c0;
-    --text-dim: #75757d;
-    --surface-solid: #0e0e14;
+    --text-muted: #c4c4cc;
+    --text-dim: #8a8a94;
+    --surface-solid: #101018;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .base-room__floor,
+  .card,
+  .h-showcase__card {
+    backdrop-filter: none;
+  }
+
+  .hero-bg__image--cinematic {
+    animation-duration: 36s;
+  }
+
+  .circuit-overlay__paths,
+  .circuit-overlay__pulse {
+    animation: none;
   }
 
   body::before {
@@ -4081,5 +4146,23 @@ label.card:focus-within {
   .base-room__status-dot,
   .hero__gate-dot {
     animation: none !important;
+  }
+
+  .scroll-lift {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .interlude--rich .interlude__content {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .hero--driven .hero__content,
+  .hero--driven .hero__circuit {
+    transform: none !important;
+    opacity: 1 !important;
   }
 }
