@@ -9,10 +9,10 @@ import {
   ClipboardList,
   CheckCircle,
 } from 'lucide-react';
-import MountainBackdrop from '@/components/MountainBackdrop';
-import Hero from '@/components/Hero';
-import SectionShell from '@/components/SectionShell';
-import ScrollReveal from '@/components/ScrollReveal';
+import MainGateHero from '@/components/MainGateHero';
+import BaseRoom from '@/components/BaseRoom';
+import RoomEnter from '@/components/RoomEnter';
+import { baseRooms } from '@/lib/base-rooms';
 import PricingCard from '@/components/PricingCard';
 import FAQAccordion, { type FAQ } from '@/components/FAQAccordion';
 import {
@@ -214,13 +214,10 @@ export default function Home() {
   })();
 
   return (
-    <>
-      <MountainBackdrop />
-      <main className="relative z-[1] flex-1">
-        <Hero onClaimOffer={() => setSelectedBuilderPackage('Starter')} />
+    <main className="relative flex-1 tour-canvas">
+        <MainGateHero onClaimOffer={() => setSelectedBuilderPackage('Starter')} />
 
-        {/* Trust bar */}
-        <div className="trust-bar-premium">
+        <div className="corridor-strip trust-bar-premium">
           <div className="trust-bar-premium__inner">
             {[
               { icon: Award, text: 'U.S. Veteran Owned & Operated' },
@@ -236,15 +233,28 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Build */}
-        <SectionShell
-          id="build"
-          location="Foothills"
-          elevation="1,800 ft"
-          eyebrow="Get Started Today"
-          title="Build Your Website"
-          subtitle="Pick your package, add any upgrades, and submit. Fast delivery, clear pricing, full ownership."
+        <BaseRoom
+          room={baseRooms.armoury}
+          eyebrow="Equip & Deploy"
+          title="The Armoury"
+          subtitle="Select your package, add upgrades, and submit your mission order."
+          wide
         >
+          <RoomEnter variant="scale">
+            <div className="services-strip">
+              {[
+                { label: 'One-Day Delivery', icon: Clock },
+                { label: 'Mobile-First Design', icon: Check },
+                { label: '100% Ownership', icon: Award },
+                { label: 'Veteran Built', icon: MapPin },
+              ].map(({ label, icon: Icon }) => (
+                <div key={label} className="services-strip__item">
+                  <Icon className="services-strip__icon h-5 w-5" />
+                  {label}
+                </div>
+              ))}
+            </div>
+          </RoomEnter>
           {!isBuilderSubmitted ? (
             <form
               action="https://formspree.io/f/mwvjoklj"
@@ -252,7 +262,7 @@ export default function Home() {
               onSubmit={handleBuilderSubmit}
               className="space-y-10"
             >
-              <ScrollReveal>
+              <RoomEnter variant="depth">
                 <div className="flex items-center justify-between mb-6">
                   <label className="premium-eyebrow mb-0">01 — Choose Package</label>
                   <a href="#pricing" className="text-xs tracking-widest uppercase text-[var(--cyan)] hover:text-[var(--text-cream)] transition-colors">
@@ -294,9 +304,9 @@ export default function Home() {
                     );
                   })}
                 </div>
-              </ScrollReveal>
+              </RoomEnter>
 
-              <ScrollReveal delay={0.1}>
+              <RoomEnter variant="slide-left" delay={0.1}>
                 <label className="premium-eyebrow block mb-6">
                   02 — Optional Upgrades
                 </label>
@@ -328,9 +338,9 @@ export default function Home() {
                     );
                   })}
                 </div>
-              </ScrollReveal>
+              </RoomEnter>
 
-              <ScrollReveal delay={0.15}>
+              <RoomEnter variant="slide-right" delay={0.15}>
                 <label className="premium-eyebrow block mb-6">03 — Your Details</label>
                 <div className="glass-card p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -384,9 +394,9 @@ export default function Home() {
                     />
                   </div>
                 </div>
-              </ScrollReveal>
+              </RoomEnter>
 
-              <ScrollReveal delay={0.2}>
+              <RoomEnter variant="scale" delay={0.2}>
                 <div className="text-center space-y-6">
                   <div className="inline-flex items-center gap-2 px-4 py-2 glass-card text-sm">
                     <span className="text-[var(--text-dim)]">Estimated total:</span>
@@ -413,10 +423,10 @@ export default function Home() {
                     We&apos;ll contact you within 24 hours to schedule your consultation.
                   </p>
                 </div>
-              </ScrollReveal>
+              </RoomEnter>
             </form>
           ) : (
-            <ScrollReveal>
+            <RoomEnter variant="scale">
               <div
                 id="order-success"
                 ref={successRef}
@@ -452,17 +462,14 @@ export default function Home() {
                   </p>
                 )}
               </div>
-            </ScrollReveal>
+            </RoomEnter>
           )}
-        </SectionShell>
+        </BaseRoom>
 
-        {/* Pricing */}
-        <SectionShell
-          id="pricing"
-          location="Misty Ridge"
-          elevation="2,600 ft"
+        <BaseRoom
+          room={baseRooms['command-center']}
           eyebrow="Transparent Pricing"
-          title="Clear prices. No hidden costs."
+          title="Command Center"
           subtitle="Mobile-first sites built in one day. You own everything."
           wide
         >
@@ -479,7 +486,7 @@ export default function Home() {
               />
             ))}
           </div>
-          <ScrollReveal delay={0.2}>
+          <RoomEnter variant="depth" delay={0.2}>
             <div className="glass-card max-w-3xl mx-auto mt-10 p-8">
               <p className="text-center text-sm tracking-widest uppercase text-[var(--gold)] mb-6">
                 Every package includes
@@ -493,24 +500,21 @@ export default function Home() {
                 ))}
               </div>
             </div>
-          </ScrollReveal>
-        </SectionShell>
+          </RoomEnter>
+        </BaseRoom>
 
-        {/* How it works */}
-        <SectionShell
-          id="how-it-works"
-          location="Golden Overlook"
-          elevation="3,200 ft"
+        <BaseRoom
+          room={baseRooms['mission-planning']}
           eyebrow="Clear & Simple"
-          title="How It Works"
-          subtitle="Six refined steps from order to launch. Built by a West Virginia veteran."
+          title="Mission Planning Room"
+          subtitle="Six refined steps from order to live deployment."
           wide
         >
           <div className="grid-steps">
             {howItWorksSteps.map((step, index) => {
               const Icon = step.icon;
               return (
-                <ScrollReveal key={index} delay={index * 0.08}>
+                <RoomEnter key={index} variant={index % 2 === 0 ? 'slide-left' : 'slide-right'} delay={index * 0.08}>
                   <div className="glass-card step-card h-full">
                     <div className="step-card__number">{step.number}</div>
                     <div>
@@ -521,23 +525,20 @@ export default function Home() {
                       <p className="step-card__desc">{step.desc}</p>
                     </div>
                   </div>
-                </ScrollReveal>
+                </RoomEnter>
               );
             })}
           </div>
           <div className="section-cta">
             <a href="#build" className="btn-premium">Start Your Order</a>
           </div>
-        </SectionShell>
+        </BaseRoom>
 
-        {/* Examples */}
-        <SectionShell
-          id="examples"
-          location="High Vista"
-          elevation="3,800 ft"
+        <BaseRoom
+          room={baseRooms['observation-deck']}
           eyebrow="See The Quality"
-          title="Live Examples"
-          subtitle="Explore live demos for each package tier."
+          title="Live Intel · Observation Deck"
+          subtitle="Survey live demos across every deployment tier."
           wide
         >
           <div className="grid-examples">
@@ -567,7 +568,7 @@ export default function Home() {
                 features: ['7 custom pages', 'Advanced branding', 'Portfolio sections', 'Priority polish'],
               },
             ].map((ex, i) => (
-              <ScrollReveal key={ex.tier} delay={i * 0.1}>
+              <RoomEnter key={ex.tier} variant="depth" delay={i * 0.1}>
                 <div className="glass-card example-card">
                   <div>
                     <span className="example-card__tier">{ex.tier}</span>
@@ -587,24 +588,21 @@ export default function Home() {
                     View Live Demo
                   </a>
                 </div>
-              </ScrollReveal>
+              </RoomEnter>
             ))}
           </div>
-        </SectionShell>
+        </BaseRoom>
 
-        {/* Testimonials */}
-        <SectionShell
-          id="testimonials"
-          location="Ridgeline"
-          elevation="3,400 ft"
+        <BaseRoom
+          room={baseRooms['after-action-lounge']}
           eyebrow="Client Voices"
-          title="Trusted by Local Businesses"
-          subtitle="Real results from West Virginia business owners."
+          title="After Action Lounge"
+          subtitle="Field reports from West Virginia business owners."
           wide
         >
           <div className="grid-testimonials">
             {testimonials.map((t, i) => (
-              <ScrollReveal key={t.author} delay={i * 0.1}>
+              <RoomEnter key={t.author} variant="rise" delay={i * 0.1}>
                 <div className="glass-card testimonial-card h-full">
                   <p className="testimonial-card__quote">{t.quote}</p>
                   <p className="testimonial-card__author">{t.author}</p>
@@ -612,68 +610,49 @@ export default function Home() {
                     {t.business} · {t.location}
                   </p>
                 </div>
-              </ScrollReveal>
+              </RoomEnter>
             ))}
           </div>
-        </SectionShell>
+        </BaseRoom>
 
-        {/* Add-ons */}
-        <SectionShell
-          id="addons"
-          location="Upper Slopes"
-          elevation="4,000 ft"
-          eyebrow="Optional Upgrades"
-          title="Two Focused Add-Ons"
-          subtitle="No clutter. Just the upgrades that matter."
+        <BaseRoom
+          room={baseRooms.debrief}
+          eyebrow="Final Phase"
+          title="Debrief · Extraction Point"
+          subtitle="Upgrades, answers, and mission contact — your final stop before launch."
+          wide
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
-            {addOnsList.map((addon, i) => (
-              <ScrollReveal key={addon.id} delay={i * 0.1}>
-                <div className="glass-card p-8">
-                  <div className="flex justify-between items-baseline gap-4">
-                    <h3 className="font-[family-name:var(--font-display)] text-xl text-[var(--text-cream)]">
-                      {addon.name}
-                    </h3>
-                    <span className="text-[var(--gold)] font-medium whitespace-nowrap">
-                      +${addon.price}
-                      <span className="text-[var(--text-dim)] text-sm">{addon.period}</span>
-                    </span>
+          <div className="debrief-grid">
+            <RoomEnter variant="slide-left" className="debrief-panel">
+              <p className="debrief-panel__label">Intel Brief — FAQ</p>
+              <FAQAccordion faqs={faqs} />
+            </RoomEnter>
+
+            <RoomEnter variant="slide-right" delay={0.1} className="debrief-panel">
+              <p className="debrief-panel__label">Equipment Upgrades</p>
+              <div className="space-y-4">
+                {addOnsList.map((addon) => (
+                  <div key={addon.id} className="glass-card p-6">
+                    <div className="flex justify-between items-baseline gap-4">
+                      <h3 className="font-[family-name:var(--font-display)] text-lg text-[var(--text-cream)]">
+                        {addon.name}
+                      </h3>
+                      <span className="text-[var(--gold)] font-medium whitespace-nowrap text-sm">
+                        +${addon.price}
+                        <span className="text-[var(--text-dim)]">{addon.period}</span>
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-[var(--text-muted)] leading-relaxed">{addon.desc}</p>
                   </div>
-                  <p className="mt-3 text-sm text-[var(--text-muted)] leading-relaxed">{addon.desc}</p>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-          <div className="section-cta">
-            <a href="#build" className="btn-premium">Add to Your Order</a>
-          </div>
-        </SectionShell>
+                ))}
+              </div>
+              <div className="mt-6 text-center">
+                <a href="#build" className="btn-premium btn-premium--outline">Add to Your Order</a>
+              </div>
+            </RoomEnter>
 
-        {/* FAQ */}
-        <SectionShell
-          id="faq"
-          location="Summit Approach"
-          elevation="4,500 ft"
-          eyebrow="Common Questions"
-          title="Frequently Asked Questions"
-          subtitle="Straight answers on pricing, timelines, and ownership."
-        >
-          <FAQAccordion faqs={faqs} />
-          <div className="section-cta">
-            <a href="#build" className="btn-premium">Start Your Order</a>
-          </div>
-        </SectionShell>
-
-        {/* Contact */}
-        <SectionShell
-          id="contact"
-          location="Summit"
-          elevation="4,863 ft"
-          eyebrow="Have Questions?"
-          title="Let's talk about your project."
-          subtitle="Or use the Build Your Website tool above to submit your order."
-        >
-          <ScrollReveal>
+            <RoomEnter variant="depth" delay={0.2} className="debrief-panel debrief-grid__extraction">
+              <p className="debrief-panel__label">Extraction — Contact Command</p>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -681,7 +660,7 @@ export default function Home() {
                 alert('Thank you! Your message has been received. We will contact you soon.');
                 form.reset();
               }}
-              className="glass-card p-8 space-y-6"
+              className="space-y-6"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -724,15 +703,18 @@ export default function Home() {
                 />
               </div>
               <button type="submit" className="btn-premium w-full">
-                Send Message
+                Initiate Extraction — Send Message
               </button>
               <p className="text-center text-xs text-[var(--text-dim)]">
                 I&apos;ll personally review your request within 24 hours. No spam, ever.
               </p>
             </form>
-          </ScrollReveal>
-        </SectionShell>
+            </RoomEnter>
+          </div>
+          <div className="section-cta">
+            <a href="#build" className="btn-premium">Begin Your Mission</a>
+          </div>
+        </BaseRoom>
       </main>
-    </>
   );
 }

@@ -3,7 +3,7 @@
 import { Check } from 'lucide-react';
 import { getDisplayPrice } from '@/lib/data';
 import type { PricingTier } from '@/lib/data';
-import ScrollReveal from '@/components/ScrollReveal';
+import RoomEnter from '@/components/RoomEnter';
 
 interface PricingCardProps {
   tier: PricingTier;
@@ -17,7 +17,7 @@ export default function PricingCard({ tier, onSelect, index = 0 }: PricingCardPr
   const displayPrice = getDisplayPrice(tier);
 
   return (
-    <ScrollReveal delay={index * 0.1}>
+    <RoomEnter variant="depth" delay={index * 0.1}>
       <div
         className={`glass-card relative h-full ${
           isPopular ? 'glass-card--popular' : hasPromo ? 'glass-card--selected' : ''
@@ -68,6 +68,6 @@ export default function PricingCard({ tier, onSelect, index = 0 }: PricingCardPr
           <p className="text-center text-xs text-[var(--text-dim)] mt-4">{tier.revisions}</p>
         </div>
       </div>
-    </ScrollReveal>
+    </RoomEnter>
   );
 }
