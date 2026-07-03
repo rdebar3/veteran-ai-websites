@@ -57,7 +57,7 @@ export default function ContactPage() {
             fill
             sizes="100vw"
             quality={85}
-            className="hv-hero__bg-img hv-hero__bg-img--mountains"
+            className="hv-hero__bg-img"
           />
           <div className="hv-hero__veil" />
         </div>

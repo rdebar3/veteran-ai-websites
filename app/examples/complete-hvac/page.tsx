@@ -27,30 +27,23 @@ export default function HvacHome() {
     <HvacShell introActive={!introDone}>
       {!introDone && <CinematicEntrance onComplete={handleIntroComplete} />}
 
-      <section className="hv-hero">
+      <section className="hv-hero hv-hero--home">
         <div className="hv-hero__bg">
           <Image
-            src="/demos/complete-hvac/entrance-fall-mountains.jpg"
+            src="/demos/complete-hvac/hero-fall.jpg"
             alt=""
             fill
             priority
             sizes="100vw"
-            quality={90}
-            className="hv-hero__bg-img hv-hero__bg-img--mountains"
+            quality={92}
+            className="hv-hero__bg-img"
           />
-          <div
-            className="hv-hero__overlay-room"
-            style={{ '--hv-room': "url('/demos/complete-hvac/entrance-fireplace.jpg')" } as React.CSSProperties}
-          />
-          <div className="hv-hero__veil" />
-          <div className="hv-hero__fire-glow" aria-hidden />
+          <div className="hv-hero__veil hv-hero__veil--home" />
+          <div className="hv-hero__ember" aria-hidden />
         </div>
 
-        <div className="hv-hero__content">
-          <div className="hv-hero__badge">
-            <span className="hv-hero__badge-leaf" aria-hidden>🍂</span>
-            Ridgeview, West Virginia · Veteran Owned
-          </div>
+        <div className="hv-hero__content hv-hero__content--home">
+          <p className="hv-hero__eyebrow">Ridgeview, West Virginia · Veteran Owned</p>
 
           <h1 className="hv-hero__title">
             Reliable Comfort
@@ -58,9 +51,8 @@ export default function HvacHome() {
           </h1>
 
           <p className="hv-hero__lead">
-            Appalachian HVAC Solutions keeps Ridgeview homes warm through crisp fall
-            nights and comfortable all year — with honest service, high-efficiency systems,
-            and the cozy reliability your family deserves.
+            Honest heating and cooling for Ridgeview families — keeping your home warm,
+            efficient, and comfortable through every West Virginia season.
           </p>
 
           <div className="hv-hero__cta-row">
@@ -70,18 +62,6 @@ export default function HvacHome() {
             <a href={HVAC_PHONE_HREF} className="hv-btn hv-btn--ghost">
               <Phone className="h-4 w-4" /> Call {HVAC_PHONE}
             </a>
-          </div>
-
-          <div className="hv-hero__trust">
-            <span>
-              <CheckCircle className="h-3.5 w-3.5 text-amber-300" /> Same-day service available
-            </span>
-            <span>
-              <CheckCircle className="h-3.5 w-3.5 text-amber-300" /> Licensed &amp; insured
-            </span>
-            <span>
-              <CheckCircle className="h-3.5 w-3.5 text-amber-300" /> 24/7 emergency response
-            </span>
           </div>
         </div>
       </section>
