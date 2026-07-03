@@ -19,6 +19,7 @@ import CinematicScroll from '@/components/CinematicScroll';
 import VisualInterlude from '@/components/VisualInterlude';
 import MarqueeBand from '@/components/MarqueeBand';
 import HorizontalShowcase from '@/components/HorizontalShowcase';
+import ScrollLift from '@/components/ScrollLift';
 import { storyChapters, processChapters, showcaseDemos } from '@/lib/cinematic';
 import {
   pricingTiers,
@@ -267,11 +268,11 @@ export default function Home() {
                 { label: 'Mobile-First', icon: Check },
                 { label: '100% Ownership', icon: Award },
                 { label: 'Veteran Built', icon: MapPin },
-              ].map(({ label, icon: Icon }) => (
-                <div key={label} className="stat-pill">
+              ].map(({ label, icon: Icon }, i) => (
+                <ScrollLift key={label} delay={i * 0.06} className="stat-pill">
                   <Icon className="stat-pill__icon h-4 w-4" />
                   {label}
-                </div>
+                </ScrollLift>
               ))}
             </div>
           </Reveal>
@@ -531,18 +532,16 @@ export default function Home() {
             {howItWorksSteps.map((step, index) => {
               const Icon = step.icon;
               return (
-                <Reveal key={index} variant={index % 2 === 0 ? 'left' : 'right'} delay={index % 2 === 0 ? '1' : '2'}>
-                  <div className="card step h-full">
-                    <div className="step__num">{step.number}</div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Icon className="h-4 w-4 text-[var(--cyan)]" />
-                        <h3 className="step__title">{step.title}</h3>
-                      </div>
-                      <p className="step__desc">{step.desc}</p>
+                <ScrollLift key={index} delay={index * 0.07} className="card step h-full">
+                  <div className="step__num">{step.number}</div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon className="h-4 w-4 text-[var(--cyan)]" />
+                      <h3 className="step__title">{step.title}</h3>
                     </div>
+                    <p className="step__desc">{step.desc}</p>
                   </div>
-                </Reveal>
+                </ScrollLift>
               );
             })}
           </div>
@@ -598,13 +597,11 @@ export default function Home() {
           />
           <div className="grid-3">
             {testimonials.map((t, i) => (
-              <Reveal key={t.author} variant="up" delay={i === 0 ? 'none' : i === 1 ? '1' : '2'}>
-                <div className="card quote-card h-full">
-                  <p className="quote-card__text">&ldquo;{t.quote}&rdquo;</p>
-                  <p className="quote-card__author">{t.author}</p>
-                  <p className="quote-card__meta">{t.business} · {t.location}</p>
-                </div>
-              </Reveal>
+              <ScrollLift key={t.author} delay={i * 0.08} className="card quote-card h-full">
+                <p className="quote-card__text">&ldquo;{t.quote}&rdquo;</p>
+                <p className="quote-card__author">{t.author}</p>
+                <p className="quote-card__meta">{t.business} · {t.location}</p>
+              </ScrollLift>
             ))}
           </div>
         </div>

@@ -1,14 +1,59 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { getViewProgress } from '@/lib/scroll-cinema';
 
 interface HeroProps {
   onClaimOffer?: () => void;
 }
 
 export default function Hero({ onClaimOffer }: HeroProps) {
+  const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    const imgWrap = hero.querySelector<HTMLElement>('.hero__image-wrap');
+    const horizon = hero.querySelector<HTMLElement>('.hero__horizon');
+    const content = hero.querySelector<HTMLElement>('.hero__content');
+    let raf = 0;
+
+    const tick = () => {
+      const scrollP = hero.offsetHeight > 0
+        ? Math.min(1, Math.max(0, window.scrollY / hero.offsetHeight))
+        : 0;
+      const viewP = getViewProgress(hero);
+
+      if (imgWrap) {
+        const y = scrollP * 18;
+        const scale = 1.02 + scrollP * 0.1;
+        imgWrap.style.transform = `translate3d(0, ${y}%, 0) scale(${scale})`;
+      }
+
+      if (horizon) {
+        horizon.style.transform = `translate3d(0, ${scrollP * 12}px, 0)`;
+        horizon.style.opacity = String(0.7 - scrollP * 0.35);
+      }
+
+      if (content) {
+        const lift = 1 - viewP * 0.15;
+        content.style.transform = `translate3d(0, ${scrollP * 28}px, 0) scale(${lift})`;
+        content.style.opacity = String(1 - scrollP * 0.25);
+      }
+
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   return (
-    <section id="hero" className="hero hero--cinematic">
+    <section id="hero" ref={heroRef} className="hero hero--cinematic hero--driven">
       <div className="hero__visual" aria-hidden="true">
         <div className="hero__image-wrap">
           <Image
