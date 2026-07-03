@@ -162,50 +162,35 @@ body::after {
 .reveal {
   opacity: 0;
   transform: translate3d(0, 40px, 0);
-  will-change: transform, opacity;
+  transition:
+    opacity 0.5s var(--ease-out),
+    transform 0.5s var(--ease-out);
 }
 
-@supports (animation-timeline: view()) {
-  .reveal--up {
-    animation: reveal-up linear both;
-    animation-timeline: view();
-    animation-range: entry 5% cover 35%;
-  }
-
-  .reveal--scale {
-    animation: reveal-scale linear both;
-    animation-timeline: view();
-    animation-range: entry 8% cover 38%;
-  }
-
-  .reveal--left {
-    animation: reveal-left linear both;
-    animation-timeline: view();
-    animation-range: entry 5% cover 35%;
-  }
-
-  .reveal--right {
-    animation: reveal-right linear both;
-    animation-timeline: view();
-    animation-range: entry 5% cover 35%;
-  }
-
-  .reveal--d1 { animation-range: entry 8% cover 36%; }
-  .reveal--d2 { animation-range: entry 12% cover 40%; }
-  .reveal--d3 { animation-range: entry 16% cover 44%; }
-  .reveal--d4 { animation-range: entry 20% cover 48%; }
-  .reveal--d5 { animation-range: entry 24% cover 52%; }
+.reveal--scale {
+  transform: translate3d(0, 32px, 0) scale(0.96);
 }
 
-@supports not (animation-timeline: view()) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-  }
+.reveal--left {
+  transform: translate3d(-40px, 0, 0);
+}
+
+.reveal--right {
+  transform: translate3d(40px, 0, 0);
+}
+
+.reveal--in {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.reveal--scale.reveal--in {
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal,
+  .reveal--in,
   .hero-animate {
     opacity: 1;
     transform: none;
@@ -3415,11 +3400,10 @@ label.card:focus-within {
 /* ── Scroll lift blocks (IntersectionObserver + CSS) ───────────── */
 .scroll-lift {
   opacity: 0;
-  transform: translate3d(0, 36px, 0);
+  transform: translate3d(0, 28px, 0);
   transition:
-    opacity 0.65s var(--ease-out),
-    transform 0.65s var(--ease-out);
-  will-change: opacity, transform;
+    opacity 0.4s var(--ease-out),
+    transform 0.4s var(--ease-out);
 }
 
 .scroll-lift--depth {
@@ -3438,21 +3422,17 @@ label.card:focus-within {
 .card.scroll-lift,
 .step.scroll-lift {
   transition:
-    opacity 0.65s var(--ease-out),
-    transform 0.65s var(--ease-out),
+    opacity 0.4s var(--ease-out),
+    transform 0.4s var(--ease-out),
     border-color 0.4s ease,
     box-shadow 0.4s ease;
-}
-
-.scroll-lift--in {
-  will-change: auto;
 }
 
 /* ── Interlude entrance ────────────────────────────────────────── */
 .interlude--rich .interlude__content {
   opacity: 0;
-  transform: translate3d(0, 20px, 0);
-  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+  transform: translate3d(0, 16px, 0);
+  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out);
 }
 
 .interlude--visible .interlude__content {
@@ -3460,16 +3440,9 @@ label.card:focus-within {
   transform: translate3d(0, 0, 0);
 }
 
-/* ── Performance: content-visibility + GPU layers ────────────── */
-.why-choose,
-.interlude,
-.h-showcase__card {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 500px;
-}
-
+/* ── Performance: GPU layers (no content-visibility — avoids scroll hitches) ── */
 .base-room {
-  contain: layout style;
+  contain: style;
 }
 
 .hero__content,
@@ -4199,6 +4172,12 @@ label.card:focus-within {
   .base-room__status-dot,
   .hero__gate-dot {
     animation: none !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   .scroll-lift {

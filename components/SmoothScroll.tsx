@@ -2,7 +2,11 @@
 
 import { useEffect } from 'react';
 import Lenis from 'lenis';
-import { runScrollFrame, setScrollDriverEnabled } from '@/lib/scroll-driver';
+import {
+  runScrollFrame,
+  setLenisInstance,
+  setScrollDriverEnabled,
+} from '@/lib/scroll-driver';
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -34,16 +38,17 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     const mobile = narrow.matches;
 
     const lenis = new Lenis({
-      lerp: mobile ? 0.11 : 0.075,
+      lerp: mobile ? 0.12 : 0.1,
       smoothWheel: true,
       syncTouch: mobile,
-      syncTouchLerp: 0.1,
-      touchInertiaExponent: 1.5,
+      syncTouchLerp: 0.12,
+      touchInertiaExponent: 1.35,
       touchMultiplier: 1,
       wheelMultiplier: 1,
       autoResize: true,
     });
 
+    setLenisInstance(lenis);
     document.documentElement.classList.add('lenis', 'lenis-smooth');
 
     let raf = 0;
@@ -58,6 +63,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       if (reducedMotion.matches) {
         cancelAnimationFrame(raf);
         document.documentElement.classList.remove('lenis', 'lenis-smooth');
+        setLenisInstance(null);
         lenis.destroy();
         setScrollDriverEnabled(false);
       }
@@ -75,7 +81,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       e.preventDefault();
       lenis.scrollTo(target as HTMLElement, {
         offset: -72,
-        lerp: mobile ? 0.12 : 0.09,
+        lock: true,
       });
     };
 
@@ -90,6 +96,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       window.removeEventListener('resize', onResize);
       reducedMotion.removeEventListener('change', onReducedChange);
       document.documentElement.classList.remove('lenis', 'lenis-smooth');
+      setLenisInstance(null);
       lenis.destroy();
       setScrollDriverEnabled(true);
     };

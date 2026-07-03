@@ -27,6 +27,7 @@ import {
   getDisplayPrice,
 } from '@/lib/data';
 import { testimonials } from '@/lib/testimonials';
+import { scrollToElement } from '@/lib/scroll-driver';
 
 interface BuilderForm {
   businessName: string;
@@ -162,10 +163,8 @@ export default function Home() {
         setIsBuilderSubmitted(true);
         setIsBuilderSubmitting(false);
         setTimeout(() => {
-          document.getElementById('order-success')?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          });
+          const success = document.getElementById('order-success');
+          if (success) scrollToElement(success, { offset: -48 });
         }, 100);
       } else {
         throw new Error('Formspree submission failed');
@@ -463,7 +462,7 @@ export default function Home() {
                 index={i}
                 onSelect={(name) => {
                   setSelectedBuilderPackage(name);
-                  document.getElementById('build')?.scrollIntoView({ behavior: 'smooth' });
+                  scrollToElement('build');
                 }}
               />
             ))}

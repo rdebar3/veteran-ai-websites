@@ -3,8 +3,22 @@ type ScrollTask = {
   isActive: () => boolean;
 };
 
+type LenisScrollOptions = {
+  offset?: number;
+  immediate?: boolean;
+  lock?: boolean;
+};
+
+type LenisLike = {
+  scrollTo: (
+    target: HTMLElement | string | number,
+    options?: LenisScrollOptions
+  ) => void;
+};
+
 const tasks = new Set<ScrollTask>();
 let enabled = true;
+let lenisInstance: LenisLike | null = null;
 
 /** Run all active scroll tasks synchronously (call from Lenis rAF loop). */
 export function runScrollFrame() {
@@ -19,6 +33,36 @@ export function runScrollFrame() {
 
 export function setScrollDriverEnabled(value: boolean) {
   enabled = value;
+}
+
+export function setLenisInstance(lenis: LenisLike | null) {
+  lenisInstance = lenis;
+}
+
+/** Unified scroll — routes through Lenis when active, native otherwise. */
+export function scrollToElement(
+  target: string | HTMLElement,
+  options?: { offset?: number; immediate?: boolean; block?: ScrollLogicalPosition }
+) {
+  const el =
+    typeof target === 'string'
+      ? document.getElementById(target.replace(/^#/, ''))
+      : target;
+
+  if (!el) return;
+
+  if (lenisInstance) {
+    lenisInstance.scrollTo(el, {
+      offset: options?.offset ?? -72,
+      immediate: options?.immediate,
+    });
+    return;
+  }
+
+  el.scrollIntoView({
+    behavior: options?.immediate ? 'auto' : 'smooth',
+    block: options?.block ?? 'start',
+  });
 }
 
 /** @deprecated Prefer runScrollFrame inside the Lenis loop. Kept for resize hooks. */

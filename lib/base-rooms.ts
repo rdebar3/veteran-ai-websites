@@ -1,4 +1,5 @@
 import { landmarks } from '@/lib/landmarks';
+import { scrollToElement } from '@/lib/scroll-driver';
 
 export type RoomId =
   | 'main-gate'
@@ -146,8 +147,5 @@ export const navRooms: BaseRoomConfig[] = [
 ];
 
 export function scrollToRoom(sectionId: string) {
-  const el = document.getElementById(sectionId);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  scrollToElement(sectionId);
 }

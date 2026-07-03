@@ -9,6 +9,7 @@ import {
   getPanelOpacity,
   getTrackProgress,
 } from '@/lib/scroll-cinema';
+import { isInViewport, registerScrollTask } from '@/lib/scroll-driver';
 
 interface CinematicScrollProps {
   id?: string;
@@ -34,8 +35,6 @@ export default function CinematicScroll({ id, chapters, className = '' }: Cinema
     const dots = Array.from(track.querySelectorAll<HTMLElement>('.cinema__dot'));
     const grids = Array.from(track.querySelectorAll<HTMLElement>('.cinema__grid-drift'));
     const glows = Array.from(track.querySelectorAll<HTMLElement>('.cinema__glow-drift'));
-
-    let raf = 0;
 
     const tick = () => {
       const p = getTrackProgress(track);
@@ -120,12 +119,14 @@ export default function CinematicScroll({ id, chapters, className = '' }: Cinema
         dot.style.transform = `scale3d(${0.85 + active * 0.15}, ${0.85 + active * 0.15}, 1)`;
         dot.classList.toggle('cinema__dot--active', active > 0.55);
       });
-
-      raf = requestAnimationFrame(tick);
     };
 
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    tick();
+
+    return registerScrollTask({
+      isActive: () => isInViewport(track, 240),
+      run: tick,
+    });
   }, [count]);
 
   return (
