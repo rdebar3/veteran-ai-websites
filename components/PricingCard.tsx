@@ -20,11 +20,7 @@ export default function PricingCard({ tier, onSelect, index = 0 }: PricingCardPr
 
   return (
     <Reveal variant="scale" delay={delay}>
-      <div
-        className={`card h-full ${
-          isPopular ? 'card--featured' : hasPromo ? 'card--selected' : ''
-        }`}
-      >
+      <div className="card pricing-card-wrap h-full">
         {isPopular && (
           <span className="pricing-card__badge pricing-card__badge--popular">Most Popular</span>
         )}
