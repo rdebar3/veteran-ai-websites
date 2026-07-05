@@ -93,7 +93,7 @@ export default function MainGateHero({ onClaimOffer }: MainGateHeroProps) {
               <span className="cinematic-hero__price-strike">$497</span>
               <span className="cinematic-hero__price-now">$397</span>
             </p>
-            <p className="cinematic-hero__offer-urgency">Ends July 4th — Single-page Starter only</p>
+            <p className="cinematic-hero__offer-urgency">Resets every Sunday 11:59 PM — Single-page Starter only</p>
           </motion.div>
 
           <motion.div className="cinematic-hero__cta-group" {...motionProps(0.72)}>

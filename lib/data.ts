@@ -15,7 +15,7 @@ export interface PricingTier {
   promoPrice?: number;
   promoActive?: boolean;
   promoLabel?: string;
-  promoEnds?: string;
+
   popular?: boolean;
   features: string[];
   delivery: string;
@@ -36,7 +36,6 @@ export const pricingTiers: PricingTier[] = [
     promoPrice: 397,
     promoActive: true,
     promoLabel: 'Limited Time Offer',
-    promoEnds: 'July 4th',
     popular: false,
     delivery: 'Delivered in 1 day',
     revisions: '1 round of revisions',

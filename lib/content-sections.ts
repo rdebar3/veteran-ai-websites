@@ -47,7 +47,7 @@ export const promoInterlude = {
   title: '$397 Starter Website',
   subtitle: 'Professional one-page site — delivered in one day.',
   body:
-    'Our Starter package gives West Virginia businesses a polished single-page website with hero, services, testimonials, and contact form — everything you need to start taking online inquiries seriously. This $397 promotional rate (regularly $497) is available until July 4th for new Starter orders only. You pay after you approve the final design, and you keep 100% ownership of every file we deliver. No retainers, no lock-in, no surprises.',
+    'Our Starter package gives West Virginia businesses a polished single-page website with hero, services, testimonials, and contact form — everything you need to start taking online inquiries seriously. This $397 promotional rate (regularly $497) resets every Sunday at 11:59 PM for new Starter orders only. You pay after you approve the final design, and you keep 100% ownership of every file we deliver. No retainers, no lock-in, no surprises.',
   imageCaption:
     'Appalachian foothills at dusk — the rolling landscape where thousands of WV family businesses serve their neighbors every day.',
 };

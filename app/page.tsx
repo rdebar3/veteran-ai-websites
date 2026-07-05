@@ -13,6 +13,7 @@ import PricingCard from '@/components/PricingCard';
 import FAQAccordion, { type FAQ } from '@/components/FAQAccordion';
 import WhyChooseSection from '@/components/WhyChooseSection';
 import VisualInterlude from '@/components/VisualInterlude';
+import OfferCountdown from '@/components/OfferCountdown';
 
 import HorizontalShowcase from '@/components/HorizontalShowcase';
 import ScrollLift from '@/components/ScrollLift';
@@ -280,9 +281,7 @@ export default function Home() {
                           <span className="order-package__price">${displayPrice}</span>
                         </div>
                         {hasPromo && (
-                          <p className="text-xs text-[var(--crimson-bright)] mt-1 font-medium">
-                            $397 until July 4th
-                          </p>
+                          <OfferCountdown compact className="mt-2" />
                         )}
                         <p className="text-xs text-[var(--text-dim)] mt-2">{tier.delivery}</p>
                       </button>
@@ -307,11 +306,11 @@ export default function Home() {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => handleToggleAddOn(addon.id)}
-                          className="mt-1 accent-[var(--crimson)] h-4 w-4"
+                          className="mt-1 accent-[var(--cyan)] h-4 w-4"
                         />
                         <div>
                           <div className="text-[var(--text-cream)] font-medium">{addon.name}</div>
-                          <div className="text-sm text-[var(--gold)] font-semibold mt-1">
+                          <div className="text-sm text-[var(--amber)] font-semibold mt-1">
                             +${addon.price}
                             {addon.period}
                           </div>
@@ -388,9 +387,12 @@ export default function Home() {
                     <span className="order-total-pill__note">one-time + recurring</span>
                   </div>
                   {selectedBuilderPackage === 'Starter' && (
-                    <p className="order-promo-note">
-                      Limited Time Offer — $397 until July 4th. Final amount confirmed at checkout.
-                    </p>
+                    <div className="order-promo-block">
+                      <OfferCountdown compact />
+                      <p className="order-promo-note">
+                        Limited Time Offer — $397 Starter (was $497). Final amount confirmed at checkout.
+                      </p>
+                    </div>
                   )}
                   <p className="order-trust-line">
                     No payment required today. Pay only after you review and approve the final design.
@@ -475,7 +477,7 @@ export default function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {allPackagesInclude.map((item, i) => (
                   <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-muted)]">
-                    <Check className="h-4 w-4 text-[var(--gold)] shrink-0" />
+                    <Check className="h-4 w-4 text-[var(--cyan)] shrink-0" />
                     {item}
                   </div>
                 ))}

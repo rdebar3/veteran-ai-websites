@@ -5,8 +5,8 @@ export default function CircuitOverlay({ className = '' }: { className?: string 
         <defs>
           <linearGradient id="circuit-glow" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.35" />
-            <stop offset="45%" stopColor="#3b82f6" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#fbbf24" stopOpacity="0.15" />
+            <stop offset="45%" stopColor="#38bdf8" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#e8a33d" stopOpacity="0.12" />
           </linearGradient>
           <filter id="circuit-blur">
             <feGaussianBlur stdDeviation="1.5" />
@@ -30,8 +30,8 @@ export default function CircuitOverlay({ className = '' }: { className?: string 
         </g>
         <g className="circuit-overlay__pulse" filter="url(#circuit-blur)">
           <circle cx="680" cy="180" r="6" fill="#22d3ee" opacity="0.2" />
-          <circle cx="580" cy="440" r="5" fill="#3b82f6" opacity="0.18" />
-          <circle cx="840" cy="700" r="6" fill="#fbbf24" opacity="0.15" />
+          <circle cx="580" cy="440" r="5" fill="#38bdf8" opacity="0.18" />
+          <circle cx="840" cy="700" r="6" fill="#e8a33d" opacity="0.12" />
         </g>
       </svg>
     </div>

@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { getDisplayPrice } from '@/lib/data';
 import type { PricingTier } from '@/lib/data';
 import Reveal from '@/components/Reveal';
+import OfferCountdown from '@/components/OfferCountdown';
 
 interface PricingCardProps {
   tier: PricingTier;
@@ -36,9 +37,9 @@ export default function PricingCard({ tier, onSelect, index = 0 }: PricingCardPr
             <span className="pricing-card__period">one-time</span>
           </div>
           {hasPromo && (
-            <p className="pricing-card__promo">
-              ${tier.promoPrice} until {tier.promoEnds}
-            </p>
+            <div className="pricing-card__promo">
+              <OfferCountdown compact />
+            </div>
           )}
           <p className="pricing-card__delivery">{tier.delivery}</p>
 

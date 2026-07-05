@@ -1,10 +1,16 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import HeroBackground from '@/components/HeroBackground';
+import HeroConstellationMesh from '@/components/HeroConstellationMesh';
+import HeroRadarSweep from '@/components/HeroRadarSweep';
+import HeroHeadline from '@/components/HeroHeadline';
 import CircuitOverlay from '@/components/CircuitOverlay';
 import PatrioticOverlay from '@/components/PatrioticOverlay';
 import NeuralOverlay from '@/components/NeuralOverlay';
+import OfferCountdown from '@/components/OfferCountdown';
 import { baseRooms } from '@/lib/base-rooms';
+import { heroFadeUp } from '@/lib/hero-motion';
 
 interface HeroProps {
   onClaimOffer?: () => void;
@@ -14,9 +20,11 @@ export default function Hero({ onClaimOffer }: HeroProps) {
   const room = baseRooms['main-gate'];
 
   return (
-    <section id="hero" className="hero hero--cinematic hero--outpost hero--gate">
+    <section id="hero" className="hero hero--cinematic hero--outpost hero--gate hero--animated">
       <div className="hero__visual" aria-hidden="true">
         <HeroBackground />
+        <HeroConstellationMesh />
+        <HeroRadarSweep />
         <div className="hero__ken-burns" />
         <div className="hero__sharpen" />
         <div className="hero__veil" />
@@ -44,35 +52,32 @@ export default function Hero({ onClaimOffer }: HeroProps) {
       </div>
 
       <div className="hero__content">
-        <div className="hero__badge hero-animate hero-animate--1">
+        <motion.div className="hero__badge" {...heroFadeUp(0.12)}>
           <span className="hero__badge-dot" />
           <span className="hero__badge-star" aria-hidden="true">★</span>
           WV Veteran Owned
           <span className="hero__badge-divider" />
           AI-Powered Web Systems
-        </div>
+        </motion.div>
 
-        <h1 className="hero__title hero-animate hero-animate--2">
-          <span className="hero__title-line">Veteran AI</span>
-          <span className="hero__title-accent">Websites</span>
-        </h1>
+        <HeroHeadline />
 
-        <p className="hero__tagline hero-animate hero-animate--3">
+        <motion.p className="hero__tagline" {...heroFadeUp(0.72)}>
           Professional websites. Built in one day.
-        </p>
+        </motion.p>
 
-        <p className="hero__lead hero-animate hero-animate--3">
+        <motion.p className="hero__lead" {...heroFadeUp(0.82)}>
           Premium one-day sites for West Virginia businesses — veteran discipline,
           modern AI craft, and 100% ownership. No agency runaround.
-        </p>
+        </motion.p>
 
-        <div className="hero__offer hero-animate hero-animate--4">
+        <motion.div className="hero__offer" {...heroFadeUp(0.95)}>
           <div className="hero__offer-shimmer" aria-hidden="true" />
           <div className="hero__offer-glow" aria-hidden="true" />
           <div className="hero__offer-header">
             <span className="hero__offer-label">Limited Time Offer</span>
-            <span className="hero__offer-deadline">Ends July 4th</span>
           </div>
+          <OfferCountdown className="hero__offer-countdown" />
           <p className="hero__offer-headline">First Starter 1-Page Website</p>
           <div className="hero__offer-price-row">
             <span className="hero__price-was">$497</span>
@@ -80,28 +85,28 @@ export default function Hero({ onClaimOffer }: HeroProps) {
             <span className="hero__price-save">Save $100</span>
           </div>
           <p className="hero__offer-note">Single-page Starter package only</p>
-        </div>
+        </motion.div>
 
-        <div className="hero__cta hero-animate hero-animate--5">
+        <motion.div className="hero__cta" {...heroFadeUp(1.1)}>
           <a href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg btn--glow">
             Claim My $397 Website
           </a>
           <a href="#pricing" className="btn btn--ghost btn--lg">
             View All Packages
           </a>
-        </div>
+        </motion.div>
 
-        <p className="hero__note hero-animate hero-animate--6">
+        <motion.p className="hero__note" {...heroFadeUp(1.22)}>
           <span className="hero__note-item">Same-day delivery</span>
           <span className="hero__note-item">100% ownership</span>
           <span className="hero__note-item">Pay after approval</span>
-        </p>
+        </motion.p>
       </div>
 
-      <div className="hero__scroll hero-animate hero-animate--6" aria-hidden="true">
+      <motion.div className="hero__scroll" aria-hidden="true" {...heroFadeUp(1.32)}>
         <span>Enter the command base</span>
         <div className="hero__scroll-line" />
-      </div>
+      </motion.div>
     </section>
   );
 }
