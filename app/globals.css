@@ -2376,6 +2376,11 @@ label.card:focus-within {
   margin: 0 auto;
 }
 
+.why-choose__intro {
+  display: flex;
+  flex-direction: column;
+}
+
 .why-choose__eyebrow {
   font-family: var(--font-mono);
   font-size: 0.625rem;
@@ -3726,15 +3731,9 @@ label.card:focus-within {
 }
 
 /* ── Interlude entrance ────────────────────────────────────────── */
-.interlude--rich .interlude__content {
-  opacity: 0;
-  transform: translate3d(0, 16px, 0);
-  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out);
-}
-
-.interlude--visible .interlude__content {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
+.interlude__content {
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Performance: GPU layers (no content-visibility — avoids scroll hitches) ── */

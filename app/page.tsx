@@ -16,7 +16,7 @@ import VisualInterlude from '@/components/VisualInterlude';
 import OfferCountdown from '@/components/OfferCountdown';
 
 import HorizontalShowcase from '@/components/HorizontalShowcase';
-import ScrollLift from '@/components/ScrollLift';
+import { InViewItem, InViewStagger } from '@/components/InViewStagger';
 import { showcaseDemos } from '@/lib/cinematic';
 import { promoInterlude, localBusinessInterlude } from '@/lib/content-sections';
 import { baseRooms } from '@/lib/base-rooms';
@@ -456,19 +456,19 @@ export default function Home() {
         subtitle="Mobile-first sites built in one day. You own everything."
         wide
       >
-          <div className="grid-3">
-            {pricingTiers.map((tier, i) => (
-              <PricingCard
-                key={tier.name}
-                tier={tier}
-                index={i}
-                onSelect={(name) => {
-                  setSelectedBuilderPackage(name);
-                  scrollToElement('build');
-                }}
-              />
+          <InViewStagger className="grid-3" stagger={0.1}>
+            {pricingTiers.map((tier) => (
+              <InViewItem key={tier.name} variant="card" className="h-full">
+                <PricingCard
+                  tier={tier}
+                  onSelect={(name) => {
+                    setSelectedBuilderPackage(name);
+                    scrollToElement('build');
+                  }}
+                />
+              </InViewItem>
             ))}
-          </div>
+          </InViewStagger>
           <Reveal variant="up" delay="2">
             <div className="card includes-card max-w-3xl mx-auto mt-10 p-8">
               <p className="text-center includes-card__label mb-6">
@@ -494,26 +494,30 @@ export default function Home() {
         subtitle="Six simple steps from order to launch."
         wide
       >
-          <div className="grid-2">
-            {howItWorksSteps.map((step, index) => {
+          <InViewStagger className="grid-2" stagger={0.09}>
+            {howItWorksSteps.map((step) => {
               const Icon = step.icon;
               return (
-                <ScrollLift key={index} delay={index * 0.07} className="card step h-full">
-                  <div className="step__num">{step.number}</div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Icon className="h-4 w-4 text-[var(--cyan)]" />
-                      <h3 className="step__title">{step.title}</h3>
+                <InViewItem key={step.number} variant="card" className="h-full">
+                  <div className="card step h-full">
+                    <div className="step__num">{step.number}</div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon className="h-4 w-4 text-[var(--cyan)]" />
+                        <h3 className="step__title">{step.title}</h3>
+                      </div>
+                      <p className="step__desc">{step.desc}</p>
                     </div>
-                    <p className="step__desc">{step.desc}</p>
                   </div>
-                </ScrollLift>
+                </InViewItem>
               );
             })}
-          </div>
-          <div className="section-cta">
-            <a href="#build" className="btn btn--primary btn--lg btn--glow">Start Your Order</a>
-          </div>
+          </InViewStagger>
+          <Reveal variant="up" delay="1">
+            <div className="section-cta">
+              <a href="#build" className="btn btn--primary btn--lg btn--glow">Start Your Order</a>
+            </div>
+          </Reveal>
       </BaseRoom>
 
       <BaseRoom
@@ -550,15 +554,17 @@ export default function Home() {
         subtitle="Real results from West Virginia business owners."
         wide
       >
-          <div className="grid-3">
-            {testimonials.map((t, i) => (
-              <ScrollLift key={t.author} delay={i * 0.08} className="card quote-card h-full">
-                <p className="quote-card__text">&ldquo;{t.quote}&rdquo;</p>
-                <p className="quote-card__author">{t.author}</p>
-                <p className="quote-card__meta">{t.business} · {t.location}</p>
-              </ScrollLift>
+          <InViewStagger className="grid-3" stagger={0.1}>
+            {testimonials.map((t) => (
+              <InViewItem key={t.author} variant="card" className="h-full">
+                <div className="card quote-card h-full">
+                  <p className="quote-card__text">&ldquo;{t.quote}&rdquo;</p>
+                  <p className="quote-card__author">{t.author}</p>
+                  <p className="quote-card__meta">{t.business} · {t.location}</p>
+                </div>
+              </InViewItem>
             ))}
-          </div>
+          </InViewStagger>
       </BaseRoom>
 
       <BaseRoom

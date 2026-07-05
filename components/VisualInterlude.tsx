@@ -1,7 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { motion, useReducedMotion } from 'framer-motion';
+import { InViewItem, InViewStagger } from '@/components/InViewStagger';
+import {
+  inViewViewport,
+  scaleUpVariants,
+} from '@/lib/scroll-motion';
 
 interface VisualInterludeProps {
   image: string;
@@ -31,64 +36,81 @@ export default function VisualInterlude({
   ctaLabel,
   align = 'center',
 }: VisualInterludeProps) {
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      el.classList.add('interlude--visible');
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('interlude--visible');
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15, rootMargin: '0px 0px -6% 0px' }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const prefersReducedMotion = useReducedMotion();
 
   return (
-    <section
-      ref={ref}
-      className={`interlude interlude--split interlude--${align} interlude--rich`}
-    >
+    <section className={`interlude interlude--split interlude--${align} interlude--rich interlude--visible`}>
       <div className="interlude__panel">
-        <div className="interlude__visual">
-          <Image
-            src={image}
-            alt={imageAlt}
-            fill
-            sizes="(max-width: 768px) 100vw, 480px"
-            className="interlude__img"
-            quality={92}
-            loading="lazy"
-          />
-          {landmark && (
-            <span className="interlude__landmark-tag">{landmark}</span>
+        {prefersReducedMotion ? (
+          <div className="interlude__visual">
+            <Image
+              src={image}
+              alt={imageAlt}
+              fill
+              sizes="(max-width: 768px) 100vw, 480px"
+              className="interlude__img"
+              quality={92}
+              loading="lazy"
+            />
+            {landmark && (
+              <span className="interlude__landmark-tag">{landmark}</span>
+            )}
+          </div>
+        ) : (
+          <motion.div
+            className="interlude__visual"
+            initial="hidden"
+            whileInView="visible"
+            viewport={inViewViewport}
+            variants={scaleUpVariants}
+          >
+            <Image
+              src={image}
+              alt={imageAlt}
+              fill
+              sizes="(max-width: 768px) 100vw, 480px"
+              className="interlude__img"
+              quality={92}
+              loading="lazy"
+            />
+            {landmark && (
+              <span className="interlude__landmark-tag">{landmark}</span>
+            )}
+          </motion.div>
+        )}
+
+        <InViewStagger className="interlude__content" stagger={0.09}>
+          {eyebrow && (
+            <InViewItem>
+              <span className="interlude__eyebrow">{eyebrow}</span>
+            </InViewItem>
           )}
-        </div>
-        <div className="interlude__content">
-          {eyebrow && <span className="interlude__eyebrow">{eyebrow}</span>}
-          <h2 className="interlude__title">{title}</h2>
-          {subtitle && <p className="interlude__subtitle">{subtitle}</p>}
-          {body && <p className="interlude__body">{body}</p>}
-          {imageCaption && <p className="interlude__caption">{imageCaption}</p>}
+          <InViewItem>
+            <h2 className="interlude__title">{title}</h2>
+          </InViewItem>
+          {subtitle && (
+            <InViewItem>
+              <p className="interlude__subtitle">{subtitle}</p>
+            </InViewItem>
+          )}
+          {body && (
+            <InViewItem>
+              <p className="interlude__body">{body}</p>
+            </InViewItem>
+          )}
+          {imageCaption && (
+            <InViewItem>
+              <p className="interlude__caption">{imageCaption}</p>
+            </InViewItem>
+          )}
           {ctaHref && ctaLabel && (
-            <a href={ctaHref} className="btn btn--primary btn--lg btn--glow interlude__cta">
-              {ctaLabel}
-            </a>
+            <InViewItem>
+              <a href={ctaHref} className="btn btn--primary btn--lg btn--glow interlude__cta">
+                {ctaLabel}
+              </a>
+            </InViewItem>
           )}
-        </div>
+        </InViewStagger>
       </div>
     </section>
   );

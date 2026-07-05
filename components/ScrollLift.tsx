@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { inViewViewport, scaleUpVariants } from '@/lib/scroll-motion';
 
 interface ScrollLiftProps {
   children: ReactNode;
@@ -9,44 +11,30 @@ interface ScrollLiftProps {
   depth?: boolean;
 }
 
-/** One-shot entrance via IntersectionObserver + CSS (no scroll rAF). */
-export default function ScrollLift({ children, className = '', delay = 0, depth = true }: ScrollLiftProps) {
-  const ref = useRef<HTMLDivElement>(null);
+/** Card/image entrance: fade in + scale 96% → 100% on scroll. */
+export default function ScrollLift({
+  children,
+  className = '',
+  delay = 0,
+  depth = true,
+}: ScrollLiftProps) {
+  const prefersReducedMotion = useReducedMotion();
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      el.classList.add('scroll-lift--in');
-      return;
-    }
-
-    if (delay > 0) {
-      el.style.transitionDelay = `${delay}s`;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('scroll-lift--in');
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
-    <div
-      ref={ref}
-      className={`scroll-lift ${depth ? 'scroll-lift--depth' : 'scroll-lift--flat'} ${className}`.trim()}
+    <motion.div
+      className={className}
+      custom={delay}
+      initial="hidden"
+      whileInView="visible"
+      viewport={inViewViewport}
+      variants={scaleUpVariants}
+      style={{ transformOrigin: depth ? 'center bottom' : 'center center' }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }

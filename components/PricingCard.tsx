@@ -3,24 +3,19 @@
 import { Check } from 'lucide-react';
 import { getDisplayPrice } from '@/lib/data';
 import type { PricingTier } from '@/lib/data';
-import Reveal from '@/components/Reveal';
 import OfferCountdown from '@/components/OfferCountdown';
 
 interface PricingCardProps {
   tier: PricingTier;
   onSelect: (packageName: string) => void;
-  index?: number;
 }
 
-export default function PricingCard({ tier, onSelect, index = 0 }: PricingCardProps) {
+export default function PricingCard({ tier, onSelect }: PricingCardProps) {
   const isPopular = tier.popular;
   const hasPromo = tier.promoActive && tier.promoPrice != null;
   const displayPrice = getDisplayPrice(tier);
-  const delays = ['none', '1', '2', '3', '4', '5'] as const;
-  const delay = delays[Math.min(index, delays.length - 1)];
 
   return (
-    <Reveal variant="scale" delay={delay}>
       <div className="card pricing-card-wrap h-full">
         {isPopular && (
           <span className="pricing-card__badge pricing-card__badge--popular">Most Popular</span>
@@ -64,6 +59,5 @@ export default function PricingCard({ tier, onSelect, index = 0 }: PricingCardPr
           <p className="text-center text-xs text-[var(--text-dim)] mt-4">{tier.revisions}</p>
         </div>
       </div>
-    </Reveal>
   );
 }

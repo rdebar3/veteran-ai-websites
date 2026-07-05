@@ -3,6 +3,7 @@
 import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import Image from 'next/image';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
+import { InViewItem, InViewStagger } from '@/components/InViewStagger';
 import type { BaseRoomConfig } from '@/lib/base-rooms';
 import { isInViewport, registerScrollTask } from '@/lib/scroll-driver';
 
@@ -71,20 +72,34 @@ export default function BaseRoom({
   const chamberContent = (
     <>
       {!hideHeader && (
-        <div className="base-room__header">
+        <InViewStagger className="base-room__header" stagger={0.09}>
           {!isFunctional && (
-            <div className="base-room__status">
-              <span className="base-room__status-dot" />
-              <span className="base-room__codename">{room.codename}</span>
-            </div>
+            <InViewItem>
+              <div className="base-room__status">
+                <span className="base-room__status-dot" />
+                <span className="base-room__codename">{room.codename}</span>
+              </div>
+            </InViewItem>
           )}
-          {index && <span className="base-room__index">{index}</span>}
-          {eyebrow && <p className="base-room__eyebrow">{eyebrow}</p>}
-          <h2 className="base-room__title">{displayTitle}</h2>
-          <p className="base-room__subtitle">{displaySubtitle}</p>
-          {headerExtra}
+          {index && (
+            <InViewItem>
+              <span className="base-room__index">{index}</span>
+            </InViewItem>
+          )}
+          {eyebrow && (
+            <InViewItem>
+              <p className="base-room__eyebrow">{eyebrow}</p>
+            </InViewItem>
+          )}
+          <InViewItem>
+            <h2 className="base-room__title">{displayTitle}</h2>
+          </InViewItem>
+          <InViewItem>
+            <p className="base-room__subtitle">{displaySubtitle}</p>
+          </InViewItem>
+          {headerExtra && <InViewItem>{headerExtra}</InViewItem>}
           <div className="base-room__threshold" aria-hidden="true" />
-        </div>
+        </InViewStagger>
       )}
 
       <div className="base-room__floor">

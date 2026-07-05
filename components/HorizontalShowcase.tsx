@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import { Check } from 'lucide-react';
 import type { ShowcaseDemo } from '@/lib/cinematic';
-import ScrollLift from '@/components/ScrollLift';
+import { InViewItem, InViewStagger } from '@/components/InViewStagger';
+import Reveal from '@/components/Reveal';
 
 interface HorizontalShowcaseProps {
   demos: ShowcaseDemo[];
@@ -12,13 +13,15 @@ interface HorizontalShowcaseProps {
 export default function HorizontalShowcase({ demos }: HorizontalShowcaseProps) {
   return (
     <div className="h-showcase">
-      <p className="h-showcase__intro">
-        Each tier includes a live demo you can click through before ordering — so you know exactly
-        what your package delivers for your business.
-      </p>
-      <div className="h-showcase__grid" role="list">
-        {demos.map((demo, i) => (
-          <ScrollLift key={demo.tier} delay={i * 0.06} depth={false} className="h-showcase__card">
+      <Reveal variant="up">
+        <p className="h-showcase__intro">
+          Each tier includes a live demo you can click through before ordering — so you know exactly
+          what your package delivers for your business.
+        </p>
+      </Reveal>
+      <InViewStagger className="h-showcase__grid" stagger={0.1} role="list">
+        {demos.map((demo) => (
+          <InViewItem key={demo.tier} variant="card" className="h-showcase__card" role="listitem">
             <div className="h-showcase__visual">
               <div className="h-showcase__img-wrap">
                 <Image
@@ -56,9 +59,9 @@ export default function HorizontalShowcase({ demos }: HorizontalShowcaseProps) {
                 View Live Demo
               </a>
             </div>
-          </ScrollLift>
+          </InViewItem>
         ))}
-      </div>
+      </InViewStagger>
     </div>
   );
 }
