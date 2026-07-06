@@ -12,14 +12,11 @@ import BaseRoom from '@/components/BaseRoom';
 import Reveal from '@/components/Reveal';
 import PricingCard from '@/components/PricingCard';
 import FAQAccordion, { type FAQ } from '@/components/FAQAccordion';
-import WhyChooseSection from '@/components/WhyChooseSection';
-import VisualInterlude from '@/components/VisualInterlude';
 import OfferCountdown from '@/components/OfferCountdown';
 
 import HorizontalShowcase from '@/components/HorizontalShowcase';
 import { InViewItem, InViewStagger } from '@/components/InViewStagger';
 import { showcaseDemos } from '@/lib/cinematic';
-import { promoInterlude, localBusinessInterlude } from '@/lib/content-sections';
 import { baseRooms } from '@/lib/base-rooms';
 import {
   pricingTiers,
@@ -232,22 +229,6 @@ export default function Home() {
         body="Starlink overhead, AI on the desk, the flag on the wall — your website deployed with the discipline of an operation, not the chaos of an agency."
         ctaHref="#build"
         ctaLabel="Start your build"
-      />
-
-      <WhyChooseSection />
-
-      <VisualInterlude
-        image="/interludes/promo-foothills.jpg"
-        imageAlt="Appalachian foothills at dusk in West Virginia"
-        landmark="Appalachian Foothills"
-        outpost="Starter Package Sector"
-        eyebrow={promoInterlude.eyebrow}
-        title={promoInterlude.title}
-        subtitle={promoInterlude.subtitle}
-        body={promoInterlude.body}
-        imageCaption={promoInterlude.imageCaption}
-        ctaHref="#build"
-        ctaLabel="Claim My $397 Website"
       />
 
       <BaseRoom
@@ -555,21 +536,6 @@ export default function Home() {
       >
         <HorizontalShowcase demos={showcaseDemos} />
       </BaseRoom>
-
-      <VisualInterlude
-        image="/interludes/local-business-highlands.jpg"
-        imageAlt="West Virginia highlands at golden hour across the Appalachian Mountains"
-        landmark="West Virginia Highlands"
-        outpost="Local Business Sector"
-        eyebrow={localBusinessInterlude.eyebrow}
-        title={localBusinessInterlude.title}
-        subtitle={localBusinessInterlude.subtitle}
-        body={localBusinessInterlude.body}
-        imageCaption={localBusinessInterlude.imageCaption}
-        ctaHref="#build"
-        ctaLabel="Start Your Order"
-        align="left"
-      />
 
       <BaseRoom
         room={baseRooms['after-action-lounge']}
