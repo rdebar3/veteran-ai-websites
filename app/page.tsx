@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 
 import HeroCinematic from '@/components/HeroCinematic';
+import CinematicSection from '@/components/CinematicSection';
 import BaseRoom from '@/components/BaseRoom';
 import Reveal from '@/components/Reveal';
 import PricingCard from '@/components/PricingCard';
@@ -221,6 +222,17 @@ export default function Home() {
   return (
     <main className="relative flex-1">
       <HeroCinematic onClaimOffer={() => setSelectedBuilderPackage('Starter')} />
+
+      <CinematicSection
+        video="/cinematic/command-base.mp4"
+        poster="/cinematic/command-base-poster.jpg"
+        side="left"
+        eyebrow="Inside the command base"
+        title={<>Built from the woods.<br /><span className="cine-sec__grad">Engineered like a mission.</span></>}
+        body="Starlink overhead, AI on the desk, the flag on the wall — your website deployed with the discipline of an operation, not the chaos of an agency."
+        ctaHref="#build"
+        ctaLabel="Start your build"
+      />
 
       <WhyChooseSection />
 
@@ -450,6 +462,15 @@ export default function Home() {
           )}
       </BaseRoom>
 
+      <CinematicSection
+        video="/cinematic/veteran.mp4"
+        poster="/cinematic/veteran-poster.jpg"
+        side="right"
+        eyebrow="One veteran · One mission"
+        title={<>You work with the<br /><span className="cine-sec__grad">person doing the work.</span></>}
+        body="No offshore ticket queue, no account managers. Just direct communication with a U.S. veteran who treats your site like a deployment — planned, executed, delivered on time."
+      />
+
       <BaseRoom
         room={baseRooms['command-center']}
         eyebrow="Pricing"
@@ -571,6 +592,16 @@ export default function Home() {
           </InViewStagger>
       </BaseRoom>
 
+      <CinematicSection
+        video="/cinematic/night.mp4"
+        poster="/cinematic/night-poster.jpg"
+        side="center"
+        eyebrow="The lights stay on"
+        title={<>Let&apos;s build <span className="cine-sec__grad">yours.</span></>}
+        ctaHref="#build"
+        ctaLabel="Claim my $397 site"
+      />
+
       <BaseRoom
         room={baseRooms.debrief}
         eyebrow="Contact"
@@ -638,7 +669,6 @@ export default function Home() {
                 </div>
               </div>
               <div>
-                <label htmlFor="package" className="field-label">Interested Package</label>
                 <select id="package" name="package" className="field-input">
                   {pricingTiers.map((tier) => (
                     <option key={tier.name} value={tier.name}>
