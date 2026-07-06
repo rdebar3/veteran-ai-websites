@@ -278,6 +278,14 @@ export default function Home() {
                           <OfferCountdown compact className="mt-2" />
                         )}
                         <p className="text-xs text-[var(--text-dim)] mt-2">{tier.delivery}</p>
+                        <ul className="mt-4 space-y-2 border-t border-[var(--border)] pt-4">
+                          {tier.features.map((f) => (
+                            <li key={f} className="flex items-start gap-2 text-xs text-[var(--text-muted)]">
+                              <Check className="h-3.5 w-3.5 text-[var(--cyan)] shrink-0 mt-0.5" />
+                              <span>{f}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </button>
                     );
                   })}
