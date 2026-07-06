@@ -324,7 +324,7 @@ export default function Home() {
 
               <Reveal variant="right" delay="2">
                 <span className="order-step-label block mb-6">Step 3 — Your Details</span>
-                <div className="card p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="card card--flat p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="businessName" className="field-label">Business Name *</label>
                     <input
@@ -413,7 +413,7 @@ export default function Home() {
             </form>
           ) : (
             <Reveal variant="scale">
-              <div id="order-success" ref={successRef} className="card success-card">
+              <div id="order-success" ref={successRef} className="card card--flat success-card">
                 <div className="success-card__icon">
                   <CheckCircle className="h-8 w-8" />
                 </div>
@@ -470,7 +470,7 @@ export default function Home() {
             ))}
           </InViewStagger>
           <Reveal variant="up" delay="2">
-            <div className="card includes-card max-w-3xl mx-auto mt-10 p-8">
+            <div className="card card--flat includes-card max-w-3xl mx-auto mt-10 p-8">
               <p className="text-center includes-card__label mb-6">
                 Every package includes
               </p>
@@ -611,7 +611,7 @@ export default function Home() {
                 alert('Thank you! Your message has been received. We will contact you soon.');
                 form.reset();
               }}
-              className="card p-8 space-y-6"
+              className="card card--flat p-8 space-y-6"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>

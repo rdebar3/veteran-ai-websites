@@ -21,7 +21,7 @@ export default function HorizontalShowcase({ demos }: HorizontalShowcaseProps) {
       </Reveal>
       <InViewStagger className="h-showcase__grid" stagger={0.1} role="list">
         {demos.map((demo) => (
-          <InViewItem key={demo.tier} variant="card" className="h-showcase__card" role="listitem">
+          <InViewItem key={demo.tier} variant="card" className="card h-showcase__card" role="listitem">
             <div className="h-showcase__visual">
               <div className="h-showcase__img-wrap">
                 <Image

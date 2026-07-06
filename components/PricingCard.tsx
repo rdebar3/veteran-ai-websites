@@ -16,9 +16,9 @@ export default function PricingCard({ tier, onSelect }: PricingCardProps) {
   const displayPrice = getDisplayPrice(tier);
 
   return (
-      <div className="card pricing-card-wrap h-full">
+      <div className={`card pricing-card-wrap h-full${isPopular ? ' card--featured' : ''}`}>
         {isPopular && (
-          <span className="pricing-card__badge pricing-card__badge--popular">Most Popular</span>
+          <span className="pricing-card__badge pricing-card__badge--popular">MOST POPULAR</span>
         )}
         {hasPromo && !isPopular && (
           <span className="pricing-card__badge pricing-card__badge--promo">Limited Offer</span>
