@@ -10,6 +10,7 @@ import CircuitOverlay from '@/components/CircuitOverlay';
 import PatrioticOverlay from '@/components/PatrioticOverlay';
 import NeuralOverlay from '@/components/NeuralOverlay';
 import OfferCountdown from '@/components/OfferCountdown';
+import MagneticButton from '@/components/MagneticButton';
 import { baseRooms } from '@/lib/base-rooms';
 import { heroFadeUp } from '@/lib/hero-motion';
 
@@ -86,9 +87,9 @@ export default function Hero({ onClaimOffer }: HeroProps) {
           </motion.div>
 
           <motion.div className="hero__cta" {...heroFadeUp(1.1)}>
-            <a href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg btn--glow">
+            <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg btn--glow">
               Claim My $397 Website
-            </a>
+            </MagneticButton>
             <a href="#pricing" className="btn btn--ghost btn--lg">
               View All Packages
             </a>

@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { getDisplayPrice } from '@/lib/data';
 import type { PricingTier } from '@/lib/data';
 import OfferCountdown from '@/components/OfferCountdown';
+import MagneticButton from '@/components/MagneticButton';
 
 interface PricingCardProps {
   tier: PricingTier;
@@ -47,15 +48,24 @@ export default function PricingCard({ tier, onSelect }: PricingCardProps) {
             ))}
           </ul>
 
-          <button
-            type="button"
-            onClick={() => onSelect(tier.name)}
-            className={`btn btn--lg w-full ${
-              isPopular || hasPromo ? 'btn--primary btn--glow' : 'btn--ghost'
-            }`}
-          >
-            {hasPromo ? `Claim $${tier.promoPrice}` : `Choose ${tier.name}`}
-          </button>
+          {isPopular || hasPromo ? (
+            <MagneticButton
+              type="button"
+              block
+              onClick={() => onSelect(tier.name)}
+              className="btn btn--lg btn--primary btn--glow w-full"
+            >
+              {hasPromo ? `Claim $${tier.promoPrice}` : `Choose ${tier.name}`}
+            </MagneticButton>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onSelect(tier.name)}
+              className="btn btn--lg btn--ghost w-full"
+            >
+              Choose {tier.name}
+            </button>
+          )}
           <p className="text-center text-xs text-[var(--text-dim)] mt-4">{tier.revisions}</p>
         </div>
       </div>

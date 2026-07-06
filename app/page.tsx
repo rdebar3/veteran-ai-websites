@@ -29,6 +29,7 @@ import {
 } from '@/lib/data';
 import { testimonials } from '@/lib/testimonials';
 import { scrollToElement } from '@/lib/scroll-driver';
+import MagneticButton from '@/components/MagneticButton';
 
 interface BuilderForm {
   businessName: string;
@@ -397,13 +398,14 @@ export default function Home() {
                   <p className="order-trust-line">
                     No payment required today. Pay only after you review and approve the final design.
                   </p>
-                  <button
+                  <MagneticButton
                     type="submit"
                     disabled={isBuilderSubmitting}
+                    magnetic={!isBuilderSubmitting}
                     className="btn btn--primary btn--lg btn--glow"
                   >
                     {isBuilderSubmitting ? 'Submitting...' : 'Submit Order Request'}
-                  </button>
+                  </MagneticButton>
                   {submitError && <p className="order-error">{submitError}</p>}
                   <p className="order-trust-line">
                     We&apos;ll contact you within 24 hours to schedule your consultation.
@@ -429,9 +431,9 @@ export default function Home() {
                   I&apos;ll personally review your request and contact you within 24 hours.
                 </p>
                 <div className="success-card__actions">
-                  <button type="button" onClick={resetBuilder} className="btn btn--primary btn--lg btn--glow">
+                  <MagneticButton type="button" onClick={resetBuilder} className="btn btn--primary btn--lg btn--glow">
                     Start Another Order
-                  </button>
+                  </MagneticButton>
                   {!paymentSuccess && (
                     <button type="button" onClick={handlePayNow} disabled={isPaying} className="btn btn--ghost btn--lg">
                       {isPaying ? 'Processing...' : 'Pay Now'}
@@ -515,7 +517,9 @@ export default function Home() {
           </InViewStagger>
           <Reveal variant="up" delay="1">
             <div className="section-cta">
-              <a href="#build" className="btn btn--primary btn--lg btn--glow">Start Your Order</a>
+              <MagneticButton href="#build" className="btn btn--primary btn--lg btn--glow">
+                Start Your Order
+              </MagneticButton>
             </div>
           </Reveal>
       </BaseRoom>
@@ -653,9 +657,9 @@ export default function Home() {
                   placeholder="We're a family-owned plumbing company in West Virginia..."
                 />
               </div>
-              <button type="submit" className="btn btn--primary btn--lg btn--glow w-full">
+              <MagneticButton type="submit" block className="btn btn--primary btn--lg btn--glow w-full">
                 Send Message
-              </button>
+              </MagneticButton>
               <p className="text-center text-xs text-[var(--text-dim)]">
                 I&apos;ll personally review your request within 24 hours. No spam, ever.
               </p>
@@ -663,7 +667,9 @@ export default function Home() {
           </Reveal>
 
           <div className="section-cta">
-            <a href="#build" className="btn btn--primary btn--lg btn--glow">Start Your Order</a>
+            <MagneticButton href="#build" className="btn btn--primary btn--lg btn--glow">
+              Start Your Order
+            </MagneticButton>
           </div>
           </div>
       </BaseRoom>

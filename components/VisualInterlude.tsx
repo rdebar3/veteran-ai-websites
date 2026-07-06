@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'framer-motion';
 import { InViewItem, InViewStagger } from '@/components/InViewStagger';
+import MagneticButton from '@/components/MagneticButton';
 import {
   inViewViewport,
   scaleUpVariants,
@@ -105,9 +106,9 @@ export default function VisualInterlude({
           )}
           {ctaHref && ctaLabel && (
             <InViewItem>
-              <a href={ctaHref} className="btn btn--primary btn--lg btn--glow interlude__cta">
+              <MagneticButton href={ctaHref} className="btn btn--primary btn--lg btn--glow interlude__cta">
                 {ctaLabel}
-              </a>
+              </MagneticButton>
             </InViewItem>
           )}
         </InViewStagger>
