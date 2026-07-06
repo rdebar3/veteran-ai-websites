@@ -6,7 +6,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 
-import Hero from '@/components/Hero';
+import HeroCinematic from '@/components/HeroCinematic';
 import BaseRoom from '@/components/BaseRoom';
 import Reveal from '@/components/Reveal';
 import PricingCard from '@/components/PricingCard';
@@ -220,7 +220,7 @@ export default function Home() {
 
   return (
     <main className="relative flex-1">
-      <Hero onClaimOffer={() => setSelectedBuilderPackage('Starter')} />
+      <HeroCinematic onClaimOffer={() => setSelectedBuilderPackage('Starter')} />
 
       <WhyChooseSection />
 
