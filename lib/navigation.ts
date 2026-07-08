@@ -1,13 +1,12 @@
 import { scrollToElement } from '@/lib/scroll-driver';
 
+/** Briefing-first nav — chapter targets live inside #briefing */
 export const navLinks = [
-  { label: 'Story', href: '#story' },
+  { label: 'Briefing', href: '#briefing' },
+  { label: 'Demos', href: '#demos' },
+  { label: 'Reviews', href: '#victory' },
+  { label: 'Packages', href: '#pricing' },
   { label: 'Build', href: '#build' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Process', href: '#how-it-works' },
-  { label: 'Examples', href: '#examples' },
-  { label: 'Testimonials', href: '#testimonials' },
-  { label: 'Contact', href: '#contact' },
 ] as const;
 
 export function scrollToSection(id: string) {

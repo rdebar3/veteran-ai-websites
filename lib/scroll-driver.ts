@@ -65,6 +65,24 @@ export function scrollToElement(
   });
 }
 
+/** Absolute document Y scroll via Lenis when available. */
+export function scrollToY(
+  y: number,
+  options?: { immediate?: boolean; lock?: boolean }
+) {
+  if (lenisInstance) {
+    lenisInstance.scrollTo(y, {
+      immediate: options?.immediate,
+      lock: options?.lock ?? true,
+    });
+    return;
+  }
+  window.scrollTo({
+    top: y,
+    behavior: options?.immediate ? 'auto' : 'smooth',
+  });
+}
+
 /** @deprecated Prefer runScrollFrame inside the Lenis loop. Kept for resize hooks. */
 export function notifyScroll() {
   runScrollFrame();

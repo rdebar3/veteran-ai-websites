@@ -6,6 +6,9 @@ import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { InViewItem, InViewStagger } from '@/components/InViewStagger';
 import type { BaseRoomConfig } from '@/lib/base-rooms';
 import { isInViewport, registerScrollTask } from '@/lib/scroll-driver';
+import CircuitOverlay from '@/components/CircuitOverlay';
+import NeuralOverlay from '@/components/NeuralOverlay';
+import PatrioticOverlay from '@/components/PatrioticOverlay';
 
 interface BaseRoomProps {
   room: BaseRoomConfig;
@@ -18,6 +21,14 @@ interface BaseRoomProps {
   headerExtra?: ReactNode;
   hideHeader?: boolean;
   className?: string;
+  /** Atmospheric FX layered over the vista */
+  overlay?: 'auto' | 'patriotic' | 'neural' | 'circuit' | 'none';
+}
+
+function moodOverlay(mood: BaseRoomConfig['mood']): 'patriotic' | 'neural' | 'circuit' {
+  if (mood === 'crimson' || mood === 'amber') return 'patriotic';
+  if (mood === 'gold' || mood === 'emerald') return 'circuit';
+  return 'neural';
 }
 
 export default function BaseRoom({
@@ -31,17 +42,20 @@ export default function BaseRoom({
   headerExtra,
   hideHeader = false,
   className = '',
+  overlay = 'auto',
 }: BaseRoomProps) {
   const ref = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const isInView = useInView(ref, { amount: 0.1, margin: '-5% 0px', once: true });
   const isFunctional = className.includes('base-room--functional');
+  const fx = overlay === 'auto' ? moodOverlay(room.mood) : overlay;
 
   useEffect(() => {
     const section = ref.current;
-    if (!section || prefersReducedMotion || isFunctional) return;
+    if (!section || prefersReducedMotion) return;
 
     const vista = section.querySelector<HTMLElement>('.base-room__vista-wrap');
+    const glow = section.querySelector<HTMLElement>('.base-room__room-glow');
 
     const run = () => {
       const rect = section.getBoundingClientRect();
@@ -51,9 +65,16 @@ export default function BaseRoom({
       const scrollP = Math.min(1, Math.max(0, traveled / total));
 
       if (vista) {
-        const y = (0.5 - scrollP) * 8;
-        const scale = 1.03 + scrollP * 0.04;
+        // Milder parallax on functional content rooms so forms stay readable
+        const strength = isFunctional ? 4.5 : 8;
+        const scaleBoost = isFunctional ? 0.025 : 0.04;
+        const y = (0.5 - scrollP) * strength;
+        const scale = 1.02 + scrollP * scaleBoost;
         vista.style.transform = `translate3d(0, ${y}%, 0) scale(${scale})`;
+      }
+
+      if (glow) {
+        glow.style.opacity = String(0.55 + scrollP * 0.35);
       }
     };
 
@@ -124,7 +145,7 @@ export default function BaseRoom({
             fill
             sizes="(max-width: 768px) 100vw, 1200px"
             className="base-room__vista-img"
-            quality={isFunctional ? 72 : 80}
+            quality={isFunctional ? 78 : 85}
             loading="lazy"
           />
         </div>
@@ -139,6 +160,13 @@ export default function BaseRoom({
               quality={72}
               loading="lazy"
             />
+          </div>
+        )}
+        {fx !== 'none' && (
+          <div className="base-room__fx">
+            {fx === 'patriotic' && <PatrioticOverlay />}
+            {fx === 'neural' && <NeuralOverlay />}
+            {fx === 'circuit' && <CircuitOverlay />}
           </div>
         )}
         <div className="base-room__room-veil" />

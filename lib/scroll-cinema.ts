@@ -7,6 +7,26 @@ export function getTrackProgress(track: HTMLElement): number {
   return Math.min(1, Math.max(0, scrolled / scrollable));
 }
 
+/** Active chapter index from global progress 0→1. */
+export function getActiveChapterIndex(p: number, total: number): number {
+  if (total <= 1) return 0;
+  return Math.min(total - 1, Math.max(0, Math.floor(p * total - 1e-6)));
+}
+
+/**
+ * Document Y that centers progress on chapter `index`
+ * (midpoint of that panel segment).
+ */
+export function getChapterScrollY(track: HTMLElement, index: number, total: number): number {
+  const scrollable = Math.max(0, track.offsetHeight - window.innerHeight);
+  if (total <= 0 || scrollable <= 0) {
+    return window.scrollY + track.getBoundingClientRect().top;
+  }
+  const mid = (index + 0.5) / total;
+  const trackTop = window.scrollY + track.getBoundingClientRect().top;
+  return trackTop + mid * scrollable;
+}
+
 /** Local progress within one panel segment (0→1 while that panel is active). */
 export function getPanelLocalProgress(global: number, index: number, total: number): number {
   const segment = 1 / total;
