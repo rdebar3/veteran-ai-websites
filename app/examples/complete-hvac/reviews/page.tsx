@@ -18,7 +18,7 @@ export default function ReviewsPage() {
       <section className="hv-hero hv-hero--page">
         <div className="hv-hero__bg">
           <Image
-            src="/demos/complete-hvac/project-fall.jpg"
+            src="/demos/complete-hvac/project-fall.jpg?v=2"
             alt=""
             fill
             sizes="100vw"

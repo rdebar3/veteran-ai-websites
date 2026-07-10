@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
-import FacebookIcon from '@/components/FacebookIcon';
-import { FACEBOOK_URL } from '@/lib/data';
 import { navLinks } from '@/lib/navigation';
 import { registerScrollTask } from '@/lib/scroll-driver';
 
@@ -49,7 +47,13 @@ export default function Navbar() {
     <nav ref={navRef} className="nav">
       <div className="nav__inner">
         <a href="#hero" className="nav__logo">
-          Veteran <span className="nav__logo-accent">AI</span> Websites
+          <svg className="nav__logo-mark" viewBox="16 16 88 102" fill="#e3b23c" aria-hidden="true">
+            <path d="M24 40 L60 22 L96 40 L96 51 L60 33 L24 51 Z" />
+            <path d="M24 55 L60 37 L96 55 L96 66 L60 48 L24 66 Z" />
+            <path d="M24 70 L60 52 L96 70 L96 81 L60 63 L24 81 Z" />
+            <path d="M24 88 Q60 100 96 88 L96 99 Q60 111 24 99 Z" />
+          </svg>
+          <span className="nav__logo-text">Veteran <span className="nav__logo-accent">AI</span> Websites</span>
         </a>
 
         <div className="nav__links">
@@ -65,16 +69,7 @@ export default function Navbar() {
               </a>
             );
           })}
-          <a
-            href={FACEBOOK_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="nav__link"
-          >
-            <FacebookIcon className="h-3 w-3 inline-block mr-1 -mt-px" />
-            Social
-          </a>
-          <a href="#build" className="nav__cta nav__cta--glow">
+          <a href="#build" className="nav__cta">
             $397 Offer
           </a>
         </div>

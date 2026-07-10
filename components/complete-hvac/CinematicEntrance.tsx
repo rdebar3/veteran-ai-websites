@@ -151,7 +151,7 @@ export default function CinematicEntrance({ onComplete }: CinematicEntranceProps
             <motion.div
               className="hv-intro__scene hv-intro__scene--mountains"
               style={{
-                backgroundImage: "url('/demos/complete-hvac/entrance-fall-mountains.jpg')",
+                backgroundImage: "url('/demos/complete-hvac/entrance-fall-mountains.jpg?v=2')",
                 transformStyle: 'preserve-3d',
               }}
               initial={{ scale: 1.1 }}
@@ -173,7 +173,7 @@ export default function CinematicEntrance({ onComplete }: CinematicEntranceProps
             <motion.div
               className="hv-intro__scene hv-intro__scene--home"
               style={{
-                backgroundImage: "url('/demos/complete-hvac/entrance-fall-home.jpg')",
+                backgroundImage: "url('/demos/complete-hvac/entrance-fall-home.jpg?v=2')",
                 transformStyle: 'preserve-3d',
               }}
               initial={{ opacity: 0, scale: 1.5 }}
@@ -203,7 +203,7 @@ export default function CinematicEntrance({ onComplete }: CinematicEntranceProps
             <motion.div
               className="hv-intro__scene hv-intro__scene--fireplace"
               style={{
-                backgroundImage: "url('/demos/complete-hvac/entrance-fireplace.jpg')",
+                backgroundImage: "url('/demos/complete-hvac/entrance-fireplace.jpg?v=2')",
                 transformStyle: 'preserve-3d',
               }}
               initial={{ opacity: 0, scale: 1.4 }}

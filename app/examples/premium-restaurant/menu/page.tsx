@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import BistroShell from '@/components/ridge-bistro/BistroShell';
-import { menuSections } from '@/lib/ridge-bistro-data';
+import { menuSections, tastingMenu } from '@/lib/ridge-bistro-data';
 
 export default function MenuPage() {
   useEffect(() => {
@@ -36,6 +36,31 @@ export default function MenuPage() {
 
       <section className="rb-section">
         <div className="rb-section__inner">
+          <div className="rb-tasting-card rb-reveal">
+            <div className="rb-tasting-card__head">
+              <div>
+                <p className="rb-section__eyebrow">The Signature Experience</p>
+                <h2 className="rb-tasting-card__title">{tastingMenu.title}</h2>
+              </div>
+              <div className="rb-tasting-card__price">
+                <span className="rb-tasting-card__amt">${tastingMenu.price}</span>
+                <span className="rb-tasting-card__unit">{tastingMenu.courses} · per guest</span>
+                <span className="rb-tasting-card__pair">
+                  with wine pairings ${tastingMenu.pairingPrice}
+                </span>
+              </div>
+            </div>
+            <p className="rb-tasting-card__blurb">{tastingMenu.blurb}</p>
+            <ul className="rb-tasting-card__list">
+              {tastingMenu.highlights.map((h, i) => (
+                <li key={h}>
+                  <span className="rb-tasting__num">{String(i + 1).padStart(2, '0')}</span>
+                  {h}
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <nav className="rb-menu-nav rb-reveal" aria-label="Menu sections">
             {menuSections.map((s) => (
               <a key={s.id} href={`#${s.id}`}>

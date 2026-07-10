@@ -1,144 +1,124 @@
 'use client';
 
-import { useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { Award, CheckCircle } from 'lucide-react';
-import HvacShell from '@/components/complete-hvac/HvacShell';
-import { values, HVAC_PHONE_HREF } from '@/lib/complete-hvac-data';
+import Image from 'next/image';
+import { CheckCircle, Award, Phone } from 'lucide-react';
+import {
+  values, serviceAreas,
+  HVAC_PHONE, HVAC_PHONE_HREF, HVAC_FOUNDED,
+} from '@/lib/complete-hvac-data';
+
+const promises = [
+  'We stock common parts on every truck for faster repairs',
+  'No overtime charges for evenings or weekends on emergencies',
+  'Written estimates and clear communication before we start',
+  'Many customers have been with us for over a decade',
+];
 
 export default function AboutPage() {
-  useEffect(() => {
-    document.title = 'About Appalachian HVAC Solutions | Ridgeview, WV';
-  }, []);
-
   return (
-    <HvacShell>
-      <section className="hv-hero hv-hero--page">
-        <div className="hv-hero__bg">
-          <Image
-            src="/demos/complete-hvac/entrance-fall-home.jpg"
-            alt=""
-            fill
-            sizes="100vw"
-            quality={85}
-            className="hv-hero__bg-img"
-          />
-          <div className="hv-hero__veil" />
+    <>
+      <section className="hv__phero">
+        <div className="hv__phero-bg" aria-hidden="true">
+          <Image src="/demos/complete-hvac/entrance-mountains.jpg?v=2" alt="" fill sizes="100vw" quality={85} priority />
         </div>
-
-        <div className="hv-hero__content">
-          <p className="hv-section__eyebrow">Our Story</p>
-          <h1 className="hv-hero__title" style={{ fontSize: 'clamp(2.25rem, 5vw, 3.5rem)' }}>
-            Built in Ridgeview.
-            <span className="hv-hero__title-accent">Here for the long run.</span>
-          </h1>
-          <p className="hv-hero__lead">
-            We&apos;re a local, veteran-owned company that believes every home deserves
-            dependable heating, cooling, and clean air — delivered with honesty and care.
-          </p>
+        <div className="hv__phero-veil" aria-hidden="true" />
+        <div className="hv__wrap hv__phero-in">
+          <span className="hv__eyebrow">Our story</span>
+          <h1>Built in Ridgeview. Here for the long run.</h1>
+          <p>A local, family-owned and veteran-operated team that believes every home deserves dependable comfort — delivered with honesty and care.</p>
         </div>
       </section>
 
-      <section className="hv-section">
-        <div className="hv-section__inner hv-reveal">
-          <div className="hv-grid-2" style={{ alignItems: 'center', gap: '2.5rem' }}>
-            <div>
-              <h2 className="hv-section__title" style={{ fontSize: 'clamp(1.75rem, 3vw, 2.25rem)' }}>
-                How Appalachian HVAC began
-              </h2>
-              <div className="space-y-4 text-[var(--hv-muted)] leading-relaxed">
-                <p>
-                  Appalachian HVAC Solutions was founded in 2011 by a U.S. Army veteran who grew up
-                  in the mountains around Ridgeview. After years working for larger companies, he
-                  saw the need for a local team that would treat every customer like a neighbor.
-                </p>
-                <p>
-                  We started small — one truck and a commitment to doing the job right the first time.
-                  Today we serve families across Ridgeview, Oakdale, Pine Hollow, and surrounding
-                  communities with the same values we started with.
-                </p>
-              </div>
-              <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--hv-orange)]">
-                <Award className="h-5 w-5" /> U.S. Army Veteran Owned &amp; Operated
-              </div>
+      <section className="hv__sec">
+        <div className="hv__wrap">
+          <div className="hv__feature">
+            <div className="hv__feature-img">
+              <Image src="/demos/complete-hvac/about-team.jpg?v=2" alt="The Appalachian HVAC team in Ridgeview, West Virginia" fill sizes="(max-width:840px) 100vw, 45vw" quality={90} />
             </div>
-
-            <div className="hv-card" style={{ padding: 0, overflow: 'hidden' }}>
-              <Image
-                src="/demos/complete-hvac/service-heating-fall.jpg"
-                alt="Professional HVAC service in a warm Ridgeview home"
-                width={800}
-                height={520}
-                className="w-full h-auto object-cover"
-              />
+            <div className="hv__feature-body">
+              <p className="hv__kicker">How we began</p>
+              <h2>One truck, one promise.</h2>
+              <p>
+                Appalachian HVAC was founded in {HVAC_FOUNDED} by a local Army veteran who grew up in
+                the mountains around Ridgeview. After years working for bigger outfits, he wanted to
+                build a family company that treats every customer like a neighbor — because here, they are.
+              </p>
+              <p>
+                We started with one truck and a commitment to doing the job right the first time. Today
+                we keep families comfortable across Ridgeview and the surrounding communities, with the
+                same values we started with.
+              </p>
+              <div className="hv__points" style={{ marginTop: 6 }}>
+                <li><span><Award size={18} /></span> Family-owned &amp; veteran-operated since {HVAC_FOUNDED}</li>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section
-        className="hv-section hv-section--vista hv-section--warm"
-        style={{ '--hv-vista': "url('/mountains/foothills.jpg')" } as React.CSSProperties}
-      >
-        <div className="hv-section__inner hv-reveal">
-          <div className="text-center mb-10">
-            <p className="hv-section__eyebrow">What Guides Us</p>
-            <h2 className="hv-section__title">Our Values</h2>
+      <section className="hv__sec hv__sec--tint">
+        <div className="hv__wrap">
+          <div className="hv__intro hv__center">
+            <p className="hv__kicker">What guides us</p>
+            <h2 className="hv__title">Our values</h2>
           </div>
-
-          <div className="hv-grid-4">
+          <div className="hv__grid">
             {values.map((v) => (
-              <article key={v.title} className="hv-card hv-reveal">
-                <h3 className="hv-card__title">{v.title}</h3>
-                <p className="hv-card__text">{v.desc}</p>
-              </article>
+              <div key={v.title} className="hv__card">
+                <h3>{v.title}</h3>
+                <p>{v.desc}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="hv-section">
-        <div className="hv-section__inner hv-reveal">
-          <div className="hv-card" style={{ padding: '2.5rem' }}>
-            <div className="hv-grid-2" style={{ alignItems: 'start' }}>
-              <div>
-                <h3 className="hv-section__title" style={{ fontSize: '1.75rem' }}>
-                  Deeply rooted in Ridgeview
-                </h3>
-                <p className="hv-section__lead" style={{ marginBottom: 0 }}>
-                  Many of our customers are families we&apos;ve known for years. We know the homes here —
-                  older farmhouses, newer builds, and everything in between — and how our mountain
-                  climate affects heating and cooling systems.
-                </p>
-              </div>
-              <div className="space-y-3 text-sm text-[var(--hv-muted)]">
-                {[
-                  'We stock common parts on every truck for faster repairs',
-                  'No overtime charges for evenings or weekends on emergencies',
-                  'Written estimates and clear communication before we start',
-                  'Many customers have been with us for over a decade',
-                ].map((text) => (
-                  <div key={text} className="flex gap-2">
-                    <CheckCircle className="h-4 w-4 mt-0.5 shrink-0 text-[var(--hv-orange)]" />
-                    {text}
-                  </div>
+      <section className="hv__sec">
+        <div className="hv__wrap">
+          <div className="hv__feature" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div>
+              <p className="hv__kicker">Rooted here</p>
+              <h2 style={{ fontSize: 'clamp(24px,3vw,36px)', fontWeight: 700, color: 'var(--espresso)', letterSpacing: '-.02em', lineHeight: 1.1, margin: '0 0 16px' }}>
+                Deeply local, in every way.
+              </h2>
+              <p style={{ fontSize: 16.5, lineHeight: 1.65, color: 'var(--muted)', margin: '0 0 22px' }}>
+                Many of our customers are families we’ve known for years. We know the homes here — older
+                farmhouses, newer builds, and everything between — and how our mountain climate treats a
+                heating and cooling system.
+              </p>
+              <ul className="hv__srv-feat">
+                {promises.map((t) => (
+                  <li key={t}><CheckCircle size={18} /> {t}</li>
                 ))}
+              </ul>
+            </div>
+            <div className="hv__card" style={{ padding: '30px 28px' }}>
+              <h3 style={{ fontSize: 19, fontWeight: 700, color: 'var(--espresso)', margin: '0 0 14px' }}>Proudly serving</h3>
+              <p style={{ fontSize: 15.5, lineHeight: 1.7, color: 'var(--muted)', margin: 0 }}>
+                {serviceAreas.join(' · ')} — and the surrounding communities.
+              </p>
+              <div className="hv__cta" style={{ marginTop: 24 }}>
+                <a href={HVAC_PHONE_HREF} className="hv__btn hv__btn--primary"><Phone size={17} /> {HVAC_PHONE}</a>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="hv-cta-band">
-        <div className="hv-cta-band__inner hv-reveal">
-          <h3>Meet the team behind your comfort</h3>
-          <p>Call today and speak with a local Ridgeview technician.</p>
-          <a href={HVAC_PHONE_HREF} className="hv-btn hv-btn--primary">
-            Contact Us
-          </a>
+      <section className="hv__sec hv__sec--tint">
+        <div className="hv__wrap">
+          <div className="hv__band">
+            <div className="hv__band-glow" aria-hidden="true" />
+            <h2>Meet the team behind your comfort.</h2>
+            <p>Give us a call or send a note — a local Ridgeview technician will take good care of you.</p>
+            <div className="hv__cta">
+              <Link href="/examples/complete-hvac/contact" className="hv__btn hv__btn--primary">Contact us</Link>
+              <a href={HVAC_PHONE_HREF} className="hv__btn hv__btn--ghost"><Phone size={18} /> {HVAC_PHONE}</a>
+            </div>
+          </div>
         </div>
       </section>
-    </HvacShell>
+    </>
   );
 }

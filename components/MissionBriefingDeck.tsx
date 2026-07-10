@@ -9,7 +9,7 @@ import {
   type FormEvent,
 } from 'react';
 import Image from 'next/image';
-import { Check, CheckCircle, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
+import { Check, CheckCircle, ChevronLeft, ChevronRight, X, Zap } from 'lucide-react';
 import {
   briefingChapters,
   briefingDemos,
@@ -24,7 +24,12 @@ import {
   getPanelOpacity,
   getTrackProgress,
 } from '@/lib/scroll-cinema';
-import { isInViewport, registerScrollTask, scrollToY } from '@/lib/scroll-driver';
+import {
+  isInViewport,
+  registerScrollTask,
+  scrollToElement,
+  scrollToY,
+} from '@/lib/scroll-driver';
 import {
   addOnsList,
   allPackagesInclude,
@@ -85,7 +90,6 @@ export default function MissionBriefingDeck() {
   const [isPinned, setIsPinned] = useState(false);
   const activeRef = useRef(0);
   const pinnedRef = useRef(false);
-  const wheelLock = useRef(0);
   const coarseRef = useRef(false);
 
   /* ── Commerce state (chapter 6–7) ── */
@@ -112,6 +116,11 @@ export default function MissionBriefingDeck() {
     },
     [count]
   );
+
+  /** Leave the sticky briefing and return to the hero */
+  const exitBriefing = useCallback(() => {
+    scrollToElement('hero', { offset: 0 });
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -187,10 +196,11 @@ export default function MissionBriefingDeck() {
 
         if (opacity < NEAR) return;
 
+        // Gentle pan only — no heavy scale (was cropping images badly)
         const wrap = layer.querySelector<HTMLElement>('.mb-layer__img-wrap');
-        if (wrap) {
-          const amp = coarseRef.current ? 0.4 : 1;
-          wrap.style.transform = `translate3d(${(local - 0.5) * 4 * amp}%, ${(0.5 - local) * 10 * amp}%, 0) scale(${1.05 + local * 0.06 * amp})`;
+        if (wrap && !coarseRef.current) {
+          const y = (0.5 - local) * 3;
+          wrap.style.transform = `translate3d(0, ${y}%, 0)`;
         }
       });
     };
@@ -204,7 +214,6 @@ export default function MissionBriefingDeck() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!pinnedRef.current) return;
       const t = e.target as HTMLElement | null;
       if (
         t &&
@@ -215,6 +224,16 @@ export default function MissionBriefingDeck() {
       ) {
         return;
       }
+
+      // Always allow Escape to leave the briefing
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        exitBriefing();
+        return;
+      }
+
+      if (!pinnedRef.current) return;
+
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') {
         e.preventDefault();
         goToChapter(activeRef.current + 1);
@@ -230,36 +249,12 @@ export default function MissionBriefingDeck() {
       }
     };
 
-    const onWheel = (e: WheelEvent) => {
-      if (coarseRef.current) return;
-      if (!pinnedRef.current) return;
-      if (Math.abs(e.deltaY) < 12 && Math.abs(e.deltaX) < 12) return;
-
-      const now = performance.now();
-      if (now - wheelLock.current < 450) {
-        e.preventDefault();
-        return;
-      }
-
-      const primary = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (Math.abs(primary) < 22) return;
-
-      const atStart = activeRef.current <= 0 && primary < 0;
-      const atEnd = activeRef.current >= count - 1 && primary > 0;
-      if (atStart || atEnd) return;
-
-      e.preventDefault();
-      wheelLock.current = now;
-      goToChapter(activeRef.current + (primary > 0 ? 1 : -1));
-    };
-
+    // Natural scroll only — no wheel-hijack (was trapping users in a "popup" loop)
     window.addEventListener('keydown', onKey);
-    window.addEventListener('wheel', onWheel, { passive: false });
     return () => {
       window.removeEventListener('keydown', onKey);
-      window.removeEventListener('wheel', onWheel);
     };
-  }, [count, goToChapter]);
+  }, [count, goToChapter, exitBriefing]);
 
   const estimatedTotal = (() => {
     const tier = pricingTiers.find((p) => p.name === selectedPackage);
@@ -374,7 +369,7 @@ export default function MissionBriefingDeck() {
                     fill
                     sizes="100vw"
                     className="mb-layer__img"
-                    quality={i === 0 ? 88 : 78}
+                    quality={i === 0 ? 95 : 90}
                     priority={i <= 1}
                   />
                 </div>
@@ -389,12 +384,21 @@ export default function MissionBriefingDeck() {
             ))}
           </div>
 
-          {/* Header chrome */}
+          {/* Header chrome + exit */}
           <div className="mb-deck__chrome">
             <span className="mb-deck__tag">◆ Mission Briefing Deck</span>
             <span className="mb-deck__counter">
               {String(activeIndex + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
             </span>
+            <button
+              type="button"
+              className="mb-deck__exit"
+              onClick={exitBriefing}
+              aria-label="Exit briefing and return to top"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+              <span>Exit</span>
+            </button>
           </div>
 
           {/* Chapter content panels — React-driven visibility */}
@@ -821,7 +825,20 @@ export default function MissionBriefingDeck() {
             >
               <ChevronRight className="h-5 w-5" aria-hidden="true" />
             </button>
+            <button
+              type="button"
+              className="mb-deck__exit mb-deck__exit--nav"
+              onClick={exitBriefing}
+              aria-label="Exit briefing"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+              Exit
+            </button>
           </div>
+
+          <p className="mb-deck__hint" aria-hidden="true">
+            Scroll or use arrows · Esc / Exit to leave
+          </p>
         </div>
       </div>
     </section>

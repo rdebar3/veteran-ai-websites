@@ -46,7 +46,7 @@ export const briefingChapters: BriefingChapter[] = [
     roomAccent: '/rooms/observation-deck.jpg',
     overlay: 'patriotic',
     layout: 'intro',
-    ctaLabel: 'Enter the base',
+    ctaLabel: 'Next: Command Base →',
     ctaChapter: 1,
   },
   {

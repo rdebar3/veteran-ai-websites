@@ -46,3 +46,10 @@ next-env.d.ts
 agent-tools/
 mcps/
 terminals/
+
+# local backups & scratch — not for the repo
+_to_delete/
+.fuse_hidden*
+_debug_*.txt
+_debug_*.html
+*.stale

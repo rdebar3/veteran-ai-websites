@@ -135,3 +135,65 @@ export const privateDiningFeatures = [
   'Wine pairings curated by our sommelier',
   'Ideal for celebrations, proposals, and corporate gatherings',
 ];
+export const accolades = [
+  'Wine Spectator · Award of Excellence',
+  'James Beard Foundation · Semifinalist 2025',
+  'Forbes Travel Guide · Recommended',
+  '4.9 ★ · 600+ Guest Reviews',
+];
+
+export interface TastingCourse {
+  name: string;
+  desc: string;
+}
+
+export const tastingMenu = {
+  title: "Chef's Tasting Menu",
+  courses: '7 courses',
+  price: '135',
+  pairingPrice: '195',
+  blurb:
+    'An evening in the hands of Executive Chef Elena Marsh — seven seasonal courses drawn from the mountains, streams, and farms around Ridgeview, composed the morning of your visit.',
+  highlights: [
+    'Amuse-bouche & fresh-baked sourdough',
+    'Ramp & potato velouté, smoked trout roe',
+    'Seared scallop, cauliflower, brown butter',
+    'Foraged mushroom risotto, aged parmesan',
+    'Dry-aged beef or Appalachian trout',
+    'Local cheese & honeycomb',
+    'Dark chocolate tart, bourbon caramel',
+  ],
+};
+
+export interface Testimonial {
+  quote: string;
+  name: string;
+  detail: string;
+}
+
+export const testimonials: Testimonial[] = [
+  {
+    quote:
+      'The finest meal we have had in West Virginia — full stop. Every course felt like a love letter to these mountains.',
+    name: 'Margaret & Tom Whitfield',
+    detail: 'Anniversary dinner',
+  },
+  {
+    quote:
+      'Elegant without a trace of pretense. The tasting menu with pairings was worth the drive from Charleston and then some.',
+    name: 'David Reyes',
+    detail: 'Wine Spectator subscriber',
+  },
+  {
+    quote:
+      'From the reclaimed-oak room to the last bite of chocolate tart, the whole evening was flawless. Service you rarely find outside a major city.',
+    name: 'Katherine Boone',
+    detail: 'Private dining guest',
+  },
+];
+
+export const pressQuotes = [
+  { outlet: 'WV Living', line: '“A destination worth planning a weekend around.”' },
+  { outlet: 'Southern Kitchen', line: '“Appalachian fine dining, done with real restraint.”' },
+  { outlet: 'Gazette-Mail', line: '“Ridgeview’s quiet culinary landmark.”' },
+];

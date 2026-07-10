@@ -1,98 +1,62 @@
 'use client';
 
-import { useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { CheckCircle } from 'lucide-react';
-import HvacShell from '@/components/complete-hvac/HvacShell';
-import { services } from '@/lib/complete-hvac-data';
+import Image from 'next/image';
+import { CheckCircle, ArrowRight, Phone } from 'lucide-react';
+import { services, HVAC_PHONE, HVAC_PHONE_HREF } from '@/lib/complete-hvac-data';
 
 export default function ServicesPage() {
-  useEffect(() => {
-    document.title = 'HVAC Services | Appalachian HVAC Solutions | Ridgeview, WV';
-  }, []);
-
   return (
-    <HvacShell>
-      <section className="hv-hero hv-hero--page">
-        <div className="hv-hero__bg">
-          <Image
-            src="/demos/complete-hvac/hero-fall.jpg"
-            alt=""
-            fill
-            sizes="100vw"
-            quality={85}
-            className="hv-hero__bg-img"
-          />
-          <div className="hv-hero__veil" />
+    <>
+      <section className="hv__phero">
+        <div className="hv__phero-bg" aria-hidden="true">
+          <Image src="/demos/complete-hvac/service-heating-fall.jpg?v=2" alt="" fill sizes="100vw" quality={85} priority />
         </div>
-
-        <div className="hv-hero__content">
-          <p className="hv-section__eyebrow">Expertise You Can Rely On</p>
-          <h1 className="hv-hero__title" style={{ fontSize: 'clamp(2.25rem, 5vw, 3.5rem)' }}>
-            Professional
-            <span className="hv-hero__title-accent">HVAC Services</span>
-          </h1>
-          <p className="hv-hero__lead">
-            From high-efficiency installations to seasonal tune-ups, we deliver solutions
-            designed for Ridgeview homes and our mountain climate.
-          </p>
+        <div className="hv__phero-veil" aria-hidden="true" />
+        <div className="hv__wrap hv__phero-in">
+          <span className="hv__eyebrow">What we do</span>
+          <h1>Heating, cooling &amp; clean air — done right.</h1>
+          <p>From high-efficiency installs to seasonal tune-ups, we handle it all for homes across Ridgeview and central West Virginia.</p>
         </div>
       </section>
 
-      <section className="hv-section">
-        <div className="hv-section__inner">
-          {services.map((service) => {
-            const Icon = service.icon;
-            return (
-              <div key={service.title} className="hv-service-block hv-reveal">
-                <div className="hv-service-block__sticky">
-                  <div className="hv-card__icon">
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <h2 className="hv-section__title" style={{ fontSize: 'clamp(1.75rem, 3vw, 2.25rem)' }}>
-                    {service.title}
-                  </h2>
-                  <p className="hv-section__lead" style={{ marginBottom: 0 }}>
-                    {service.desc}
-                  </p>
-                </div>
-
+      <section className="hv__sec">
+        <div className="hv__wrap">
+          <div className="hv__srv-list">
+            {services.map((s) => (
+              <article key={s.title} className="hv__srv">
                 <div>
-                  <Image
-                    src={service.image}
-                    alt={`${service.title} in Ridgeview, West Virginia`}
-                    width={900}
-                    height={500}
-                    className="hv-service-block__img"
-                  />
-                  <div className="hv-feature-list">
-                    {service.features.map((feature) => (
-                      <span key={feature}>
-                        <CheckCircle className="h-4 w-4 mt-0.5 shrink-0 text-[var(--hv-orange)]" />
-                        {feature}
-                      </span>
-                    ))}
+                  <div className="hv__srv-head">
+                    <span className="hv__ic"><s.icon size={24} /></span>
+                    <h2>{s.title}</h2>
                   </div>
+                  <p className="hv__srv-desc">{s.desc}</p>
                 </div>
-              </div>
-            );
-          })}
+                <ul className="hv__srv-feat">
+                  {s.features.map((f) => (
+                    <li key={f}><CheckCircle size={18} /> {f}</li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="hv-cta-band">
-        <div className="hv-cta-band__inner hv-reveal">
-          <h3>Protect your system with a Maintenance Plan</h3>
-          <p>
-            Twice-yearly visits keep equipment efficient and often include priority service
-            and discounts on repairs.
-          </p>
-          <Link href="/examples/complete-hvac/contact" className="hv-btn hv-btn--primary">
-            Get a Maintenance Plan Quote
-          </Link>
+      <section className="hv__sec hv__sec--tint">
+        <div className="hv__wrap">
+          <div className="hv__band">
+            <div className="hv__band-glow" aria-hidden="true" />
+            <h2>Protect your system year-round.</h2>
+            <p>A maintenance plan keeps your equipment efficient, adds priority service, and saves you money on any repairs.</p>
+            <div className="hv__cta">
+              <Link href="/examples/complete-hvac/maintenance-plans" className="hv__btn hv__btn--primary">See maintenance plans <ArrowRight size={17} /></Link>
+              <a href={HVAC_PHONE_HREF} className="hv__btn hv__btn--ghost"><Phone size={17} /> {HVAC_PHONE}</a>
+            </div>
+            <p className="hv__band-fin">Financing available on new systems — comfortable monthly payments, with fast approval.</p>
+          </div>
         </div>
       </section>
-    </HvacShell>
+    </>
   );
 }

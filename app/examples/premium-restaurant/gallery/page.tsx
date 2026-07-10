@@ -37,11 +37,8 @@ export default function GalleryPage() {
       <section className="rb-section">
         <div className="rb-section__inner rb-reveal">
           <div className="rb-gallery">
-            {galleryImages.map((img, i) => (
-              <div
-                key={img.src}
-                className={`rb-gallery__item ${i === 0 ? '' : ''}`}
-              >
+            {galleryImages.map((img) => (
+              <div key={img.src} className="rb-gallery__item">
                 <Image
                   src={img.src}
                   alt={img.alt}
@@ -49,6 +46,9 @@ export default function GalleryPage() {
                   height={600}
                   className="rb-gallery__img"
                 />
+                <div className="rb-gallery__cap">
+                  <span>{img.alt}</span>
+                </div>
               </div>
             ))}
           </div>

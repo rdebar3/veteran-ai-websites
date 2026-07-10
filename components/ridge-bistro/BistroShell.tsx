@@ -4,6 +4,15 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Phone, Menu, X } from 'lucide-react';
+import { Cormorant_Garamond } from 'next/font/google';
+
+const rbSerif = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
+  variable: '--rb-serif-font',
+  display: 'swap',
+});
 import {
   navLinks,
   BISTRO_PHONE,
@@ -59,7 +68,7 @@ export default function BistroShell({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="rb-demo">
+    <div className={`rb-demo ${rbSerif.variable}`}>
       <header className={`rb-header ${scrolled ? 'rb-header--scrolled' : ''}`}>
         <div className="rb-header__bar">
           <a href={BISTRO_PHONE_HREF} className="rb-header__phone">

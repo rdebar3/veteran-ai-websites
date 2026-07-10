@@ -4,7 +4,13 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import BistroShell from '@/components/ridge-bistro/BistroShell';
-import { featuredDishes } from '@/lib/ridge-bistro-data';
+import {
+  featuredDishes,
+  accolades,
+  tastingMenu,
+  testimonials,
+  pressQuotes,
+} from '@/lib/ridge-bistro-data';
 
 export default function RidgeBistroHome() {
   useEffect(() => {
@@ -49,6 +55,16 @@ export default function RidgeBistroHome() {
         </div>
       </section>
 
+      <section className="rb-accolades" aria-label="Accolades and recognition">
+        <div className="rb-accolades__inner">
+          {accolades.map((a) => (
+            <span key={a} className="rb-accolades__item">
+              {a}
+            </span>
+          ))}
+        </div>
+      </section>
+
       <section className="rb-section">
         <div className="rb-section__inner rb-reveal">
           <div className="text-center">
@@ -87,6 +103,38 @@ export default function RidgeBistroHome() {
         </div>
       </section>
 
+      <section className="rb-tasting">
+        <div className="rb-tasting__inner rb-reveal">
+          <div className="rb-tasting__copy">
+            <p className="rb-section__eyebrow">The Signature Experience</p>
+            <h2 className="rb-section__title">{tastingMenu.title}</h2>
+            <p className="rb-section__lead">{tastingMenu.blurb}</p>
+            <div className="rb-tasting__price">
+              <span>
+                <b>{tastingMenu.courses}</b> · ${tastingMenu.price} per guest
+              </span>
+              <span className="rb-tasting__pair">
+                with sommelier wine pairings ${tastingMenu.pairingPrice}
+              </span>
+            </div>
+            <Link
+              href="/examples/premium-restaurant/reservations"
+              className="rb-btn rb-btn--gold"
+            >
+              Reserve the Tasting
+            </Link>
+          </div>
+          <ul className="rb-tasting__list">
+            {tastingMenu.highlights.map((h, i) => (
+              <li key={h}>
+                <span className="rb-tasting__num">{String(i + 1).padStart(2, '0')}</span>
+                {h}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       <section className="rb-section rb-section--dark">
         <div className="rb-section__inner rb-split rb-reveal">
           <div>
@@ -108,6 +156,36 @@ export default function RidgeBistroHome() {
             height={520}
             className="rb-split__img"
           />
+        </div>
+      </section>
+
+      <section className="rb-section">
+        <div className="rb-section__inner rb-reveal">
+          <div className="text-center">
+            <p className="rb-section__eyebrow">Praise</p>
+            <h2 className="rb-section__title">What our guests say</h2>
+            <div className="rb-divider" />
+          </div>
+          <div className="rb-quotes">
+            {testimonials.map((t) => (
+              <figure key={t.name} className="rb-quote">
+                <div className="rb-quote__stars" aria-hidden="true">★★★★★</div>
+                <blockquote className="rb-quote__text">{t.quote}</blockquote>
+                <figcaption className="rb-quote__by">
+                  <span>{t.name}</span>
+                  {t.detail}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+          <div className="rb-press">
+            {pressQuotes.map((pr) => (
+              <div key={pr.outlet} className="rb-press__item">
+                <p className="rb-press__line">{pr.line}</p>
+                <p className="rb-press__outlet">{pr.outlet}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
