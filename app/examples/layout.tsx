@@ -15,7 +15,12 @@ export default function ExamplesLayout({ children }: { children: React.ReactNode
   return (
     <>
       {children}
-      <Link href="/" className="demo-home-pill" aria-label="Back to Veteran AI Websites home page">
+      <Link
+        href="/#pricing"
+        scroll={false}
+        className="demo-home-pill"
+        aria-label="Back to Veteran AI Websites — see all packages and demos"
+      >
         <span className="demo-home-pill__arrow" aria-hidden="true">
           ←
         </span>
