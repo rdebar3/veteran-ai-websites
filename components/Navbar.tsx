@@ -9,6 +9,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [active, setActive] = useState('hero');
   const navRef = useRef<HTMLElement>(null);
+  const linksRef = useRef<HTMLDivElement>(null);
+  const [ind, setInd] = useState({ left: 0, top: 0, width: 0, on: false });
 
   useEffect(() => {
     const nav = navRef.current;
@@ -16,10 +18,14 @@ export default function Navbar() {
 
     let scrolled = false;
     const run = () => {
-      const next = window.scrollY > 32;
-      if (next === scrolled) return;
-      scrolled = next;
-      nav.classList.toggle('nav--scrolled', next);
+      const y = window.scrollY;
+      const next = y > 32;
+      if (next !== scrolled) {
+        scrolled = next;
+        nav.classList.toggle('nav--scrolled', next);
+      }
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      nav.style.setProperty('--nav-progress', String(max > 0 ? Math.min(1, y / max) : 0));
     };
 
     run();
@@ -43,8 +49,28 @@ export default function Navbar() {
     return () => observer.disconnect();
   }, []);
 
+  // Slide a glowing indicator to the active section link.
+  useEffect(() => {
+    const container = linksRef.current;
+    if (!container) return;
+    const measure = () => {
+      const el = container.querySelector<HTMLElement>(`[data-nav-id="${active}"]`);
+      if (!el || active === 'hero') {
+        setInd((prev) => (prev.on ? { ...prev, on: false } : prev));
+        return;
+      }
+      const c = container.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      setInd({ left: r.left - c.left, top: r.bottom - c.top + 3, width: r.width, on: true });
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [active]);
+
   return (
     <nav ref={navRef} className="nav">
+      <div className="nav__progress" aria-hidden="true" />
       <div className="nav__inner">
         <a href="#hero" className="nav__logo">
           <svg className="nav__logo-mark" viewBox="16 16 88 102" fill="#e3b23c" aria-hidden="true">
@@ -56,13 +82,24 @@ export default function Navbar() {
           <span className="nav__logo-text">Veteran <span className="nav__logo-accent">AI</span> Websites</span>
         </a>
 
-        <div className="nav__links">
+        <div className="nav__links" ref={linksRef}>
+          <span
+            className="nav__indicator"
+            aria-hidden="true"
+            style={{
+              transform: `translateX(${ind.left}px)`,
+              top: ind.top,
+              width: ind.width,
+              opacity: ind.on ? 1 : 0,
+            }}
+          />
           {navLinks.map((link) => {
             const id = link.href.slice(1);
             return (
               <a
                 key={link.href}
                 href={link.href}
+                data-nav-id={id}
                 className={`nav__link ${active === id ? 'nav__link--active' : ''}`}
               >
                 {link.label}
