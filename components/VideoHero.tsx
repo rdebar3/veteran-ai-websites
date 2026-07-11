@@ -11,7 +11,7 @@ import {
 } from 'framer-motion';
 import MagneticButton from '@/components/MagneticButton';
 
-const VIDEO = '/hero/hero-gorge.mp4';
+const VIDEO = '/hero/hero-gorge-loop.mp4';
 const POSTER = '/hero/hero-gorge-poster.jpg';
 
 type Scene = { eyebrow?: string; title: string; cta?: boolean };
@@ -101,9 +101,6 @@ interface VideoHeroProps {
 
 export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const targetTime = useRef(0);
-  const durationRef = useRef(0);
   const prefersReducedMotion = useReducedMotion();
   const [simple, setSimple] = useState(false);
   const [active, setActive] = useState(0);
@@ -118,63 +115,19 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
   const anim = useTransform(scrollYProgress, [0, HOLD], [0, 1]);
 
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    setSimple(mq.matches || !!prefersReducedMotion);
+    // Only reduced-motion users get the static single-headline fallback.
+    setSimple(!!prefersReducedMotion);
   }, [prefersReducedMotion]);
 
   useMotionValueEvent(anim, 'change', (a) => {
-    targetTime.current = a * (durationRef.current || 0);
     setActive(clamp(Math.round(a * (N - 1)), 0, N - 1));
   });
 
 
-  // Scroll-scrub the video: drive currentTime straight from scroll progress each frame.
-  useEffect(() => {
-    if (simple) return;
-    const v = videoRef.current;
-    if (!v) return;
-    v.load();
-    // Prime the decoder so seeking is smooth, then hold on the first frame.
-    const prime = () => {
-      v.play().then(() => v.pause()).catch(() => {});
-    };
-    v.addEventListener('loadeddata', prime, { once: true });
 
-    let raf = 0;
-    let lastSet = -1;
-    const tick = () => {
-      const dur = v.duration;
-      if (dur && isFinite(dur)) {
-        const t = anim.get() * dur;
-        if (Math.abs(t - lastSet) > 0.02) {
-          try {
-            v.currentTime = t;
-            lastSet = t;
-          } catch {
-            /* seek pending */
-          }
-        }
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => {
-      cancelAnimationFrame(raf);
-      v.removeEventListener('loadeddata', prime);
-    };
-  }, [simple, anim]);
-
-  const onMeta = () => {
-    const v = videoRef.current;
-    if (v) {
-      durationRef.current = v.duration || 0;
-      if (!simple) v.pause();
-    }
-  };
 
   // Fallback: autoplay loop + static headline (mobile / reduced motion)
   if (simple) {
-    const last = scenes[scenes.length - 1];
     return (
       <div className="vh-simple">
         <style dangerouslySetInnerHTML={{ __html: styles }} />
@@ -199,14 +152,14 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <div className="vh-stage">
         <video
-          ref={videoRef}
           className="vh-video"
           src={VIDEO}
           poster={POSTER}
+          autoPlay
           muted
+          loop
           playsInline
           preload="auto"
-          onLoadedMetadata={onMeta}
         />
         <div className="vh-veil" aria-hidden="true" />
         <div className="vh-scenes">
