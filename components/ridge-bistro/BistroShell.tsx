@@ -52,19 +52,33 @@ export default function BistroShell({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     let last = window.scrollY;
+    let nearTop = false; // pointer reaching toward the top edge
     const onScroll = () => {
       const y = window.scrollY;
       setScrolled(y > 20);
-      // Hide when scrolling down past the header, glide back on scroll up.
-      if (y > 160 && y > last + 4) setHidden(true);
-      else if (y < last - 4 || y < 160) setHidden(false);
+      // Reveal near the top; hide as you read down; show on scroll-up or when
+      // the pointer moves toward the top of the screen.
+      if (y < 120 || nearTop) setHidden(false);
+      else if (y > last + 4) setHidden(true);
+      else if (y < last - 4) setHidden(false);
       const max = document.documentElement.scrollHeight - window.innerHeight;
       setProgress(max > 0 ? Math.min(1, y / max) : 0);
       last = y;
     };
+    const onMove = (e: MouseEvent) => {
+      const top = e.clientY <= 90;
+      if (top !== nearTop) {
+        nearTop = top;
+        if (top) setHidden(false);
+      }
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('mousemove', onMove, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('mousemove', onMove);
+    };
   }, []);
 
   useEffect(() => {
