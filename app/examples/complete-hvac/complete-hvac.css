@@ -364,11 +364,27 @@
   background: rgba(255, 253, 249, 0.92);
   backdrop-filter: blur(14px);
   box-shadow: 0 4px 24px rgba(120, 53, 15, 0.06);
-  transition: box-shadow 0.35s ease;
+  transition: box-shadow 0.35s ease, background 0.3s ease;
 }
 
 .hv-nav--scrolled {
+  background: rgba(255, 253, 249, 0.97);
   box-shadow: 0 8px 32px rgba(120, 53, 15, 0.1);
+}
+.hv-nav--scrolled .hv-nav__inner {
+  height: 3.6rem;
+}
+.hv-nav__progress {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 3px;
+  width: 100%;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, var(--hv-orange), var(--hv-amber));
+  border-radius: 0 3px 3px 0;
+  pointer-events: none;
 }
 
 .hv-nav__inner {
@@ -380,6 +396,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  transition: height 0.35s ease;
 }
 
 .hv-nav__logo {
@@ -430,12 +447,18 @@
   font-weight: 500;
   color: var(--hv-muted);
   text-decoration: none;
-  transition: color 0.25s ease;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  transition: color 0.25s ease, background 0.25s ease;
 }
 
-.hv-nav__link:hover,
+.hv-nav__link:hover {
+  color: var(--hv-orange);
+  background: color-mix(in srgb, var(--hv-orange) 8%, transparent);
+}
 .hv-nav__link--active {
   color: var(--hv-orange);
+  background: color-mix(in srgb, var(--hv-orange) 15%, transparent);
 }
 
 .hv-nav__cta {

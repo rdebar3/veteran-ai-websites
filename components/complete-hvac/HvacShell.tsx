@@ -34,14 +34,24 @@ export default function HvacShell({ children, introActive = false }: HvacShellPr
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [navScrolled, setNavScrolled] = useState(false);
+  const [navProgress, setNavProgress] = useState(0);
 
   useHvacReveal();
 
   useEffect(() => {
-    const onScroll = () => setNavScrolled(window.scrollY > 24);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setNavScrolled(y > 24);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setNavProgress(max > 0 ? Math.min(1, y / max) : 0);
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, []);
 
   const isActive = (href: string) => {
@@ -100,6 +110,11 @@ export default function HvacShell({ children, introActive = false }: HvacShellPr
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
+        <div
+          className="hv-nav__progress"
+          aria-hidden="true"
+          style={{ transform: `scaleX(${navProgress})` }}
+        />
 
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-[var(--hv-border)] px-6 py-4 flex flex-col gap-3">
