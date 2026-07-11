@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -25,9 +25,22 @@ const familyPoints = [
 ];
 
 export default function AppalachianHvacHome() {
-  const [gateOpen, setGateOpen] = useState(true);
+  const [gateOpen, setGateOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [claimed, setClaimed] = useState(false);
+
+  // Show the new-customer offer only once per visit — not every time you hit Home.
+  useEffect(() => {
+    try {
+      if (!sessionStorage.getItem('hvGateSeen')) setGateOpen(true);
+    } catch {
+      setGateOpen(true);
+    }
+  }, []);
+  const closeGate = () => {
+    try { sessionStorage.setItem('hvGateSeen', '1'); } catch {}
+    setGateOpen(false);
+  };
 
   return (
     <>
@@ -43,7 +56,7 @@ export default function AppalachianHvacHome() {
                 <span className="hv__gate-badge"><Flame size={15} /> You’re in</span>
                 <h2>Welcome to the family.</h2>
                 <p>Use code <b>COZY10</b> for 10% off your first service — we’ve emailed it to you too.</p>
-                <button className="hv__btn hv__btn--primary" onClick={() => setGateOpen(false)}>Enter the site →</button>
+                <button className="hv__btn hv__btn--primary" onClick={closeGate}>Enter the site →</button>
               </>
             ) : (
               <>
@@ -60,7 +73,7 @@ export default function AppalachianHvacHome() {
                   />
                   <button type="submit" className="hv__btn hv__btn--primary">Get my 10% off</button>
                 </form>
-                <button className="hv__gate-skip" onClick={() => setGateOpen(false)}>
+                <button className="hv__gate-skip" onClick={closeGate}>
                   No thanks, take me to the site
                 </button>
               </>

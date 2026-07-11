@@ -25,6 +25,8 @@ const HOME = '/examples/complete-hvac';
 export default function CompleteHvacLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [navScrolled, setNavScrolled] = useState(false);
+  const [navProgress, setNavProgress] = useState(0);
 
   // Hide the main Veteran AI Websites nav/footer while inside the demo.
   useEffect(() => {
@@ -49,6 +51,23 @@ export default function CompleteHvacLayout({ children }: { children: React.React
     setMenuOpen(false);
   }, [pathname]);
 
+  // Sticky-nav scroll state + page progress.
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      setNavScrolled(y > 12);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setNavProgress(max > 0 ? Math.min(1, y / max) : 0);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
+
   const isActive = (href: string) => {
     const cur = pathname || '';
     if (href === HOME) return cur === HOME || cur === `${HOME}/`;
@@ -60,7 +79,7 @@ export default function CompleteHvacLayout({ children }: { children: React.React
       <a href={HVAC_PHONE_HREF} className="hv__emerg">
         <Siren size={15} /> No heat? No AC? 24/7 emergency service — <b>call {HVAC_PHONE}</b>
       </a>
-      <header className="hv__hdr">
+      <header className={`hv__hdr${navScrolled ? ' hv__hdr--scrolled' : ''}`}>
         <div className="hv__wrap hv__hdr-in">
           <Link href={HOME} className="hv__brand">
             <span className="hv__brand-mark"><Flame size={18} /></span>
@@ -89,6 +108,11 @@ export default function CompleteHvacLayout({ children }: { children: React.React
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
+        <div
+          className="hv__hdr-progress"
+          aria-hidden="true"
+          style={{ transform: `scaleX(${navProgress})` }}
+        />
 
         {menuOpen && (
           <div className="hv__wrap">
