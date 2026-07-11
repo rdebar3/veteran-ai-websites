@@ -33,7 +33,7 @@ const smooth = (x: number) => {
 const styles = `
 .vh-root{position:relative;height:620vh;background:#06090f}
 .vh-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#06090f;isolation:isolate}
-.vh-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.vh-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transform:scale(.9);transform-origin:center}
 .vh-veil{position:absolute;inset:0;z-index:1;pointer-events:none;background:
   radial-gradient(78% 58% at 50% 50%,rgba(6,9,15,.52),transparent 72%),
   radial-gradient(120% 90% at 50% 55%,transparent 40%,rgba(6,9,15,.32) 74%,rgba(6,9,15,.62) 100%),
@@ -58,6 +58,8 @@ const styles = `
 .vh-simple .vh-veil{z-index:1}
 .vh-simple .vh-scene{position:relative;z-index:2;padding:0 24px}
 @media(max-width:640px){.vh-cta{flex-direction:column;align-items:stretch}.vh-cta .btn--primary,.vh-cta .btn--ghost{min-width:0;width:100%;justify-content:center}}
+/* mobile: shorter scroll region so the hero text advances quicker */
+@media(max-width:768px){.vh-root{height:460vh}}
 `;
 
 function SceneText({
