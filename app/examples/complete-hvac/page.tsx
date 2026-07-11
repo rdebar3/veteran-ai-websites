@@ -32,10 +32,31 @@ export default function AppalachianHvacHome() {
   // Show the new-customer offer only once per visit — not every time you hit Home.
   useEffect(() => {
     try {
-      if (!sessionStorage.getItem('hvGateSeen')) setGateOpen(true);
-    } catch {
-      setGateOpen(true);
+      if (sessionStorage.getItem('hvGateSeen')) return;
+    } catch {}
+    let done = false;
+    function cleanup() {
+      window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('mouseout', onExit);
+      window.clearTimeout(timer);
     }
+    const open = () => {
+      if (done) return;
+      done = true;
+      setGateOpen(true);
+      cleanup();
+    };
+    // Show the offer once the visitor is engaged — not the instant they arrive.
+    const onScroll = () => {
+      if (window.scrollY > 650) open();
+    };
+    const onExit = (e: MouseEvent) => {
+      if (!e.relatedTarget && e.clientY <= 0) open(); // exit intent
+    };
+    const timer = window.setTimeout(open, 20000); // fallback after 20s
+    window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('mouseout', onExit);
+    return cleanup;
   }, []);
   const closeGate = () => {
     try { sessionStorage.setItem('hvGateSeen', '1'); } catch {}
