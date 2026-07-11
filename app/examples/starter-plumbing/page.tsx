@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import {
   Phone,
   Siren,
@@ -52,17 +52,24 @@ const reviews = [
 ];
 
 const styles = `
-.sp{--navy:#0c2a43;--navy-2:#0a2033;--blue:#1f8fe0;--blue-d:#1774c0;--ink:#122536;--muted:#586a7a;--line:#e4ebf2;--bg:#f6f9fc;background:#fff;color:var(--ink);font-family:var(--font-sans),system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.sp{--navy:#0c2a43;--navy-2:#0a2033;--blue:#1f8fe0;--blue-d:#1774c0;--ink:#122536;--muted:#586a7a;--line:#e4ebf2;--bg:#f6f9fc;background:#fff;color:var(--ink);font-family:var(--font-sans),system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
 .sp *{box-sizing:border-box}
 .sp a{color:inherit;text-decoration:none}
 .sp__wrap{max-width:1160px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
-.sp__hdr{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.sp__hdr-in{display:flex;align-items:center;justify-content:space-between;height:70px}
+.sp__hdr{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(12px) saturate(1.1);border-bottom:1px solid var(--line);transition:background .3s ease,box-shadow .3s ease,border-color .3s ease}
+.sp__hdr-in{display:flex;align-items:center;justify-content:space-between;height:70px;transition:height .3s ease}
 .sp__brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;letter-spacing:-.01em;color:var(--navy)}
 .sp__brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(150deg,var(--blue),var(--navy));color:#fff}
 .sp__nav{display:flex;align-items:center;gap:30px}
-.sp__nav a{font-size:15px;font-weight:500;color:var(--muted)}
+.sp__nav a{position:relative;font-size:15px;font-weight:500;color:var(--muted);transition:color .2s}
 .sp__nav a:hover{color:var(--navy)}
+.sp__hdr--scrolled{background:rgba(255,255,255,.95);box-shadow:0 10px 30px rgba(12,42,67,.10);border-bottom-color:transparent}
+.sp__hdr--scrolled .sp__hdr-in{height:58px}
+.sp__nav a::after{content:'';position:absolute;left:0;right:0;bottom:-7px;height:2px;border-radius:2px;background:var(--blue);transform:scaleX(0);transform-origin:center;transition:transform .28s cubic-bezier(.4,0,.2,1)}
+.sp__nav a:hover::after{transform:scaleX(.5)}
+.sp__nav a.is-active{color:var(--navy);font-weight:600}
+.sp__nav a.is-active::after{transform:scaleX(1)}
+.sp__hdr-progress{position:absolute;left:0;bottom:-1.5px;height:3px;width:100%;transform-origin:left center;transform:scaleX(0);background:linear-gradient(90deg,var(--blue),var(--navy));border-radius:0 3px 3px 0;will-change:transform;pointer-events:none}
 .sp__call{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:15px;padding:11px 18px;border-radius:999px;box-shadow:0 8px 20px rgba(31,143,224,.3);transition:background .2s,transform .2s,box-shadow .2s}
 .sp__call:hover{background:var(--blue-d);transform:translateY(-1px);box-shadow:0 10px 26px rgba(31,143,224,.42)}
 @media(max-width:820px){.sp__nav{display:none}}
@@ -183,6 +190,36 @@ const styles = `
 export default function SummitPlumbingDemo() {
   const [sent, setSent] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '', service: '', message: '' });
+  const [scrolled, setScrolled] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [active, setActive] = useState('top');
+
+  useEffect(() => {
+    const ids = ['top', 'services', 'work', 'pro', 'reviews', 'quote'];
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(max > 0 ? Math.min(1, y / max) : 0);
+      let current = ids[0];
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= 140) current = id;
+      }
+      setActive(current);
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
   const set =
     (k: string) =>
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -199,21 +236,28 @@ export default function SummitPlumbingDemo() {
         <Siren size={15} /> 24/7 Emergency Plumbing — burst pipe or no water? <b>Call {PHONE}</b>
       </a>
 
-      <header className="sp__hdr">
+      <header className={`sp__hdr${scrolled ? ' sp__hdr--scrolled' : ''}`}>
         <div className="sp__wrap sp__hdr-in">
           <a href="#top" className="sp__brand">
             <span className="sp__brand-mark"><Droplet size={18} /></span>
             Summit Plumbing
           </a>
           <nav className="sp__nav">
-            <a href="#services">Services</a>
-            <a href="#work">Our work</a>
-            <a href="#pro">Meet your plumber</a>
-            <a href="#reviews">Reviews</a>
-            <a href="#quote">Contact</a>
+            {[
+              { id: 'services', label: 'Services' },
+              { id: 'work', label: 'Our work' },
+              { id: 'pro', label: 'Meet your plumber' },
+              { id: 'reviews', label: 'Reviews' },
+              { id: 'quote', label: 'Contact' },
+            ].map((l) => (
+              <a key={l.id} href={`#${l.id}`} className={active === l.id ? 'is-active' : ''}>
+                {l.label}
+              </a>
+            ))}
           </nav>
           <a href={PHONE_HREF} className="sp__call"><Phone size={16} /> {PHONE}</a>
         </div>
+        <div className="sp__hdr-progress" aria-hidden="true" style={{ transform: `scaleX(${progress})` }} />
       </header>
 
       <section className="sp__hero" id="top">
