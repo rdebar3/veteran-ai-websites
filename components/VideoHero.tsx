@@ -18,7 +18,7 @@ const POSTER = '/hero/hero-gorge-poster.jpg';
 type Scene = { eyebrow?: string; title: string; cta?: boolean };
 
 const scenes: Scene[] = [
-  { eyebrow: 'West Virginia · Veteran-Owned', title: 'Peak-performance websites.' },
+  { eyebrow: 'West Virginia · Veteran-Owned', title: 'Fast, professional websites.' },
   { title: 'Designed & built in a single day.' },
   { title: 'You own it. 100%.' },
   { eyebrow: 'From $397', title: 'Let’s build yours.', cta: true },
@@ -144,7 +144,7 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
         <div className="vh-veil" aria-hidden="true" />
         <div className="vh-scene">
           <p className="vh-eyebrow">West Virginia · Veteran-Owned</p>
-          <h2 className="vh-title">Peak-performance websites.</h2>
+          <h2 className="vh-title">Fast, professional websites.</h2>
           <div className="vh-cta">
             <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
               Claim my $397 site

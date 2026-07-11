@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Veteran AI Websites | One-Day Websites by a West Virginia Veteran",
-  description: "Professional one-day websites for West Virginia small businesses. Limited Time Offer — $397 Starter (was $497), resets weekly. Complete $697 • Premium $997. Add-ons: Shoppable Store & Monthly Care. Veteran-owned. Full ownership.",
+  description: "Professional one-day websites for West Virginia small businesses. Starter $397 • Complete $697 • Premium $997. Add-ons: Shoppable Store & Monthly Care. Veteran-owned — you keep full ownership.",
   icons: {
     icon: "/favicon.ico",
   },

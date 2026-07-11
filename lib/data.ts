@@ -32,10 +32,7 @@ export function getDisplayPrice(tier: PricingTier): number {
 export const pricingTiers: PricingTier[] = [
   {
     name: 'Starter',
-    price: 497,
-    promoPrice: 397,
-    promoActive: true,
-    promoLabel: 'Limited Time Offer',
+    price: 397,
     popular: false,
     delivery: 'Delivered in 1 day',
     revisions: '1 round of revisions',

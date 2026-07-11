@@ -32,7 +32,10 @@ const styles = `
 .rv__body{font-size:15px;line-height:1.6;color:rgba(233,240,246,.9);margin:0 0 16px}
 .rv__who{font-size:14px;color:#fff;font-weight:600}
 .rv__who span{display:block;font-weight:400;color:rgba(233,240,246,.72);font-size:13px;margin-top:2px}
-.rv__empty{max-width:560px;margin:0 auto clamp(36px,5vw,56px);text-align:center;color:rgba(233,240,246,.72);font-size:15px;border:1px dashed rgba(233,240,246,.18);border-radius:16px;padding:32px}
+.rv__empty{position:relative;overflow:hidden;max-width:620px;margin:0 auto clamp(36px,5vw,56px);text-align:center;border:1px solid rgba(227,178,60,.3);border-radius:20px;background:rgba(12,16,22,.62);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);padding:clamp(28px,4vw,42px)}
+.rv__empty::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#e3b23c;z-index:2}
+.rv__empty h3{font-family:var(--font-sans);font-size:20px;font-weight:700;letter-spacing:-.01em;color:#fff;margin:0 0 10px}
+.rv__empty p{max-width:48ch;margin:0 auto;font-size:15px;line-height:1.6;color:rgba(233,240,246,.82)}
 .rv__form{position:relative;overflow:hidden;max-width:560px;margin:0 auto;border:1px solid rgba(233,240,246,.14);border-radius:20px;background:rgba(12,16,22,.62);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);padding:clamp(24px,4vw,36px)}
 .rv__form::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#5b9bd5,#e0912f,#c2452f);z-index:3}
 .rv__form h3{font-family:var(--font-sans);font-size:19px;font-weight:600;color:#fff;margin:0 0 6px;text-align:center}
@@ -162,7 +165,13 @@ export default function Reviews() {
 
       {!loading && reviews.length === 0 && (
         <div className="rv__empty">
-          No reviews yet — be the first to share your experience below.
+          <h3>Be my first review.</h3>
+          <p>
+            I’m a West Virginia veteran just getting this business off the ground — so right now,
+            you’d be one of my very first clients. That means my full attention, honest work, and a
+            website I’ll stand behind personally. If we’ve worked together, I’d be honored to have
+            your words here — and they’ll sit right at the top of this page.
+          </p>
         </div>
       )}
 
