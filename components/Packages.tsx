@@ -210,7 +210,7 @@ export default function Packages() {
                     {sel ? 'Selected' : `Choose ${t.name}`}
                   </button>
                   {demoLinks[t.name] && (
-                    <a className="pk__demo" href={demoLinks[t.name]}>
+                    <a className="pk__demo" href={demoLinks[t.name]} onClick={() => { try { sessionStorage.setItem('vaw:returnY', String(Math.round(window.scrollY))); } catch {} }}>
                       See a live {t.name} demo →
                     </a>
                   )}

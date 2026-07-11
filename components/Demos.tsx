@@ -63,7 +63,7 @@ export default function Demos() {
             <div className="dm__body">
               <h3 className="dm__biz">{demo.landmark}</h3>
               <p className="dm__desc">{demo.desc}</p>
-              <a className="dm__link" href={demo.href}>
+              <a className="dm__link" href={demo.href} onClick={() => { try { sessionStorage.setItem('vaw:returnY', String(Math.round(window.scrollY))); } catch {} }}>
                 View live demo <span className="dm__arrow" aria-hidden="true">→</span>
               </a>
             </div>

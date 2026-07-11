@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 
 const pillStyles = `
@@ -16,10 +18,15 @@ export default function ExamplesLayout({ children }: { children: React.ReactNode
     <>
       {children}
       <Link
-        href="/#pricing"
+        href="/"
         scroll={false}
+        onClick={() => {
+          try {
+            sessionStorage.setItem('vaw:restore', '1');
+          } catch {}
+        }}
         className="demo-home-pill"
-        aria-label="Back to Veteran AI Websites — see all packages and demos"
+        aria-label="Back to Veteran AI Websites"
       >
         <span className="demo-home-pill__arrow" aria-hidden="true">
           ←
