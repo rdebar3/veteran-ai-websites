@@ -27,6 +27,7 @@ import {
 import {
   isInViewport,
   registerScrollTask,
+  resizeScroll,
   scrollToElement,
   scrollToY,
 } from '@/lib/scroll-driver';
@@ -147,22 +148,39 @@ export default function MissionBriefingDeck() {
       if (!hash || hash === 'briefing' || hash === 'hero') return;
       const idx = briefingChapters.findIndex((c) => c.id === hash);
       if (idx < 0) return;
-      // Wait until the deck has its real (tall) height before jumping — on
-      // mobile the track isn't measured yet on first paint, which otherwise
-      // makes the target collapse to the top. Then re-assert a couple times
-      // to beat late layout shifts (mobile URL bar, smooth-scroll init).
-      let tries = 0;
-      const attempt = () => {
+      const clamped = Math.min(count - 1, Math.max(0, idx));
+
+      // Re-measure the smooth-scroller (mobile Lenis holds the previous, shorter
+      // page's size after a route change) and then jump.
+      const doJump = () => {
+        resizeScroll();
+        goToChapter(clamped);
+      };
+
+      let waited = 0;
+      const start = () => {
         const track = trackRef.current;
-        if (track && track.offsetHeight > window.innerHeight + 8) {
-          goToChapter(idx);
-          setTimeout(() => goToChapter(idx), 160);
-          setTimeout(() => goToChapter(idx), 450);
+        if (!track || track.offsetHeight <= window.innerHeight + 8) {
+          if (waited++ < 90) requestAnimationFrame(start);
           return;
         }
-        if (tries++ < 60) requestAnimationFrame(attempt);
+        doJump();
+        // Verify we actually left the top; if Lenis clamped the jump against
+        // stale dimensions (drops us back at the hero), re-fire until it holds.
+        let checks = 0;
+        const verify = () => {
+          const t = trackRef.current;
+          if (!t) return;
+          const targetY = getChapterScrollY(t, clamped, count);
+          const moved = window.scrollY > Math.min(targetY, window.innerHeight) * 0.6;
+          if (!moved && checks++ < 9) {
+            doJump();
+            setTimeout(verify, 150);
+          }
+        };
+        setTimeout(verify, 260);
       };
-      attempt();
+      start();
     };
     jumpFromHash();
     window.addEventListener('hashchange', jumpFromHash);

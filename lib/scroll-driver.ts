@@ -14,6 +14,7 @@ type LenisLike = {
     target: HTMLElement | string | number,
     options?: LenisScrollOptions
   ) => void;
+  resize?: () => void;
 };
 
 const tasks = new Set<ScrollTask>();
@@ -37,6 +38,11 @@ export function setScrollDriverEnabled(value: boolean) {
 
 export function setLenisInstance(lenis: LenisLike | null) {
   lenisInstance = lenis;
+}
+
+/** Force the smooth-scroll engine to re-measure the page (after route changes). */
+export function resizeScroll() {
+  lenisInstance?.resize?.();
 }
 
 /** Unified scroll — routes through Lenis when active, native otherwise. */
