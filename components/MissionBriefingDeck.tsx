@@ -146,10 +146,23 @@ export default function MissionBriefingDeck() {
       const hash = window.location.hash.replace(/^#/, '');
       if (!hash || hash === 'briefing' || hash === 'hero') return;
       const idx = briefingChapters.findIndex((c) => c.id === hash);
-      if (idx >= 0) {
-        // slight delay so layout is ready
-        requestAnimationFrame(() => goToChapter(idx));
-      }
+      if (idx < 0) return;
+      // Wait until the deck has its real (tall) height before jumping — on
+      // mobile the track isn't measured yet on first paint, which otherwise
+      // makes the target collapse to the top. Then re-assert a couple times
+      // to beat late layout shifts (mobile URL bar, smooth-scroll init).
+      let tries = 0;
+      const attempt = () => {
+        const track = trackRef.current;
+        if (track && track.offsetHeight > window.innerHeight + 8) {
+          goToChapter(idx);
+          setTimeout(() => goToChapter(idx), 160);
+          setTimeout(() => goToChapter(idx), 450);
+          return;
+        }
+        if (tries++ < 60) requestAnimationFrame(attempt);
+      };
+      attempt();
     };
     jumpFromHash();
     window.addEventListener('hashchange', jumpFromHash);
