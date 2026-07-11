@@ -12,6 +12,7 @@ import {
 import MagneticButton from '@/components/MagneticButton';
 
 const VIDEO = '/hero/hero-gorge-loop.mp4';
+const MOBILE_VIDEO = '/hero/hero-gorge-mobile.mp4';
 const POSTER = '/hero/hero-gorge-poster.jpg';
 
 type Scene = { eyebrow?: string; title: string; cta?: boolean };
@@ -33,7 +34,7 @@ const smooth = (x: number) => {
 const styles = `
 .vh-root{position:relative;height:620vh;background:#06090f}
 .vh-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#06090f;isolation:isolate}
-.vh-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transform:scale(.9);transform-origin:center}
+.vh-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
 .vh-veil{position:absolute;inset:0;z-index:1;pointer-events:none;background:
   radial-gradient(78% 58% at 50% 50%,rgba(6,9,15,.52),transparent 72%),
   radial-gradient(120% 90% at 50% 55%,transparent 40%,rgba(6,9,15,.32) 74%,rgba(6,9,15,.62) 100%),
@@ -106,6 +107,7 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
   const prefersReducedMotion = useReducedMotion();
   const [simple, setSimple] = useState(false);
   const [active, setActive] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: rootRef,
@@ -119,6 +121,11 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
   useEffect(() => {
     // Only reduced-motion users get the static single-headline fallback.
     setSimple(!!prefersReducedMotion);
+    // Mobile gets a purpose-built 9:16 video so the whole scene is visible.
+    const setMq = () => setIsMobile(window.matchMedia('(max-width: 767px)').matches);
+    setMq();
+    window.addEventListener('resize', setMq);
+    return () => window.removeEventListener('resize', setMq);
   }, [prefersReducedMotion]);
 
   useMotionValueEvent(anim, 'change', (a) => {
@@ -133,7 +140,7 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
     return (
       <div className="vh-simple">
         <style dangerouslySetInnerHTML={{ __html: styles }} />
-        <video src={VIDEO} poster={POSTER} autoPlay muted loop playsInline preload="metadata" />
+        <video src={isMobile ? MOBILE_VIDEO : VIDEO} poster={POSTER} autoPlay muted loop playsInline preload="metadata" />
         <div className="vh-veil" aria-hidden="true" />
         <div className="vh-scene">
           <p className="vh-eyebrow">West Virginia · Veteran-Owned</p>
@@ -155,7 +162,7 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
       <div className="vh-stage">
         <video
           className="vh-video"
-          src={VIDEO}
+          src={isMobile ? MOBILE_VIDEO : VIDEO}
           poster={POSTER}
           autoPlay
           muted
