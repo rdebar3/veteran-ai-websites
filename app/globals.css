@@ -5387,7 +5387,7 @@ html.is-scrolling .h-showcase__img {
     flex-direction: column;
     gap: 0.65rem;
     max-height: min(42vh, 320px);
-    overflow-x: hidden;
+    overflow-x: clip;
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     overscroll-behavior: contain;
@@ -5887,7 +5887,7 @@ html.is-scrolling .h-showcase__img {
 
 .mb-panel__scroll {
   height: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
