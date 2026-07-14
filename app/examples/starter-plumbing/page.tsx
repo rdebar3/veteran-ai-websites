@@ -73,6 +73,7 @@ const styles = `
 .sp__call{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:15px;padding:11px 18px;border-radius:999px;box-shadow:0 8px 20px rgba(31,143,224,.3);transition:background .2s,transform .2s,box-shadow .2s}
 .sp__call:hover{background:var(--blue-d);transform:translateY(-1px);box-shadow:0 10px 26px rgba(31,143,224,.42)}
 @media(max-width:820px){.sp__nav{display:none}}
+@media(max-width:640px){.sp__call{font-size:13px;padding:8px 14px;gap:6px;box-shadow:0 5px 14px rgba(31,143,224,.26)}.sp__call svg{width:15px;height:15px}}
 /* Split hero */
 .sp__hero{display:grid;grid-template-columns:1.05fr 1fr;min-height:640px}
 .sp__hero-text{display:flex;flex-direction:column;justify-content:center;padding:clamp(48px,6vw,90px) clamp(24px,5vw,72px);background:linear-gradient(180deg,#fff,#f2f7fc)}
