@@ -14,8 +14,8 @@ export default function VeteranBand() {
     <section className="vb" aria-label="About the builder">
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <p className="vb__line">
-        Built by someone who spent 15 years working alongside small business owners — not a
-        tech guy selling you software.
+        I spent 15 years working alongside small business owners before I ever built a website. I get
+        what you&apos;re up against — and I build sites that actually help.
       </p>
     </section>
   );
