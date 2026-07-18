@@ -15,9 +15,6 @@ const VIDEO = '/hero/hero-gorge-loop.mp4';
 const MOBILE_VIDEO = '/hero/hero-gorge-mobile.mp4';
 const POSTER = '/hero/hero-gorge-poster.jpg';
 
-const VETERAN_SUBHEAD =
-  'Built by a West Virginia veteran who spent 15 years working alongside small business owners — not a tech guy selling you software.';
-
 type Scene = { eyebrow?: string; title: string; cta?: boolean };
 
 const scenes: Scene[] = [
@@ -48,8 +45,7 @@ const styles = `
 .vh-scene{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:transform,opacity}
 .vh-eyebrow{font-family:var(--font-sans);font-size:clamp(12px,1.45vw,16px);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#fff;margin:0 0 22px;text-shadow:0 2px 14px rgba(0,0,0,.8),0 1px 3px rgba(0,0,0,.7)}
 .vh-title{font-family:var(--font-sans);font-size:clamp(32px,5.6vw,86px);font-weight:600;letter-spacing:-.035em;line-height:1;color:#fff;margin:0;text-shadow:0 2px 3px rgba(0,0,0,.6),0 3px 14px rgba(0,0,0,.55),0 8px 40px rgba(0,0,0,.45);-webkit-text-stroke:0.5px rgba(0,0,0,.2)}
-.vh-subhead{position:relative;z-index:1;margin:22px auto 0;max-width:42ch;font-family:var(--font-sans);font-size:clamp(14px,1.45vw,18px);font-weight:500;line-height:1.55;letter-spacing:-.01em;color:rgba(255,255,255,.9);text-shadow:0 1px 12px rgba(0,0,0,.75),0 2px 4px rgba(0,0,0,.55)}
-.vh-cta{margin-top:30px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center}
+.vh-cta{margin-top:38px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center}
 .vh-cta .btn--primary{min-width:min(100%,220px);background:#fff;color:#0a0e14;border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 34px rgba(0,0,0,.45);font-weight:700;transition:transform .25s,box-shadow .25s,background .25s}
 .vh-cta .btn--primary:hover{background:#fff;transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,0,0,.55)}
 .vh-cta .btn--ghost{min-width:min(100%,210px);background:#12161d;color:#fff;border:1px solid rgba(255,255,255,.38);font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.5);transition:transform .25s,box-shadow .25s,background .25s,color .25s,border-color .25s}
@@ -166,7 +162,6 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
         <div className="vh-stack">
           <p className="vh-eyebrow">West Virginia · Veteran-Owned</p>
           <h2 className="vh-title">A professional website in a day.</h2>
-          <p className="vh-subhead">{VETERAN_SUBHEAD}</p>
           <div className="vh-cta">
             <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
               Claim my $397 site
@@ -200,7 +195,6 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
                 <SceneText key={i} scene={s} i={i} progress={anim} />
               ))}
             </div>
-            <p className="vh-subhead">{VETERAN_SUBHEAD}</p>
             <CtaBlock progress={anim} onClaimOffer={onClaimOffer} />
           </div>
         </div>
