@@ -15,10 +15,13 @@ const VIDEO = '/hero/hero-gorge-loop.mp4';
 const MOBILE_VIDEO = '/hero/hero-gorge-mobile.mp4';
 const POSTER = '/hero/hero-gorge-poster.jpg';
 
+const VETERAN_SUBHEAD =
+  'Built by a West Virginia veteran who spent 15 years working alongside small business owners — not a tech guy selling you software.';
+
 type Scene = { eyebrow?: string; title: string; cta?: boolean };
 
 const scenes: Scene[] = [
-  { eyebrow: 'West Virginia · Veteran-Owned', title: 'Fast, professional websites.' },
+  { eyebrow: 'West Virginia · Veteran-Owned', title: 'A professional website in a day.' },
   { title: 'Designed & built in a single day.' },
   { title: 'You own it. 100%.' },
   { eyebrow: 'From $397', title: 'Let’s build yours.', cta: true },
@@ -40,10 +43,13 @@ const styles = `
   radial-gradient(120% 90% at 50% 55%,transparent 40%,rgba(6,9,15,.32) 74%,rgba(6,9,15,.62) 100%),
   linear-gradient(180deg,rgba(6,9,15,.5) 0%,transparent 30%,transparent 55%,rgba(6,9,15,.72) 80%,rgba(6,9,15,.94) 100%)}
 .vh-scenes{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 24px}
-.vh-scene{position:absolute;max-width:min(92vw,1040px);will-change:transform,opacity}
+.vh-stack{position:relative;width:100%;max-width:min(92vw,1040px);display:flex;flex-direction:column;align-items:center}
+.vh-titles{position:relative;width:100%;min-height:clamp(120px,18vw,200px)}
+.vh-scene{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:transform,opacity}
 .vh-eyebrow{font-family:var(--font-sans);font-size:clamp(12px,1.45vw,16px);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#fff;margin:0 0 22px;text-shadow:0 2px 14px rgba(0,0,0,.8),0 1px 3px rgba(0,0,0,.7)}
 .vh-title{font-family:var(--font-sans);font-size:clamp(32px,5.6vw,86px);font-weight:600;letter-spacing:-.035em;line-height:1;color:#fff;margin:0;text-shadow:0 2px 3px rgba(0,0,0,.6),0 3px 14px rgba(0,0,0,.55),0 8px 40px rgba(0,0,0,.45);-webkit-text-stroke:0.5px rgba(0,0,0,.2)}
-.vh-cta{margin-top:38px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center}
+.vh-subhead{position:relative;z-index:1;margin:22px auto 0;max-width:42ch;font-family:var(--font-sans);font-size:clamp(14px,1.45vw,18px);font-weight:500;line-height:1.55;letter-spacing:-.01em;color:rgba(255,255,255,.9);text-shadow:0 1px 12px rgba(0,0,0,.75),0 2px 4px rgba(0,0,0,.55)}
+.vh-cta{margin-top:30px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center}
 .vh-cta .btn--primary{min-width:min(100%,220px);background:#fff;color:#0a0e14;border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 34px rgba(0,0,0,.45);font-weight:700;transition:transform .25s,box-shadow .25s,background .25s}
 .vh-cta .btn--primary:hover{background:#fff;transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,0,0,.55)}
 .vh-cta .btn--ghost{min-width:min(100%,210px);background:#12161d;color:#fff;border:1px solid rgba(255,255,255,.38);font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.5);transition:transform .25s,box-shadow .25s,background .25s,color .25s,border-color .25s}
@@ -57,7 +63,7 @@ const styles = `
 .vh-simple{position:relative;min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:#06090f}
 .vh-simple video,.vh-simple img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .vh-simple .vh-veil{z-index:1}
-.vh-simple .vh-scene{position:relative;z-index:2;padding:0 24px}
+.vh-simple .vh-stack{position:relative;z-index:2;padding:0 24px}
 @media(max-width:640px){.vh-cta{flex-direction:column;align-items:stretch}.vh-cta .btn--primary,.vh-cta .btn--ghost{min-width:0;width:100%;justify-content:center}}
 /* mobile: shorter scroll region so the hero text advances quicker */
 @media(max-width:768px){.vh-root{height:260vh}}
@@ -67,12 +73,10 @@ function SceneText({
   scene,
   i,
   progress,
-  onClaimOffer,
 }: {
   scene: Scene;
   i: number;
   progress: MotionValue<number>;
-  onClaimOffer?: () => void;
 }) {
   const opacity = useTransform(progress, (p) => {
     const s = p * (N - 1);
@@ -86,14 +90,34 @@ function SceneText({
     <motion.div className="vh-scene" style={{ opacity, y }}>
       {scene.eyebrow && <p className="vh-eyebrow">{scene.eyebrow}</p>}
       <h2 className="vh-title">{scene.title}</h2>
-      {scene.cta && (
-        <div className="vh-cta">
-          <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
-            Claim my $397 site
-          </MagneticButton>
-          <a href="#pricing" className="btn btn--ghost btn--lg">View packages</a>
-        </div>
-      )}
+    </motion.div>
+  );
+}
+
+function CtaBlock({
+  progress,
+  onClaimOffer,
+}: {
+  progress: MotionValue<number>;
+  onClaimOffer?: () => void;
+}) {
+  const last = N - 1;
+  const opacity = useTransform(progress, (p) => {
+    const s = p * (N - 1);
+    return smooth(1 - Math.abs(s - last) / 0.72);
+  });
+  const y = useTransform(progress, (p) => {
+    const s = p * (N - 1);
+    return -(s - last) * 46;
+  });
+  const pointerEvents = useTransform(opacity, (o) => (o > 0.35 ? 'auto' : 'none'));
+
+  return (
+    <motion.div className="vh-cta" style={{ opacity, y, pointerEvents }}>
+      <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
+        Claim my $397 site
+      </MagneticButton>
+      <a href="#pricing" className="btn btn--ghost btn--lg">View packages</a>
     </motion.div>
   );
 }
@@ -132,19 +156,17 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
     setActive(clamp(Math.round(a * (N - 1)), 0, N - 1));
   });
 
-
-
-
-  // Fallback: autoplay loop + static headline (mobile / reduced motion)
+  // Fallback: autoplay loop + static headline (reduced motion)
   if (simple) {
     return (
       <div className="vh-simple">
         <style dangerouslySetInnerHTML={{ __html: styles }} />
         <video src={isMobile ? MOBILE_VIDEO : VIDEO} poster={POSTER} autoPlay muted loop playsInline preload="metadata" />
         <div className="vh-veil" aria-hidden="true" />
-        <div className="vh-scene">
+        <div className="vh-stack">
           <p className="vh-eyebrow">West Virginia · Veteran-Owned</p>
-          <h2 className="vh-title">Fast, professional websites.</h2>
+          <h2 className="vh-title">A professional website in a day.</h2>
+          <p className="vh-subhead">{VETERAN_SUBHEAD}</p>
           <div className="vh-cta">
             <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
               Claim my $397 site
@@ -172,9 +194,15 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
         />
         <div className="vh-veil" aria-hidden="true" />
         <div className="vh-scenes">
-          {scenes.map((s, i) => (
-            <SceneText key={i} scene={s} i={i} progress={anim} onClaimOffer={onClaimOffer} />
-          ))}
+          <div className="vh-stack">
+            <div className="vh-titles">
+              {scenes.map((s, i) => (
+                <SceneText key={i} scene={s} i={i} progress={anim} />
+              ))}
+            </div>
+            <p className="vh-subhead">{VETERAN_SUBHEAD}</p>
+            <CtaBlock progress={anim} onClaimOffer={onClaimOffer} />
+          </div>
         </div>
         <div className="vh-dots" aria-hidden="true">
           {scenes.map((_, i) => (

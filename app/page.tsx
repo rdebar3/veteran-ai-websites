@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import VideoHero from '@/components/VideoHero';
+import MontiTeaser from '@/components/MontiTeaser';
 import Demos from '@/components/Demos';
 import Packages from '@/components/Packages';
 import Reviews from '@/components/Reviews';
@@ -12,7 +13,7 @@ import { scrollToY, resizeScroll } from '@/lib/scroll-driver';
 
 /**
  * Clean homepage:
- * Scroll-scrubbed video hero → live demos → packages & checkout → reviews → project intake.
+ * Scroll-scrubbed video hero → Monti teaser → live demos → packages & checkout → reviews → project intake.
  */
 export default function Home() {
   // Return visitors to the exact spot they left from when they open a demo.
@@ -43,6 +44,7 @@ export default function Home() {
       <h1 className="sr-only">Veteran AI Websites — West Virginia veteran-owned web design</h1>
       <VideoHero />
       <LowerBackdrop>
+        <MontiTeaser />
         <Demos />
         <Packages />
         <Veterans />
