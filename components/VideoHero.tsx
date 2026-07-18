@@ -19,7 +19,7 @@ type Scene = { eyebrow?: string; title: string; cta?: boolean };
 
 const scenes: Scene[] = [
   { eyebrow: 'West Virginia · Veteran-Owned', title: 'A professional website in a day.' },
-  { title: 'Designed & built in a single day.' },
+  { title: "By someone who's been in your shoes." },
   { title: 'You own it. 100%.' },
   { eyebrow: 'From $397', title: 'Let’s build yours.', cta: true },
 ];
@@ -30,6 +30,18 @@ const smooth = (x: number) => {
   const c = clamp(x, 0, 1);
   return c * c * (3 - 2 * c);
 };
+
+/**
+ * Sequential (non-crossfade) opacity: only one scene can be non-zero at a time.
+ * Hold fully opaque near the scene center; fade out before the midpoint so the
+ * next phrase does not appear until the previous has fully cleared.
+ */
+function sceneOpacityAt(s: number, i: number): number {
+  const dist = Math.abs(s - i);
+  if (dist >= 0.5) return 0;
+  if (dist <= 0.28) return 1;
+  return smooth((0.5 - dist) / 0.22);
+}
 
 const styles = `
 .vh-root{position:relative;height:340vh;background:#06090f}
@@ -42,7 +54,7 @@ const styles = `
 .vh-scenes{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 24px}
 .vh-stack{position:relative;width:100%;max-width:min(92vw,1040px);display:flex;flex-direction:column;align-items:center}
 .vh-titles{position:relative;width:100%;min-height:clamp(120px,18vw,200px)}
-.vh-scene{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:transform,opacity}
+.vh-scene{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:opacity}
 .vh-eyebrow{font-family:var(--font-sans);font-size:clamp(12px,1.45vw,16px);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#fff;margin:0 0 22px;text-shadow:0 2px 14px rgba(0,0,0,.8),0 1px 3px rgba(0,0,0,.7)}
 .vh-title{font-family:var(--font-sans);font-size:clamp(32px,5.6vw,86px);font-weight:600;letter-spacing:-.035em;line-height:1;color:#fff;margin:0;text-shadow:0 2px 3px rgba(0,0,0,.6),0 3px 14px rgba(0,0,0,.55),0 8px 40px rgba(0,0,0,.45);-webkit-text-stroke:0.5px rgba(0,0,0,.2)}
 .vh-cta{margin-top:38px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center}
@@ -69,21 +81,21 @@ function SceneText({
   scene,
   i,
   progress,
+  mounted,
 }: {
   scene: Scene;
   i: number;
   progress: MotionValue<number>;
+  mounted: boolean;
 }) {
-  const opacity = useTransform(progress, (p) => {
-    const s = p * (N - 1);
-    return smooth(1 - Math.abs(s - i) / 0.72);
-  });
-  const y = useTransform(progress, (p) => {
-    const s = p * (N - 1);
-    return -(s - i) * 46;
-  });
+  const opacity = useTransform(progress, (p) => sceneOpacityAt(p * (N - 1), i));
+  // Unmount-adjacent: hide from hit-testing / compositing when fully clear
+  const visibility = useTransform(opacity, (o) => (o > 0.001 ? 'visible' : 'hidden'));
+
+  if (!mounted) return null;
+
   return (
-    <motion.div className="vh-scene" style={{ opacity, y }}>
+    <motion.div className="vh-scene" style={{ opacity, visibility }} aria-hidden={false}>
       {scene.eyebrow && <p className="vh-eyebrow">{scene.eyebrow}</p>}
       <h2 className="vh-title">{scene.title}</h2>
     </motion.div>
@@ -93,23 +105,21 @@ function SceneText({
 function CtaBlock({
   progress,
   onClaimOffer,
+  mounted,
 }: {
   progress: MotionValue<number>;
   onClaimOffer?: () => void;
+  mounted: boolean;
 }) {
   const last = N - 1;
-  const opacity = useTransform(progress, (p) => {
-    const s = p * (N - 1);
-    return smooth(1 - Math.abs(s - last) / 0.72);
-  });
-  const y = useTransform(progress, (p) => {
-    const s = p * (N - 1);
-    return -(s - last) * 46;
-  });
+  const opacity = useTransform(progress, (p) => sceneOpacityAt(p * (N - 1), last));
   const pointerEvents = useTransform(opacity, (o) => (o > 0.35 ? 'auto' : 'none'));
+  const visibility = useTransform(opacity, (o) => (o > 0.001 ? 'visible' : 'hidden'));
+
+  if (!mounted) return null;
 
   return (
-    <motion.div className="vh-cta" style={{ opacity, y, pointerEvents }}>
+    <motion.div className="vh-cta" style={{ opacity, pointerEvents, visibility }}>
       <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
         Claim my $397 site
       </MagneticButton>
@@ -128,6 +138,8 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
   const [simple, setSimple] = useState(false);
   const [active, setActive] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  // Only mount the active phrase + neighbors so faded-out copy fully unmounts.
+  const [mounted, setMounted] = useState<Set<number>>(() => new Set([0]));
 
   const { scrollYProgress } = useScroll({
     target: rootRef,
@@ -149,7 +161,24 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
   }, [prefersReducedMotion]);
 
   useMotionValueEvent(anim, 'change', (a) => {
-    setActive(clamp(Math.round(a * (N - 1)), 0, N - 1));
+    const s = a * (N - 1);
+    // Nearest scene for dots — switches at midpoints where both phrases are fully clear.
+    const next = clamp(Math.round(s), 0, N - 1);
+    setActive((prev) => (prev === next ? prev : next));
+
+    // Mount only scenes that can currently have opacity > 0 (|s - i| < 0.5).
+    // At exact midpoints both are 0; keep the rounded target so the next can fade in.
+    setMounted((prev) => {
+      const nextMounted = new Set<number>();
+      for (let i = 0; i < N; i++) {
+        if (Math.abs(s - i) < 0.5) nextMounted.add(i);
+      }
+      nextMounted.add(next);
+      if (prev.size === nextMounted.size && [...nextMounted].every((i) => prev.has(i))) {
+        return prev;
+      }
+      return nextMounted;
+    });
   });
 
   // Fallback: autoplay loop + static headline (reduced motion)
@@ -192,10 +221,20 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
           <div className="vh-stack">
             <div className="vh-titles">
               {scenes.map((s, i) => (
-                <SceneText key={i} scene={s} i={i} progress={anim} />
+                <SceneText
+                  key={i}
+                  scene={s}
+                  i={i}
+                  progress={anim}
+                  mounted={mounted.has(i)}
+                />
               ))}
             </div>
-            <CtaBlock progress={anim} onClaimOffer={onClaimOffer} />
+            <CtaBlock
+              progress={anim}
+              onClaimOffer={onClaimOffer}
+              mounted={mounted.has(N - 1)}
+            />
           </div>
         </div>
         <div className="vh-dots" aria-hidden="true">
