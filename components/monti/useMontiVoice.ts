@@ -11,7 +11,7 @@ const REALTIME_URL =
   'wss://api.x.ai/v1/realtime?model=grok-voice-latest';
 
 /** Default speech rate (xAI audio.output.speed range 0.7–1.5). Override with ?speed= */
-const MONTI_SPEED = 1.2;
+const MONTI_SPEED = 1.3;
 
 /**
  * Default voice id. Rich locks the American pick by ear after auditioning via
