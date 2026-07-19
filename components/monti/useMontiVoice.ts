@@ -17,7 +17,7 @@ const MONTI_SPEED = 1.3;
  * Default voice id. Rich locks the American pick by ear after auditioning via
  * /monti?voice=NAME (and optional &speed=). Server token may also suggest a voice.
  */
-const MONTI_VOICE = 'leo';
+const MONTI_VOICE = 'castor';
 
 const SUPPORTED_RATES = new Set([
   8000, 16000, 22050, 24000, 32000, 44100, 48000,
@@ -43,7 +43,8 @@ function readVoiceQuery(): { voice?: string; speed?: number } {
 
 function resolveVoice(serverDefault?: string): string {
   const { voice } = readVoiceQuery();
-  return voice || serverDefault || MONTI_VOICE;
+  // URL override > client MONTI_VOICE default (token may still send an older name)
+  return voice || MONTI_VOICE || serverDefault || 'castor';
 }
 
 function resolveSpeed(): number {
