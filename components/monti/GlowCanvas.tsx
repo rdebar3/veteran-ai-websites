@@ -3,10 +3,14 @@
 import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 
 export interface GlowCanvasHandle {
-  /** Pulse the glow as if Monti is speaking for ~n words */
+  /** Pulse the glow as if Monti is speaking for ~n words (typed fallback) */
   speak: (wordCount: number) => void;
   /** Brief impulse (e.g. visitor submitted) */
   impulse: () => void;
+  /** Drive envelope from real output-audio amplitude (voice mode), 0..1 */
+  setAmplitude: (level: number) => void;
+  /** Subtle calmer shimmer while the visitor is talking (voice VAD) */
+  setListening: (on: boolean) => void;
 }
 
 interface GlowCanvasProps {
@@ -27,6 +31,10 @@ const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
       impulse: 0,
       muted: muted,
       reduced: false,
+      /** Live voice amplitude (0..1); 0 when idle */
+      liveAmp: 0,
+      liveUntil: 0,
+      listening: false,
     });
 
     useEffect(() => {
@@ -64,6 +72,16 @@ const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
       },
       impulse() {
         stateRef.current.impulse = 1;
+      },
+      setAmplitude(level: number) {
+        const s = stateRef.current;
+        const n = Math.max(0, Math.min(1, level));
+        s.liveAmp = n;
+        s.liveUntil = performance.now() + 180;
+        if (n > 0.05) s.speaking = true;
+      },
+      setListening(on: boolean) {
+        stateRef.current.listening = on;
       },
     }));
 
@@ -120,7 +138,12 @@ const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
       function ampT(now: number) {
         const s = stateRef.current;
         let a = 0.08 + 0.04 * Math.sin(now * 0.0014);
-        if (s.speaking && !s.muted && !s.reduced) {
+
+        // Voice mode: real output amplitude wins while fresh
+        if (!s.muted && !s.reduced && now < s.liveUntil && s.liveAmp > 0) {
+          a = Math.max(a, 0.12 + s.liveAmp * 0.95);
+        } else if (s.speaking && !s.muted && !s.reduced) {
+          // Typed fallback: simulated syllable envelope
           const tt = (now - s.speakStart) / 1000;
           let syAmp = 0;
           for (const sy of s.sylls) {
@@ -128,7 +151,19 @@ const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
             syAmp = Math.max(syAmp, sy.peak * Math.exp(-dz * dz));
           }
           a = Math.max(a, syAmp) + 0.04 * Math.sin(now * 0.02);
+        } else if (s.listening && !s.muted && !s.reduced) {
+          // Visitor talking — calmer shimmer
+          a = 0.1 + 0.06 * Math.sin(now * 0.003);
         }
+
+        if (now >= s.liveUntil && s.liveAmp > 0) {
+          s.liveAmp *= 0.85;
+          if (s.liveAmp < 0.02) {
+            s.liveAmp = 0;
+            if (!s.sylls.length) s.speaking = false;
+          }
+        }
+
         a += s.impulse * 0.5;
         return Math.min(1.2, a);
       }

@@ -228,24 +228,46 @@ export function parseModelJson(text: string): unknown {
   }
 }
 
+/** Result of merging a validated section patch into the working record. */
+export interface ApplyFillResult {
+  record: MontiRecord;
+  fill: FillSection[];
+  patch: MontiPatch;
+  template_id: 'trades' | null;
+  hero_image_id: TradeKey | null;
+}
+
 /**
- * Validate raw model turn JSON against §2/§3.
- * Always returns a usable TurnResponse (fallback on total failure).
+ * Shared validation gate for site fills (typed turn patch + voice `fill_site` tool).
+ * Accepts either a flat fill_site-shaped object or a turn-style `{ patch, fills, … }`.
+ * Never invents fields — coerces, truncates, drops malformed.
  */
-export function validateTurn(
-  raw: unknown,
+export function applyFill(
   current: MontiRecord | null | undefined,
-): TurnResponse {
+  raw: unknown,
+  sectionsHint?: unknown,
+): ApplyFillResult {
   const base = current ? structuredClone(current) : emptyRecord();
 
   if (!raw || typeof raw !== 'object') {
-    return fallbackTurn(base, 'Sorry — hiccup on my end. Mind saying that again?');
+    return {
+      record: base,
+      fill: [],
+      patch: {},
+      template_id: base.template_id,
+      hero_image_id: base.trade_key,
+    };
   }
 
   const o = raw as Record<string, unknown>;
-  const patch = coercePatch(o.patch);
+  // Voice fill_site is flat; typed turns wrap fields in `patch`
+  const patchSource =
+    o.patch && typeof o.patch === 'object'
+      ? { ...(o.patch as Record<string, unknown>), template_id: o.template_id ?? (o.patch as Record<string, unknown>).template_id, trade_key: o.trade_key ?? (o.patch as Record<string, unknown>).trade_key }
+      : o;
 
-  // Top-level template / hero image may also set trade
+  const patch = coercePatch(patchSource);
+
   let heroImageId = coerceHeroImageId(o.hero_image_id);
   if (!heroImageId && patch.hero?.image_id && isTradeKey(patch.hero.image_id)) {
     heroImageId = patch.hero.image_id;
@@ -268,7 +290,6 @@ export function validateTurn(
     }
   }
 
-  // If patch has trade-ish image without top-level
   if (patch.hero?.image_id && isTradeKey(patch.hero.image_id)) {
     patch.trade_key = patch.hero.image_id;
     if (!heroImageId) heroImageId = patch.hero.image_id;
@@ -276,7 +297,6 @@ export function validateTurn(
 
   const record = deepMergeRecord(base, patch);
 
-  // Ensure trade_key sync
   if (heroImageId) {
     record.trade_key = heroImageId;
     record.hero.image_id = heroImageId;
@@ -285,13 +305,46 @@ export function validateTurn(
     record.trade_key = record.hero.image_id;
   }
 
+  const fill = coerceFill(
+    sectionsHint !== undefined
+      ? sectionsHint
+      : o.sections !== undefined
+        ? o.sections
+        : o.fill,
+  );
+
+  return {
+    record,
+    fill,
+    patch,
+    template_id: templateId ?? record.template_id,
+    hero_image_id: heroImageId,
+  };
+}
+
+/**
+ * Validate raw model turn JSON against §2/§3.
+ * Always returns a usable TurnResponse (fallback on total failure).
+ */
+export function validateTurn(
+  raw: unknown,
+  current: MontiRecord | null | undefined,
+): TurnResponse {
+  const base = current ? structuredClone(current) : emptyRecord();
+
+  if (!raw || typeof raw !== 'object') {
+    return fallbackTurn(base, 'Sorry — hiccup on my end. Mind saying that again?');
+  }
+
+  const o = raw as Record<string, unknown>;
+  const filled = applyFill(current, raw, o.fill);
+
   let expect: TurnResponse['expect'] = 'text';
   if (o.expect === 'choice' || o.expect === 'done' || o.expect === 'text') {
     expect = o.expect;
   }
 
   const choices = expect === 'choice' ? coerceChoices(o.choices) : [];
-  const fill = coerceFill(o.fill);
   const done = o.done === true || expect === 'done';
 
   let say = cap(o.say, MAX.say);
@@ -305,12 +358,12 @@ export function validateTurn(
     expect: done ? 'done' : expect,
     choices,
     input_hint,
-    template_id: templateId ?? record.template_id,
-    hero_image_id: heroImageId,
-    patch,
-    fill,
+    template_id: filled.template_id,
+    hero_image_id: filled.hero_image_id,
+    patch: filled.patch,
+    fill: filled.fill,
     done,
-    record,
+    record: filled.record,
   };
 }
 

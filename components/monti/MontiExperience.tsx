@@ -11,8 +11,10 @@ import BrowserFrame from './BrowserFrame';
 import GlowCanvas, { type GlowCanvasHandle } from './GlowCanvas';
 import LeadCard from './LeadCard';
 import TradesTemplate from './TradesTemplate';
+import { useMontiVoice } from './useMontiVoice';
 import { emptyRecord } from '@/lib/monti/contract';
 import { tradeLabel } from '@/lib/monti/trade-labels';
+import type { ApplyFillResult } from '@/lib/monti/validate';
 import type {
   ChatMessage,
   FillSection,
@@ -30,12 +32,19 @@ function slug(s: string): string {
 }
 
 type Phase = 'start' | 'chat' | 'handoff' | 'done';
+type Mode = 'voice' | 'typed';
+
+const CORE_FILLS: FillSection[] = ['hero', 'services', 'contact', 'about'];
 
 export default function MontiExperience() {
   const glowRef = useRef<GlowCanvasHandle>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const recordRef = useRef<MontiRecord>(emptyRecord());
+  const leadSentRef = useRef(false);
+  const messagesRef = useRef<ChatMessage[]>([]);
 
   const [started, setStarted] = useState(false);
+  const [mode, setMode] = useState<Mode>('typed');
   const [building, setBuilding] = useState(false);
   const [muted, setMuted] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -54,6 +63,14 @@ export default function MontiExperience() {
   const [phase, setPhase] = useState<Phase>('start');
   const [showLead, setShowLead] = useState(false);
   const [allowEmpty, setAllowEmpty] = useState(false);
+
+  useEffect(() => {
+    recordRef.current = record;
+  }, [record]);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   // Hide root marketing chrome while Monti is mounted
   useEffect(() => {
@@ -81,67 +98,90 @@ export default function MontiExperience() {
     };
   }, []);
 
-  const speakLine = useCallback(
-    (line: string) => {
-      setPrompt(line);
-      glowRef.current?.speak(line.split(/\s+/).filter(Boolean).length);
+  const speakLine = useCallback((line: string) => {
+    setPrompt(line);
+    glowRef.current?.speak(line.split(/\s+/).filter(Boolean).length);
+  }, []);
+
+  /** Shared site state from fill sections (typed or voice). */
+  const applySiteUpdate = useCallback(
+    (opts: {
+      record: MontiRecord;
+      fill: FillSection[];
+      template_id?: 'trades' | null;
+      hero_image_id?: string | null;
+      forceHandoff?: boolean;
+    }) => {
+      setRecord(opts.record);
+      recordRef.current = opts.record;
+
+      setFill((prev) => {
+        const next = new Set(prev);
+        for (const f of opts.fill) next.add(f);
+        const arr = Array.from(next) as FillSection[];
+
+        const name = opts.record.business?.name || '';
+        const hasHero =
+          arr.includes('hero') ||
+          opts.template_id === 'trades' ||
+          opts.record.template_id === 'trades' ||
+          !!opts.hero_image_id ||
+          !!opts.record.trade_key;
+
+        if (name && hasHero) {
+          setBuilding(true);
+          setShowHeroSkel(false);
+          setStatusText('building the hero…');
+        } else if (hasHero) {
+          setBuilding(true);
+          setShowHeroSkel(false);
+          setStatusText('framing your homepage…');
+        }
+
+        if (arr.includes('services')) {
+          setShowServicesSkel(false);
+          setStatusText('adding your services…');
+        }
+        if (arr.includes('about')) {
+          setStatusText('finishing your site…');
+        }
+        if (arr.includes('contact')) {
+          setStatusText('adding contact…');
+        }
+
+        const allCore = CORE_FILLS.every((s) => arr.includes(s));
+        if (opts.forceHandoff || allCore) {
+          setStatusText('site ready');
+          setStatusDone(true);
+          setPhase((p) => (p === 'done' ? p : 'handoff'));
+          setExpect('choice');
+          setChoices([
+            'Yes — send it to Rich',
+            "Just looking for now",
+          ]);
+          setAllowEmpty(false);
+        }
+
+        return arr;
+      });
     },
     [],
   );
 
   const applyTurn = useCallback(
     (turn: TurnResponse, priorMessages: ChatMessage[]) => {
-      setRecord(turn.record);
-      setFill((prev) => {
-        const next = new Set(prev);
-        for (const f of turn.fill) next.add(f);
-        return Array.from(next) as FillSection[];
+      applySiteUpdate({
+        record: turn.record,
+        fill: turn.fill,
+        template_id: turn.template_id,
+        hero_image_id: turn.hero_image_id,
+        forceHandoff: turn.done || turn.expect === 'done',
       });
 
-      const name = turn.record.business?.name || '';
-      const hasHero =
-        turn.fill.includes('hero') ||
-        !!turn.template_id ||
-        turn.record.template_id === 'trades' ||
-        !!turn.hero_image_id;
-
-      if (name && hasHero) {
-        setBuilding(true);
-        setShowHeroSkel(false);
-        setStatusText('building the hero…');
-      } else if (hasHero) {
-        // Trade known — slide layout even if name edge-case missing
-        setBuilding(true);
-        setShowHeroSkel(false);
-        setStatusText('framing your homepage…');
-      }
-
-      if (turn.fill.includes('services')) {
-        setShowServicesSkel(false);
-        setStatusText('adding your services…');
-      }
-      if (turn.fill.includes('about')) {
-        setStatusText('finishing your site…');
-      }
-      if (turn.fill.includes('contact')) {
-        setStatusText('adding contact…');
-      }
-
-      if (turn.done || turn.expect === 'done') {
-        setStatusText('site ready');
-        setStatusDone(true);
-        setPhase('handoff');
-        setExpect('choice');
-        setChoices([
-          'Yes — send it to Rich',
-          "Just looking for now",
-        ]);
-        setAllowEmpty(false);
-      } else {
+      if (!(turn.done || turn.expect === 'done')) {
         setExpect(turn.expect);
         setChoices(turn.expect === 'choice' ? turn.choices : []);
         setInputHint(turn.input_hint || 'Type your answer…');
-        // About step often allows empty ("write it for me")
         const aboutStep =
           turn.say.toLowerCase().includes('different') ||
           turn.say.toLowerCase().includes('skip') ||
@@ -156,10 +196,79 @@ export default function MontiExperience() {
         role: 'assistant',
         content: turn.say,
       };
-      setMessages([...priorMessages, assistantMsg]);
+      const next = [...priorMessages, assistantMsg];
+      setMessages(next);
+      messagesRef.current = next;
     },
-    [speakLine],
+    [applySiteUpdate, speakLine],
   );
+
+  const sendLeadOnce = useCallback(async (): Promise<{
+    ok: boolean;
+    error?: string;
+  }> => {
+    if (leadSentRef.current) return { ok: true };
+    const current = recordRef.current;
+    if (!current.business?.name?.trim()) {
+      return { ok: false, error: 'Need a business name first' };
+    }
+    try {
+      const res = await fetch('/api/monti/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ record: current }),
+      });
+      if (!res.ok) {
+        return { ok: false, error: 'Failed to save lead' };
+      }
+      leadSentRef.current = true;
+      setShowLead(true);
+      setPhase('done');
+      setChoices([]);
+      setExpect('text');
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'Network error' };
+    }
+  }, []);
+
+  const voice = useMontiVoice({
+    getRecord: () => recordRef.current,
+    muted,
+    onFill: (result: ApplyFillResult) => {
+      applySiteUpdate({
+        record: result.record,
+        fill: result.fill,
+        template_id: result.template_id,
+        hero_image_id: result.hero_image_id,
+      });
+    },
+    onSendToRich: async () => {
+      const r = await sendLeadOnce();
+      if (r.ok) {
+        const phone = recordRef.current.business.phone || 'your number';
+        setPrompt(
+          `Done — Rich has it. Expect a friendly call or text at ${phone}.`,
+        );
+      }
+      return r;
+    },
+    onTranscript: (text, role) => {
+      if (role === 'assistant' && text) {
+        setPrompt(text);
+      }
+    },
+    onAmplitude: (level) => {
+      glowRef.current?.setAmplitude(level);
+    },
+    onListening: (on) => {
+      glowRef.current?.setListening(on);
+    },
+    onError: (msg) => {
+      // Soft: keep captions, offer typing
+      if (msg) setPrompt((p) => p || msg);
+    },
+  });
 
   const callTurn = useCallback(
     async (opts: {
@@ -208,17 +317,64 @@ export default function MontiExperience() {
     [applyTurn, speakLine],
   );
 
+  const beginTyped = useCallback(async () => {
+    setMode('typed');
+    setShowHeroSkel(true);
+    setStatusText('framing your homepage…');
+    await callTurn({
+      start: true,
+      history: messagesRef.current,
+      current: recordRef.current,
+    });
+  }, [callTurn]);
+
   const begin = async () => {
     if (busy) return;
     setStarted(true);
     setPhase('chat');
     setShowHeroSkel(true);
     setStatusText('framing your homepage…');
-    await callTurn({
-      start: true,
-      history: [],
-      current: emptyRecord(),
-    });
+    setPrompt('Connecting…');
+
+    // Voice-first; typed fallback if mic / token / socket fails
+    const ok = await voice.start();
+    if (ok) {
+      setMode('voice');
+      setPrompt('Listening…');
+      setInputHint('Or type your answer…');
+      setExpect('text');
+      return;
+    }
+
+    setPrompt('');
+    await beginTyped();
+  };
+
+  const switchToTyped = async () => {
+    voice.stop();
+    setMode('typed');
+    glowRef.current?.setListening(false);
+    glowRef.current?.setAmplitude(0);
+    setInputHint('Type your answer…');
+    // If nothing started yet via typed, kick a turn with current record
+    if (messagesRef.current.length === 0 && !recordRef.current.business.name) {
+      await beginTyped();
+    } else if (messagesRef.current.length === 0) {
+      // Voice had fills but no typed history — seed a continuation
+      setBusy(true);
+      try {
+        await callTurn({
+          message:
+            '[Visitor switched to typing. Continue the build from the current site record — ask the next needed question.]',
+          history: [],
+          current: recordRef.current,
+        });
+      } finally {
+        setBusy(false);
+      }
+    } else {
+      setTimeout(() => inputRef.current?.focus(), 80);
+    }
   };
 
   const submitAnswer = async (raw: string) => {
@@ -233,32 +389,20 @@ export default function MontiExperience() {
 
       if (yes || text === 'Yes — send it to Rich') {
         setBusy(true);
-        try {
-          const res = await fetch('/api/monti/lead', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ record }),
-          });
-          if (!res.ok) {
-            speakLine(
-              "Couldn't reach Rich's inbox just now — try again in a minute, or call him direct.",
-            );
-            setBusy(false);
-            return;
-          }
-          setShowLead(true);
-          setPhase('done');
-          setChoices([]);
-          setExpect('text');
-          const phone = record.business.phone || 'your number';
+        const r = await sendLeadOnce();
+        if (!r.ok) {
           speakLine(
-            `Done — Rich has it. Expect a friendly call or text at ${phone}.`,
+            "Couldn't reach Rich's inbox just now — try again in a minute, or call him direct.",
           );
-        } catch {
-          speakLine("Couldn't send that just now. Give it another go?");
-        } finally {
+          leadSentRef.current = false;
           setBusy(false);
+          return;
         }
+        const phone = recordRef.current.business.phone || 'your number';
+        speakLine(
+          `Done — Rich has it. Expect a friendly call or text at ${phone}.`,
+        );
+        setBusy(false);
         return;
       }
 
@@ -272,14 +416,19 @@ export default function MontiExperience() {
 
     if (!text && !allowEmpty) return;
 
+    // In pure voice mode, typing still works as a user message path via typed API
+    if (mode === 'voice') {
+      // Stop voice mic path for this answer and use typed turn so text is reliable
+      voice.stop();
+      setMode('typed');
+    }
+
     glowRef.current?.impulse();
 
-    // Skeletons for upcoming sections
     if (!building && record.business.name) {
       setShowHeroSkel(true);
     }
     if (building && fill.includes('hero') && !fill.includes('services')) {
-      // might be heading to services
       if (/yep|perfect|close|tweak|services/i.test(text) || expect === 'choice') {
         setShowServicesSkel(true);
         setStatusText('laying out your services…');
@@ -289,8 +438,8 @@ export default function MontiExperience() {
     const userText = text || '(skip — write it for me)';
     await callTurn({
       message: userText,
-      history: messages,
-      current: record,
+      history: messagesRef.current,
+      current: recordRef.current,
     });
     setInputValue('');
   };
@@ -309,7 +458,9 @@ export default function MontiExperience() {
     phase !== 'start' &&
     phase !== 'done' &&
     !busy &&
-    (expect === 'text' || (phase === 'handoff' && choices.length === 0));
+    (expect === 'text' ||
+      mode === 'voice' ||
+      (phase === 'handoff' && choices.length === 0));
 
   const showChips =
     phase !== 'start' &&
@@ -330,7 +481,10 @@ export default function MontiExperience() {
           <div className="monti-center">
             {started ? (
               <div className={`monti-prompt${busy ? ' busy' : ''}`}>
-                {busy && !prompt ? 'Monti is thinking…' : prompt}
+                {busy && !prompt
+                  ? 'Monti is thinking…'
+                  : prompt ||
+                    (mode === 'voice' ? 'Listening…' : '')}
               </div>
             ) : null}
 
@@ -357,7 +511,11 @@ export default function MontiExperience() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder={
-                    busy ? 'Monti is thinking…' : inputHint
+                    busy
+                      ? 'Monti is thinking…'
+                      : mode === 'voice'
+                        ? 'Speak — or type here…'
+                        : inputHint
                   }
                   disabled={busy}
                   autoComplete="off"
@@ -374,7 +532,18 @@ export default function MontiExperience() {
               </form>
             ) : null}
 
-            {busy && started ? (
+            {started && phase !== 'done' && mode === 'voice' ? (
+              <button
+                type="button"
+                className="monti-chip"
+                style={{ marginTop: 12 }}
+                onClick={() => void switchToTyped()}
+              >
+                Prefer to type?
+              </button>
+            ) : null}
+
+            {busy && started && mode === 'typed' ? (
               <div className="monti-prompt busy" style={{ fontSize: 13 }}>
                 …
               </div>
