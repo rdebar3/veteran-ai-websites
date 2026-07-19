@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monti · Tourism & Outdoors Template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     MONTI — TOURISM & OUTDOORS TEMPLATE
+     A FIXED, DESIGNED FRAME. Monti supplies only the §3 DATA
+     (same contract) and the frame renders it with FALLBACKS.
+     Cinematic/aspirational: big landscape hero, the experience
+     is the pitch, book-now CTA. services[] = trips/amenities.
+     business.hours = season window (e.g. "Open Apr–Oct").
+     ============================================================ */
+
+  :root, [data-palette="summit"]{
+    --bg:#f3f5f3; --surface:#fff; --ink:#16201b; --muted:#5c6b62; --line:#dde5df;
+    --accent:#1f7a8c; --accent-d:#166170; --dark:#12201d; --dark-2:#0c1613; --gold:#d9a54a;
+    --ph1:#1c3a34; --ph2:#6f9a7f;
+  }
+  [data-palette="sunrise"]{
+    --bg:#f6f3ee; --surface:#fff; --ink:#211c15; --muted:#6b6152; --line:#e6ddce;
+    --accent:#cf8a2e; --accent-d:#a86c1e; --dark:#1d1712; --dark-2:#140f0b; --gold:#d9a54a;
+    --ph1:#3a2c1c; --ph2:#a3835a;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0}
+  .site{color:var(--ink);background:var(--bg);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+  .site a{color:inherit;text-decoration:none}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,44px)}
+  h1,h2,h3,h4{font-family:Fraunces,Georgia,serif;font-weight:600}
+  .kicker{font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+
+  .btn{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:15px;padding:15px 28px;border-radius:999px;cursor:pointer;border:1px solid transparent;letter-spacing:.01em;transition:transform .2s,background .2s,color .2s,border-color .2s}
+  .btn--primary{background:var(--accent);color:#fff}
+  .btn--primary:hover{background:var(--accent-d);transform:translateY(-2px)}
+  .btn--onlight{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.5);backdrop-filter:blur(4px)}
+  .btn--onlight:hover{background:#fff;color:var(--dark)}
+  .btn--outline{background:transparent;color:var(--ink);border-color:var(--ink)}
+  .btn--outline:hover{background:var(--ink);color:var(--bg)}
+
+  .img{position:relative;overflow:hidden;background:linear-gradient(140deg,var(--ph1),var(--ph2))}
+  .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+
+  /* header */
+  .hdr{position:fixed;top:0;left:0;right:0;z-index:60;transition:background .35s,box-shadow .35s;border-bottom:1px solid transparent}
+  .hdr-in{display:flex;align-items:center;justify-content:space-between;height:76px}
+  .brand{font-family:Fraunces,serif;font-weight:600;font-size:21px;color:#fff;transition:color .35s;letter-spacing:.01em}
+  .nav{display:flex;align-items:center;gap:30px}
+  .nav a{font-size:14px;font-weight:500;color:rgba(255,255,255,.85);transition:color .2s}
+  .nav a:hover{color:#fff}
+  .hdr .book{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;padding:10px 20px;border-radius:999px;transition:background .2s,transform .2s}
+  .hdr .book:hover{background:var(--accent-d);transform:translateY(-1px)}
+  .hdr.solid{background:var(--dark);box-shadow:0 10px 34px -20px rgba(0,0,0,.6)}
+  @media(max-width:840px){.nav{display:none}}
+
+  /* hero — full-bleed cinematic */
+  .hero{position:relative;min-height:100vh;display:flex;align-items:flex-end;color:#fff;isolation:isolate}
+  .hero .img{position:absolute;inset:0;z-index:-2}
+  .hero .img img{animation:kb 26s ease-out both}
+  @keyframes kb{from{transform:scale(1.05)}to{transform:scale(1.18)}}
+  .hero .scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(10,16,13,.82) 2%,rgba(10,16,13,.15) 42%,rgba(10,16,13,.28) 100%)}
+  .hero-in{padding-bottom:clamp(66px,11vh,140px);padding-top:120px;max-width:900px}
+  .hero .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.92);margin:0 0 20px}
+  .hero .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+  .hero h1{font-size:clamp(44px,8vw,104px);line-height:.98;letter-spacing:-.02em;margin:0;font-weight:600;text-wrap:balance;
+           display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .hero .tag{margin:22px 0 0;max-width:52ch;font-size:clamp(16px,1.5vw,20px);line-height:1.6;color:rgba(255,255,255,.92);
+             display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .hero-cta{margin-top:34px;display:flex;flex-wrap:wrap;gap:14px}
+
+  /* season / info strip */
+  .strip{background:var(--dark);color:#fff}
+  .strip-in{display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px 30px;padding:26px 0}
+  .st{flex:1 1 180px;text-align:center;display:flex;flex-direction:column;gap:4px}
+  .st .lbl{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+  .st .val{font-family:Fraunces,serif;font-size:clamp(17px,2vw,22px);color:#fff}
+
+  /* sections */
+  .sec{padding:clamp(64px,9vw,124px) 0}
+  .sec--tint{background:linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--accent) 6%,var(--bg)))}
+  .head{max-width:660px;margin:0 0 clamp(40px,6vw,58px)}
+  .head.center{margin-left:auto;margin-right:auto;text-align:center}
+  .title{font-size:clamp(30px,4.4vw,50px);line-height:1.05;letter-spacing:-.015em;margin:0;color:var(--ink)}
+  .head .sub{margin:16px 0 0;font-size:17.5px;line-height:1.6;color:var(--muted);max-width:54ch}
+
+  /* experiences */
+  .exp{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+  .card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px 26px;overflow:hidden;transition:transform .28s,box-shadow .28s}
+  .card:hover{transform:translateY(-5px);box-shadow:0 30px 50px -28px rgba(15,30,22,.3)}
+  .card .n{font-family:Fraunces,serif;font-size:14px;color:var(--accent);letter-spacing:.1em;font-weight:600}
+  .card h3{font-size:21px;margin:10px 0 9px;color:var(--ink)}
+  .card p{font-size:14.5px;line-height:1.58;color:var(--muted);margin:0;
+          display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .card::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+  .card:hover::after{transform:scaleX(1)}
+
+  /* feature */
+  .feature{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,70px);align-items:center}
+  .feature .img{aspect-ratio:4/3;border-radius:18px;box-shadow:0 40px 70px -34px rgba(10,25,18,.5)}
+  .feature h2{font-size:clamp(28px,3.6vw,42px);line-height:1.07;margin:0 0 18px;color:var(--ink)}
+  .feature p{font-size:17px;line-height:1.7;color:var(--muted);margin:0 0 24px}
+  @media(max-width:840px){.feature{grid-template-columns:1fr}}
+
+  /* full-bleed band */
+  .band{position:relative;color:#fff;text-align:center;isolation:isolate}
+  .band .img{position:absolute;inset:0;z-index:-2}
+  .band .scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(10,16,13,.62),rgba(10,16,13,.32))}
+  .band .inner{padding:clamp(90px,15vw,200px) 20px;max-width:820px;margin:0 auto}
+  .band h2{font-size:clamp(30px,5vw,60px);line-height:1.08;letter-spacing:-.01em;margin:0;font-weight:600}
+  .band .tag{margin:20px auto 0;max-width:46ch;font-size:17.5px;line-height:1.6;color:rgba(255,255,255,.9)}
+
+  /* reviews */
+  .reviews{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:1000px;margin:0 auto}
+  .rev{text-align:center;padding:10px}
+  .rev .stars{color:var(--gold);letter-spacing:3px;font-size:15px;margin-bottom:14px}
+  .rev q{font-family:Fraunces,serif;font-size:19px;font-style:italic;line-height:1.5;color:var(--ink);quotes:none;display:block;margin:0 0 16px}
+  .rev .who{font-size:13px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+
+  /* CTA */
+  .cta{position:relative;color:#fff;text-align:center;isolation:isolate;overflow:hidden}
+  .cta .img{position:absolute;inset:0;z-index:-2}
+  .cta .scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(10,16,13,.8),rgba(10,16,13,.55))}
+  .cta .inner{padding:clamp(64px,10vw,130px) 20px}
+  .cta h2{font-size:clamp(30px,4.8vw,56px);line-height:1.04;margin:0}
+  .cta p{margin:16px auto 0;max-width:46ch;font-size:17.5px;color:rgba(255,255,255,.9)}
+  .cta .row{margin-top:32px;display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+
+  /* footer */
+  .ft{background:var(--dark-2);color:rgba(255,255,255,.72);padding:56px 0 30px;text-align:center}
+  .ft .brand{color:#fff;display:block;margin-bottom:14px}
+  .ft .row{display:flex;flex-wrap:wrap;gap:6px 24px;justify-content:center;margin:14px 0;font-size:14.5px}
+  .ft-bottom{border-top:1px solid rgba(255,255,255,.12);padding-top:20px;margin-top:22px;font-size:12.5px;color:rgba(255,255,255,.5)}
+
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}.hero .img img{animation:none}}
+
+  /* harness */
+  .harness{position:fixed;z-index:200;left:50%;transform:translateX(-50%);bottom:14px;display:flex;gap:7px;align-items:center;background:#0f172a;color:#fff;padding:9px 11px;border-radius:13px;box-shadow:0 18px 50px rgba(0,0,0,.45);font-family:Inter,sans-serif;font-size:12.5px;flex-wrap:wrap;justify-content:center;max-width:94vw}
+  .harness .lbl{color:#8b97a9;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:10.5px}
+  .harness button{background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:8px;padding:7px 11px;font-size:12.5px;font-weight:600;cursor:pointer}
+  .harness button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .harness .sep{width:1px;height:20px;background:#334155;margin:0 3px}
+</style>
+</head>
+<body>
+<div class="site" id="site" data-palette="summit"></div>
+
+<div class="harness">
+  <span class="lbl">Business</span>
+  <button id="b-full" class="on" onclick="pick('full')">Full-detail</button>
+  <button id="b-sparse" onclick="pick('sparse')">Bare-bones</button>
+  <span class="sep"></span>
+  <span class="lbl">Palette</span>
+  <button id="p-summit" class="on" onclick="pal('summit')">Summit</button>
+  <button id="p-sunrise" onclick="pal('sunrise')">Sunrise</button>
+</div>
+
+<script>
+/* curated Tourism/Outdoors photo library — real photography, all 6000px+ (verified), Unsplash commercial-free */
+const U='https://images.unsplash.com/photo-';
+const PRESET={
+  hero:   'w=3840&h=2160&fit=crop&crop=entropy&q=80&fm=jpg',
+  feature:'w=2000&h=1500&fit=crop&crop=entropy&q=80&fm=jpg',
+  band:   'w=3840&h=1600&fit=crop&crop=entropy&q=80&fm=jpg'
+};
+const IMG={
+  cabin:'1637687222430-ca092fb9062a', rafting:'1658355686821-f412c8397a0d',
+  overlook:'1769428839337-a1d1b09494bb', atv:'1777665625792-cc62356e66e6',
+  camping:'1470246973918-29a93221c455', interior:'1698933787134-af2d451985c7',
+  river_valley:'1760407182912-150b6fe85236', overlook2:'1779936532105-6d6f5646c03d'
+};
+
+/* §3 DATA CONTRACT (same shape). Tourism reading: services[]=trips/amenities,
+   business.hours = season window, contact.cta = Book/Check availability. */
+const SAMPLES={
+  full:{
+    template_id:"tourism", palette:"summit", copy_tone:"adventurous",
+    business:{name:"New River Adventures", phone:"(304) 555-0110", service_area:"Fayetteville · New River Gorge, WV", established:1998, hours:"Open Apr–Oct"},
+    hero:{ image_id:"rafting",
+      headline:"The river is calling.",
+      subhead:"Guided whitewater, kayak schools, and overnight trips through the wildest water in the East — run by locals who know every rapid by name.",
+      cta_text:"Check availability" },
+    about:{ body:"We've been putting boats on the New and Gauley since 1998. Our guides grew up on this water, and there's nothing they'd rather do than show you why folks come from all over the world to paddle it." },
+    services:[
+      {title:"Lower New Full-Day", description:"Big, splashy Class III–IV fun — perfect for first-timers."},
+      {title:"Gauley Season", description:"Legendary Class V whitewater, September & October only."},
+      {title:"Family Float Trip", description:"Gentle scenic water the whole family can enjoy."},
+      {title:"Kayak School", description:"Two-day intro to paddling with certified instructors."},
+      {title:"Overnight Expeditions", description:"Riverside camping and two days on the water."},
+      {title:"Gorge Zipline Combo", description:"Add a canopy tour to any rafting trip."}
+    ],
+    trust:{ badges:["Since 1998","Licensed Outfitter","Family-Friendly"],
+      reviews:[
+        {quote:"Our guide made a nervous first-timer feel completely safe — and it was the best day of our whole trip.", name:"The Barnes Family", detail:"Columbus, OH"},
+        {quote:"Gauley season with these folks is a bucket-list experience. Absolute pros.", name:"Derek W.", detail:"Pittsburgh, PA"}
+      ] },
+    contact:{ cta_text:"Check availability", phone_prompt:"Book online or call — trips fill fast in peak season", emergency:false }
+  },
+  sparse:{
+    template_id:"tourism", palette:"summit", copy_tone:"adventurous",
+    business:{name:"Hemlock Ridge Cabin", phone:"(304) 555-0184", service_area:"near Seneca Rocks, WV", established:null, hours:"Open year-round"},
+    hero:{ image_id:"cabin",
+      headline:"Your quiet place in the hills.",
+      subhead:"A cozy log cabin tucked in the West Virginia woods.",
+      cta_text:"Check dates" },
+    about:{ body:"Wake up to birdsong and mountain air. Just you, the trees, and the quiet." },
+    services:[
+      {title:"Sleeps 6", description:"Two bedrooms plus a loft, fully furnished."},
+      {title:"Hot Tub & Fire Pit", description:"Soak under the stars, roast marshmallows by the fire."},
+      {title:"Trailhead Access", description:"Hiking and the river minutes from your door."}
+    ],
+    trust:{ badges:[], reviews:[] },
+    contact:{ cta_text:"Check dates", phone_prompt:"Reserve your weekend — book direct and save", emergency:false }
+  }
+};
+
+const cap=(s,n)=>{s=(s==null?'':String(s)).trim();return s.length>n?s.slice(0,n-1).trimEnd()+'…':s;};
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const imgTag=(name,preset,alt)=>`<div class="img"><img src="${IMG[name]?(U+IMG[name]+'?'+PRESET[preset]):''}" alt="${esc(alt)}" loading="lazy" onerror="this.style.display='none'"></div>`;
+
+function render(key){
+  const d=SAMPLES[key], b=d.business||{};
+  const tel='tel:'+String(b.phone||'').replace(/[^0-9+]/g,'');
+  const heroImg=d.hero?.image_id&&IMG[d.hero.image_id]?d.hero.image_id:'overlook';
+  const heroCta=cap(d.hero?.cta_text,22)||'Check availability';
+  const contactCta=cap(d.contact?.cta_text,22)||heroCta;
+  const phonePrompt=cap(d.contact?.phone_prompt,60)||'Book online or give us a call';
+  const exps=(d.services||[]).slice(0,6);
+  const reviews=(d.trust?.reviews||[]).slice(0,3);
+  const badges=(d.trust?.badges||[]).slice(0,3);
+  const est=b.established, season=b.hours;
+
+  // season/info strip: season + location + (first badge OR "book direct") + phone
+  const strip = [
+    season?{lbl:'Season',val:cap(season,22)}:null,
+    {lbl:'Where',val:cap(b.service_area,26)||'West Virginia'},
+    badges[0]?{lbl:'Good to know',val:cap(badges[0],22)}:{lbl:'Booking',val:'Reserve direct'},
+    {lbl:'Call',val:b.phone||''}
+  ].filter(Boolean).map(s=>`<div class="st"><span class="lbl">${esc(s.lbl)}</span><span class="val">${esc(s.val)}</span></div>`).join('');
+
+  document.getElementById('site').innerHTML=`
+  <header class="hdr" id="hdr"><div class="wrap hdr-in">
+    <div class="brand">${esc(cap(b.name,28))}</div>
+    <nav class="nav"><a href="#exp">Experiences</a><a href="#about">About</a><a href="#book">Book</a></nav>
+    <a href="#book" class="book">${esc(contactCta)}</a>
+  </div></header>
+
+  <section class="hero">
+    ${imgTag(heroImg,'hero',b.name)}
+    <div class="scrim"></div>
+    <div class="wrap hero-in">
+      <p class="eyebrow"><span class="dot"></span> ${esc(cap(b.service_area,44))||'West Virginia'}</p>
+      <h1>${esc(cap(d.hero?.headline,50))}</h1>
+      <p class="tag">${esc(cap(d.hero?.subhead,160))}</p>
+      <div class="hero-cta">
+        <a href="#book" class="btn btn--primary">${esc(heroCta)}</a>
+        <a href="${tel}" class="btn btn--onlight">☎ ${esc(b.phone||'')}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="strip"><div class="wrap strip-in">${strip}</div></section>
+
+  <section class="sec" id="exp"><div class="wrap">
+    <div class="head reveal"><p class="kicker">What you'll do</p><h2 class="title">Pick your adventure.</h2></div>
+    <div class="exp">
+      ${exps.map((s,i)=>`<div class="card reveal" style="transition-delay:${i*55}ms"><div class="n">0${i+1}</div><h3>${esc(cap(s.title,30))}</h3><p>${esc(cap(s.description,96))}</p></div>`).join('')}
+    </div>
+  </div></section>
+
+  <section class="sec sec--tint" id="about"><div class="wrap">
+    <div class="feature">
+      <div class="img reveal">${imgTag('interior','feature',b.name+' — your basecamp')}</div>
+      <div class="reveal">
+        <p class="kicker">Why us</p>
+        <h2>Local, and proud of it.</h2>
+        <p>${esc(cap(d.about?.body,320))}</p>
+        <a href="#book" class="btn btn--primary">${esc(contactCta)}</a>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="band">
+    ${imgTag('overlook','band',b.service_area+' — West Virginia')}
+    <div class="scrim"></div>
+    <div class="inner reveal">
+      <h2>${esc(est?('A West Virginia tradition since '+est+'.'):'Wild, wonderful, and right outside your door.')}</h2>
+      <p class="tag">The mountains have been waiting. Come see what all the fuss is about.</p>
+    </div>
+  </section>
+
+  ${reviews.length?`
+  <section class="sec"><div class="wrap">
+    <div class="head center reveal"><p class="kicker">Guests &amp; guests</p><h2 class="title">People don't forget it.</h2></div>
+    <div class="reviews">
+      ${reviews.map((r,i)=>`<div class="rev reveal" style="transition-delay:${i*70}ms"><div class="stars">★★★★★</div><q>${esc(cap(r.quote,170))}</q><div class="who">${esc(cap(r.name,28))} · ${esc(cap(r.detail,26))}</div></div>`).join('')}
+    </div>
+  </div></section>`:``}
+
+  <section class="cta" id="book">
+    ${imgTag('camping','band',b.name)}
+    <div class="scrim"></div>
+    <div class="inner">
+      <h2>${esc(season?(cap(season,30)):'Come on out.')}</h2>
+      <p>${esc(phonePrompt)}.</p>
+      <div class="row">
+        <a href="${tel}" class="btn btn--primary">☎ ${esc(b.phone||'')}</a>
+        <a href="${tel}" class="btn btn--onlight">${esc(contactCta)}</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="ft"><div class="wrap">
+    <span class="brand">${esc(cap(b.name,28))}</span>
+    <div class="row"><span>${esc(cap(b.service_area,44))}</span>${season?`<span>${esc(cap(season,24))}</span>`:``}<span>${esc(b.phone||'')}</span></div>
+    <div class="ft-bottom">© ${esc(cap(b.name,40))}${est?(' · Since '+esc(est)):''} · Site by Veteran AI Websites</div>
+  </div></footer>
+  `;
+  wireScroll();
+}
+
+function wireScroll(){
+  const hdr=document.getElementById('hdr');
+  const onScroll=()=>hdr.classList.toggle('solid',window.scrollY>60);
+  window.onscroll=onScroll; onScroll();
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+}
+
+let cur='full';
+function pick(k){cur=k;render(k);
+  document.getElementById('b-full').classList.toggle('on',k==='full');
+  document.getElementById('b-sparse').classList.toggle('on',k==='sparse');}
+function pal(p){document.getElementById('site').dataset.palette=p;
+  document.getElementById('p-summit').classList.toggle('on',p==='summit');
+  document.getElementById('p-sunrise').classList.toggle('on',p==='sunrise');}
+render('full');
+</script>
+</body>
+</html>

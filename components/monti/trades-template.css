@@ -1,0 +1,769 @@
+/* Monti Trades template — locked frame, scoped under .mt-trades */
+
+.mt-trades,
+.mt-trades[data-palette='ember'] {
+  --bg: #f7f4ef;
+  --surface: #fff;
+  --ink: #20242b;
+  --muted: #6f665c;
+  --line: #e8e1d6;
+  --accent: #c2532a;
+  --accent-d: #a5451f;
+  --dark: #191c22;
+  --dark-2: #111318;
+  --gold: #c9a24b;
+  --ph1: #3a546e;
+  --ph2: #c4966e;
+  --font-serif: var(--monti-serif, Fraunces, Georgia, serif);
+  --font-sans: var(--monti-sans, Inter, system-ui, sans-serif);
+}
+
+.mt-trades[data-palette='timber'] {
+  --bg: #f5f6f2;
+  --surface: #fff;
+  --ink: #1c231e;
+  --muted: #606a60;
+  --line: #e0e6dd;
+  --accent: #2f6b46;
+  --accent-d: #245537;
+  --dark: #16211a;
+  --dark-2: #0f1712;
+  --gold: #c9a24b;
+  --ph1: #2f4a3a;
+  --ph2: #8aa06f;
+}
+
+.mt-trades {
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+  position: relative;
+  min-height: 100%;
+  text-align: left;
+}
+
+.mt-trades *,
+.mt-trades *::before,
+.mt-trades *::after {
+  box-sizing: border-box;
+}
+
+.mt-trades a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mt-trades .wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 36px);
+}
+
+.mt-trades h1,
+.mt-trades h2,
+.mt-trades h3,
+.mt-trades .disp {
+  font-family: var(--font-serif);
+  font-weight: 600;
+}
+
+.mt-trades .kicker {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 12px;
+}
+
+.mt-trades .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: default;
+  border: 1px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.mt-trades .btn--primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 12px 26px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.mt-trades .btn--ghost {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.mt-trades .btn--ondark {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.mt-trades .img {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(140deg, var(--ph1), var(--ph2));
+}
+
+.mt-trades .img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Header — sticky inside browser frame scroll */
+.mt-trades .hdr {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  transition: background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.mt-trades .hdr-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.mt-trades .brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: #fff;
+  transition: color 0.35s ease;
+}
+
+.mt-trades .brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.5);
+  flex: 0 0 auto;
+}
+
+.mt-trades .nav {
+  display: none;
+}
+
+.mt-trades .hdr .call {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-weight: 600;
+  font-size: 12.5px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.mt-trades .hdr.solid {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border-bottom-color: var(--line);
+  box-shadow: 0 8px 30px -20px rgba(0, 0, 0, 0.4);
+}
+
+.mt-trades .hdr.solid .brand {
+  color: var(--ink);
+}
+
+.mt-trades .hdr.solid .call {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* When header sits over empty/skeleton (no hero yet) */
+.mt-trades .hdr.on-light .brand {
+  color: var(--ink);
+}
+
+.mt-trades .hdr.on-light .call {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Hero */
+.mt-trades .hero {
+  position: relative;
+  min-height: 340px;
+  display: flex;
+  align-items: flex-end;
+  color: #fff;
+  isolation: isolate;
+  margin-top: -56px;
+  padding-top: 56px;
+}
+
+.mt-trades .hero .img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.mt-trades .hero .scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 18, 24, 0.42) 0%,
+      rgba(15, 18, 24, 0.12) 34%,
+      rgba(15, 18, 24, 0.55) 78%,
+      rgba(15, 18, 24, 0.82) 100%
+    ),
+    linear-gradient(90deg, rgba(15, 18, 24, 0.55), transparent 60%);
+}
+
+.mt-trades .hero-in {
+  padding: 28px 0 32px;
+  max-width: 640px;
+}
+
+.mt-trades .hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 7px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.mt-trades .hero h1 {
+  font-size: clamp(24px, 3.2vw, 40px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  margin: 0;
+  font-weight: 600;
+  max-width: 16ch;
+}
+
+.mt-trades .hero .lead {
+  margin: 14px 0 0;
+  max-width: 44ch;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.mt-trades .hero-cta {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mt-trades .hero-trust {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.mt-trades .hero-trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.mt-trades .hero-trust .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+/* Trust bar */
+.mt-trades .trustbar {
+  background: var(--dark);
+  color: #fff;
+}
+
+.mt-trades .trustbar-in {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 18px 0;
+}
+
+.mt-trades .tstat {
+  flex: 1 1 100px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mt-trades .tstat b {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.mt-trades .tstat span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+/* Sections */
+.mt-trades .sec {
+  padding: 36px 0;
+}
+
+.mt-trades .sec--tint {
+  background: linear-gradient(
+    180deg,
+    var(--bg),
+    color-mix(in srgb, var(--accent) 5%, var(--bg))
+  );
+}
+
+.mt-trades .head {
+  max-width: 640px;
+  margin: 0 0 22px;
+}
+
+.mt-trades .head.center {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.mt-trades .title {
+  font-size: clamp(20px, 2.4vw, 28px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+}
+
+.mt-trades .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.mt-trades .card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 16px;
+  overflow: hidden;
+}
+
+.mt-trades .card .ic {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--accent);
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.mt-trades .card h3 {
+  font-size: 15px;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+
+.mt-trades .card p {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0;
+}
+
+.mt-trades .feature {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  align-items: center;
+}
+
+@media (min-width: 700px) {
+  .mt-trades .feature {
+    grid-template-columns: 1.05fr 1fr;
+    gap: 36px;
+  }
+}
+
+.mt-trades .feature .img {
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  box-shadow: 0 30px 50px -28px rgba(0, 0, 0, 0.35);
+}
+
+.mt-trades .feature h2 {
+  font-size: clamp(20px, 2.6vw, 28px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+
+.mt-trades .feature p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+
+.mt-trades .points {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mt-trades .points li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.mt-trades .points li i {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--accent) 13%, var(--bg));
+  color: var(--accent);
+  flex: 0 0 auto;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.mt-trades .band-photo {
+  position: relative;
+  color: #fff;
+  isolation: isolate;
+  min-height: 180px;
+}
+
+.mt-trades .band-photo .img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.mt-trades .band-photo .scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(15, 18, 24, 0.8), rgba(15, 18, 24, 0.42));
+}
+
+.mt-trades .band-photo .inner {
+  padding: 48px 0;
+  max-width: 520px;
+}
+
+.mt-trades .band-photo h2 {
+  font-size: clamp(20px, 2.8vw, 28px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+}
+
+.mt-trades .band-photo p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.86);
+  margin: 0;
+}
+
+.mt-trades .steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .mt-trades .steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+.mt-trades .step {
+  position: relative;
+}
+
+.mt-trades .step .n {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+}
+
+.mt-trades .step h4 {
+  font-size: 16px;
+  margin: 8px 0 6px;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-weight: 600;
+}
+
+.mt-trades .step p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0;
+}
+
+.mt-trades .step::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 0;
+  width: 32px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.mt-trades .reviews {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.mt-trades .rev {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-trades .rev .stars {
+  color: var(--gold);
+  letter-spacing: 2px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.mt-trades .rev q {
+  font-family: var(--font-serif);
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  font-style: italic;
+  quotes: none;
+  display: block;
+  margin: 0 0 14px;
+}
+
+.mt-trades .rev .who {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: auto;
+}
+
+.mt-trades .rev .who span {
+  display: block;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.mt-trades .cta-band {
+  position: relative;
+  background: var(--dark);
+  color: #fff;
+  border-radius: 18px;
+  padding: 36px 22px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.mt-trades .cta-band .glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    60% 80% at 80% 0%,
+    color-mix(in srgb, var(--accent) 45%, transparent),
+    transparent 62%
+  );
+  pointer-events: none;
+}
+
+.mt-trades .cta-band h2 {
+  position: relative;
+  font-size: clamp(20px, 2.8vw, 30px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.mt-trades .cta-band p {
+  position: relative;
+  margin: 12px auto 0;
+  max-width: 40ch;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.mt-trades .cta-band .row {
+  position: relative;
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.mt-trades .ft {
+  background: var(--dark-2);
+  color: rgba(255, 255, 255, 0.72);
+  padding: 36px 0 22px;
+}
+
+.mt-trades .ft-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 40px;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.mt-trades .ft h5 {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0 0 10px;
+}
+
+.mt-trades .ft p {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.mt-trades .ft-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Skeleton + fill animation */
+.mt-trades .sk {
+  background: linear-gradient(90deg, #e8e1d6 25%, #f3eee5 37%, #e8e1d6 63%);
+  background-size: 400% 100%;
+  animation: mt-sh 1.4s ease infinite;
+  border-radius: 8px;
+}
+
+@keyframes mt-sh {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.mt-trades .sk-line {
+  height: 12px;
+  margin-bottom: 10px;
+}
+
+.mt-trades .hero-skel {
+  min-height: 280px;
+  background: #e8e1d6;
+  display: flex;
+  align-items: flex-end;
+  padding: 28px 0 32px;
+  margin-top: -56px;
+  padding-top: 80px;
+}
+
+.mt-trades .fillin {
+  animation: mt-fill 0.5s ease both;
+}
+
+@keyframes mt-fill {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mt-trades .empty-hint {
+  padding: 60px 24px;
+  color: #b7b0a4;
+  text-align: center;
+  font-size: 13.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mt-trades .fillin,
+  .mt-trades .sk {
+    animation: none;
+  }
+}

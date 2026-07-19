@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:Inter,system-ui,sans-serif;color:#f3ece2;overflow:hidden;height:100vh;
+       background:radial-gradient(120% 100% at 50% 40%,#1f160f 0%,#140e0a 48%,#0a0605 100%)}
+  .wrap{position:relative;height:100vh;display:flex;flex-direction:column;align-items:center}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}
+
+  .top{position:relative;z-index:5;width:100%;display:flex;align-items:center;justify-content:space-between;padding:22px 26px}
+  .logo{font-family:Fraunces,serif;font-weight:600;letter-spacing:.3em;font-size:14px;color:#f0d3ab}
+  .logo b{color:#e0913f}
+
+  .stage{position:relative;z-index:5;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:0 22px}
+  .spacer{height:min(46vh,420px)}
+
+  /* client's input box */
+  .ask{position:relative;width:min(640px,94vw);display:flex;align-items:center;gap:10px;
+       background:rgba(30,21,15,.66);backdrop-filter:blur(10px);
+       border:1px solid rgba(224,145,63,.28);border-radius:16px;padding:8px 8px 8px 20px;
+       box-shadow:0 30px 80px -44px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.04);transition:border-color .2s, box-shadow .2s}
+  .ask:focus-within{border-color:rgba(224,145,63,.6);box-shadow:0 30px 80px -40px rgba(0,0,0,.85),0 0 0 4px rgba(224,145,63,.10)}
+  .ask input{flex:1;background:none;border:none;outline:none;color:#fbf5ec;font-family:inherit;font-size:16px;padding:12px 0}
+  .ask input::placeholder{color:#9a8b78}
+  .ask .go{flex:0 0 auto;width:44px;height:44px;border-radius:12px;border:none;background:#c2532a;color:#fff;font-size:18px;cursor:pointer;transition:background .18s, transform .18s}
+  .ask .go:hover{background:#a5451f;transform:translateY(-1px)}
+  .prompt{width:min(640px,94vw);text-align:center;font-size:13px;color:#a08a72;letter-spacing:.02em;margin:0 0 14px;min-height:16px;transition:color .3s}
+  .prompt.speaking{color:#e0913f}
+
+  .controls{position:relative;z-index:5;display:flex;gap:12px;align-items:center;justify-content:center;padding:0 0 34px}
+  .play{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#e6ddd0;font-weight:600;font-size:14px;padding:12px 20px;border-radius:999px;cursor:pointer;font-family:inherit;transition:.18s}
+  .play:hover{background:rgba(255,255,255,.12)}
+  .play:disabled{opacity:.5;cursor:default}
+  .mute{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#e6ddd0;border-radius:999px;padding:12px 15px;font-size:13px;font-weight:600;cursor:pointer}
+  .mute.off{opacity:.55}
+  .hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:11px;color:#6b6154;z-index:5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <canvas id="c"></canvas>
+  <div class="top"><div class="logo"><b>▲</b> M O N T I</div></div>
+  <div class="stage">
+    <div class="spacer"></div>
+    <div class="prompt" id="prompt">Monti's listening…</div>
+    <form class="ask" onsubmit="send(event)">
+      <input id="in" placeholder="Type your answer to Monti…" autocomplete="off">
+      <button class="go" type="submit" aria-label="send">↑</button>
+    </form>
+  </div>
+  <div class="controls">
+    <button class="play" id="play" onclick="speak()">▶ Hear Monti speak (demo)</button>
+    <button class="mute" id="mute" onclick="toggleMute()">🔊 voice on</button>
+  </div>
+  <div class="hint">Monti talks out loud; the glow moves with his voice. The box is where the visitor types back.</div>
+</div>
+
+<script>
+const cv=document.getElementById('c'), ctx=cv.getContext('2d');
+let W=0,H=0,DPR=Math.min(2,window.devicePixelRatio||1);
+let cx=0,cy=0,unit=0;
+function resize(){ W=cv.clientWidth;H=cv.clientHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+  cx=W/2; cy=H*0.38; unit=Math.min(W,H); }
+window.addEventListener('resize',resize);
+
+let SEED=7; function rnd(){ SEED=(SEED*1103515245+12345)&0x7fffffff; return SEED/0x7fffffff; }
+const blobs=[];
+for(let i=0;i<7;i++) blobs.push({dist:0.02+rnd()*0.06, r:0.13+rnd()*0.14, ph:rnd()*6.28, sp:0.00014+rnd()*0.00026, spin:(rnd()<.5?1:-1)});
+
+/* envelope + smoothing */
+let speaking=false, sylls=[], speakStart=0, speakDur=0, ampS=0, impulse=0;
+function makeEnvelope(nWords){ sylls=[]; let t=0.35; const per=0.34;
+  for(let i=0;i<nWords*1.7;i++){ sylls.push({t,dur:0.10+Math.random()*0.08,peak:0.55+Math.random()*0.45}); t+=per*(0.6+Math.random()*0.8);} speakDur=t+0.5; }
+function ampTarget(now){
+  let a=0.08+0.04*Math.sin(now*0.0014);          // gentle idle breathing
+  if(speaking){ const tt=(now-speakStart)/1000; let s=0;
+    for(const sy of sylls){ const dz=(tt-sy.t)/sy.dur; s=Math.max(s, sy.peak*Math.exp(-dz*dz)); }
+    a=Math.max(a,s)+0.04*Math.sin(now*0.02); }
+  a+=impulse*0.5;
+  return Math.min(1.2,a);
+}
+
+const GREETING="Hey there — I'm Monti. Give me a minute and I'll build you a website right here, while we talk.";
+let muted=false;
+function toggleMute(){ muted=!muted; const b=document.getElementById('mute'); b.textContent=muted?'🔇 voice off':'🔊 voice on'; b.classList.toggle('off',muted); }
+function speak(){
+  if(speaking) return;
+  makeEnvelope(GREETING.split(' ').length);
+  speaking=true; speakStart=performance.now();
+  document.getElementById('prompt').textContent='Monti’s speaking…';
+  document.getElementById('prompt').classList.add('speaking');
+  document.getElementById('play').disabled=true;
+  if(!muted && 'speechSynthesis' in window){ try{
+    const u=new SpeechSynthesisUtterance(GREETING.replace('—',',')); u.rate=0.96; u.pitch=0.9;
+    const vs=speechSynthesis.getVoices(); const pref=vs.find(v=>/Google US|Daniel|Alex|Matthew|US English/i.test(v.name))||vs.find(v=>/en-US/i.test(v.lang));
+    if(pref)u.voice=pref; speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){} }
+  setTimeout(endSpeak, speakDur*1000+150);
+}
+function endSpeak(){ speaking=false; document.getElementById('prompt').textContent='Monti’s listening…'; document.getElementById('prompt').classList.remove('speaking'); document.getElementById('play').disabled=false; }
+function send(e){ e.preventDefault(); const inp=document.getElementById('in'); if(!inp.value.trim())return; inp.value=''; impulse=1; document.getElementById('prompt').textContent='Got it — one sec…'; setTimeout(()=>{ if(!speaking)document.getElementById('prompt').textContent='Monti’s listening…'; },1400); }
+
+function frame(now){
+  const at=ampTarget(now);
+  ampS += (at-ampS)*0.10;                 // extra-smooth = softer motion
+  impulse*=0.94;
+  const amp=ampS;
+  ctx.clearRect(0,0,W,H);
+  ctx.globalCompositeOperation='lighter';
+
+  // soft ambient wash
+  const wash=ctx.createRadialGradient(cx,cy,0,cx,cy,unit*0.8);
+  wash.addColorStop(0, `rgba(120,58,26,${0.06+amp*0.07})`);
+  wash.addColorStop(1, 'rgba(120,58,26,0)');
+  ctx.fillStyle=wash; ctx.fillRect(0,0,W,H);
+
+  // layered soft blobs — softened: lower alpha, larger feathered radii
+  const scale=1+amp*0.45;
+  for(const b of blobs){
+    const drift=(0.5+amp*0.8);
+    const bx=cx+Math.cos(now*b.sp*b.spin+b.ph)*b.dist*unit*drift;
+    const by=cy+Math.sin(now*b.sp*1.25*b.spin+b.ph)*b.dist*unit*drift;
+    const br=b.r*unit*scale*(0.95+amp*0.45);
+    const g=ctx.createRadialGradient(bx,by,0,bx,by,br);
+    g.addColorStop(0, `rgba(255,194,120,${0.055+amp*0.06})`);
+    g.addColorStop(0.55,`rgba(220,132,60,${0.03+amp*0.035})`);
+    g.addColorStop(1, 'rgba(190,80,40,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(bx,by,br,0,6.283); ctx.fill();
+  }
+
+  // gentle core (softened — dimmer, more feathered, no hard hot spot)
+  const cr=unit*0.17*scale;
+  const core=ctx.createRadialGradient(cx,cy,0,cx,cy,cr);
+  core.addColorStop(0, `rgba(255,224,175,${0.28+amp*0.26})`);
+  core.addColorStop(0.45,`rgba(240,160,95,${0.14+amp*0.16})`);
+  core.addColorStop(1, 'rgba(230,130,70,0)');
+  ctx.fillStyle=core; ctx.beginPath(); ctx.arc(cx,cy,cr,0,6.283); ctx.fill();
+
+  ctx.globalCompositeOperation='source-over';
+  requestAnimationFrame(frame);
+}
+
+if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged=()=>{}; speechSynthesis.getVoices(); }
+resize(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

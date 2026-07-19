@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monti — the experience</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:Inter,system-ui,sans-serif;color:#f3ece2;overflow:hidden;height:100vh;background:#0a0605}
+  .app{display:flex;height:100vh;width:100%}
+
+  /* ---- Monti pane (glow + input) ---- */
+  .monti{position:relative;width:100%;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
+         background:radial-gradient(120% 100% at 50% 38%,#1f160f 0%,#140e0a 48%,#0a0605 100%);
+         transition:width .9s cubic-bezier(.7,0,.2,1)}
+  .app.building .monti{width:37%}
+  #glow{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+  .mtop{position:relative;z-index:5;width:100%;padding:22px 24px}
+  .logo{font-family:Fraunces,serif;font-weight:600;letter-spacing:.3em;font-size:13px;color:#f0d3ab}
+  .logo b{color:#e0913f}
+  .mcenter{position:relative;z-index:5;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:0 22px;gap:16px}
+  .prompt{width:min(560px,92%);text-align:center;font-size:15px;line-height:1.5;color:#d9cdbd;min-height:22px;transition:color .3s;font-family:Fraunces,serif}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:520px}
+  .chip{background:rgba(255,255,255,.06);border:1px solid rgba(224,145,63,.3);color:#f0e6d8;border-radius:999px;padding:10px 17px;font-size:14px;font-weight:500;cursor:pointer;transition:.15s}
+  .chip:hover{background:#c2532a;border-color:#c2532a;color:#fff}
+  .ask{width:min(560px,92%);display:flex;align-items:center;gap:9px;background:rgba(30,21,15,.66);backdrop-filter:blur(10px);
+       border:1px solid rgba(224,145,63,.28);border-radius:15px;padding:7px 7px 7px 18px;transition:border-color .2s, box-shadow .2s}
+  .ask:focus-within{border-color:rgba(224,145,63,.6);box-shadow:0 0 0 4px rgba(224,145,63,.10)}
+  .ask input{flex:1;background:none;border:none;outline:none;color:#fbf5ec;font-family:inherit;font-size:15.5px;padding:11px 0}
+  .ask input::placeholder{color:#9a8b78}
+  .ask .go{flex:0 0 auto;width:42px;height:42px;border-radius:11px;border:none;background:#c2532a;color:#fff;font-size:17px;cursor:pointer;transition:.18s}
+  .ask .go:hover{background:#a5451f}
+  .ask.hidden,.chips.hidden{display:none}
+  .mcontrols{position:relative;z-index:5;padding:0 0 22px}
+  .mute{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#cbc3b8;border-radius:999px;padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer}
+  .mute.off{opacity:.55}
+
+  /* ---- Site pane (browser frame that builds) ---- */
+  .site{position:relative;width:0;flex:0 0 auto;opacity:0;overflow:hidden;background:#0c0e12;
+        display:flex;flex-direction:column;transition:width .9s cubic-bezier(.7,0,.2,1), opacity .7s ease .15s}
+  .app.building .site{width:63%;opacity:1}
+  .pvhd{padding:12px 18px 0;color:#8b93a2;font-size:11.5px;display:flex;align-items:center;gap:8px;flex:0 0 auto}
+  .pvhd .status{margin-left:auto;display:flex;align-items:center;gap:7px;font-weight:600}
+  .pvhd .status .d{width:7px;height:7px;border-radius:50%;background:#f5b53d}
+  .pvhd .status.done .d{background:#4ade80}
+  .frame{flex:1;margin:12px 18px 18px;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 30px 80px -30px rgba(0,0,0,.8);display:flex;flex-direction:column;min-height:0}
+  .bar{display:flex;align-items:center;gap:7px;padding:11px 14px;background:#eceae6;border-bottom:1px solid #dfdcd6;flex:0 0 auto}
+  .bar .dot{width:11px;height:11px;border-radius:50%;background:#cfccc6}
+  .bar .url{margin-left:8px;background:#fff;border-radius:7px;padding:5px 12px;font-size:12px;color:#6f665c;flex:1}
+  .cv{flex:1;overflow-y:auto;background:#f7f4ef;min-height:0}
+
+  /* rendered site sections (compact Trades template) */
+  .s-hero{position:relative;min-height:340px;display:flex;align-items:flex-end;color:#fff;isolation:isolate;overflow:hidden}
+  .s-hero .bgimg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:-2}
+  .s-hero .scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(15,18,24,.35),rgba(15,18,24,.12) 40%,rgba(15,18,24,.82))}
+  .s-hero .in{padding:26px 30px 30px}
+  .s-hero .eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.9;margin:0 0 10px;display:inline-flex;gap:6px;align-items:center}
+  .s-hero .eyebrow .d{width:5px;height:5px;border-radius:50%;background:#c9a24b}
+  .s-hero h1{font-family:Fraunces,serif;font-weight:600;font-size:clamp(24px,3vw,38px);line-height:1.04;margin:0;letter-spacing:-.02em;max-width:16ch}
+  .s-hero p{margin:12px 0 0;max-width:44ch;font-size:14px;line-height:1.5;color:rgba(255,255,255,.9)}
+  .s-hero .btns{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+  .b{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13px;padding:11px 18px;border-radius:8px}
+  .b1{background:#c2532a;color:#fff}.b2{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3)}
+  .s-trust{background:#191c22;color:#fff;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:18px 30px}
+  .s-trust .t{flex:1 1 120px;text-align:center}
+  .s-trust .t b{font-family:Fraunces,serif;font-size:16px;display:block}
+  .s-trust .t span{font-size:11px;color:rgba(255,255,255,.66)}
+  .s-sec{padding:34px 30px}
+  .s-sec .kick{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#c2532a;margin:0 0 8px}
+  .s-sec h2{font-family:Fraunces,serif;font-weight:600;font-size:clamp(20px,2vw,26px);margin:0 0 20px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .c{background:#fff;border:1px solid #e8e1d6;border-radius:13px;padding:18px 16px}
+  .c .ic{width:38px;height:38px;border-radius:10px;background:color-mix(in srgb,#c2532a 12%,#fff);color:#c2532a;display:grid;place-items:center;font-size:17px;margin-bottom:11px}
+  .c h3{font-family:Fraunces,serif;font-size:16px;margin:0 0 5px;color:#20242b}
+  .c p{font-size:12.5px;line-height:1.45;color:#6f665c;margin:0}
+  .s-about{padding:34px 30px;background:linear-gradient(180deg,#f7f4ef,#f1e9df)}
+  .s-about h2{font-family:Fraunces,serif;font-size:clamp(20px,2vw,26px);margin:0 0 12px;color:#20242b}
+  .s-about p{font-size:14.5px;line-height:1.65;color:#6f665c;margin:0;max-width:52ch}
+  .s-cta{margin:30px;background:#191c22;color:#fff;border-radius:18px;padding:34px 26px;text-align:center;position:relative;overflow:hidden}
+  .s-cta .glow{position:absolute;inset:0;background:radial-gradient(60% 80% at 80% 0%,color-mix(in srgb,#c2532a 45%,transparent),transparent 62%)}
+  .s-cta h2{font-family:Fraunces,serif;font-size:clamp(20px,2.4vw,28px);margin:0;position:relative}
+  .s-cta p{position:relative;margin:10px 0 0;font-size:14px;color:rgba(255,255,255,.82)}
+  .s-cta .btns{position:relative;margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .sk{background:linear-gradient(90deg,#e8e1d6 25%,#f3eee5 37%,#e8e1d6 63%);background-size:400% 100%;animation:sh 1.4s ease infinite;border-radius:8px}
+  @keyframes sh{0%{background-position:100% 0}100%{background-position:-100% 0}}
+  .skblock{padding:34px 30px}.sk-line{height:14px;margin-bottom:12px}
+  .fillin{animation:fill .5s ease both}@keyframes fill{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  /* start overlay */
+  .start{position:fixed;inset:0;background:radial-gradient(90% 90% at 50% 35%,#241a12,#0b0706);display:flex;align-items:center;justify-content:center;text-align:center;z-index:30;padding:24px;transition:opacity .6s}
+  .start.gone{opacity:0;pointer-events:none}
+  .start .box{max-width:520px}
+  .start h1{font-family:Fraunces,serif;font-size:clamp(30px,5vw,46px);margin:0 0 14px;color:#fff;letter-spacing:-.02em}
+  .start p{color:#b7ab9c;font-size:16px;line-height:1.6;margin:0 0 26px}
+  .start button{background:#c2532a;color:#fff;border:none;border-radius:12px;padding:16px 30px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+  .start button:hover{background:#a5451f}
+
+  /* lead card */
+  .lead{position:fixed;left:37%;transform:translateX(-50%);bottom:22px;background:#12151a;border:1px solid #2a303a;border-radius:14px;padding:15px 17px;width:min(420px,90%);box-shadow:0 24px 60px rgba(0,0,0,.6);z-index:25;animation:fill .5s ease both}
+  .lead .h{color:#4ade80;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:9px}
+  .lead .card{background:#1a1f27;border:1px solid #2a303a;border-radius:10px;padding:12px 13px}
+  .lead .nm{font-weight:700;font-size:15px}.lead .meta{font-size:12px;color:#8b93a2;margin-top:3px}
+  .lead .tag{display:inline-block;margin-top:8px;background:rgba(194,83,42,.16);color:#e5895f;border:1px solid rgba(194,83,42,.4);font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:999px}
+
+  @media(max-width:900px){
+    .app{flex-direction:column}
+    .monti{width:100%;height:100%}
+    .app.building .monti{width:100%;height:40%;order:2}
+    .app.building .site{width:100%;height:60%;opacity:1;order:1}
+    .lead{left:50%}
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="monti" id="monti">
+    <canvas id="glow"></canvas>
+    <div class="mtop"><div class="logo"><b>▲</b> M O N T I</div></div>
+    <div class="mcenter">
+      <div class="prompt" id="prompt"></div>
+      <div class="chips hidden" id="chips"></div>
+      <form class="ask hidden" id="askform" onsubmit="onSubmit(event)"><input id="in" autocomplete="off"><button class="go" type="submit" aria-label="send">↑</button></form>
+    </div>
+    <div class="mcontrols"><button class="mute" id="mute" onclick="toggleMute()">🔊 voice on</button></div>
+  </div>
+  <div class="site" id="site">
+    <div class="pvhd"><span>Live preview</span><span class="status" id="pvstatus"><span class="d"></span> <span id="pvtext">building…</span></span></div>
+    <div class="frame"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url" id="url">yoursite.com</span></div><div class="cv" id="cv"></div></div>
+  </div>
+</div>
+
+<div class="start" id="start"><div class="box">
+  <h1>Hey — I'm Monti.</h1>
+  <p>Tell me about your business and I'll build you a real website right here, while we talk. About a minute. No sign-up.</p>
+  <button onclick="begin()">Let's build it →</button>
+</div></div>
+
+<script>
+/* ---------- glow ---------- */
+const glow=document.getElementById('glow'), gx=glow.getContext('2d');
+let DPR=Math.min(2,window.devicePixelRatio||1), cx=0,cy=0,unit=0;
+function sizeGlow(){ const w=glow.clientWidth,h=glow.clientHeight; if(!w||!h)return; glow.width=w*DPR; glow.height=h*DPR; gx.setTransform(DPR,0,0,DPR,0,0); }
+new ResizeObserver(sizeGlow).observe(glow);
+let SEED=7; function rnd(){ SEED=(SEED*1103515245+12345)&0x7fffffff; return SEED/0x7fffffff; }
+const blobs=[]; for(let i=0;i<7;i++) blobs.push({dist:0.02+rnd()*0.06,r:0.13+rnd()*0.14,ph:rnd()*6.28,sp:0.00014+rnd()*0.00026,spin:(rnd()<.5?1:-1)});
+let speaking=false,sylls=[],speakStart=0,speakDur=0,ampS=0,impulse=0;
+function makeEnv(n){ sylls=[]; let t=0.3; const per=0.32; for(let i=0;i<n*1.7;i++){ sylls.push({t,dur:0.10+Math.random()*0.08,peak:0.55+Math.random()*0.45}); t+=per*(0.6+Math.random()*0.8);} speakDur=t+0.4; }
+function ampT(now){ let a=0.08+0.04*Math.sin(now*0.0014);
+  if(speaking){ const tt=(now-speakStart)/1000; let s=0; for(const sy of sylls){ const dz=(tt-sy.t)/sy.dur; s=Math.max(s,sy.peak*Math.exp(-dz*dz)); } a=Math.max(a,s)+0.04*Math.sin(now*0.02); }
+  return Math.min(1.2,a+impulse*0.5); }
+function glowFrame(now){
+  const w=glow.clientWidth,h=glow.clientHeight; cx=w/2; cy=h*0.36; unit=Math.min(w,h);
+  const at=ampT(now); ampS+=(at-ampS)*0.10; impulse*=0.94; const amp=ampS;
+  gx.clearRect(0,0,w,h); gx.globalCompositeOperation='lighter';
+  const wash=gx.createRadialGradient(cx,cy,0,cx,cy,unit*0.8); wash.addColorStop(0,`rgba(120,58,26,${0.06+amp*0.07})`); wash.addColorStop(1,'rgba(120,58,26,0)'); gx.fillStyle=wash; gx.fillRect(0,0,w,h);
+  const scale=1+amp*0.45;
+  for(const b of blobs){ const drift=0.5+amp*0.8; const bx=cx+Math.cos(now*b.sp*b.spin+b.ph)*b.dist*unit*drift; const by=cy+Math.sin(now*b.sp*1.25*b.spin+b.ph)*b.dist*unit*drift; const br=b.r*unit*scale*(0.95+amp*0.45);
+    const g=gx.createRadialGradient(bx,by,0,bx,by,br); g.addColorStop(0,`rgba(255,194,120,${0.055+amp*0.06})`); g.addColorStop(0.55,`rgba(220,132,60,${0.03+amp*0.035})`); g.addColorStop(1,'rgba(190,80,40,0)'); gx.fillStyle=g; gx.beginPath(); gx.arc(bx,by,br,0,6.283); gx.fill(); }
+  const cr=unit*0.17*scale; const core=gx.createRadialGradient(cx,cy,0,cx,cy,cr); core.addColorStop(0,`rgba(255,224,175,${0.28+amp*0.26})`); core.addColorStop(0.45,`rgba(240,160,95,${0.14+amp*0.16})`); core.addColorStop(1,'rgba(230,130,70,0)'); gx.fillStyle=core; gx.beginPath(); gx.arc(cx,cy,cr,0,6.283); gx.fill();
+  gx.globalCompositeOperation='source-over'; requestAnimationFrame(glowFrame);
+}
+
+/* ---------- Monti's trade intelligence ---------- */
+const U='https://images.unsplash.com/photo-';
+const HERO=id=>U+id+'?w=1600&h=900&fit=crop&crop=entropy&q=78&fm=jpg';
+const TRADES={
+  landscaping:{label:'Landscaping / Lawn',img:'1689728318937-17d24bc0a65c',headline:'Yards worth coming home to.',subhead:a=>`Design, hardscaping, and clean weekly care from a crew that treats your property like their own — across ${a}.`,services:['Landscape Design','Weekly Lawn Care','Hardscaping & Patios','Mulch & Planting','Seasonal Cleanup','Retaining Walls'],about:'A family-run crew that treats your property like their own. Honest quotes, tidy work, no surprises when the bill comes.'},
+  plumbing:{label:'Plumbing',img:'1676210133055-eab6ef033ce3',headline:'Plumbing you can count on.',subhead:a=>`Fast, honest, professional plumbing for homes and businesses across ${a}.`,services:['Leak Detection & Repair','Water Heaters','Drain & Sewer','Fixtures & Faucets','Repiping','24/7 Emergency'],about:'A licensed local pro who answers the phone, shows up on time, and leaves your place cleaner than they found it.'},
+  towing:{label:'Towing / Roadside',img:'1742069029207-0aacf8fa4401',headline:"Stuck on the side of the road? We're on the way.",subhead:a=>`24/7 towing and recovery across ${a}. Fast, fair, and always answering the phone.`,services:['24/7 Towing','Roadside Assistance','Recovery & Winch-Outs','Lockouts & Jump-Starts'],about:'Local, dependable, and always answering the phone — day or night, rain or shine.'},
+  hvac:{label:'HVAC / Heating & Cooling',img:'1660330589693-99889d60181e',headline:'Comfortable, season after season.',subhead:a=>`Heating, cooling, and cleaner air for families across ${a} — installed and serviced by neighbors.`,services:['Heating Repair','AC Install & Service','Tune-Ups & Maintenance','Indoor Air Quality','Emergency Service'],about:'Family-owned and veteran-operated. The same friendly faces, season after season, who treat your home like their own.'}
+};
+
+/* ---------- site render (skeleton -> atomic fills) ---------- */
+const data={business:{name:'',area:'',phone:''},trade:null};
+let filled=new Set();
+const cv=document.getElementById('cv');
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function skLines(n){let h='';for(let i=0;i<n;i++)h+=`<div class="sk sk-line" style="width:${[92,78,60][i%3]}%"></div>`;return h;}
+function setStatus(t,done){document.getElementById('pvtext').textContent=t;document.getElementById('pvstatus').classList.toggle('done',!!done);}
+function renderSite(){
+  const b=data.business, tr=data.trade?TRADES[data.trade]:null, area=b.area||'West Virginia'; let h='';
+  if(filled.has('hero')&&tr){ h+=`<section class="s-hero fillin"><div class="bgimg" style="background-image:url('${HERO(tr.img)}')"></div><div class="scrim"></div><div class="in">
+    <p class="eyebrow"><span class="d"></span> ${b.area?esc(b.area):'Serving West Virginia'}</p><h1>${esc(tr.headline)}</h1>
+    ${filled.has('sub')?`<p class="fillin">${esc(tr.subhead(area))}</p>`:''}
+    <div class="btns"><span class="b b1">Get a free quote</span>${b.phone?`<span class="b b2 fillin">☎ ${esc(b.phone)}</span>`:''}</div></div></section>`;
+  } else if(filled.has('heroskel')){ h+=`<section class="s-hero" style="background:#e8e1d6"><div class="in" style="width:100%"><div class="sk sk-line" style="width:120px;height:11px"></div><div class="sk" style="height:34px;width:70%;margin:14px 0"></div><div class="sk sk-line" style="width:52%"></div></div></section>`; }
+  if(filled.has('hero')&&tr){ h+=`<section class="s-trust fillin"><div class="t"><b>Local</b><span>& family-owned</span></div><div class="t"><b>Licensed</b><span>& insured</span></div><div class="t"><b>Upfront</b><span>pricing</span></div><div class="t"><b>WV</b><span>owned & operated</span></div></section>`; }
+  if(filled.has('services')&&tr){ h+=`<section class="s-sec fillin"><p class="kick">What we do</p><h2>Every job, done right.</h2><div class="cards">${tr.services.map(s=>`<div class="c"><div class="ic">◆</div><h3>${esc(s)}</h3><p>Professional ${esc(s.toLowerCase())}, done right the first time.</p></div>`).join('')}</div></section>`; }
+  else if(filled.has('servicesskel')){ h+=`<div class="skblock"><div class="sk sk-line" style="width:90px;height:10px"></div><div class="sk" style="height:24px;width:40%;margin:12px 0 20px"></div><div class="cards">${[0,1,2].map(()=>`<div class="c"><div class="sk" style="width:38px;height:38px;border-radius:10px;margin-bottom:11px"></div>${skLines(2)}</div>`).join('')}</div></div>`; }
+  if(filled.has('about')&&tr){ h+=`<section class="s-about fillin"><p class="kick">Who you're hiring</p><h2>A real local crew — not a call center.</h2><p>${esc(tr.about)}</p></section>`; }
+  if(filled.has('cta')&&tr){ h+=`<section class="s-cta fillin"><div class="glow"></div><h2>Let's get your project started.</h2><p>Call for a free, same-week estimate.</p><div class="btns"><span class="b b1">☎ ${esc(b.phone||'')}</span><span class="b b2">Get a quote</span></div></section>`; }
+  cv.innerHTML=h||`<div style="padding:60px 30px;color:#b7b0a4;text-align:center;font-size:14px">Your site will appear here as we talk…</div>`;
+}
+
+/* ---------- conversation via glow + input/chips ---------- */
+const promptEl=document.getElementById('prompt'), chipsEl=document.getElementById('chips'), askEl=document.getElementById('askform'), inEl=document.getElementById('in');
+let muted=false, submitCb=null;
+function toggleMute(){ muted=!muted; const b=document.getElementById('mute'); b.textContent=muted?'🔇 voice off':'🔊 voice on'; b.classList.toggle('off',muted); }
+function showInput(placeholder,cb){ chipsEl.classList.add('hidden'); askEl.classList.remove('hidden'); inEl.placeholder=placeholder; inEl.value=''; submitCb=cb; setTimeout(()=>inEl.focus(),50); }
+function showChips(opts,cb){ askEl.classList.add('hidden'); chipsEl.classList.remove('hidden'); chipsEl.innerHTML=''; opts.forEach(o=>{ const c=document.createElement('div'); c.className='chip'; c.textContent=o.label; c.onclick=()=>{ chipsEl.classList.add('hidden'); cb(o); }; chipsEl.appendChild(c); }); }
+function onSubmit(e){ e.preventDefault(); const v=inEl.value.trim(); if(!v||!submitCb)return; const cb=submitCb; submitCb=null; askEl.classList.add('hidden'); cb(v); }
+function say(line,after,extra){ // Monti speaks: glow pulses + voice + prompt shows the line
+  promptEl.textContent=line; makeEnv(line.split(' ').length); speaking=true; speakStart=performance.now();
+  if(!muted && 'speechSynthesis' in window){ try{ const u=new SpeechSynthesisUtterance(line.replace(/—/g,',')); u.rate=0.98; u.pitch=0.9; const vs=speechSynthesis.getVoices(); const pref=vs.find(v=>/Google US|Daniel|Alex|Matthew|US English/i.test(v.name))||vs.find(v=>/en-US/i.test(v.lang)); if(pref)u.voice=pref; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} }
+  const dur=Math.min(3200, Math.max(1000, line.split(' ').length*210));
+  speakDur=dur/1000+0.3; // keep the glow envelope roughly matched to the turn
+  setTimeout(()=>{ speaking=false; if(after)after(); }, dur+(extra||0));
+}
+function slug(s){return (s||'yoursite').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,22)||'yoursite';}
+
+function begin(){
+  document.getElementById('start').classList.add('gone');
+  renderSite();
+  say("Hey — glad you're here. First off, what's your business called?", ()=>{
+    showInput("Type your business name…", v=>{ data.business.name=v; document.getElementById('url').textContent=slug(v)+'.com'; qTrade(); });
+  });
+}
+function qTrade(){
+  filled.add('heroskel'); renderSite();
+  say(`Nice to meet you, ${data.business.name}. What kind of work do you do?`, ()=>{
+    showChips(Object.keys(TRADES).map(k=>({label:TRADES[k].label,key:k})), o=>{
+      data.trade=o.key;
+      document.getElementById('app').classList.add('building');   // <-- site slides in, glow to the side
+      setStatus('framing your homepage…');
+      setTimeout(()=>{ filled.delete('heroskel'); filled.add('hero'); setStatus('building the hero…'); renderSite();
+        say("Watch this — that's your homepage starting to build. Where do you work? What towns or area do you serve?", ()=>{
+          showInput("e.g. Buckhannon, Elkins & central WV", v=>{ data.business.area=v; filled.add('sub'); renderSite(); qServices(); });
+        });
+      }, 700);
+    });
+  });
+}
+function qServices(){
+  filled.add('servicesskel'); setStatus('laying out your services…'); renderSite();
+  const tr=TRADES[data.trade];
+  say(`Got it — ${data.business.area}. Most ${tr.label.toLowerCase()} folks offer things like ${tr.services.slice(0,3).join(', ')}. Want me to run with those?`, ()=>{
+    showChips([{label:'Yep, perfect ✓'},{label:"Close — I'll tweak later"}], ()=>{
+      filled.delete('servicesskel'); filled.add('services'); setStatus('adding your services…'); renderSite();
+      say("Those are on your site now. What's the best phone number for customers to reach you?", ()=>{
+        showInput("e.g. (304) 555-0148", v=>{ data.business.phone=v; renderSite(); qAbout(); });
+      });
+    });
+  });
+}
+function qAbout(){
+  say("Last thing — in a sentence, what makes you different? Or I'll write something solid and you tweak it later.", ()=>{
+    showInput("Family-run, 15 years, treat your yard like our own…", v=>{ finishUp(v); });
+    // allow empty submit as "write it for me"
+    inEl.placeholder="Type a sentence… or just hit ↑ and I'll write it";
+    submitCb=(v)=>finishUp(v);
+    askEl.onsubmit=(e)=>{ e.preventDefault(); const v=inEl.value.trim(); askEl.classList.add('hidden'); finishUp(v||null); askEl.onsubmit=onSubmit; };
+  });
+}
+function finishUp(custom){
+  const tr=TRADES[data.trade];
+  if(custom) tr.about=custom.charAt(0).toUpperCase()+custom.slice(1)+(/[.!?]$/.test(custom)?'':'.');
+  filled.add('about'); filled.add('cta'); setStatus('finishing your site…'); renderSite();
+  say(`That's it — take a look. In about a minute, ${data.business.name} went from nothing to a real website.`, ()=>{
+    setStatus('site ready',true);
+    say("Here's the honest part — this is a live preview I built to show you what's possible. Want it real, live on the internet and yours to keep? I'll send it straight to Rich, a West Virginia veteran who builds these for local businesses. He'll reach out personally.", ()=>{
+      showChips([{label:'Yes — send it to Rich 🤝',key:'y'},{label:'Just looking for now',key:'n'}], o=>{
+        if(o.key==='y') showLead(); else { promptEl.textContent="No worries at all — the door's always open."; }
+      });
+    }, 400);
+  }, 500);
+}
+function showLead(){
+  const tr=TRADES[data.trade], b=data.business;
+  promptEl.textContent=`Done — Rich has it. Expect a friendly call or text at ${b.phone}. 🏔️`;
+  const el=document.createElement('div'); el.className='lead';
+  el.innerHTML=`<div class="h">● New hot lead — landed in Rich's tool</div><div class="card"><div class="nm">${esc(b.name)}</div><div class="meta">${esc(tr.label)} · ${esc(b.area)} · ${esc(b.phone)}</div><span class="tag">source: monti · hot_inbound · site drafted</span></div>`;
+  document.body.appendChild(el);
+}
+
+if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged=()=>{}; speechSynthesis.getVoices(); }
+sizeGlow(); requestAnimationFrame(glowFrame);
+</script>
+</body>
+</html>

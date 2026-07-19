@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monti · Trades Template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     MONTI — TRADES TEMPLATE
+     A FIXED, DESIGNED FRAME. Monti never touches this CSS/layout.
+     He supplies only the DATA object (§3 contract, bottom of file).
+     The frame renders that data through designed slots WITH
+     FALLBACKS — so it cannot render ugly or broken, ever.
+     Photos come from a curated set (real WV photography); every
+     image has a warm gradient behind it so it degrades cleanly.
+     ============================================================ */
+
+  :root, [data-palette="ember"]{
+    --bg:#f7f4ef; --surface:#fff; --ink:#20242b; --muted:#6f665c; --line:#e8e1d6;
+    --accent:#c2532a; --accent-d:#a5451f; --dark:#191c22; --dark-2:#111318; --gold:#c9a24b;
+    --ph1:#3a546e; --ph2:#c4966e;
+  }
+  [data-palette="timber"]{
+    --bg:#f5f6f2; --surface:#fff; --ink:#1c231e; --muted:#606a60; --line:#e0e6dd;
+    --accent:#2f6b46; --accent-d:#245537; --dark:#16211a; --dark-2:#0f1712; --gold:#c9a24b;
+    --ph1:#2f4a3a; --ph2:#8aa06f;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0}
+  .site{color:var(--ink);background:var(--bg);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+  .site a{color:inherit;text-decoration:none}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,44px)}
+  h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600}
+
+  .disp{font-family:Fraunces,Georgia,serif}
+  .kicker{font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:15.5px;padding:15px 26px;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+  .btn--primary{background:var(--accent);color:#fff;box-shadow:0 12px 26px -8px color-mix(in srgb,var(--accent) 60%,transparent)}
+  .btn--primary:hover{background:var(--accent-d);transform:translateY(-2px);box-shadow:0 18px 34px -10px color-mix(in srgb,var(--accent) 70%,transparent)}
+  .btn--ghost{background:transparent;color:var(--ink);border-color:var(--line);backdrop-filter:blur(4px)}
+  .btn--ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .btn--ondark{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.25)}
+  .btn--ondark:hover{background:rgba(255,255,255,.18)}
+
+  /* image slot: gradient behind, photo on top (degrades cleanly) */
+  .img{position:relative;overflow:hidden;background:linear-gradient(140deg,var(--ph1),var(--ph2))}
+  .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+
+  /* ---------- Header ---------- */
+  .hdr{position:fixed;top:0;left:0;right:0;z-index:60;transition:background .35s ease,box-shadow .35s ease,border-color .35s ease;border-bottom:1px solid transparent}
+  .hdr-in{display:flex;align-items:center;justify-content:space-between;height:74px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:19px;letter-spacing:-.01em;color:#fff;transition:color .35s ease}
+  .brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:var(--accent);color:#fff;font-family:Fraunces,serif;font-weight:700;font-size:17px;box-shadow:0 6px 16px -6px rgba(0,0,0,.5)}
+  .nav{display:flex;align-items:center;gap:30px}
+  .nav a{font-size:14.5px;font-weight:500;color:rgba(255,255,255,.82);transition:color .2s}
+  .nav a:hover{color:#fff}
+  .hdr .call{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);color:#fff;font-weight:600;font-size:14.5px;padding:10px 17px;border-radius:8px;border:1px solid rgba(255,255,255,.22);transition:background .2s}
+  .hdr .call:hover{background:rgba(255,255,255,.24)}
+  /* scrolled state */
+  .hdr.solid{background:rgba(255,255,255,.92);backdrop-filter:blur(14px) saturate(1.1);border-bottom-color:var(--line);box-shadow:0 8px 30px -20px rgba(0,0,0,.4)}
+  .hdr.solid .brand{color:var(--ink)}
+  .hdr.solid .nav a{color:var(--muted)}
+  .hdr.solid .nav a:hover{color:var(--ink)}
+  .hdr.solid .call{background:var(--accent);border-color:var(--accent);color:#fff}
+  .hdr .prog{position:absolute;left:0;bottom:-1px;height:2px;background:var(--accent);width:100%;transform:scaleX(0);transform-origin:left;pointer-events:none}
+  @media(max-width:860px){.nav{display:none}}
+
+  /* ---------- Hero ---------- */
+  .hero{position:relative;min-height:92vh;display:flex;align-items:flex-end;color:#fff;isolation:isolate}
+  .hero .img{position:absolute;inset:0;z-index:-2}
+  .hero .img img{animation:kb 22s ease-out both}
+  @keyframes kb{from{transform:scale(1.02)}to{transform:scale(1.14)}}
+  .hero .scrim{position:absolute;inset:0;z-index:-1;background:
+     linear-gradient(180deg,rgba(15,18,24,.42) 0%,rgba(15,18,24,.12) 34%,rgba(15,18,24,.55) 78%,rgba(15,18,24,.82) 100%),
+     linear-gradient(90deg,rgba(15,18,24,.55),transparent 60%)}
+  .hero-in{padding-bottom:clamp(56px,9vh,110px);padding-top:120px;max-width:760px}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);padding:8px 14px;border-radius:999px;backdrop-filter:blur(6px);margin-bottom:22px}
+  .hero h1{font-size:clamp(38px,6vw,76px);line-height:1.02;letter-spacing:-.02em;margin:0;font-weight:600;text-wrap:balance;
+           display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .hero .lead{margin:22px 0 0;max-width:52ch;font-size:clamp(16px,1.4vw,19px);line-height:1.6;color:rgba(255,255,255,.9);
+              display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .hero-cta{margin-top:32px;display:flex;flex-wrap:wrap;gap:14px}
+  .hero-trust{margin-top:30px;display:flex;flex-wrap:wrap;gap:10px 26px;font-size:13.5px;color:rgba(255,255,255,.86)}
+  .hero-trust span{display:inline-flex;align-items:center;gap:8px}
+  .hero-trust .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+
+  /* ---------- Trust bar ---------- */
+  .trustbar{background:var(--dark);color:#fff}
+  .trustbar-in{display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px 24px;padding:26px 0}
+  .tstat{flex:1 1 160px;text-align:center;display:flex;flex-direction:column;gap:4px}
+  .tstat b{font-family:Fraunces,serif;font-size:clamp(20px,2.6vw,30px);font-weight:600;letter-spacing:-.01em}
+  .tstat span{font-size:12.5px;color:rgba(255,255,255,.66);letter-spacing:.02em}
+  .tstat + .tstat{border-left:1px solid rgba(255,255,255,.1)}
+  @media(max-width:640px){.tstat + .tstat{border-left:none}.tstat{flex-basis:44%}}
+
+  /* ---------- Sections ---------- */
+  .sec{padding:clamp(64px,9vw,116px) 0}
+  .sec--tint{background:linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--accent) 5%,var(--bg)))}
+  .head{max-width:640px;margin:0 0 clamp(36px,5vw,54px)}
+  .head.center{margin-left:auto;margin-right:auto;text-align:center}
+  .title{font-size:clamp(28px,4vw,46px);line-height:1.08;letter-spacing:-.02em;margin:0;color:var(--ink)}
+  .head .sub{margin:16px 0 0;font-size:17.5px;line-height:1.62;color:var(--muted)}
+
+  /* services */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:18px}
+  .card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px 26px;overflow:hidden;transition:transform .28s ease,box-shadow .28s ease,border-color .28s}
+  .card::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
+  .card:hover{transform:translateY(-5px);box-shadow:0 30px 50px -28px rgba(0,0,0,.28);border-color:transparent}
+  .card:hover::before{transform:scaleX(1)}
+  .card .ic{display:grid;place-items:center;width:50px;height:50px;border-radius:12px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--accent);margin-bottom:18px;font-size:22px}
+  .card h3{font-size:20px;margin:0 0 9px;color:var(--ink);letter-spacing:-.01em}
+  .card p{font-size:14.5px;line-height:1.58;color:var(--muted);margin:0;
+          display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+  /* feature */
+  .feature{display:grid;grid-template-columns:1.05fr 1fr;gap:clamp(30px,5vw,68px);align-items:center}
+  .feature .img{aspect-ratio:4/3;border-radius:20px;box-shadow:0 40px 70px -34px rgba(0,0,0,.4)}
+  .feature h2{font-size:clamp(26px,3.4vw,40px);line-height:1.08;letter-spacing:-.02em;margin:0 0 18px;color:var(--ink)}
+  .feature p{font-size:17px;line-height:1.66;color:var(--muted);margin:0 0 22px}
+  .points{list-style:none;margin:0 0 26px;padding:0;display:flex;flex-direction:column;gap:13px}
+  .points li{display:flex;align-items:center;gap:12px;font-size:15.5px;color:var(--ink);font-weight:500}
+  .points li i{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:color-mix(in srgb,var(--accent) 13%,var(--bg));color:var(--accent);flex:0 0 auto;font-style:normal;font-weight:800;font-size:14px}
+  @media(max-width:860px){.feature{grid-template-columns:1fr}.feature .img{aspect-ratio:16/10}}
+
+  /* cinematic band */
+  .band-photo{position:relative;color:#fff;isolation:isolate}
+  .band-photo .img{position:absolute;inset:0;z-index:-2}
+  .band-photo .scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(15,18,24,.8),rgba(15,18,24,.42))}
+  .band-photo .inner{padding:clamp(70px,11vw,150px) 0;max-width:620px}
+  .band-photo h2{font-size:clamp(26px,3.6vw,42px);line-height:1.12;letter-spacing:-.01em;margin:0 0 14px}
+  .band-photo p{font-size:17.5px;line-height:1.6;color:rgba(255,255,255,.86);margin:0}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,40px);counter-reset:s}
+  .step{position:relative}
+  .step .n{font-family:Fraunces,serif;font-size:15px;font-weight:700;color:var(--accent);letter-spacing:.06em}
+  .step h4{font-size:20px;margin:12px 0 8px;color:var(--ink);font-family:Fraunces,serif;font-weight:600}
+  .step p{font-size:15px;line-height:1.58;color:var(--muted);margin:0}
+  .step::before{content:"";position:absolute;top:-6px;left:0;width:40px;height:3px;border-radius:3px;background:var(--accent)}
+  @media(max-width:760px){.steps{grid-template-columns:1fr;gap:28px}}
+
+  /* reviews */
+  .reviews{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+  .rev{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:30px;display:flex;flex-direction:column}
+  .rev .stars{color:var(--gold);letter-spacing:3px;font-size:15px;margin-bottom:14px}
+  .rev q{font-family:Fraunces,serif;font-size:18px;line-height:1.5;color:var(--ink);font-style:italic;quotes:none;
+         display:block;margin:0 0 18px}
+  .rev .who{font-size:14px;font-weight:600;color:var(--ink);margin-top:auto}
+  .rev .who span{display:block;font-weight:400;color:var(--muted);font-size:13px;margin-top:2px}
+
+  /* CTA */
+  .cta-band{position:relative;background:var(--dark);color:#fff;border-radius:26px;padding:clamp(44px,7vw,84px);text-align:center;overflow:hidden}
+  .cta-band .glow{position:absolute;inset:0;background:radial-gradient(60% 80% at 80% 0%,color-mix(in srgb,var(--accent) 45%,transparent),transparent 62%);pointer-events:none}
+  .cta-band h2{position:relative;font-size:clamp(28px,4.4vw,50px);line-height:1.06;letter-spacing:-.02em;margin:0}
+  .cta-band p{position:relative;margin:16px auto 0;max-width:48ch;font-size:17.5px;color:rgba(255,255,255,.82)}
+  .cta-band .row{position:relative;margin-top:32px;display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+
+  /* footer */
+  .ft{background:var(--dark-2);color:rgba(255,255,255,.72);padding:56px 0 30px}
+  .ft-grid{display:flex;flex-wrap:wrap;gap:30px 64px;justify-content:space-between;margin-bottom:34px}
+  .ft h5{color:#fff;font-size:14px;font-weight:700;letter-spacing:.04em;margin:0 0 13px}
+  .ft p{font-size:14.5px;line-height:1.85;margin:0}
+  .ft a:hover{color:#fff}
+  .ft-bottom{border-top:1px solid rgba(255,255,255,.12);padding-top:20px;display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between;font-size:12.5px;color:rgba(255,255,255,.5)}
+
+  /* mobile sticky call */
+  .callbar{display:none}
+  @media(max-width:860px){
+    .callbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:70;gap:10px;padding:11px 14px calc(11px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);box-shadow:0 -10px 30px -14px rgba(0,0,0,.4)}
+    .callbar .btn{flex:1;justify-content:center;padding:14px 12px}
+    .ft{padding-bottom:104px}
+  }
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}.hero .img img{animation:none}}
+
+  /* ===== preview harness (NOT part of template) ===== */
+  .harness{position:fixed;z-index:200;left:50%;transform:translateX(-50%);bottom:14px;display:flex;gap:7px;align-items:center;background:#0f172a;color:#fff;padding:9px 11px;border-radius:13px;box-shadow:0 18px 50px rgba(0,0,0,.45);font-family:Inter,sans-serif;font-size:12.5px;flex-wrap:wrap;justify-content:center;max-width:94vw}
+  .harness .lbl{color:#8b97a9;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:10.5px}
+  .harness button{background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:8px;padding:7px 11px;font-size:12.5px;font-weight:600;cursor:pointer}
+  .harness button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .harness .sep{width:1px;height:20px;background:#334155;margin:0 3px}
+  @media(max-width:860px){.harness{bottom:70px}}
+</style>
+</head>
+<body>
+<div class="site" id="site" data-palette="ember"></div>
+
+<div class="harness">
+  <span class="lbl">Business</span>
+  <button id="b-full" class="on" onclick="pick('full')">Full-detail</button>
+  <button id="b-sparse" onclick="pick('sparse')">Bare-bones</button>
+  <span class="sep"></span>
+  <span class="lbl">Palette</span>
+  <button id="p-ember" class="on" onclick="pal('ember')">Ember</button>
+  <button id="p-timber" onclick="pal('timber')">Timber</button>
+</div>
+
+<script>
+/* ===== curated Trades photo library v1 — real photography, all sources 6000px+ (verified),
+   Unsplash (commercial-free). Monti picks the hero matching the business TRADE via
+   hero.image_id, so a landscaper gets landscaping and a tow co gets a tow truck. Feature +
+   band use fixed curated WV/universal shots. Cropped per slot via CDN presets. ===== */
+const U='https://images.unsplash.com/photo-';
+const PRESET={
+  hero:   'w=3840&h=2160&fit=crop&crop=entropy&q=80&fm=jpg', // 4K 16:9
+  feature:'w=2000&h=1500&fit=crop&crop=entropy&q=80&fm=jpg', // 4:3
+  band:   'w=3840&h=1400&fit=crop&crop=entropy&q=80&fm=jpg'  // ultra-wide
+};
+const IMG={
+  landscaping:'1689728318937-17d24bc0a65c', towing:'1742069029207-0aacf8fa4401',
+  plumbing:'1676210133055-eab6ef033ce3',   hvac:'1660330589693-99889d60181e',
+  electrical:'1621905251189-08b45d6a269e', roofing:'1632759145351-1d592919f522',
+  auto:'1631720040176-0d789a643a78',       cleaning:'1758273705627-937374bfa978',
+  wv_hero:'1661823331212-28e241c85291',    wv_band:'1698787273825-90bd24e90eb0',
+  work_truck:'1564355172839-be57081c219f'
+};
+
+/* ===== §3 DATA CONTRACT — all Monti produces per lead. Two real-shaped samples:
+   FULL (6 services, 4 badges, 2 reviews) and SPARSE (3 services, no badges, no review).
+   NOTE: added a `business{name,phone,service_area,established}` block the original §3 lacked
+   (examples hardcoded the phone) — fold into Monti's spec. ===== */
+const SAMPLES={
+  full:{
+    template_id:"trades", palette:"ember", copy_tone:"grounded",
+    business:{name:"Mountain State Landscaping", phone:"(304) 555-0148", service_area:"Buckhannon · Elkins · Weston", established:2009},
+    hero:{ image_id:"landscaping",
+      headline:"Yards worth coming home to.",
+      subhead:"Design, hardscaping, and clean weekly care from a crew that treats your property like their own — all across north-central West Virginia.",
+      cta_text:"Get a free quote" },
+    about:{ body:"We're a family-run crew out of Upshur County. Fifteen years turning tired yards into the best-looking place on the street — honest quotes, tidy work, and no surprises when the bill comes." },
+    services:[
+      {title:"Landscape Design", description:"Custom plans that fit your yard, your style, and your budget."},
+      {title:"Hardscaping & Patios", description:"Paver patios, walls, and walkways built to last decades."},
+      {title:"Weekly Lawn Care", description:"Mowing, edging, and cleanup on a schedule you can count on."},
+      {title:"Mulch & Planting", description:"Fresh beds, healthy plants, and mulch that ties it together."},
+      {title:"Seasonal Cleanup", description:"Spring and fall cleanups that keep the property sharp."},
+      {title:"Retaining Walls", description:"Engineered walls that hold the hillside and look great doing it."}
+    ],
+    trust:{ badges:["Licensed & Insured","Family-Owned","Since 2009","Free Estimates"],
+      reviews:[
+        {quote:"They redid our whole front yard in two days and it looks incredible. Fair price, spotless cleanup.", name:"Karen M.", detail:"Buckhannon, WV"},
+        {quote:"Best-looking lawn on the street now. On time every single week.", name:"Dwayne P.", detail:"Elkins, WV"}
+      ] },
+    contact:{ cta_text:"Get a free quote", phone_prompt:"Call for a same-week estimate", emergency:false }
+  },
+  sparse:{
+    template_id:"trades", palette:"ember", copy_tone:"grounded",
+    business:{name:"Ridgeline Towing", phone:"(304) 555-0173", service_area:"I-79 & central WV", established:null},
+    hero:{ image_id:"towing",
+      headline:"Stuck on the side of the road? We're on the way.",
+      subhead:"24/7 towing and recovery across central West Virginia.",
+      cta_text:"Call now" },
+    about:{ body:"Local, dependable, and always answering the phone — day or night." },
+    services:[
+      {title:"24/7 Towing", description:"Fast response any hour, anywhere on the mountain."},
+      {title:"Roadside Assistance", description:"Jump-starts, lockouts, fuel, and flat tires."},
+      {title:"Recovery & Winch-Outs", description:"Off-road, ditch, and mud recovery done safely."}
+    ],
+    trust:{ badges:[], reviews:[] },
+    contact:{ cta_text:"Call now", phone_prompt:"Answered 24/7", emergency:true }
+  }
+};
+
+/* ===== fill helpers ===== */
+const cap=(s,n)=>{s=(s==null?'':String(s)).trim();return s.length>n?s.slice(0,n-1).trimEnd()+'…':s;};
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const imgTag=(name,preset,alt)=>`<div class="img"><img src="${IMG[name]?(U+IMG[name]+'?'+PRESET[preset]):''}" alt="${esc(alt)}" loading="lazy" onerror="this.style.display='none'"></div>`;
+
+/* ===== THE FRAME — renders contract through designed slots with fallbacks ===== */
+function render(key){
+  const d=SAMPLES[key], b=d.business||{};
+  const tel='tel:'+String(b.phone||'').replace(/[^0-9+]/g,'');
+  const initials=(b.name||'?').split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+  const heroImg=d.hero?.image_id&&IMG[d.hero.image_id]?d.hero.image_id:'wv_hero';
+  const heroCta=cap(d.hero?.cta_text,22)||'Get a quote';
+  const contactCta=cap(d.contact?.cta_text,22)||heroCta;
+  const phonePrompt=cap(d.contact?.phone_prompt,40)||'Call for a free estimate';
+  const services=(d.services||[]).slice(0,6);
+  const badges=(d.trust?.badges||[]).slice(0,4);
+  const reviews=(d.trust?.reviews||[]).slice(0,3);
+  const emergency=!!d.contact?.emergency;
+  const est=b.established;
+
+  // trust bar: badges if present, else a quiet dependable default (never blank)
+  const tb = badges.length
+    ? badges.map(x=>`<div class="tstat"><b>✓</b><span>${esc(cap(x,24))}</span></div>`).join('')
+    : `<div class="tstat"><b>Local</b><span>& family-owned</span></div>
+       <div class="tstat"><b>Fast</b><span>response, done right</span></div>
+       <div class="tstat"><b>Honest</b><span>upfront pricing</span></div>
+       <div class="tstat"><b>WV</b><span>owned & operated</span></div>`;
+
+  document.getElementById('site').innerHTML=`
+  <header class="hdr" id="hdr">
+    <div class="wrap hdr-in">
+      <div class="brand"><span class="brand-mark">${esc(initials)}</span>${esc(cap(b.name,34))}</div>
+      <nav class="nav">
+        <a href="#services">Services</a><a href="#about">About</a><a href="#reviews">Reviews</a><a href="#contact">Contact</a>
+      </nav>
+      <a href="${tel}" class="call">☎ ${esc(b.phone||'')}</a>
+    </div>
+    <div class="prog" id="prog"></div>
+  </header>
+
+  <section class="hero">
+    ${imgTag(heroImg, 'hero', b.name+' — serving '+(b.service_area||'West Virginia'))}
+    <div class="scrim"></div>
+    <div class="wrap hero-in">
+      <span class="chip">◆ ${esc(cap(b.service_area,46))||'Serving West Virginia'}</span>
+      <h1>${esc(cap(d.hero?.headline,64))}</h1>
+      <p class="lead">${esc(cap(d.hero?.subhead,150))}</p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn--primary">${esc(heroCta)}</a>
+        <a href="${tel}" class="btn btn--ghost" style="color:#fff;border-color:rgba(255,255,255,.35)">☎ ${esc(b.phone||'')}</a>
+      </div>
+      <div class="hero-trust">
+        <span><i class="dot"></i> Licensed & insured</span>
+        <span><i class="dot"></i> Upfront pricing</span>
+        <span><i class="dot"></i> ${est?('Since '+esc(est)):'Local crew'}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="trustbar"><div class="wrap trustbar-in">${tb}</div></section>
+
+  <section class="sec" id="services"><div class="wrap">
+    <div class="head reveal"><p class="kicker">What we do</p><h2 class="title">Every job, done right the first time.</h2></div>
+    <div class="grid">
+      ${services.map((s,i)=>`
+        <div class="card reveal" style="transition-delay:${i*60}ms">
+          <span class="ic">◆</span>
+          <h3>${esc(cap(s.title,30))}</h3>
+          <p>${esc(cap(s.description,96))}</p>
+        </div>`).join('')}
+    </div>
+  </div></section>
+
+  <section class="sec sec--tint" id="about"><div class="wrap">
+    <div class="feature">
+      <div class="img reveal">${imgTag('work_truck', 'feature', b.name+' — local crew')}</div>
+      <div class="reveal">
+        <p class="kicker">Who you're hiring</p>
+        <h2>A real local crew — not a call center.</h2>
+        <p>${esc(cap(d.about?.body,320))}</p>
+        <ul class="points">
+          <li><i>✓</i> Straight answers and honest quotes</li>
+          <li><i>✓</i> Clean, and respectful of your property</li>
+          <li><i>✓</i> Work we stand behind, every time</li>
+        </ul>
+        <a href="#contact" class="btn btn--primary">${esc(contactCta)}</a>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="band-photo">
+    ${imgTag('wv_band', 'band', b.service_area+' — West Virginia')}
+    <div class="scrim"></div>
+    <div class="wrap inner reveal">
+      <h2 class="disp">Proud to work where we live.</h2>
+      <p>Born and raised in these mountains — the same hills you call home. When you hire us, you're hiring a neighbor.</p>
+    </div>
+  </section>
+
+  <section class="sec"><div class="wrap">
+    <div class="head reveal"><p class="kicker">How it works</p><h2 class="title">Simple, from first call to clean-up.</h2></div>
+    <div class="steps">
+      <div class="step reveal"><span class="n">01</span><h4>Reach out</h4><p>Call or drop a message. We give you a straight answer and a real time — no runaround.</p></div>
+      <div class="step reveal" style="transition-delay:80ms"><span class="n">02</span><h4>We show up prepared</h4><p>A clean, uniformed crew arrives on time with the right tools for the job.</p></div>
+      <div class="step reveal" style="transition-delay:160ms"><span class="n">03</span><h4>Done & guaranteed</h4><p>We finish right, clean up after ourselves, and stand behind the work.</p></div>
+    </div>
+  </div></section>
+
+  ${reviews.length?`
+  <section class="sec sec--tint" id="reviews"><div class="wrap">
+    <div class="head center reveal"><p class="kicker">Reviews</p><h2 class="title">Trusted in homes across WV.</h2></div>
+    <div class="reviews">
+      ${reviews.map((r,i)=>`
+        <div class="rev reveal" style="transition-delay:${i*70}ms">
+          <div class="stars">★★★★★</div>
+          <q>${esc(cap(r.quote,180))}</q>
+          <div class="who">${esc(cap(r.name,28))}<span>${esc(cap(r.detail,32))}</span></div>
+        </div>`).join('')}
+    </div>
+  </div></section>`:``}
+
+  <section class="sec" id="contact"><div class="wrap">
+    <div class="cta-band reveal">
+      <div class="glow"></div>
+      <h2>${emergency?"Need help now? We're standing by.":"Let's get your project started."}</h2>
+      <p>${esc(phonePrompt)}.</p>
+      <div class="row">
+        <a href="${tel}" class="btn btn--primary">☎ ${esc(b.phone||'')}</a>
+        <a href="${tel}" class="btn btn--ondark">${esc(contactCta)}</a>
+      </div>
+    </div>
+  </div></section>
+
+  <footer class="ft"><div class="wrap">
+    <div class="ft-grid">
+      <div style="max-width:30ch">
+        <div class="brand" style="color:#fff;margin-bottom:12px"><span class="brand-mark">${esc(initials)}</span>${esc(cap(b.name,34))}</div>
+        <p>Honest, professional work for the mountains of West Virginia.</p>
+      </div>
+      <div><h5>CONTACT</h5><p><a href="${tel}">${esc(b.phone||'')}</a><br>${esc(cap(b.service_area,50))}</p></div>
+      <div><h5>SERVICE AREA</h5><p>${esc(cap(b.service_area,60))}<br>& surrounding WV</p></div>
+    </div>
+    <div class="ft-bottom"><span>© ${esc(cap(b.name,40))}${est?(' · Since '+esc(est)):''}</span><span>Site by Veteran AI Websites</span></div>
+  </div></footer>
+  `;
+
+  wireScroll();
+}
+
+/* header solidify + progress + reveal */
+function wireScroll(){
+  const hdr=document.getElementById('hdr'), prog=document.getElementById('prog');
+  const onScroll=()=>{
+    const y=window.scrollY;
+    hdr.classList.toggle('solid', y>60);
+    const max=document.documentElement.scrollHeight-window.innerHeight;
+    prog.style.transform='scaleX('+(max>0?Math.min(1,y/max):0)+')';
+  };
+  window.onscroll=onScroll; onScroll();
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+}
+
+let cur='full';
+function pick(k){cur=k;render(k);
+  document.getElementById('b-full').classList.toggle('on',k==='full');
+  document.getElementById('b-sparse').classList.toggle('on',k==='sparse');}
+function pal(p){document.getElementById('site').dataset.palette=p;
+  document.getElementById('p-ember').classList.toggle('on',p==='ember');
+  document.getElementById('p-timber').classList.toggle('on',p==='timber');}
+render('full');
+</script>
+</body>
+</html>

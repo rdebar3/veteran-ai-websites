@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meet Monti — Live Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     MONTI — LIVE EXPERIENCE PROTOTYPE
+     Simulates the real thing: visitor chats with Monti, and a
+     website assembles LIVE as they answer (skeleton -> atomic
+     section fills), ending in a hot-lead handoff to Rich.
+     Conversation is scripted here (deterministic) — the real
+     build swaps in the LLM for dynamic chat + xAI TTS for voice.
+     Everything Monti "knows" per trade (headline, default
+     services, hero photo) is the same curated intelligence the
+     production version uses.
+     ============================================================ */
+  :root{
+    --bg:#f7f4ef; --surface:#fff; --ink:#20242b; --muted:#6f665c; --line:#e8e1d6;
+    --accent:#c2532a; --accent-d:#a5451f; --dark:#191c22; --gold:#c9a24b;
+    --chatbg:#12151a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:#0c0e12;color:var(--ink);-webkit-font-smoothing:antialiased;height:100vh;overflow:hidden}
+  .stage{display:grid;grid-template-columns:minmax(360px,42%) 1fr;height:100vh}
+  @media(max-width:900px){.stage{grid-template-columns:1fr;grid-template-rows:1fr 1fr}}
+
+  /* ---------- Monti chat panel ---------- */
+  .chat{background:var(--chatbg);color:#e9ecf1;display:flex;flex-direction:column;height:100vh;min-height:0}
+  @media(max-width:900px){.chat{height:auto}}
+  .chat-hd{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid #22262e}
+  .m-avatar{width:42px;height:42px;border-radius:12px;background:linear-gradient(150deg,var(--accent),#7a2f18);display:grid;place-items:center;font-family:Fraunces,serif;font-weight:700;font-size:20px;color:#fff;flex:0 0 auto;box-shadow:0 6px 16px -6px rgba(0,0,0,.6)}
+  .m-who{font-weight:700;font-size:15px}
+  .m-sub{font-size:12px;color:#8b93a2;display:flex;align-items:center;gap:6px}
+  .m-sub .live{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.2)}
+  .msgs{flex:1;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:14px;min-height:0}
+  .msg{max-width:88%;font-size:14.5px;line-height:1.5;padding:12px 15px;border-radius:14px;animation:pop .35s ease both}
+  @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .msg.monti{background:#1e232c;border:1px solid #262c36;border-bottom-left-radius:4px;align-self:flex-start}
+  .msg.user{background:var(--accent);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+  .typing{display:inline-flex;gap:4px;padding:14px 16px}
+  .typing i{width:7px;height:7px;border-radius:50%;background:#5b6472;animation:bl 1.2s infinite}
+  .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+  @keyframes bl{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+  .voice{font-size:11px;color:#6b7280;align-self:flex-start;margin:-8px 0 0 4px;display:flex;align-items:center;gap:5px}
+
+  .compose{border-top:1px solid #22262e;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:#1e232c;border:1px solid #333a45;color:#cbd3de;border-radius:999px;padding:9px 15px;font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s}
+  .chip:hover{border-color:var(--accent);color:#fff}
+  .chip.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+  .inrow{display:flex;gap:9px}
+  .inrow input{flex:1;background:#1e232c;border:1px solid #333a45;color:#fff;border-radius:11px;padding:13px 15px;font-size:14.5px;font-family:inherit}
+  .inrow input:focus{outline:none;border-color:var(--accent)}
+  .send{background:var(--accent);border:none;color:#fff;border-radius:11px;padding:0 18px;font-weight:600;cursor:pointer;font-size:14px}
+  .send:hover{background:var(--accent-d)}
+  .subtle{background:none;border:none;color:#6b7280;font-size:12.5px;cursor:pointer;align-self:flex-start;text-decoration:underline}
+
+  /* ---------- Live preview panel ---------- */
+  .preview{background:#0c0e12;display:flex;flex-direction:column;height:100vh;min-height:0}
+  @media(max-width:900px){.preview{height:auto;min-height:0}}
+  .pv-hd{display:flex;align-items:center;gap:10px;padding:14px 18px;color:#8b93a2;font-size:12px}
+  .pv-hd .status{margin-left:auto;display:flex;align-items:center;gap:7px;font-weight:600}
+  .pv-hd .status .d{width:7px;height:7px;border-radius:50%;background:#f5b53d}
+  .pv-hd .status.done .d{background:#4ade80}
+  .frame{flex:1;margin:0 18px 18px;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 30px 80px -30px rgba(0,0,0,.8);display:flex;flex-direction:column;min-height:0}
+  .bar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#eceae6;border-bottom:1px solid #dfdcd6;flex:0 0 auto}
+  .bar .dot{width:11px;height:11px;border-radius:50%;background:#cfccc6}
+  .bar .url{margin-left:8px;background:#fff;border-radius:7px;padding:5px 12px;font-size:12px;color:#6f665c;flex:1;font-family:Inter}
+  .canvas{flex:1;overflow-y:auto;background:var(--bg);min-height:0}
+
+  /* ---- rendered site sections (compact of the real Trades template) ---- */
+  .s-hero{position:relative;min-height:340px;display:flex;align-items:flex-end;color:#fff;isolation:isolate;overflow:hidden}
+  .s-hero .bgimg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:-2}
+  .s-hero .scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(15,18,24,.35),rgba(15,18,24,.15) 40%,rgba(15,18,24,.82))}
+  .s-hero .in{padding:26px 30px 30px}
+  .s-hero .eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#fff;opacity:.9;margin:0 0 10px;display:inline-flex;gap:6px;align-items:center}
+  .s-hero .eyebrow .d{width:5px;height:5px;border-radius:50%;background:var(--gold)}
+  .s-hero h1{font-family:Fraunces,serif;font-weight:600;font-size:clamp(24px,3.6vw,40px);line-height:1.04;margin:0;letter-spacing:-.02em;max-width:16ch}
+  .s-hero p{margin:12px 0 0;max-width:44ch;font-size:14px;line-height:1.5;color:rgba(255,255,255,.9)}
+  .s-hero .btns{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+  .b{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13px;padding:11px 18px;border-radius:8px}
+  .b1{background:var(--accent);color:#fff}.b2{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3)}
+
+  .s-trust{background:var(--dark);color:#fff;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:18px 30px}
+  .s-trust .t{flex:1 1 120px;text-align:center}
+  .s-trust .t b{font-family:Fraunces,serif;font-size:16px;display:block}
+  .s-trust .t span{font-size:11px;color:rgba(255,255,255,.66)}
+
+  .s-sec{padding:34px 30px}
+  .s-sec .kick{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+  .s-sec h2{font-family:Fraunces,serif;font-weight:600;font-size:clamp(20px,2.6vw,28px);margin:0 0 20px;letter-spacing:-.01em}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .c{background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px 16px}
+  .c .ic{width:38px;height:38px;border-radius:10px;background:color-mix(in srgb,var(--accent) 12%,#fff);color:var(--accent);display:grid;place-items:center;font-size:17px;margin-bottom:11px}
+  .c h3{font-family:Fraunces,serif;font-size:16px;margin:0 0 5px}
+  .c p{font-size:12.5px;line-height:1.45;color:var(--muted);margin:0}
+
+  .s-about{padding:34px 30px;background:linear-gradient(180deg,var(--bg),#f1e9df)}
+  .s-about h2{font-family:Fraunces,serif;font-size:clamp(20px,2.6vw,28px);margin:0 0 12px}
+  .s-about p{font-size:14.5px;line-height:1.65;color:var(--muted);margin:0;max-width:52ch}
+
+  .s-cta{margin:30px;background:var(--dark);color:#fff;border-radius:18px;padding:34px 26px;text-align:center;position:relative;overflow:hidden}
+  .s-cta .glow{position:absolute;inset:0;background:radial-gradient(60% 80% at 80% 0%,color-mix(in srgb,var(--accent) 45%,transparent),transparent 62%)}
+  .s-cta h2{font-family:Fraunces,serif;font-size:clamp(20px,3vw,30px);margin:0;position:relative}
+  .s-cta p{position:relative;margin:10px 0 0;font-size:14px;color:rgba(255,255,255,.82)}
+  .s-cta .btns{position:relative;margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  .sk{background:linear-gradient(90deg,#e8e1d6 25%,#f3eee5 37%,#e8e1d6 63%);background-size:400% 100%;animation:sh 1.4s ease infinite;border-radius:8px}
+  @keyframes sh{0%{background-position:100% 0}100%{background-position:-100% 0}}
+  .skblock{padding:34px 30px}
+  .sk-line{height:14px;margin-bottom:12px}
+  .fillin{animation:fill .5s ease both}
+  @keyframes fill{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* start overlay */
+  .start{position:absolute;inset:0;background:radial-gradient(80% 80% at 70% 20%,#1a2230,#0c0e12);display:flex;align-items:center;justify-content:center;text-align:center;z-index:20;padding:24px}
+  .start .box{max-width:520px}
+  .start .m-avatar{width:76px;height:76px;border-radius:20px;font-size:36px;margin:0 auto 22px}
+  .start h1{font-family:Fraunces,serif;color:#fff;font-size:clamp(28px,5vw,44px);margin:0 0 14px;letter-spacing:-.02em}
+  .start p{color:#aeb6c2;font-size:16px;line-height:1.6;margin:0 0 26px}
+  .start button{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:16px 30px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+  .start button:hover{background:var(--accent-d)}
+  .start .tiny{margin-top:16px;color:#5b6472;font-size:12.5px}
+
+  /* lead card (end) */
+  .lead{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);background:#12151a;border:1px solid #2a303a;border-radius:14px;padding:16px 18px;width:min(440px,92%);box-shadow:0 24px 60px rgba(0,0,0,.6);animation:pop .5s ease both;z-index:15}
+  .lead .h{display:flex;align-items:center;gap:8px;color:#4ade80;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+  .lead .card{background:#1a1f27;border:1px solid #2a303a;border-radius:10px;padding:13px 14px;color:#e9ecf1}
+  .lead .card .nm{font-weight:700;font-size:15px}
+  .lead .card .meta{font-size:12.5px;color:#8b93a2;margin-top:3px}
+  .lead .card .tag{display:inline-block;margin-top:9px;background:rgba(194,83,42,.16);color:#e5895f;border:1px solid rgba(194,83,42,.4);font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px}
+</style>
+</head>
+<body>
+<div class="stage">
+  <!-- CHAT -->
+  <div class="chat">
+    <div class="chat-hd">
+      <div class="m-avatar">M</div>
+      <div><div class="m-who">Monti</div><div class="m-sub"><span class="live"></span> building your site, live</div></div>
+    </div>
+    <div class="msgs" id="msgs"></div>
+    <div class="compose" id="compose"></div>
+  </div>
+  <!-- PREVIEW -->
+  <div class="preview">
+    <div class="pv-hd"><span>Live preview</span><span class="status" id="pvstatus"><span class="d"></span> <span id="pvtext">waiting to start…</span></span></div>
+    <div class="frame">
+      <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url" id="url">yoursite.com</span></div>
+      <div class="canvas" id="canvas"></div>
+    </div>
+  </div>
+</div>
+
+<!-- start overlay -->
+<div class="start" id="startOverlay">
+  <div class="box">
+    <div class="m-avatar">M</div>
+    <h1>Hey — I'm Monti.</h1>
+    <p>Tell me about your business, and I'll build you a real website right here, while we talk. Takes about a minute. No sign-up, no catch.</p>
+    <button onclick="start()">Let's build it →</button>
+    <div class="tiny">A demo of the Monti concierge for Veteran AI Websites</div>
+  </div>
+</div>
+
+<script>
+/* ---- Monti's per-trade intelligence (curated; same idea the real build uses) ---- */
+const U='https://images.unsplash.com/photo-';
+const HERO=id=>U+id+'?w=1600&h=900&fit=crop&crop=entropy&q=78&fm=jpg';
+const TRADES={
+  landscaping:{ label:'Landscaping / Lawn', img:'1689728318937-17d24bc0a65c',
+    headline:'Yards worth coming home to.',
+    subhead:a=>`Design, hardscaping, and clean weekly care from a crew that treats your property like their own — across ${a}.`,
+    services:['Landscape Design','Weekly Lawn Care','Hardscaping & Patios','Mulch & Planting','Seasonal Cleanup','Retaining Walls'],
+    about:'A family-run crew that treats your property like their own. Honest quotes, tidy work, no surprises when the bill comes.' },
+  plumbing:{ label:'Plumbing', img:'1676210133055-eab6ef033ce3',
+    headline:'Plumbing you can count on.',
+    subhead:a=>`Fast, honest, professional plumbing for homes and businesses across ${a} — with upfront pricing and a guarantee.`,
+    services:['Leak Detection & Repair','Water Heaters','Drain & Sewer','Fixtures & Faucets','Repiping','24/7 Emergency'],
+    about:'A licensed local pro who answers the phone, shows up on time, and leaves your place cleaner than they found it.' },
+  towing:{ label:'Towing / Roadside', img:'1742069029207-0aacf8fa4401',
+    headline:"Stuck on the side of the road? We're on the way.",
+    subhead:a=>`24/7 towing and recovery across ${a}. Fast, fair, and always answering the phone.`,
+    services:['24/7 Towing','Roadside Assistance','Recovery & Winch-Outs','Lockouts & Jump-Starts'],
+    about:'Local, dependable, and always answering the phone — day or night, rain or shine.' },
+  hvac:{ label:'HVAC / Heating & Cooling', img:'1660330589693-99889d60181e',
+    headline:'Comfortable, season after season.',
+    subhead:a=>`Heating, cooling, and cleaner air for families across ${a} — installed and serviced by neighbors, not a call center.`,
+    services:['Heating Repair','AC Install & Service','Tune-Ups & Maintenance','Indoor Air Quality','Emergency Service'],
+    about:'Family-owned and veteran-operated. The same friendly faces, season after season, who treat your home like their own.' }
+};
+const ICON='◆';
+
+/* ---- conversation script ---- */
+const data={ business:{name:'',area:'',phone:''}, trade:null };
+let filled=new Set();
+
+const msgs=document.getElementById('msgs');
+const compose=document.getElementById('compose');
+const canvas=document.getElementById('canvas');
+const pvstatus=document.getElementById('pvstatus');
+const pvtext=document.getElementById('pvtext');
+
+function scrollMsgs(){ msgs.scrollTop=msgs.scrollHeight; }
+function bubble(text,who){ const d=document.createElement('div'); d.className='msg '+who; d.textContent=text; msgs.appendChild(d); scrollMsgs(); return d; }
+function voiceNote(){ const d=document.createElement('div'); d.className='voice'; d.innerHTML='🔊 spoken aloud (xAI voice)'; msgs.appendChild(d); scrollMsgs(); }
+function typing(){ const d=document.createElement('div'); d.className='msg monti'; d.innerHTML='<span class="typing"><i></i><i></i><i></i></span>'; msgs.appendChild(d); scrollMsgs(); return d; }
+function montiSay(text,cb,delay){ const t=typing(); setTimeout(()=>{ t.remove(); bubble(text,'monti'); voiceNote(); if(cb) setTimeout(cb,350); }, delay||900); }
+function setStatus(txt,done){ pvtext.textContent=txt; pvstatus.classList.toggle('done',!!done); }
+
+/* ---- preview renderer: shows skeletons for unfilled sections, fills atomically ---- */
+function skLines(n){ let h=''; for(let i=0;i<n;i++) h+=`<div class="sk sk-line" style="width:${[92,80,64][i%3]}%"></div>`; return h; }
+function render(){
+  const b=data.business, tr=data.trade?TRADES[data.trade]:null;
+  const area=b.area||'West Virginia';
+  let h='';
+
+  // HERO
+  if(filled.has('hero')&&tr){
+    h+=`<section class="s-hero fillin"><div class="bgimg" style="background-image:url('${HERO(tr.img)}')"></div><div class="scrim"></div><div class="in">
+      <p class="eyebrow"><span class="d"></span> ${b.area?escapeHtml(b.area):'Serving West Virginia'}</p>
+      <h1>${escapeHtml(tr.headline)}</h1>
+      ${filled.has('sub')?`<p class="fillin">${escapeHtml(tr.subhead(area))}</p>`:``}
+      <div class="btns"><span class="b b1">Get a free quote</span>${b.phone?`<span class="b b2 fillin">☎ ${escapeHtml(b.phone)}</span>`:``}</div>
+    </div></section>`;
+  } else if(filled.has('heroskel')){
+    h+=`<section class="s-hero" style="background:#e8e1d6"><div class="in" style="width:100%">
+      <div class="sk sk-line" style="width:120px;height:11px"></div>
+      <div class="sk" style="height:34px;width:70%;margin:14px 0"></div>
+      <div class="sk sk-line" style="width:52%"></div></div></section>`;
+  }
+
+  // TRUST
+  if(filled.has('hero')&&tr){
+    h+=`<section class="s-trust fillin">
+      <div class="t"><b>Local</b><span>& family-owned</span></div>
+      <div class="t"><b>Licensed</b><span>& insured</span></div>
+      <div class="t"><b>Upfront</b><span>pricing</span></div>
+      <div class="t"><b>WV</b><span>owned & operated</span></div></section>`;
+  }
+
+  // SERVICES
+  if(filled.has('services')&&tr){
+    h+=`<section class="s-sec fillin"><p class="kick">What we do</p><h2>Every job, done right.</h2>
+      <div class="cards">${tr.services.map(s=>`<div class="c"><div class="ic">${ICON}</div><h3>${escapeHtml(s)}</h3><p>Professional ${escapeHtml(s.toLowerCase())}, done right the first time.</p></div>`).join('')}</div></section>`;
+  } else if(filled.has('servicesskel')){
+    h+=`<div class="skblock"><div class="sk sk-line" style="width:90px;height:10px"></div><div class="sk" style="height:24px;width:40%;margin:12px 0 20px"></div>
+      <div class="cards">${[0,1,2].map(()=>`<div class="c"><div class="sk" style="width:38px;height:38px;border-radius:10px;margin-bottom:11px"></div>${skLines(2)}</div>`).join('')}</div></div>`;
+  }
+
+  // ABOUT
+  if(filled.has('about')&&tr){
+    h+=`<section class="s-about fillin"><p class="kick" style="color:var(--accent);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px">Who you're hiring</p>
+      <h2>A real local crew — not a call center.</h2><p>${escapeHtml(tr.about)}</p></section>`;
+  }
+
+  // CTA
+  if(filled.has('cta')&&tr){
+    h+=`<section class="s-cta fillin"><div class="glow"></div><h2>Let's get your project started.</h2>
+      <p>Call for a free, same-week estimate.</p>
+      <div class="btns"><span class="b b1">☎ ${escapeHtml(b.phone||'')}</span><span class="b b2">Get a quote</span></div></section>`;
+  }
+
+  canvas.innerHTML=h||`<div style="padding:60px 30px;color:#b7b0a4;text-align:center;font-size:14px">Your site will appear here as we talk…</div>`;
+}
+function escapeHtml(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---- compose helpers ---- */
+function clearCompose(){ compose.innerHTML=''; }
+function askText(placeholder,onSubmit,skip){
+  clearCompose();
+  const row=document.createElement('div'); row.className='inrow';
+  const inp=document.createElement('input'); inp.placeholder=placeholder;
+  const btn=document.createElement('button'); btn.className='send'; btn.textContent='Send';
+  row.appendChild(inp); row.appendChild(btn); compose.appendChild(row);
+  const go=()=>{ const v=inp.value.trim(); if(!v) return; bubble(v,'user'); clearCompose(); onSubmit(v); };
+  btn.onclick=go; inp.onkeydown=e=>{if(e.key==='Enter')go();};
+  if(skip){ const s=document.createElement('button'); s.className='subtle'; s.textContent=skip.label; s.onclick=()=>{clearCompose();skip.fn();}; compose.appendChild(s); }
+  inp.focus();
+}
+function askChips(options,onPick){
+  clearCompose();
+  const wrap=document.createElement('div'); wrap.className='chips';
+  options.forEach(o=>{ const c=document.createElement('div'); c.className='chip'; c.textContent=o.label; c.onclick=()=>{ bubble(o.label,'user'); clearCompose(); onPick(o); }; wrap.appendChild(c); });
+  compose.appendChild(wrap);
+}
+
+/* ---- flow ---- */
+function start(){
+  document.getElementById('startOverlay').style.display='none';
+  setStatus('starting…');
+  render();
+  montiSay("Alright — let's make you something good. First up: what's your business called?", ()=>{
+    askText("e.g. Mountain State Landscaping", v=>{ data.business.name=v; document.getElementById('url').textContent=slug(v)+'.com'; stepTrade(); });
+  }, 500);
+}
+function slug(s){ return (s||'yoursite').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,20)||'yoursite'; }
+
+function stepTrade(){
+  filled.add('heroskel'); setStatus('framing your homepage…'); render();
+  montiSay(`Love it. And what kind of work does ${data.business.name} do?`, ()=>{
+    askChips(Object.keys(TRADES).map(k=>({label:TRADES[k].label,key:k})), o=>{
+      data.trade=o.key; filled.delete('heroskel'); filled.add('hero'); setStatus('building the hero…'); render();
+      montiSay(`Perfect. I already dropped in a headline and a real photo for a ${TRADES[o.key].label.toLowerCase()} business — see it building over there? Now, where do you work? What towns or area do you serve?`, ()=>{
+        askText("e.g. Buckhannon, Elkins & central WV", v=>{ data.business.area=v; filled.add('sub'); render(); stepServices(); });
+      });
+    });
+  });
+}
+function stepServices(){
+  filled.add('servicesskel'); setStatus('laying out your services…'); render();
+  const tr=TRADES[data.trade];
+  montiSay(`Got it — ${data.business.area}. Most ${tr.label.toLowerCase()} folks offer things like: ${tr.services.slice(0,4).join(', ')}… Look about right? I can run with these.`, ()=>{
+    askChips([{label:'Yep, those are perfect ✓',key:'ok'},{label:'Close — I\'ll tweak later',key:'ok'}], ()=>{
+      filled.delete('servicesskel'); filled.add('services'); setStatus('adding your services…'); render();
+      montiSay("Nice — those are on your site now. What's the best phone number for customers to reach you?", ()=>{
+        askText("e.g. (304) 555-0148", v=>{ data.business.phone=v; render(); stepAbout(); });
+      });
+    });
+  });
+}
+function stepAbout(){
+  setStatus('almost there…');
+  montiSay("Last thing — in a sentence, what makes you different? Or I can write something solid and you tweak it later.", ()=>{
+    askText("e.g. Family-run, 15 years, treat your yard like our own", v=>{ finish(v); }, {label:"Just write it for me", fn:()=>finish(null)});
+  });
+}
+function finish(customAbout){
+  const tr=TRADES[data.trade];
+  if(customAbout) tr.about=customAbout.charAt(0).toUpperCase()+customAbout.slice(1)+(/[.!?]$/.test(customAbout)?'':'.');
+  filled.add('about'); filled.add('cta'); setStatus('finishing your site…'); render();
+  montiSay(`That's it — take a look. In about a minute, ${data.business.name} went from nothing to a real website.`, ()=>{
+    setTimeout(()=>{
+      setStatus('site ready',true);
+      montiSay("Here's the honest part: this is a live preview I built to show you what's possible. Want it real — live on the internet, yours to keep? I'll send it straight to Rich. He's a West Virginia veteran who builds these for local businesses, and he'll reach out personally. No pressure, no bots.", ()=>{
+        clearCompose();
+        askChips([{label:"Yes — send it to Rich 🤝",key:'y'},{label:"Just looking for now",key:'n'}], o=>{
+          if(o.key==='y') showLead(); else montiSay("No worries at all — the door's always open. Thanks for building with me.");
+        });
+      }, 1200);
+    }, 900);
+  });
+}
+function showLead(){
+  montiSay(`Done — Rich has it. Expect a friendly call or text at ${data.business.phone}. Talk soon. 🏔️`);
+  const tr=TRADES[data.trade], b=data.business;
+  const el=document.createElement('div'); el.className='lead';
+  el.innerHTML=`<div class="h">● New hot lead — landed in Rich's tool</div>
+    <div class="card"><div class="nm">${escapeHtml(b.name)}</div>
+    <div class="meta">${escapeHtml(tr.label)} · ${escapeHtml(b.area)} · ${escapeHtml(b.phone)}</div>
+    <span class="tag">source: monti · hot_inbound · site drafted</span></div>`;
+  document.body.appendChild(el);
+}
+</script>
+</body>
+</html>
