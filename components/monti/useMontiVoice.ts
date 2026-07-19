@@ -10,9 +10,47 @@ import type { MontiRecord } from '@/lib/monti/types';
 const REALTIME_URL =
   'wss://api.x.ai/v1/realtime?model=grok-voice-latest';
 
+/** Default speech rate (xAI audio.output.speed range 0.7–1.5). Override with ?speed= */
+const MONTI_SPEED = 1.2;
+
+/**
+ * Default voice id. Rich locks the American pick by ear after auditioning via
+ * /monti?voice=NAME (and optional &speed=). Server token may also suggest a voice.
+ */
+const MONTI_VOICE = 'leo';
+
 const SUPPORTED_RATES = new Set([
   8000, 16000, 22050, 24000, 32000, 44100, 48000,
 ]);
+
+function clampSpeed(n: number): number {
+  return Math.min(1.5, Math.max(0.7, n));
+}
+
+/** Live audition overrides from the URL — no redeploy needed. */
+function readVoiceQuery(): { voice?: string; speed?: number } {
+  if (typeof window === 'undefined') return {};
+  const q = new URLSearchParams(window.location.search);
+  const voice = q.get('voice')?.trim() || undefined;
+  const rawSpeed = q.get('speed');
+  let speed: number | undefined;
+  if (rawSpeed != null && rawSpeed !== '') {
+    const n = Number(rawSpeed);
+    if (Number.isFinite(n)) speed = clampSpeed(n);
+  }
+  return { voice, speed };
+}
+
+function resolveVoice(serverDefault?: string): string {
+  const { voice } = readVoiceQuery();
+  return voice || serverDefault || MONTI_VOICE;
+}
+
+function resolveSpeed(): number {
+  const { speed } = readVoiceQuery();
+  if (speed != null) return speed;
+  return clampSpeed(MONTI_SPEED);
+}
 
 export type VoiceStatus = 'idle' | 'connecting' | 'live' | 'error';
 
@@ -186,6 +224,8 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const nextPlayTimeRef = useRef(0);
   const pendingSourcesRef = useRef(0);
+  /** Live AudioBufferSourceNodes still scheduled/playing — flushed on barge-in. */
+  const activeSourcesRef = useRef<AudioBufferSourceNode[]>([]);
   const mutedRef = useRef(opts.muted);
   const startedRef = useRef(false);
   const sessionReadyRef = useRef(false);
@@ -226,6 +266,24 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     }
   }, []);
 
+  /** Instantly silence any scheduled/playing Monti audio (client-side barge-in). */
+  const flushPlayback = useCallback(() => {
+    for (const s of activeSourcesRef.current) {
+      try {
+        s.onended = null;
+        s.stop();
+      } catch {
+        /* already stopped or never started */
+      }
+    }
+    activeSourcesRef.current = [];
+    pendingSourcesRef.current = 0;
+    const ctx = playCtxRef.current;
+    nextPlayTimeRef.current = ctx ? ctx.currentTime : 0;
+    setSpeaking(false);
+    optsRef.current.onAmplitude(0);
+  }, []);
+
   const playPcmChunk = useCallback((pcm: Int16Array) => {
     const ctx = playCtxRef.current;
     if (!ctx || !pcm.length) return;
@@ -247,6 +305,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     src.start(startAt);
     nextPlayTimeRef.current = startAt + buffer.duration;
 
+    activeSourcesRef.current.push(src);
     pendingSourcesRef.current++;
     setSpeaking(true);
 
@@ -254,6 +313,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     optsRef.current.onAmplitude(amp);
 
     src.onended = () => {
+      activeSourcesRef.current = activeSourcesRef.current.filter((s) => s !== src);
       pendingSourcesRef.current = Math.max(0, pendingSourcesRef.current - 1);
       if (pendingSourcesRef.current === 0) {
         setSpeaking(false);
@@ -337,6 +397,13 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       }
 
       if (type === 'input_audio_buffer.speech_started') {
+        // Barge-in: stop already-scheduled client audio first (server VAD alone
+        // does not un-play the browser queue), then cancel active generation.
+        flushPlayback();
+        if (responseActiveRef.current) {
+          sendJson({ type: 'response.cancel' });
+          responseActiveRef.current = false;
+        }
         setListening(true);
         optsRef.current.onListening(true);
         return;
@@ -348,6 +415,8 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       }
 
       if (type === 'response.created') {
+        // Safety: never let a prior turn's scheduled chunks bleed into this one.
+        flushPlayback();
         responseActiveRef.current = true;
         assistantBufRef.current = '';
         pendingToolCallsRef.current = [];
@@ -417,13 +486,14 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         }
       }
     },
-    [handleFunctionCalls, playPcmChunk, sendJson, setStatusSafe],
+    [flushPlayback, handleFunctionCalls, playPcmChunk, sendJson, setStatusSafe],
   );
 
   const stop = useCallback(() => {
     startedRef.current = false;
     sessionReadyRef.current = false;
     greetingSentRef.current = false;
+    responseActiveRef.current = false;
 
     try {
       processorRef.current?.disconnect();
@@ -442,20 +512,18 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     }
     wsRef.current = null;
 
+    flushPlayback();
+
     void audioCtxRef.current?.close().catch(() => {});
     void playCtxRef.current?.close().catch(() => {});
     audioCtxRef.current = null;
     playCtxRef.current = null;
     gainRef.current = null;
-    nextPlayTimeRef.current = 0;
-    pendingSourcesRef.current = 0;
 
-    setSpeaking(false);
     setListening(false);
     setStatusSafe('idle');
-    optsRef.current.onAmplitude(0);
     optsRef.current.onListening(false);
-  }, [setStatusSafe]);
+  }, [flushPlayback, setStatusSafe]);
 
   const start = useCallback(async (): Promise<boolean> => {
     if (startedRef.current) return true;
@@ -565,14 +633,19 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
           type: 'session.update',
           session: {
             instructions: tokenPayload.instructions,
-            voice: tokenPayload.voice || 'leo',
-            turn_detection: { type: 'server_vad' },
+            voice: resolveVoice(tokenPayload.voice),
+            turn_detection: {
+              type: 'server_vad',
+              // Slightly snappier end-of-turn; barge-in flush is the real interrupt fix.
+              silence_duration_ms: 600,
+            },
             audio: {
               input: {
                 format: { type: 'audio/pcm', rate: sampleRate },
               },
               output: {
                 format: { type: 'audio/pcm', rate: sampleRate },
+                speed: resolveSpeed(),
               },
             },
             tools: [FILL_SITE_TOOL, SEND_TO_RICH_TOOL],
