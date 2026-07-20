@@ -61,12 +61,13 @@ function useAgentAmplitude(
   audioTrack: TrackReference | undefined,
   glowRef: React.RefObject<GlowCanvasHandle | null>,
   agentState: string | undefined,
+  muted: boolean,
 ) {
   useEffect(() => {
     const publication = audioTrack?.publication;
     const track = publication?.track;
     const mediaStreamTrack = track?.mediaStreamTrack;
-    if (!mediaStreamTrack) {
+    if (!mediaStreamTrack || muted) {
       glowRef.current?.setAmplitude(0);
       return;
     }
@@ -120,11 +121,11 @@ function useAgentAmplitude(
       void ctx?.close();
       glowRef.current?.setAmplitude(0);
     };
-  }, [audioTrack, glowRef]);
+  }, [audioTrack, glowRef, muted]);
 
   useEffect(() => {
-    glowRef.current?.setListening(agentState === 'listening');
-  }, [agentState, glowRef]);
+    glowRef.current?.setListening(!muted && agentState === 'listening');
+  }, [agentState, glowRef, muted]);
 }
 
 function LiveSessionShell({
@@ -152,13 +153,15 @@ function LiveSessionShell({
   const [buildPhase, setBuildPhase] = useState<BuildPhase>('chat');
   const [showLead, setShowLead] = useState(false);
   const [caption, setCaption] = useState('');
-  const [speakerQuiet, setSpeakerQuiet] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [leadFailed, setLeadFailed] = useState(false);
+  const [leadBusy, setLeadBusy] = useState(false);
 
-  useAgentAmplitude(audioTrack, glowRef, agentState);
+  useAgentAmplitude(audioTrack, glowRef, agentState, muted);
 
   // Silence agent audio without ending the session
   useEffect(() => {
-    const level = speakerQuiet ? 0 : 1;
+    const level = muted ? 0 : 1;
     room.remoteParticipants.forEach((p) => {
       p.audioTrackPublications.forEach((pub) => {
         const t = pub.track;
@@ -167,7 +170,7 @@ function LiveSessionShell({
         }
       });
     });
-  }, [room, speakerQuiet, audioTrack]);
+  }, [room, muted, audioTrack]);
 
   useEffect(() => {
     recordRef.current = record;
@@ -284,10 +287,16 @@ function LiveSessionShell({
     error?: string;
   }> => {
     if (leadSentRef.current) return { ok: true };
+    if (leadBusy) return { ok: false, error: 'busy' };
+
     const current = recordRef.current;
     if (!current.business?.name?.trim()) {
+      setLeadFailed(true);
+      setCaption("Need a business name before we can send this to Rich.");
       return { ok: false, error: 'Need a business name first' };
     }
+
+    setLeadBusy(true);
     try {
       const res = await fetch('/api/monti/lead', {
         method: 'POST',
@@ -295,9 +304,12 @@ function LiveSessionShell({
         body: JSON.stringify({ record: current }),
       });
       if (!res.ok) {
+        setLeadFailed(true);
+        setCaption("Hmm — couldn't reach Rich's inbox just now.");
         return { ok: false, error: 'Failed to save lead' };
       }
       leadSentRef.current = true;
+      setLeadFailed(false);
       setShowLead(true);
       setBuildPhase('done');
       setStatusText('site ready');
@@ -308,9 +320,13 @@ function LiveSessionShell({
       );
       return { ok: true };
     } catch {
+      setLeadFailed(true);
+      setCaption("Hmm — couldn't reach Rich's inbox just now.");
       return { ok: false, error: 'Network error' };
+    } finally {
+      setLeadBusy(false);
     }
-  }, []);
+  }, [leadBusy]);
 
   // LiveKit data messages from agent tools
   useEffect(() => {
@@ -366,20 +382,24 @@ function LiveSessionShell({
         ? 'Monti speaking…'
         : voiceStatusLabel(agentState));
 
+  const showHandoffChip =
+    buildPhase === 'handoff' && !showLead && !leadFailed;
+  const showRetryChip = leadFailed && !showLead;
+
   return (
     <>
-      <RoomAudioRenderer muted={speakerQuiet} volume={speakerQuiet ? 0 : 1} />
+      <RoomAudioRenderer muted={muted} volume={muted ? 0 : 1} />
       {/* Fixed controls — always on top of glow, dock, and site pane */}
       <div className="monti-live-fixed-bar" role="toolbar" aria-label="Session controls">
         <button
           type="button"
           className={`monti-live-fixed-btn monti-live-fixed-btn--quiet${
-            speakerQuiet ? ' is-quiet' : ''
+            muted ? ' is-quiet' : ''
           }`}
-          onClick={() => setSpeakerQuiet((q) => !q)}
-          aria-pressed={speakerQuiet}
+          onClick={() => setMuted((m) => !m)}
+          aria-pressed={muted}
         >
-          {speakerQuiet ? 'Unmute' : 'Quiet'}
+          {muted ? 'Unmute' : 'Mute'}
         </button>
         <button
           type="button"
@@ -391,7 +411,7 @@ function LiveSessionShell({
       </div>
       <div className={`monti-app${building ? ' building' : ''}`}>
         <div className="monti-pane">
-          <GlowCanvas ref={glowRef} muted={speakerQuiet} className="monti-glow" />
+          <GlowCanvas ref={glowRef} muted={muted} className="monti-glow" />
           <div className="monti-top">
             <div className="monti-logo">
               <b>▲</b> M O N T I
@@ -407,6 +427,29 @@ function LiveSessionShell({
               >
                 {promptText}
               </div>
+              {(showHandoffChip || showRetryChip) && (
+                <div className="monti-chips">
+                  {showRetryChip ? (
+                    <button
+                      type="button"
+                      className="monti-chip"
+                      disabled={leadBusy}
+                      onClick={() => void sendLeadOnce()}
+                    >
+                      {leadBusy ? 'Sending…' : 'Try again — send it to Rich'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="monti-chip"
+                      disabled={leadBusy}
+                      onClick={() => void sendLeadOnce()}
+                    >
+                      {leadBusy ? 'Sending…' : 'Send it to Rich'}
+                    </button>
+                  )}
+                </div>
+              )}
               <div className="monti-controls" style={{ marginTop: 12 }}>
                 <button
                   type="button"
