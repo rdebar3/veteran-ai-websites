@@ -152,8 +152,22 @@ function LiveSessionShell({
   const [buildPhase, setBuildPhase] = useState<BuildPhase>('chat');
   const [showLead, setShowLead] = useState(false);
   const [caption, setCaption] = useState('');
+  const [speakerQuiet, setSpeakerQuiet] = useState(false);
 
   useAgentAmplitude(audioTrack, glowRef, agentState);
+
+  // Silence agent audio without ending the session
+  useEffect(() => {
+    const level = speakerQuiet ? 0 : 1;
+    room.remoteParticipants.forEach((p) => {
+      p.audioTrackPublications.forEach((pub) => {
+        const t = pub.track;
+        if (t && 'setVolume' in t && typeof t.setVolume === 'function') {
+          t.setVolume(level);
+        }
+      });
+    });
+  }, [room, speakerQuiet, audioTrack]);
 
   useEffect(() => {
     recordRef.current = record;
@@ -354,10 +368,30 @@ function LiveSessionShell({
 
   return (
     <>
-      <RoomAudioRenderer />
+      <RoomAudioRenderer muted={speakerQuiet} volume={speakerQuiet ? 0 : 1} />
+      {/* Fixed controls — always on top of glow, dock, and site pane */}
+      <div className="monti-live-fixed-bar" role="toolbar" aria-label="Session controls">
+        <button
+          type="button"
+          className={`monti-live-fixed-btn monti-live-fixed-btn--quiet${
+            speakerQuiet ? ' is-quiet' : ''
+          }`}
+          onClick={() => setSpeakerQuiet((q) => !q)}
+          aria-pressed={speakerQuiet}
+        >
+          {speakerQuiet ? 'Unmute' : 'Quiet'}
+        </button>
+        <button
+          type="button"
+          className="monti-live-fixed-btn monti-live-fixed-btn--end"
+          onClick={onEnd}
+        >
+          End
+        </button>
+      </div>
       <div className={`monti-app${building ? ' building' : ''}`}>
         <div className="monti-pane">
-          <GlowCanvas ref={glowRef} className="monti-glow" />
+          <GlowCanvas ref={glowRef} muted={speakerQuiet} className="monti-glow" />
           <div className="monti-top">
             <div className="monti-logo">
               <b>▲</b> M O N T I
@@ -502,6 +536,19 @@ export default function MontiLiveClient() {
 
   return (
     <div className="monti-app-root">
+      {/* Connecting: End available before room mounts; live bar is inside shell */}
+      {phase === 'connecting' ? (
+        <div className="monti-live-fixed-bar" role="toolbar" aria-label="Session controls">
+          <button
+            type="button"
+            className="monti-live-fixed-btn monti-live-fixed-btn--end"
+            onClick={end}
+          >
+            End
+          </button>
+        </div>
+      ) : null}
+
       {phase === 'live' && connection ? (
         <LiveKitRoom
           serverUrl={connection.url}
