@@ -253,6 +253,10 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     { name: string; call_id: string; arguments: string }[]
   >([]);
   const responseActiveRef = useRef(false);
+  /** Only play audio deltas for this response id (drops stale/overlap). */
+  const currentResponseIdRef = useRef<string | null>(null);
+  /** Avoid spamming stale-drop logs for every chunk. */
+  const staleDropLoggedRef = useRef(false);
   /** Last logged mic gate state (half-duplex: closed while Monti speaks). */
   const micGatedRef = useRef(false);
   /** Rate of PCM chunks we play (session audio.output.format.rate). */
@@ -348,6 +352,23 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     ensureAudioRunning();
     syncMicGateLog();
   }, [ensureAudioRunning, syncMicGateLog]);
+
+  /**
+   * Start a model turn — never stack response.create over a live response
+   * (causes two Montis / overlapping audio + wasted minutes).
+   */
+  const requestResponseCreate = useCallback(() => {
+    if (responseActiveRef.current) {
+      console.log(
+        '[monti/voice] cancel before response.create (already active)',
+      );
+      sendJson({ type: 'response.cancel' });
+      responseActiveRef.current = false;
+      currentResponseIdRef.current = null;
+      flushPlayback();
+    }
+    sendJson({ type: 'response.create' });
+  }, [flushPlayback, sendJson]);
 
   const playPcmChunk = useCallback(
     (pcm: Int16Array) => {
@@ -463,9 +484,9 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       }
 
       await waitForPlaybackIdle();
-      sendJson({ type: 'response.create' });
+      requestResponseCreate();
     },
-    [sendJson, waitForPlaybackIdle],
+    [requestResponseCreate, waitForPlaybackIdle],
   );
 
   const onServerEvent = useCallback(
@@ -502,7 +523,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         if (!greetingSentRef.current) {
           greetingSentRef.current = true;
           // Kick Monti's opening line
-          sendJson({ type: 'response.create' });
+          requestResponseCreate();
         }
         return;
       }
@@ -534,10 +555,19 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       if (type === 'response.created') {
         // Safety: never let a prior turn's scheduled chunks bleed into this one.
         flushPlayback();
+        const resp = event.response as { id?: string } | undefined;
+        const rid =
+          (typeof resp?.id === 'string' && resp.id) ||
+          (typeof event.response_id === 'string'
+            ? (event.response_id as string)
+            : null);
+        currentResponseIdRef.current = rid;
+        staleDropLoggedRef.current = false;
         responseActiveRef.current = true;
         syncMicGateLog();
         assistantBufRef.current = '';
         pendingToolCallsRef.current = [];
+        console.log('[monti/voice] response.created', { responseId: rid });
         return;
       }
 
@@ -568,6 +598,21 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         type === 'response.output_audio.delta' ||
         type === 'response.audio.delta'
       ) {
+        const rid =
+          typeof event.response_id === 'string'
+            ? (event.response_id as string)
+            : null;
+        const current = currentResponseIdRef.current;
+        if (current && rid && rid !== current) {
+          if (!staleDropLoggedRef.current) {
+            staleDropLoggedRef.current = true;
+            console.log(
+              '[monti/voice] dropped stale audio (response_id mismatch)',
+              { got: rid, current },
+            );
+          }
+          return;
+        }
         const b64 = event.delta as string;
         if (b64) {
           try {
@@ -589,7 +634,20 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       }
 
       if (type === 'response.done') {
-        responseActiveRef.current = false;
+        const doneId =
+          typeof event.response_id === 'string'
+            ? (event.response_id as string)
+            : (event.response as { id?: string } | undefined)?.id;
+        // Only clear active if this done matches current (or we have no id)
+        if (
+          !doneId ||
+          !currentResponseIdRef.current ||
+          doneId === currentResponseIdRef.current
+        ) {
+          responseActiveRef.current = false;
+          // Keep currentResponseId until next response.created so late
+          // deltas for this id can still play while audio drains.
+        }
         // Mic re-opens once generation ends AND scheduled audio has drained
         // (syncMicGateLog also runs on each source onended).
         syncMicGateLog();
@@ -613,6 +671,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       handleFunctionCalls,
       isMicGated,
       playPcmChunk,
+      requestResponseCreate,
       sendJson,
       setStatusSafe,
       syncMicGateLog,
@@ -726,6 +785,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     if (responseActiveRef.current) {
       sendJson({ type: 'response.cancel' });
       responseActiveRef.current = false;
+      currentResponseIdRef.current = null;
     }
     syncMicGateLog();
     setListening(false);
@@ -764,6 +824,8 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     sessionReadyRef.current = false;
     greetingSentRef.current = false;
     responseActiveRef.current = false;
+    currentResponseIdRef.current = null;
+    staleDropLoggedRef.current = false;
     pausedRef.current = false;
     setPaused(false);
     micGatedRef.current = false;
