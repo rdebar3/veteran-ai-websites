@@ -253,6 +253,8 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     { name: string; call_id: string; arguments: string }[]
   >([]);
   const responseActiveRef = useRef(false);
+  /** Last logged mic gate state (half-duplex: closed while Monti speaks). */
+  const micGatedRef = useRef(false);
   /** Rate of PCM chunks we play (session audio.output.format.rate). */
   const outputRateRef = useRef(OUTPUT_RATE);
   /** Rate of PCM we append (must match session audio.input.format.rate). */
@@ -261,6 +263,26 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
   const captureRateRef = useRef(TARGET_SEND_RATE);
   /** Remove visibility/focus listeners on stop. */
   const audioFocusCleanupRef = useRef<(() => void) | null>(null);
+
+  /** Half-duplex: mic closed while Monti generates or audio is still draining. */
+  const isMicGated = useCallback(() => {
+    return (
+      pausedRef.current ||
+      pendingSourcesRef.current > 0 ||
+      responseActiveRef.current
+    );
+  }, []);
+
+  const syncMicGateLog = useCallback(() => {
+    const gated = isMicGated();
+    if (gated === micGatedRef.current) return;
+    micGatedRef.current = gated;
+    console.log(
+      gated
+        ? '[monti/voice] mic gated (monti speaking)'
+        : '[monti/voice] mic open',
+    );
+  }, [isMicGated]);
 
   useEffect(() => {
     mutedRef.current = opts.muted;
@@ -324,7 +346,8 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     optsRef.current.onAmplitude(0);
     // Keep context running + gain correct so later chunks aren't silent
     ensureAudioRunning();
-  }, [ensureAudioRunning]);
+    syncMicGateLog();
+  }, [ensureAudioRunning, syncMicGateLog]);
 
   const playPcmChunk = useCallback(
     (pcm: Int16Array) => {
@@ -374,6 +397,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
 
       activeSourcesRef.current.push(src);
       pendingSourcesRef.current++;
+      syncMicGateLog();
       setSpeaking(true);
 
       const amp = rmsFromInt16(pcm);
@@ -384,13 +408,14 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
           (s) => s !== src,
         );
         pendingSourcesRef.current = Math.max(0, pendingSourcesRef.current - 1);
+        syncMicGateLog();
         if (pendingSourcesRef.current === 0) {
           setSpeaking(false);
           optsRef.current.onAmplitude(0);
         }
       };
     },
-    [ensureAudioRunning],
+    [ensureAudioRunning, syncMicGateLog],
   );
 
   const handleFunctionCalls = useCallback(
@@ -492,29 +517,15 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       }
 
       if (type === 'input_audio_buffer.speech_started') {
-        // Conversation paused — ignore VAD (mic should be disconnected anyway).
-        if (pausedRef.current) return;
-        // Only barge-in when Monti is actually talking / generating.
-        // Ambient noise while idle must not thrash playback state.
-        const montiSpeaking =
-          pendingSourcesRef.current > 0 || responseActiveRef.current;
-        if (montiSpeaking) {
-          console.log('[monti/voice] barge-in: flush + response.cancel', {
-            pendingSources: pendingSourcesRef.current,
-            responseActive: responseActiveRef.current,
-          });
-          flushPlayback();
-          if (responseActiveRef.current) {
-            sendJson({ type: 'response.cancel' });
-            responseActiveRef.current = false;
-          }
-        }
+        // Half-duplex: mic is gated while Monti speaks, so echo barge-in is retired.
+        // Pause button is how the user stops him. Ignore VAD when gated/paused.
+        if (pausedRef.current || isMicGated()) return;
         setListening(true);
         optsRef.current.onListening(true);
         return;
       }
       if (type === 'input_audio_buffer.speech_stopped') {
-        if (pausedRef.current) return;
+        if (pausedRef.current || isMicGated()) return;
         setListening(false);
         optsRef.current.onListening(false);
         return;
@@ -524,6 +535,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         // Safety: never let a prior turn's scheduled chunks bleed into this one.
         flushPlayback();
         responseActiveRef.current = true;
+        syncMicGateLog();
         assistantBufRef.current = '';
         pendingToolCallsRef.current = [];
         return;
@@ -578,6 +590,9 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
 
       if (type === 'response.done') {
         responseActiveRef.current = false;
+        // Mic re-opens once generation ends AND scheduled audio has drained
+        // (syncMicGateLog also runs on each source onended).
+        syncMicGateLog();
         const calls = pendingToolCallsRef.current.splice(0);
         if (calls.length > 0) {
           void handleFunctionCalls(calls);
@@ -596,9 +611,11 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       ensureAudioRunning,
       flushPlayback,
       handleFunctionCalls,
+      isMicGated,
       playPcmChunk,
       sendJson,
       setStatusSafe,
+      syncMicGateLog,
     ],
   );
 
@@ -648,6 +665,14 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
 
       processor.onaudioprocess = (e) => {
         if (pausedRef.current) return;
+        // Half-duplex: never stream mic while Monti is generating or playing
+        // (blocks speaker→mic echo from triggering server VAD).
+        if (
+          pendingSourcesRef.current > 0 ||
+          responseActiveRef.current
+        ) {
+          return;
+        }
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
           return;
         }
@@ -694,6 +719,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
 
     // Stop mic streaming (keep tracks alive for resume; keep WS open)
     disconnectMic();
+    syncMicGateLog();
 
     // Silence Monti mid-sentence if talking
     flushPlayback();
@@ -701,12 +727,19 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       sendJson({ type: 'response.cancel' });
       responseActiveRef.current = false;
     }
+    syncMicGateLog();
     setListening(false);
     setSpeaking(false);
     optsRef.current.onListening(false);
     optsRef.current.onAmplitude(0);
     ensureAudioRunning();
-  }, [disconnectMic, ensureAudioRunning, flushPlayback, sendJson]);
+  }, [
+    disconnectMic,
+    ensureAudioRunning,
+    flushPlayback,
+    sendJson,
+    syncMicGateLog,
+  ]);
 
   const resume = useCallback(() => {
     if (!startedRef.current || !pausedRef.current) return;
@@ -723,7 +756,8 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     }
     pausedRef.current = false;
     setPaused(false);
-  }, [ensureAudioRunning, wireMicCapture]);
+    syncMicGateLog();
+  }, [ensureAudioRunning, syncMicGateLog, wireMicCapture]);
 
   const stop = useCallback(() => {
     startedRef.current = false;
@@ -732,6 +766,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     responseActiveRef.current = false;
     pausedRef.current = false;
     setPaused(false);
+    micGatedRef.current = false;
 
     if (audioFocusCleanupRef.current) {
       audioFocusCleanupRef.current();
@@ -785,6 +820,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
+          autoGainControl: true,
           channelCount: 1,
         },
       });
