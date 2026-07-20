@@ -19,12 +19,7 @@ const MONTI_SPEED = 1.0;
  */
 const MONTI_VOICE = 'castor';
 
-/** PCM rates accepted by xAI Voice Agent (session.audio.*.format.rate). */
-const SUPPORTED_RATES = new Set([
-  8000, 16000, 22050, 24000, 32000, 44100, 48000,
-]);
-
-/** Preferred rate when browser capture rate is unsupported or we want a fixed output. */
+/** Fixed end-to-end PCM rate (mic resampled to this; output requested at this). */
 const TARGET_SEND_RATE = 24000;
 const OUTPUT_RATE = 24000;
 
@@ -205,17 +200,6 @@ function rmsFromInt16(pcm: Int16Array): number {
   return Math.min(1, Math.sqrt(sum / pcm.length) * 4);
 }
 
-/**
- * Rate we declare + send for mic PCM. Prefer the browser's actual capture rate
- * when the API supports it; otherwise resample to TARGET_SEND_RATE.
- */
-function chooseSendRate(actualCaptureRate: number): number {
-  const rounded = Math.round(actualCaptureRate);
-  if (SUPPORTED_RATES.has(rounded)) return rounded;
-  if (SUPPORTED_RATES.has(actualCaptureRate)) return actualCaptureRate;
-  return TARGET_SEND_RATE;
-}
-
 /** Linear-interpolate mono Float32 from fromRate → toRate. */
 function resampleFloat32(
   input: Float32Array,
@@ -273,8 +257,10 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
   const outputRateRef = useRef(OUTPUT_RATE);
   /** Rate of PCM we append (must match session audio.input.format.rate). */
   const sendRateRef = useRef(TARGET_SEND_RATE);
-  /** True capture AudioContext rate (may differ from sendRate → resample). */
+  /** True capture AudioContext rate (always resample to 24k before send). */
   const captureRateRef = useRef(TARGET_SEND_RATE);
+  /** Remove visibility/focus listeners on stop. */
+  const audioFocusCleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     mutedRef.current = opts.muted;
@@ -282,6 +268,21 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       gainRef.current.gain.value = opts.muted ? 0 : 1;
     }
   }, [opts.muted]);
+
+  /** Resume suspended AudioContexts and restore speaker gain after pause/focus. */
+  const ensureAudioRunning = useCallback(() => {
+    const play = playCtxRef.current;
+    const capture = audioCtxRef.current;
+    if (play && play.state !== 'running') {
+      void play.resume().catch(() => {});
+    }
+    if (capture && capture.state !== 'running') {
+      void capture.resume().catch(() => {});
+    }
+    if (gainRef.current) {
+      gainRef.current.gain.value = mutedRef.current ? 0 : 1;
+    }
+  }, []);
 
   const setStatusSafe = useCallback((s: VoiceStatus) => {
     setStatus(s);
@@ -321,47 +322,76 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     nextPlayTimeRef.current = ctx ? ctx.currentTime : 0;
     setSpeaking(false);
     optsRef.current.onAmplitude(0);
-  }, []);
+    // Keep context running + gain correct so later chunks aren't silent
+    ensureAudioRunning();
+  }, [ensureAudioRunning]);
 
-  const playPcmChunk = useCallback((pcm: Int16Array) => {
-    const ctx = playCtxRef.current;
-    if (!ctx || !pcm.length) return;
+  const playPcmChunk = useCallback(
+    (pcm: Int16Array) => {
+      const ctx = playCtxRef.current;
+      if (!ctx || !pcm.length) return;
 
-    // Decode at the rate the server was told (output.format.rate), not the
-    // browser's AudioContext rate — Web Audio resamples to the context.
-    const rate = outputRateRef.current;
-    const float = new Float32Array(pcm.length);
-    for (let i = 0; i < pcm.length; i++) float[i] = pcm[i] / 32768;
-
-    const buffer = ctx.createBuffer(1, float.length, rate);
-    buffer.copyToChannel(float, 0);
-
-    const src = ctx.createBufferSource();
-    src.buffer = buffer;
-    const gain = gainRef.current || ctx.destination;
-    src.connect(gain);
-
-    const now = ctx.currentTime;
-    const startAt = Math.max(now + 0.02, nextPlayTimeRef.current);
-    src.start(startAt);
-    nextPlayTimeRef.current = startAt + buffer.duration;
-
-    activeSourcesRef.current.push(src);
-    pendingSourcesRef.current++;
-    setSpeaking(true);
-
-    const amp = rmsFromInt16(pcm);
-    optsRef.current.onAmplitude(amp);
-
-    src.onended = () => {
-      activeSourcesRef.current = activeSourcesRef.current.filter((s) => s !== src);
-      pendingSourcesRef.current = Math.max(0, pendingSourcesRef.current - 1);
-      if (pendingSourcesRef.current === 0) {
-        setSpeaking(false);
-        optsRef.current.onAmplitude(0);
+      if (ctx.state !== 'running') {
+        console.warn(
+          '[monti/voice] playback context not running:',
+          ctx.state,
+          '— resuming',
+        );
+        void ctx.resume().catch(() => {});
       }
-    };
-  }, []);
+      ensureAudioRunning();
+
+      // Decode at the rate the server is sending (from session.updated).
+      const rate = outputRateRef.current;
+      const float = new Float32Array(pcm.length);
+      for (let i = 0; i < pcm.length; i++) float[i] = pcm[i] / 32768;
+
+      const buffer = ctx.createBuffer(1, float.length, rate);
+      buffer.copyToChannel(float, 0);
+
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      if (gainRef.current) {
+        gainRef.current.gain.value = mutedRef.current ? 0 : 1;
+      }
+      const gain = gainRef.current || ctx.destination;
+      src.connect(gain);
+
+      const now = ctx.currentTime;
+      const startAt = Math.max(now + 0.02, nextPlayTimeRef.current);
+      const ahead = startAt - now;
+      if (ahead > 1) {
+        console.warn(
+          '[monti/voice] playback schedule drift',
+          ahead.toFixed(2),
+          's ahead — resetting timeline',
+        );
+        nextPlayTimeRef.current = now + 0.02;
+      }
+      const playAt = Math.max(now + 0.02, nextPlayTimeRef.current);
+      src.start(playAt);
+      nextPlayTimeRef.current = playAt + buffer.duration;
+
+      activeSourcesRef.current.push(src);
+      pendingSourcesRef.current++;
+      setSpeaking(true);
+
+      const amp = rmsFromInt16(pcm);
+      optsRef.current.onAmplitude(amp);
+
+      src.onended = () => {
+        activeSourcesRef.current = activeSourcesRef.current.filter(
+          (s) => s !== src,
+        );
+        pendingSourcesRef.current = Math.max(0, pendingSourcesRef.current - 1);
+        if (pendingSourcesRef.current === 0) {
+          setSpeaking(false);
+          optsRef.current.onAmplitude(0);
+        }
+      };
+    },
+    [ensureAudioRunning],
+  );
 
   const handleFunctionCalls = useCallback(
     async (
@@ -419,13 +449,30 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
 
       if (type === 'session.updated') {
         sessionReadyRef.current = true;
-        // Confirm formats registered (should not be "not specified")
         const sess = event.session as
-          | { audio?: unknown }
+          | {
+              audio?: {
+                output?: { format?: { rate?: number; type?: string } };
+                input?: { format?: { rate?: number; type?: string } };
+              };
+            }
           | undefined;
-        if (sess?.audio) {
-          console.debug('[monti/voice] session.audio', sess.audio);
+        const outRate = sess?.audio?.output?.format?.rate;
+        if (typeof outRate === 'number' && outRate > 0) {
+          outputRateRef.current = outRate;
+        } else {
+          outputRateRef.current = OUTPUT_RATE;
         }
+        console.log('[monti/voice] session.updated', {
+          negotiatedOutputRate: outputRateRef.current,
+          inputFormat: sess?.audio?.input?.format,
+          outputFormat: sess?.audio?.output?.format,
+          playCtxSampleRate: playCtxRef.current?.sampleRate,
+          playCtxState: playCtxRef.current?.state,
+          captureCtxSampleRate: audioCtxRef.current?.sampleRate,
+          captureCtxState: audioCtxRef.current?.state,
+        });
+        ensureAudioRunning();
         setStatusSafe('live');
         if (!greetingSentRef.current) {
           greetingSentRef.current = true;
@@ -452,6 +499,10 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         const montiSpeaking =
           pendingSourcesRef.current > 0 || responseActiveRef.current;
         if (montiSpeaking) {
+          console.log('[monti/voice] barge-in: flush + response.cancel', {
+            pendingSources: pendingSourcesRef.current,
+            responseActive: responseActiveRef.current,
+          });
           flushPlayback();
           if (responseActiveRef.current) {
             sendJson({ type: 'response.cancel' });
@@ -541,7 +592,14 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         }
       }
     },
-    [flushPlayback, handleFunctionCalls, playPcmChunk, sendJson, setStatusSafe],
+    [
+      ensureAudioRunning,
+      flushPlayback,
+      handleFunctionCalls,
+      playPcmChunk,
+      sendJson,
+      setStatusSafe,
+    ],
   );
 
   /** Tear down mic graph only (keep stream tracks + WS + contexts). */
@@ -583,9 +641,10 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       const bufferSize = 4096;
       const processor = captureCtx.createScriptProcessor(bufferSize, 1, 1);
       processorRef.current = processor;
+      // Always send 24 kHz PCM (resample from browser capture rate).
       const actualCaptureRate = captureRateRef.current;
-      const sendRate = sendRateRef.current;
-      const needsResample = Math.abs(actualCaptureRate - sendRate) > 1;
+      const sendRate = TARGET_SEND_RATE;
+      sendRateRef.current = sendRate;
 
       processor.onaudioprocess = (e) => {
         if (pausedRef.current) return;
@@ -596,9 +655,10 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         const channel = e.inputBuffer.getChannelData(0);
         const copied = new Float32Array(channel.length);
         copied.set(channel);
-        const floats = needsResample
-          ? resampleFloat32(copied, actualCaptureRate, sendRate)
-          : copied;
+        const floats =
+          Math.abs(actualCaptureRate - sendRate) > 1
+            ? resampleFloat32(copied, actualCaptureRate, sendRate)
+            : copied;
         const pcm = floatTo16BitPCM(floats);
         const audio = int16ToBase64(pcm);
         try {
@@ -645,13 +705,15 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     setSpeaking(false);
     optsRef.current.onListening(false);
     optsRef.current.onAmplitude(0);
-  }, [disconnectMic, flushPlayback, sendJson]);
+    ensureAudioRunning();
+  }, [disconnectMic, ensureAudioRunning, flushPlayback, sendJson]);
 
   const resume = useCallback(() => {
     if (!startedRef.current || !pausedRef.current) return;
     if (!streamRef.current || !audioCtxRef.current || !wsRef.current) return;
     if (wsRef.current.readyState !== WebSocket.OPEN) return;
 
+    ensureAudioRunning();
     const ok = wireMicCapture();
     if (!ok) {
       optsRef.current.onError?.(
@@ -661,7 +723,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     }
     pausedRef.current = false;
     setPaused(false);
-  }, [wireMicCapture]);
+  }, [ensureAudioRunning, wireMicCapture]);
 
   const stop = useCallback(() => {
     startedRef.current = false;
@@ -670,6 +732,11 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     responseActiveRef.current = false;
     pausedRef.current = false;
     setPaused(false);
+
+    if (audioFocusCleanupRef.current) {
+      audioFocusCleanupRef.current();
+      audioFocusCleanupRef.current = null;
+    }
 
     disconnectMic();
 
@@ -754,32 +821,28 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       return false;
     }
 
-    // --- Capture context first: always trust the ACTUAL rate the browser uses ---
-    // Request 24 kHz (API default / best practice); many browsers keep 44.1/48k.
+    // --- Capture: browser may keep 44.1/48k; we always resample to 24k before send ---
     const captureCtx = new AudioContext({ sampleRate: TARGET_SEND_RATE });
     await captureCtx.resume().catch(() => {});
     const actualCaptureRate = captureCtx.sampleRate;
     captureRateRef.current = actualCaptureRate;
-
-    const sendRate = chooseSendRate(actualCaptureRate);
+    // Fixed end-to-end send rate (never declare browser native if it differs)
+    const sendRate = TARGET_SEND_RATE;
     sendRateRef.current = sendRate;
-    const needsResample = Math.abs(actualCaptureRate - sendRate) > 1;
 
-    console.debug('[monti/voice] capture rates', {
+    console.log('[monti/voice] capture rates', {
       requested: TARGET_SEND_RATE,
       actual: actualCaptureRate,
       send: sendRate,
-      resample: needsResample,
+      alwaysResampleTo24k: Math.abs(actualCaptureRate - sendRate) > 1,
     });
 
     audioCtxRef.current = captureCtx;
 
-    // --- Playback: declare OUTPUT_RATE to the server; decode at that rate ---
+    // --- Playback: request 24k; session.updated may refine outputRateRef ---
     outputRateRef.current = OUTPUT_RATE;
     const playCtx = new AudioContext({ sampleRate: OUTPUT_RATE });
     await playCtx.resume().catch(() => {});
-    // Even if browser forced another context rate, createBuffer uses OUTPUT_RATE
-    // (the rate of the PCM we receive from the server).
     playCtxRef.current = playCtx;
     const pctx = playCtx;
     const gain = pctx.createGain();
@@ -787,6 +850,25 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     gain.connect(pctx.destination);
     gainRef.current = gain;
     nextPlayTimeRef.current = pctx.currentTime;
+
+    // Keep AudioContexts alive across tab blur / focus
+    if (audioFocusCleanupRef.current) {
+      audioFocusCleanupRef.current();
+    }
+    const onVis = () => {
+      if (!startedRef.current) return;
+      if (document.visibilityState === 'visible') ensureAudioRunning();
+    };
+    const onFocus = () => {
+      if (!startedRef.current) return;
+      ensureAudioRunning();
+    };
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('focus', onFocus);
+    audioFocusCleanupRef.current = () => {
+      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('focus', onFocus);
+    };
 
     return await new Promise<boolean>((resolve) => {
       let settled = false;
@@ -829,13 +911,13 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
               input: {
                 format: {
                   type: 'audio/pcm',
-                  rate: sendRate,
+                  rate: TARGET_SEND_RATE, // always 24000 after resample
                 },
               },
               output: {
                 format: {
                   type: 'audio/pcm',
-                  rate: OUTPUT_RATE,
+                  rate: OUTPUT_RATE, // 24000
                 },
                 speed: resolveSpeed(),
               },
@@ -884,7 +966,14 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         }
       };
     });
-  }, [onServerEvent, sendJson, setStatusSafe, stop, wireMicCapture]);
+  }, [
+    ensureAudioRunning,
+    onServerEvent,
+    sendJson,
+    setStatusSafe,
+    stop,
+    wireMicCapture,
+  ]);
 
   // Cleanup on unmount
   useEffect(() => () => stop(), [stop]);
