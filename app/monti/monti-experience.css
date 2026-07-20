@@ -28,7 +28,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: radial-gradient(120% 100% at 50% 38%, #1f160f 0%, #140e0a 48%, #0a0605 100%);
+  background: radial-gradient(120% 100% at 50% 28%, #1f160f 0%, #140e0a 48%, #0a0605 100%);
   transition: width 0.9s cubic-bezier(0.7, 0, 0.2, 1);
 }
 
@@ -49,6 +49,7 @@
   z-index: 5;
   width: 100%;
   padding: 22px 24px;
+  flex: 0 0 auto;
 }
 
 .monti-logo {
@@ -63,33 +64,63 @@
   color: #e0913f;
 }
 
-.monti-center {
+/* Room for elevated glow core — text lives in .monti-dock below */
+.monti-glow-spacer {
+  flex: 1 1 auto;
+  min-height: 28vh;
+  width: 100%;
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
+}
+
+.monti-dock {
   position: relative;
   z-index: 5;
-  flex: 1;
+  width: 100%;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 0 22px;
-  gap: 16px;
-  min-height: 0;
+  padding: 0 16px 18px;
+  gap: 12px;
+}
+
+.monti-dock-panel {
+  width: min(560px, 94%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px 18px;
+  border-radius: 18px;
+  background: rgba(12, 8, 6, 0.72);
+  border: 1px solid rgba(224, 145, 63, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.85);
 }
 
 .monti-prompt {
-  width: min(560px, 92%);
+  width: 100%;
   text-align: center;
   font-size: 15px;
   line-height: 1.5;
-  color: #d9cdbd;
+  color: #f0e6d8;
   min-height: 22px;
   transition: color 0.3s;
   font-family: var(--monti-serif);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
 }
 
 .monti-prompt.busy {
   color: #a08a72;
+}
+
+.monti-prompt.paused {
+  color: #a08a72;
+  font-style: italic;
+  font-size: 14px;
 }
 
 .monti-chips {
@@ -125,12 +156,11 @@
 }
 
 .monti-ask {
-  width: min(560px, 92%);
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 9px;
-  background: rgba(30, 21, 15, 0.66);
-  backdrop-filter: blur(10px);
+  background: rgba(30, 21, 15, 0.55);
   border: 1px solid rgba(224, 145, 63, 0.28);
   border-radius: 15px;
   padding: 7px 7px 7px 18px;
@@ -183,10 +213,16 @@
 .monti-controls {
   position: relative;
   z-index: 5;
-  padding: 0 0 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 4px;
 }
 
-.monti-mute {
+.monti-mute,
+.monti-pause {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: #cbc3b8;
@@ -200,6 +236,12 @@
 
 .monti-mute.off {
   opacity: 0.55;
+}
+
+.monti-pause.is-paused {
+  border-color: rgba(224, 145, 63, 0.45);
+  color: #e8c9a0;
+  background: rgba(194, 83, 42, 0.14);
 }
 
 /* ---- Site pane ---- */
@@ -453,6 +495,38 @@
     height: 60%;
     opacity: 1;
     order: 1;
+  }
+
+  .monti-app.building .monti-glow-spacer {
+    min-height: 12%;
+    flex: 1 1 auto;
+  }
+
+  .monti-app.building .monti-dock {
+    padding: 0 10px 10px;
+    gap: 8px;
+  }
+
+  .monti-app.building .monti-dock-panel {
+    padding: 10px 12px 12px;
+    gap: 10px;
+  }
+
+  .monti-app.building .monti-prompt {
+    font-size: 13.5px;
+  }
+
+  .monti-glow-spacer {
+    min-height: 22vh;
+  }
+
+  .monti-dock-panel {
+    padding: 12px 14px 14px;
+    gap: 10px;
+  }
+
+  .monti-prompt {
+    font-size: 14px;
   }
 
   .monti-lead {

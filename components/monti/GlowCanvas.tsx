@@ -173,7 +173,8 @@ const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
         const w = canvas.clientWidth;
         const h = canvas.clientHeight;
         cx = w / 2;
-        cy = h * 0.36;
+        // Upper third — glow core sits above the caption/input dock
+        cy = h * 0.28;
         unit = Math.min(w, h);
 
         const s = stateRef.current;

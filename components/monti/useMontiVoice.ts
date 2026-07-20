@@ -245,6 +245,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
   const [status, setStatus] = useState<VoiceStatus>('idle');
   const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   const wsRef = useRef<WebSocket | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -252,11 +253,14 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
   const playCtxRef = useRef<AudioContext | null>(null);
   const gainRef = useRef<GainNode | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const micSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const micMuteGainRef = useRef<GainNode | null>(null);
   const nextPlayTimeRef = useRef(0);
   const pendingSourcesRef = useRef(0);
   /** Live AudioBufferSourceNodes still scheduled/playing — flushed on barge-in. */
   const activeSourcesRef = useRef<AudioBufferSourceNode[]>([]);
   const mutedRef = useRef(opts.muted);
+  const pausedRef = useRef(false);
   const startedRef = useRef(false);
   const sessionReadyRef = useRef(false);
   const greetingSentRef = useRef(false);
@@ -441,6 +445,8 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
       }
 
       if (type === 'input_audio_buffer.speech_started') {
+        // Conversation paused — ignore VAD (mic should be disconnected anyway).
+        if (pausedRef.current) return;
         // Only barge-in when Monti is actually talking / generating.
         // Ambient noise while idle must not thrash playback state.
         const montiSpeaking =
@@ -457,6 +463,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         return;
       }
       if (type === 'input_audio_buffer.speech_stopped') {
+        if (pausedRef.current) return;
         setListening(false);
         optsRef.current.onListening(false);
         return;
@@ -537,18 +544,134 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     [flushPlayback, handleFunctionCalls, playPcmChunk, sendJson, setStatusSafe],
   );
 
-  const stop = useCallback(() => {
-    startedRef.current = false;
-    sessionReadyRef.current = false;
-    greetingSentRef.current = false;
-    responseActiveRef.current = false;
-
+  /** Tear down mic graph only (keep stream tracks + WS + contexts). */
+  const disconnectMic = useCallback(() => {
     try {
       processorRef.current?.disconnect();
     } catch {
       /* ignore */
     }
     processorRef.current = null;
+    try {
+      micSourceRef.current?.disconnect();
+    } catch {
+      /* ignore */
+    }
+    micSourceRef.current = null;
+    try {
+      micMuteGainRef.current?.disconnect();
+    } catch {
+      /* ignore */
+    }
+    micMuteGainRef.current = null;
+  }, []);
+
+  /**
+   * Wire mic → ScriptProcessor → silent gain → capture destination.
+   * Shared by start() and resume(). Sends only when session ready and not paused.
+   */
+  const wireMicCapture = useCallback((): boolean => {
+    const captureCtx = audioCtxRef.current;
+    const stream = streamRef.current;
+    if (!captureCtx || !stream) return false;
+
+    disconnectMic();
+
+    try {
+      const source = captureCtx.createMediaStreamSource(stream);
+      micSourceRef.current = source;
+      const bufferSize = 4096;
+      const processor = captureCtx.createScriptProcessor(bufferSize, 1, 1);
+      processorRef.current = processor;
+      const actualCaptureRate = captureRateRef.current;
+      const sendRate = sendRateRef.current;
+      const needsResample = Math.abs(actualCaptureRate - sendRate) > 1;
+
+      processor.onaudioprocess = (e) => {
+        if (pausedRef.current) return;
+        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+          return;
+        }
+        if (!sessionReadyRef.current) return;
+        const channel = e.inputBuffer.getChannelData(0);
+        const copied = new Float32Array(channel.length);
+        copied.set(channel);
+        const floats = needsResample
+          ? resampleFloat32(copied, actualCaptureRate, sendRate)
+          : copied;
+        const pcm = floatTo16BitPCM(floats);
+        const audio = int16ToBase64(pcm);
+        try {
+          wsRef.current.send(
+            JSON.stringify({
+              type: 'input_audio_buffer.append',
+              audio,
+            }),
+          );
+        } catch {
+          /* ignore send errors mid-teardown */
+        }
+      };
+
+      source.connect(processor);
+      const mute = captureCtx.createGain();
+      mute.gain.value = 0;
+      micMuteGainRef.current = mute;
+      processor.connect(mute);
+      mute.connect(captureCtx.destination);
+      return true;
+    } catch (e) {
+      console.error('[monti/voice] mic pipeline failed', e);
+      disconnectMic();
+      return false;
+    }
+  }, [disconnectMic]);
+
+  const pause = useCallback(() => {
+    if (!startedRef.current || pausedRef.current) return;
+    pausedRef.current = true;
+    setPaused(true);
+
+    // Stop mic streaming (keep tracks alive for resume; keep WS open)
+    disconnectMic();
+
+    // Silence Monti mid-sentence if talking
+    flushPlayback();
+    if (responseActiveRef.current) {
+      sendJson({ type: 'response.cancel' });
+      responseActiveRef.current = false;
+    }
+    setListening(false);
+    setSpeaking(false);
+    optsRef.current.onListening(false);
+    optsRef.current.onAmplitude(0);
+  }, [disconnectMic, flushPlayback, sendJson]);
+
+  const resume = useCallback(() => {
+    if (!startedRef.current || !pausedRef.current) return;
+    if (!streamRef.current || !audioCtxRef.current || !wsRef.current) return;
+    if (wsRef.current.readyState !== WebSocket.OPEN) return;
+
+    const ok = wireMicCapture();
+    if (!ok) {
+      optsRef.current.onError?.(
+        'Could not resume the mic — try typing, or refresh.',
+      );
+      return;
+    }
+    pausedRef.current = false;
+    setPaused(false);
+  }, [wireMicCapture]);
+
+  const stop = useCallback(() => {
+    startedRef.current = false;
+    sessionReadyRef.current = false;
+    greetingSentRef.current = false;
+    responseActiveRef.current = false;
+    pausedRef.current = false;
+    setPaused(false);
+
+    disconnectMic();
 
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
@@ -571,10 +694,12 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
     setListening(false);
     setStatusSafe('idle');
     optsRef.current.onListening(false);
-  }, [flushPlayback, setStatusSafe]);
+  }, [disconnectMic, flushPlayback, setStatusSafe]);
 
   const start = useCallback(async (): Promise<boolean> => {
     if (startedRef.current) return true;
+    pausedRef.current = false;
+    setPaused(false);
     setStatusSafe('connecting');
 
     if (
@@ -720,45 +845,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         });
 
         // Start streaming mic — PCM rate must match sendRate declared above
-        try {
-          const source = captureCtx.createMediaStreamSource(stream);
-          // ScriptProcessor: simple path; AudioWorklet later
-          const bufferSize = 4096;
-          const processor = captureCtx.createScriptProcessor(bufferSize, 1, 1);
-          processorRef.current = processor;
-          processor.onaudioprocess = (e) => {
-            if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-              return;
-            }
-            if (!sessionReadyRef.current) return;
-            const channel = e.inputBuffer.getChannelData(0);
-            // Copy — never mutate the live input buffer
-            const copied = new Float32Array(channel.length);
-            copied.set(channel);
-            const floats = needsResample
-              ? resampleFloat32(copied, actualCaptureRate, sendRate)
-              : copied;
-            const pcm = floatTo16BitPCM(floats);
-            const audio = int16ToBase64(pcm);
-            try {
-              wsRef.current.send(
-                JSON.stringify({
-                  type: 'input_audio_buffer.append',
-                  audio,
-                }),
-              );
-            } catch {
-              /* ignore send errors mid-teardown */
-            }
-          };
-          source.connect(processor);
-          // Keep processor alive without audible loopback
-          const mute = captureCtx.createGain();
-          mute.gain.value = 0;
-          processor.connect(mute);
-          mute.connect(captureCtx.destination);
-        } catch (e) {
-          console.error('[monti/voice] mic pipeline failed', e);
+        if (!wireMicCapture()) {
           window.clearTimeout(connectTimeout);
           finish(false);
         }
@@ -797,7 +884,7 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
         }
       };
     });
-  }, [onServerEvent, sendJson, setStatusSafe, stop]);
+  }, [onServerEvent, sendJson, setStatusSafe, stop, wireMicCapture]);
 
   // Cleanup on unmount
   useEffect(() => () => stop(), [stop]);
@@ -805,8 +892,11 @@ export function useMontiVoice(opts: UseMontiVoiceOptions) {
   return {
     start,
     stop,
+    pause,
+    resume,
     status,
     speaking,
     listening,
+    paused,
   };
 }

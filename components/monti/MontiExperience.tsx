@@ -478,85 +478,120 @@ export default function MontiExperience() {
               <b>▲</b> M O N T I
             </div>
           </div>
-          <div className="monti-center">
+          <div className="monti-glow-spacer" aria-hidden="true" />
+          <div className="monti-dock">
             {started ? (
-              <div className={`monti-prompt${busy ? ' busy' : ''}`}>
-                {busy && !prompt
-                  ? 'Monti is thinking…'
-                  : prompt ||
-                    (mode === 'voice' ? 'Listening…' : '')}
-              </div>
-            ) : null}
+              <div className="monti-dock-panel">
+                <div
+                  className={`monti-prompt${busy ? ' busy' : ''}${
+                    mode === 'voice' && voice.paused ? ' paused' : ''
+                  }`}
+                >
+                  {mode === 'voice' && voice.paused
+                    ? 'Paused'
+                    : busy && !prompt
+                      ? 'Monti is thinking…'
+                      : prompt ||
+                        (mode === 'voice' ? 'Listening…' : '')}
+                </div>
 
-            {showChips ? (
-              <div className="monti-chips">
-                {choices.map((c) => (
+                {showChips ? (
+                  <div className="monti-chips">
+                    {choices.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        className="monti-chip"
+                        disabled={busy || (mode === 'voice' && voice.paused)}
+                        onClick={() => void submitAnswer(c)}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+
+                {showInput ||
+                (expect === 'text' && started && phase === 'chat') ? (
+                  <form className="monti-ask" onSubmit={onSubmit}>
+                    <input
+                      ref={inputRef}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder={
+                        mode === 'voice' && voice.paused
+                          ? 'Paused — Resume to continue…'
+                          : busy
+                            ? 'Monti is thinking…'
+                            : mode === 'voice'
+                              ? 'Speak — or type here…'
+                              : inputHint
+                      }
+                      disabled={
+                        busy || (mode === 'voice' && voice.paused)
+                      }
+                      autoComplete="off"
+                      aria-label="Answer Monti"
+                    />
+                    <button
+                      className="monti-go"
+                      type="submit"
+                      aria-label="send"
+                      disabled={
+                        busy ||
+                        (mode === 'voice' && voice.paused) ||
+                        (!inputValue.trim() && !allowEmpty)
+                      }
+                    >
+                      ↑
+                    </button>
+                  </form>
+                ) : null}
+
+                {started && phase !== 'done' && mode === 'voice' ? (
                   <button
-                    key={c}
                     type="button"
                     className="monti-chip"
-                    disabled={busy}
-                    onClick={() => void submitAnswer(c)}
+                    onClick={() => void switchToTyped()}
                   >
-                    {c}
+                    Prefer to type?
                   </button>
-                ))}
+                ) : null}
+
+                {busy && started && mode === 'typed' ? (
+                  <div className="monti-prompt busy" style={{ fontSize: 13 }}>
+                    …
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
-            {showInput || (expect === 'text' && started && phase === 'chat') ? (
-              <form className="monti-ask" onSubmit={onSubmit}>
-                <input
-                  ref={inputRef}
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder={
-                    busy
-                      ? 'Monti is thinking…'
-                      : mode === 'voice'
-                        ? 'Speak — or type here…'
-                        : inputHint
-                  }
-                  disabled={busy}
-                  autoComplete="off"
-                  aria-label="Answer Monti"
-                />
-                <button
-                  className="monti-go"
-                  type="submit"
-                  aria-label="send"
-                  disabled={busy || (!inputValue.trim() && !allowEmpty)}
-                >
-                  ↑
-                </button>
-              </form>
-            ) : null}
-
-            {started && phase !== 'done' && mode === 'voice' ? (
+            <div className="monti-controls">
               <button
                 type="button"
-                className="monti-chip"
-                style={{ marginTop: 12 }}
-                onClick={() => void switchToTyped()}
+                className={`monti-mute${muted ? ' off' : ''}`}
+                onClick={() => setMuted((m) => !m)}
               >
-                Prefer to type?
+                {muted ? '🔇 glow calm' : '🔊 glow live'}
               </button>
-            ) : null}
-
-            {busy && started && mode === 'typed' ? (
-              <div className="monti-prompt busy" style={{ fontSize: 13 }}>
-                …
-              </div>
-            ) : null}
-          </div>
-          <div className="monti-controls">
-            <button
-              type="button"
-              className={`monti-mute${muted ? ' off' : ''}`}
-              onClick={() => setMuted((m) => !m)}
-            >
-              {muted ? '🔇 glow calm' : '🔊 glow live'}
-            </button>
+              {started && phase !== 'done' && mode === 'voice' ? (
+                <button
+                  type="button"
+                  className={`monti-pause${voice.paused ? ' is-paused' : ''}`}
+                  onClick={() => {
+                    if (voice.paused) {
+                      voice.resume();
+                    } else {
+                      voice.pause();
+                      glowRef.current?.setListening(false);
+                      glowRef.current?.setAmplitude(0);
+                    }
+                  }}
+                >
+                  {voice.paused ? '▶ Resume' : '⏸ Pause'}
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
 
