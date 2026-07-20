@@ -23,8 +23,9 @@ from livekit.agents import (
     WorkerOptions,
     cli,
     function_tool,
+    room_io,
 )
-from livekit.plugins import xai
+from livekit.plugins import noise_cancellation, xai
 
 load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
 load_dotenv()
@@ -221,9 +222,23 @@ async def entrypoint(ctx: JobContext) -> None:
         ),
     )
 
+    # Krisp BVC: isolate primary speaker, strip background noise + echoed/secondary voices.
+    # Falls back to NC (noise only) if BVC is unavailable in this plugin build.
+    try:
+        nc_filter = noise_cancellation.BVC()
+        logger.info("noise cancellation: Krisp BVC")
+    except AttributeError:
+        nc_filter = noise_cancellation.NC()
+        logger.info("noise cancellation: Krisp NC (BVC not available)")
+
     await session.start(
         room=ctx.room,
         agent=agent,
+        room_options=room_io.RoomOptions(
+            audio_input=room_io.AudioInputOptions(
+                noise_cancellation=nc_filter,
+            ),
+        ),
     )
 
     await session.generate_reply(
