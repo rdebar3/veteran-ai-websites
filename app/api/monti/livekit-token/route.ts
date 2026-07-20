@@ -1,11 +1,7 @@
 import { randomBytes } from 'crypto';
 import { AccessToken, type VideoGrant } from 'livekit-server-sdk';
-import { RoomAgentDispatch, RoomConfiguration } from '@livekit/protocol';
 
 export const runtime = 'nodejs';
-
-/** Must match monti-agent WorkerOptions.agent_name */
-const AGENT_NAME = 'monti';
 
 function uniqueId(prefix: string): string {
   return `${prefix}-${randomBytes(6).toString('hex')}`;
@@ -13,7 +9,8 @@ function uniqueId(prefix: string): string {
 
 /**
  * Mint a LiveKit access token for /monti/live.
- * Unique room + identity per visitor; dispatches the "monti" agent.
+ * Unique room + identity per visitor. Automatic agent dispatch
+ * (worker has no agent_name) joins every room in the project.
  * Server-side only — never exposes LIVEKIT_API_SECRET or XAI_API_KEY.
  */
 export async function POST() {
@@ -46,14 +43,6 @@ export async function POST() {
       canPublishData: true,
     };
     at.addGrant(grant);
-
-    at.roomConfig = new RoomConfiguration({
-      agents: [
-        new RoomAgentDispatch({
-          agentName: AGENT_NAME,
-        }),
-      ],
-    });
 
     const token = await at.toJwt();
 
