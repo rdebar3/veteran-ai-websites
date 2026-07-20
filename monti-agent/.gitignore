@@ -1,8 +1,14 @@
 .venv/
 .env
 .env.local
+.secrets.cloud.env
 __pycache__/
 *.pyc
 .Python
 *.egg-info/
 .ruff_cache/
+*.log
+agent-startup.log
+
+.secrets.cloud.env
+

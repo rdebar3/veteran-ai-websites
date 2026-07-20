@@ -1,77 +1,99 @@
 # Monti agent (LiveKit + xAI Grok realtime)
 
-Phase A voice worker for the `/monti/live` test route. This process is **not** built or run by Vercel. It runs on your machine (or later on LiveKit Cloud) and joins rooms when the Next app mints a token that dispatches agent name `monti`.
+Voice worker for **`/monti/live`**. Speaks via xAI Grok realtime, publishes `fill_site` / `send_to_rich` as LiveKit data messages so the browser builds the Trades site and lands leads.
+
+**Production:** runs on **LiveKit Cloud** (always-on).  
+**Local `dev`:** only for testing agent changes — do **not** run local + cloud at the same time (jobs go to whichever worker grabs them).
 
 ## What it does
 
-- Connects to your LiveKit Cloud project
-- Speaks with **xAI Grok realtime** (`grok-voice-latest`, voice **`castor`**)
-- Uses `instructions.md` (Monti voice arc + Phase A “no tools” note)
-- Conversation only — no `fill_site` / `send_to_rich` yet
+- Connects to LiveKit Cloud project `monti-xbmzg07e`
+- Grok realtime (`grok-voice-latest`, voice **castor**) + Krisp BVC noise cancellation
+- Tools: `fill_site` → topic `monti_fill`; `send_to_rich` → topic `monti_lead`
+- Instructions: `instructions.md` (must ship in the Docker image)
 
 ## Requirements
 
-- Python **3.10+** (3.12 recommended)
-- LiveKit Cloud project keys (same as Vercel: `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`)
-- `XAI_API_KEY`
+- Python **3.12** (local) · LiveKit CLI (`lk`) for cloud deploy
+- Secrets: `XAI_API_KEY` (cloud + local). LiveKit Cloud injects `LIVEKIT_*` for deployed agents.
 
-## Setup and run
+---
 
-```bash
+## Local run (testing only)
+
+```powershell
 cd monti-agent
-
-python -m venv .venv
-
-# Windows (PowerShell / cmd):
-.venv\Scripts\activate
-
-# macOS / Linux:
-# source .venv/bin/activate
-
-pip install -r requirements.txt
-
-# Windows:
-copy .env.example .env
-
-# macOS / Linux:
-# cp .env.example .env
-
-# Edit .env and fill LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, XAI_API_KEY
-
-python main.py dev
+# use the real venv python — not Store stub
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+# .env: LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, XAI_API_KEY
+.\.venv\Scripts\python.exe main.py dev
 ```
 
-Leave this terminal running. You should see the worker register with LiveKit (connected / registered).
+Stop local before relying on cloud traffic.
 
-## Test with the site
+---
 
-1. Agent running (`python main.py dev`)
-2. Next app has the same `LIVEKIT_*` env (Vercel production or local `.env.local`)
-3. Open **`/monti/live`**, click **Start talking**, allow the microphone
-4. Monti should greet and you can talk back and forth over WebRTC
+## LiveKit Cloud (production)
 
-If the agent is **not** running, the browser still joins a room but Monti never appears.
+### One-time create (already done for this project)
 
-## Deploy later (not Phase A)
-
-When ready for always-on hosting:
-
-```bash
-# with LiveKit CLI linked to your project
-lk agent create
+```powershell
+cd monti-agent
+# Link project (interactive auth or):
+#   lk project add monti --url wss://monti-xbmzg07e.livekit.cloud --api-key ... --api-secret ... --default
+# Secrets file: XAI_API_KEY only, UTF-8 no BOM (never commit it)
+lk agent create --secrets-file .secrets.cloud.env --region us-east --yes
 ```
 
-See [LiveKit agent deployment](https://docs.livekit.io/agents/ops/deployment/).
+This builds the Dockerfile, deploys, writes `livekit.toml` with agent id.
+
+### Ship agent code updates
+
+```powershell
+cd monti-agent
+lk agent deploy
+```
+
+### Rotate / update secrets
+
+```powershell
+# .secrets.cloud.env or .env with XAI_API_KEY=... (no BOM)
+lk agent update-secrets --secrets-file .secrets.cloud.env
+```
+
+### Status and logs
+
+```powershell
+lk agent status
+lk agent logs
+lk agent logs --log-type=build
+```
+
+### Test without local agent
+
+1. No `main.py dev` running on any machine  
+2. Open https://veteranaiwebsites.com/monti/live → Start talking  
+3. Monti should join from the cloud worker  
+
+---
 
 ## Env
 
-| Variable | Where |
-|----------|--------|
-| `LIVEKIT_URL` | Agent + Vercel |
-| `LIVEKIT_API_KEY` | Agent + Vercel |
-| `LIVEKIT_API_SECRET` | Agent + Vercel |
-| `XAI_API_KEY` | **Agent only** (never in the browser token) |
+| Variable | Local | LiveKit Cloud |
+|----------|-------|----------------|
+| `LIVEKIT_URL` | required | **injected** |
+| `LIVEKIT_API_KEY` | required | **injected** |
+| `LIVEKIT_API_SECRET` | required | **injected** |
+| `XAI_API_KEY` | required | **secret** you set |
 
-## Dispatch name
+Never commit `.env` or `.secrets.cloud.env`.
 
-Worker `agent_name` is **`monti`**. The token route must dispatch the same name via `RoomAgentDispatch({ agentName: "monti" })`.
+## Dispatch
+
+Automatic dispatch (no `agent_name` on the worker). The Next token route mints rooms without named agent dispatch; the cloud worker joins new rooms in the project.
+
+## Docs
+
+- [Deploy agents](https://docs.livekit.io/deploy/agents/quickstart/)
+- [Secrets](https://docs.livekit.io/deploy/agents/secrets/)
+- [Builds / Dockerfile](https://docs.livekit.io/deploy/agents/builds/)

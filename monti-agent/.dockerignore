@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Caches and logs
+.cache/
+.pytest_cache/
+.ruff_cache/
+*.log
+*.gz
+*.tgz
+.tmp
+agent-startup.log
+
+# Secrets and local env (never ship to image)
+.env
+.env.*
+
+# Local-only / scratch
+KMS/
+.git
+.gitignore
+.github/
+.idea/
+.vscode/
+.DS_Store
+
+# Docs (source of truth stays in repo; not required at runtime)
+# Keep README out of image context size; runtime uses instructions.md which is NOT listed here
+README.md
