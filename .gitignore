@@ -47,6 +47,9 @@ agent-tools/
 mcps/
 terminals/
 
+# monti LiveKit agent local venv (Python; not Vercel)
+monti-agent/.venv/
+
 # local backups & scratch — not for the repo
 _to_delete/
 .fuse_hidden*
