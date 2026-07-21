@@ -418,6 +418,8 @@
   overflow-y: auto;
   background: #f7f4ef;
   min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Start overlay */
@@ -545,7 +547,8 @@
   border-radius: 999px;
 }
 
-@media (max-width: 900px) {
+/* Tablet / narrow: light stack before phone breakpoint */
+@media (max-width: 900px) and (min-width: 769px) {
   .monti-app {
     flex-direction: column;
   }
@@ -587,7 +590,6 @@
 
   .monti-app.building .monti-prompt {
     font-size: 13.5px;
-    max-height: calc(1.5em * 3);
   }
 
   .monti-glow-spacer {
@@ -605,5 +607,153 @@
 
   .monti-lead {
     left: 50%;
+  }
+}
+
+/* Phone portrait: site on top (star), compact dock below, glow off while building */
+@media (max-width: 768px) {
+  .monti-app {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .monti-pane {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .monti-app.building .monti-site {
+    order: 1;
+    width: 100%;
+    flex: 0 0 58dvh;
+    height: 58dvh;
+    max-height: 58dvh;
+    min-height: 0;
+    opacity: 1;
+    overflow: hidden;
+  }
+
+  .monti-app.building .monti-pane {
+    order: 2;
+    width: 100%;
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .monti-app.building .monti-glow,
+  .monti-app.building .monti-glow-spacer {
+    display: none;
+  }
+
+  .monti-app.building .monti-top {
+    padding: 8px 12px 0;
+  }
+
+  .monti-app.building .monti-dock {
+    padding: 0 10px 10px;
+    gap: 6px;
+  }
+
+  .monti-app.building .monti-dock-panel {
+    padding: 10px 12px 12px;
+    gap: 8px;
+    width: min(100%, 96%);
+    max-width: 100%;
+  }
+
+  .monti-app.building .monti-prompt {
+    font-size: 13.5px;
+    max-height: calc(1.5em * 2);
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .monti-app.building .monti-ask {
+    padding: 5px 5px 5px 14px;
+  }
+
+  .monti-app.building .monti-ask input {
+    font-size: 15px;
+    padding: 9px 0;
+  }
+
+  .monti-app.building .monti-frame {
+    margin: 8px 10px 10px;
+  }
+
+  .monti-app.building .monti-pvhd {
+    padding: 8px 12px 0;
+  }
+
+  .monti-live-fixed-bar {
+    top: 10px;
+    right: 10px;
+    padding: 4px 6px;
+  }
+
+  .monti-live-fixed-btn {
+    font-size: 11.5px;
+    padding: 7px 12px;
+  }
+
+  .monti-top {
+    padding: 14px 14px 0;
+  }
+
+  .monti-glow-spacer {
+    min-height: 18vh;
+  }
+
+  .monti-dock {
+    padding: 0 12px 14px;
+  }
+
+  .monti-dock-panel {
+    padding: 12px 14px 14px;
+    gap: 10px;
+    width: min(100%, 96%);
+  }
+
+  .monti-prompt {
+    font-size: 14px;
+  }
+
+  .monti-lead {
+    left: 50%;
+    bottom: 12px;
+    width: min(420px, 92%);
+  }
+}
+
+/* Landscape phone/tablet: keep side-by-side when height allows */
+@media (max-width: 900px) and (orientation: landscape) and (min-height: 420px) {
+  .monti-app {
+    flex-direction: row;
+  }
+
+  .monti-app.building .monti-pane {
+    order: 0;
+    width: 38%;
+    height: 100%;
+    flex: 0 0 38%;
+  }
+
+  .monti-app.building .monti-site {
+    order: 0;
+    width: 62%;
+    height: 100%;
+    flex: 0 0 62%;
+    max-height: none;
+  }
+
+  .monti-app.building .monti-glow {
+    display: block;
+  }
+
+  .monti-app.building .monti-glow-spacer {
+    display: block;
+    min-height: 8%;
   }
 }

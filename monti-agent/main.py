@@ -46,7 +46,10 @@ TOPIC_LEAD = "monti_lead"
 
 # --- Session cost / quality guards (tune these) ---
 SESSION_MAX_SECONDS = 600  # ~10 min wall-clock hard stop
-SESSION_IDLE_SECONDS = 120  # ~2 min user-away → polite wrap + close
+SESSION_NUDGE_SECONDS = 22  # user_away_timeout → first soft re-engage
+SESSION_NUDGE_GAP_SECONDS = 25  # wait after a nudge before the next
+SESSION_IDLE_SECONDS = 120  # total quiet after first "away" → polite wrap
+SESSION_MAX_NUDGES = 2  # max re-engages per quiet spell
 
 # xAI RealtimeModel server VAD (0.6–0.75 threshold; modest silence for snappier turns)
 VAD_THRESHOLD = 0.65
@@ -55,6 +58,12 @@ VAD_PREFIX_PADDING_MS = 300
 
 WRAP_UP_LINE = (
     "I'll let you go for now — start again anytime if you want to keep building. Take care."
+)
+NUDGE_INSTRUCTIONS = (
+    "Visitor went quiet while you're waiting on something. "
+    "Speak ONE short warm line only — re-ask what you still need in fewer words, "
+    "or a light check-in like 'Still with me? No rush.' "
+    "Never pressure, never stack questions, never mention tools or AI."
 )
 
 FILL_SITE_SCHEMA: dict[str, Any] = {
@@ -283,7 +292,8 @@ async def entrypoint(ctx: JobContext) -> None:
                 "max_delay": 2.5,
             },
         },
-        user_away_timeout=float(SESSION_IDLE_SECONDS),
+        # First quiet signal after SESSION_NUDGE_SECONDS → soft re-engage pipeline
+        user_away_timeout=float(SESSION_NUDGE_SECONDS),
     )
 
     # Krisp BVC: isolate primary speaker, strip background noise + echoed/secondary voices.
@@ -296,12 +306,16 @@ async def entrypoint(ctx: JobContext) -> None:
         logger.info("noise cancellation: Krisp NC (BVC not available)")
 
     closing = False
+    silence_task: asyncio.Task[None] | None = None
+    user_is_away = False
 
     async def polite_end(reason: str) -> None:
-        nonlocal closing
+        nonlocal closing, silence_task
         if closing:
             return
         closing = True
+        if silence_task and not silence_task.done():
+            silence_task.cancel()
         logger.info("session ending reason=%s room=%s", reason, ctx.room.name)
         try:
             await session.say(WRAP_UP_LINE, allow_interruptions=False)
@@ -312,10 +326,55 @@ async def entrypoint(ctx: JobContext) -> None:
         except Exception:
             logger.exception("session aclose failed")
 
+    async def silence_pipeline() -> None:
+        """Re-engage up to SESSION_MAX_NUDGES times, then wrap at SESSION_IDLE_SECONDS."""
+        nonlocal user_is_away
+        started = asyncio.get_event_loop().time()
+        nudges = 0
+        try:
+            while not closing and user_is_away and nudges < SESSION_MAX_NUDGES:
+                if nudges > 0:
+                    await asyncio.sleep(SESSION_NUDGE_GAP_SECONDS)
+                    if closing or not user_is_away:
+                        return
+                logger.info("silence nudge %s room=%s", nudges + 1, ctx.room.name)
+                try:
+                    await session.generate_reply(instructions=NUDGE_INSTRUCTIONS)
+                except Exception:
+                    logger.exception("silence nudge failed")
+                nudges += 1
+
+            # Wait out remaining idle budget from first away signal
+            elapsed = asyncio.get_event_loop().time() - started
+            remaining = max(0.0, float(SESSION_IDLE_SECONDS) - elapsed)
+            if remaining > 0:
+                await asyncio.sleep(remaining)
+            if not closing and user_is_away:
+                await polite_end("idle")
+        except asyncio.CancelledError:
+            return
+
+    def _cancel_silence() -> None:
+        nonlocal silence_task, user_is_away
+        user_is_away = False
+        if silence_task and not silence_task.done():
+            silence_task.cancel()
+        silence_task = None
+
     @session.on("user_state_changed")
     def _on_user_state(ev: UserStateChangedEvent) -> None:
+        nonlocal silence_task, user_is_away
+        if closing:
+            return
         if ev.new_state == "away":
-            asyncio.create_task(polite_end("idle"))
+            if user_is_away:
+                return
+            user_is_away = True
+            if silence_task and not silence_task.done():
+                silence_task.cancel()
+            silence_task = asyncio.create_task(silence_pipeline())
+        elif ev.new_state in ("speaking", "listening"):
+            _cancel_silence()
 
     # text_input defaults on; set explicitly so typed lk.chat turns join the
     # same conversation as speech (https://docs.livekit.io/agents/build/text/).

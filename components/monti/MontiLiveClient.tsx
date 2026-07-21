@@ -149,9 +149,16 @@ function LiveSessionShell({
   const connectionState = useConnectionState(room);
   const { state: agentState, audioTrack } = useVoiceAssistant();
   const connected = connectionState === ConnectionState.Connected;
+  const agentReady =
+    connected &&
+    !!agentState &&
+    agentState !== 'connecting' &&
+    agentState !== 'initializing' &&
+    agentState !== 'disconnected';
 
   const recordRef = useRef<MontiRecord>(emptyRecord());
   const leadSentRef = useRef(false);
+  const pendingTextsRef = useRef<string[]>([]);
 
   const [record, setRecord] = useState<MontiRecord>(() => emptyRecord());
   const [fill, setFill] = useState<FillSection[]>([]);
@@ -168,6 +175,15 @@ function LiveSessionShell({
   const [leadBusy, setLeadBusy] = useState(false);
   const [draft, setDraft] = useState('');
   const [sendingText, setSendingText] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   useAgentAmplitude(audioTrack, glowRef, agentState, muted);
 
@@ -230,19 +246,53 @@ function LiveSessionShell({
     };
   }, [room]);
 
+  const deliverText = useCallback(
+    async (text: string) => {
+      // LiveKit Agents text input: lk.chat topic → user turn
+      // https://docs.livekit.io/agents/build/text/
+      await room.localParticipant.sendText(text, { topic: 'lk.chat' });
+    },
+    [room],
+  );
+
+  // Flush messages typed before the agent finished joining
+  useEffect(() => {
+    if (!agentReady || pendingTextsRef.current.length === 0) return;
+    const queued = pendingTextsRef.current.splice(0);
+    void (async () => {
+      for (const text of queued) {
+        try {
+          await deliverText(text);
+        } catch (err) {
+          console.warn('[monti/live] flush sendText failed', err);
+          setCaption("Couldn't send — try again");
+          // Re-queue remaining on hard failure
+          pendingTextsRef.current.unshift(
+            ...queued.slice(queued.indexOf(text) + 1),
+          );
+          break;
+        }
+      }
+    })();
+  }, [agentReady, deliverText]);
+
   const sendTypedMessage = useCallback(
     async (e?: React.FormEvent) => {
       e?.preventDefault();
       const text = draft.trim();
       if (!text || !connected || sendingText) return;
 
+      setCaption(`You: ${text}`);
+      setDraft('');
+
+      if (!agentReady) {
+        pendingTextsRef.current.push(text);
+        return;
+      }
+
       setSendingText(true);
       try {
-        // LiveKit Agents text input: lk.chat topic → user turn
-        // https://docs.livekit.io/agents/build/text/
-        await room.localParticipant.sendText(text, { topic: 'lk.chat' });
-        setCaption(`You: ${text}`);
-        setDraft('');
+        await deliverText(text);
       } catch (err) {
         console.warn('[monti/live] sendText failed', err);
         setCaption("Couldn't send — try again");
@@ -250,7 +300,7 @@ function LiveSessionShell({
         setSendingText(false);
       }
     },
-    [draft, connected, sendingText, room],
+    [draft, connected, sendingText, agentReady, deliverText],
   );
 
   const applySiteUpdate = useCallback(
@@ -445,7 +495,12 @@ function LiveSessionShell({
       </div>
       <div className={`monti-app${building ? ' building' : ''}`}>
         <div className="monti-pane">
-          <GlowCanvas ref={glowRef} muted={muted} className="monti-glow" />
+          <GlowCanvas
+            ref={glowRef}
+            muted={muted}
+            paused={building && isMobile}
+            className="monti-glow"
+          />
           <div className="monti-top">
             <div className="monti-logo">
               <b>▲</b> M O N T I
@@ -506,7 +561,13 @@ function LiveSessionShell({
                   type="text"
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
-                  placeholder={connected ? 'Type to Monti…' : 'Connecting…'}
+                  placeholder={
+                    !connected
+                      ? 'Connecting…'
+                      : !agentReady
+                        ? 'Almost ready…'
+                        : 'Type to Monti…'
+                  }
                   disabled={!connected || sendingText}
                   autoComplete="off"
                   aria-label="Message Monti"

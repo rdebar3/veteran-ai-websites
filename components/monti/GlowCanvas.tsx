@@ -21,9 +21,12 @@ export interface GlowCanvasHandle {
 interface GlowCanvasProps {
   muted?: boolean;
   className?: string;
+  /** Pause WebGL (e.g. mobile + building) — zero GPU while hidden */
+  paused?: boolean;
 }
 
-const PARTICLE_COUNT = 3000;
+const PARTICLE_COUNT_FULL = 3000;
+const PARTICLE_COUNT_LITE = 1100;
 const AMP_THRESHOLD = 0.045;
 
 const COLOR_BRIGHT = new THREE.Color('#E8A05C');
@@ -36,7 +39,13 @@ function clamp01(v: number) {
   return v < 0 ? 0 : v > 1 ? 1 : v;
 }
 
+function detectLiteDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+}
+
 function ParticleField({
+  particleCount,
   amplitudeRef,
   listeningRef,
   energyRef,
@@ -44,6 +53,7 @@ function ParticleField({
   reducedMotionRef,
   pausedRef,
 }: {
+  particleCount: number;
   amplitudeRef: React.MutableRefObject<number>;
   listeningRef: React.MutableRefObject<boolean>;
   energyRef: React.MutableRefObject<number>;
@@ -55,10 +65,10 @@ function ParticleField({
   const materialRef = useRef<THREE.PointsMaterial>(null);
 
   const { positions, velocities, seeds } = useMemo(() => {
-    const positions = new Float32Array(PARTICLE_COUNT * 3);
-    const velocities = new Float32Array(PARTICLE_COUNT * 3);
-    const seeds = new Float32Array(PARTICLE_COUNT);
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = new Float32Array(particleCount * 3);
+    const seeds = new Float32Array(particleCount);
+    for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
       positions[i3] = (Math.random() - 0.5) * 8.6;
       positions[i3 + 1] = Math.random() * 3.0 - 0.5;
@@ -69,7 +79,7 @@ function ParticleField({
       seeds[i] = Math.random() * Math.PI * 2;
     }
     return { positions, velocities, seeds };
-  }, []);
+  }, [particleCount]);
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -161,16 +171,21 @@ function ParticleField({
     const dt = Math.min(delta, 0.048);
     const time = state.clock.elapsedTime;
 
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
+    for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
-      const seed = seeds[i];
+      const seed = seeds[i]!;
       const wx = Math.sin(time * 0.33 + seed) * 0.0032 * wanderMult;
       const wz = Math.cos(time * 0.27 + seed * 1.27) * 0.0026 * wanderMult;
-      arr[i3] += (velocities[i3] * wanderMult + wx) * (60 * dt);
-      arr[i3 + 2] += (velocities[i3 + 2] * wanderMult + wz) * (60 * dt);
-      const lift = velocities[i3 + 1] * liftMult * (0.55 + effectiveAmp * 1.75 + burst * 2.1);
-      arr[i3 + 1] += lift * (60 * dt);
-      if (arr[i3 + 1] > 3.7 || Math.abs(arr[i3]) > 5.1 || Math.abs(arr[i3 + 2]) > 2.35) {
+      arr[i3]! += (velocities[i3]! * wanderMult + wx) * (60 * dt);
+      arr[i3 + 2]! += (velocities[i3 + 2]! * wanderMult + wz) * (60 * dt);
+      const lift =
+        velocities[i3 + 1]! * liftMult * (0.55 + effectiveAmp * 1.75 + burst * 2.1);
+      arr[i3 + 1]! += lift * (60 * dt);
+      if (
+        arr[i3 + 1]! > 3.7 ||
+        Math.abs(arr[i3]!) > 5.1 ||
+        Math.abs(arr[i3 + 2]!) > 2.35
+      ) {
         arr[i3] = (Math.random() - 0.5) * 8.2;
         arr[i3 + 1] = -0.55 + Math.random() * 0.45;
         arr[i3 + 2] = (Math.random() - 0.5) * 2.9;
@@ -205,21 +220,24 @@ function ParticleField({
   );
 }
 
-function GLSetup() {
+function GLSetup({ maxDpr }: { maxDpr: number }) {
   const { gl } = useThree();
   useEffect(() => {
-    const dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 1.5);
+    const dpr = Math.min(
+      typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
+      maxDpr,
+    );
     gl.setPixelRatio(dpr);
     gl.setClearColor(new THREE.Color(BG), 1);
     return () => {
       gl.dispose();
     };
-  }, [gl]);
+  }, [gl, maxDpr]);
   return null;
 }
 
 const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
-  function GlowCanvas({ muted = false, className }, ref) {
+  function GlowCanvas({ muted = false, className, paused = false }, ref) {
     const amplitudeRef = useRef(0);
     const listeningRef = useRef(false);
     const energyRef = useRef(0);
@@ -228,8 +246,10 @@ const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
     const pausedRef = useRef(false);
     // Client-only mount guard: WebGL canvas + document/texture work never runs during SSR.
     const [mounted, setMounted] = useState(false);
+    const [lite, setLite] = useState(false);
 
     useEffect(() => {
+      setLite(detectLiteDevice());
       setMounted(true);
     }, []);
 
@@ -250,13 +270,14 @@ const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
     }, []);
 
     useEffect(() => {
-      const onVis = () => {
-        pausedRef.current = document.visibilityState !== 'visible';
+      const syncPause = () => {
+        pausedRef.current =
+          paused || document.visibilityState !== 'visible';
       };
-      onVis();
-      document.addEventListener('visibilitychange', onVis);
-      return () => document.removeEventListener('visibilitychange', onVis);
-    }, []);
+      syncPause();
+      document.addEventListener('visibilitychange', syncPause);
+      return () => document.removeEventListener('visibilitychange', syncPause);
+    }, [paused]);
 
     useImperativeHandle(
       ref,
@@ -277,25 +298,43 @@ const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
           energyRef.current = Math.min(1, Math.max(energyRef.current, boost));
         },
       }),
-      []
+      [],
     );
+
+    const particleCount = lite ? PARTICLE_COUNT_LITE : PARTICLE_COUNT_FULL;
+    const maxDpr = lite ? 1 : 1.5;
+    const frameActive = !paused;
 
     return (
       <div
         className={className}
-        style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, background: BG }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 0,
+          background: BG,
+        }}
         aria-hidden
       >
         {mounted ? (
           <Canvas
-            dpr={[1, 1.5]}
-            gl={{ antialias: false, alpha: false, powerPreference: 'high-performance', stencil: false, depth: false }}
+            dpr={lite ? 1 : [1, 1.5]}
+            gl={{
+              antialias: false,
+              alpha: false,
+              powerPreference: lite ? 'low-power' : 'high-performance',
+              stencil: false,
+              depth: false,
+            }}
             camera={{ position: [0, 1.05, 5.4], fov: 45, near: 0.1, far: 40 }}
             style={{ width: '100%', height: '100%' }}
-            frameloop="always"
+            frameloop={frameActive ? 'always' : 'never'}
           >
-            <GLSetup />
+            <GLSetup maxDpr={maxDpr} />
             <ParticleField
+              key={lite ? 'lite' : 'full'}
+              particleCount={particleCount}
               amplitudeRef={amplitudeRef}
               listeningRef={listeningRef}
               energyRef={energyRef}
@@ -307,7 +346,7 @@ const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
         ) : null}
       </div>
     );
-  }
+  },
 );
 
 GlowCanvas.displayName = 'GlowCanvas';
