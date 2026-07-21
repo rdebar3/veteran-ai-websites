@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FillSection, MontiRecord, SiteLayout } from '@/lib/monti/types';
 import { hasPhoto, photoUrl } from '@/lib/monti/photos';
+import { tradeLabel } from '@/lib/monti/trade-labels';
 import './trades-template.css';
 
 function cap(s: unknown, n: number): string {
@@ -114,51 +115,34 @@ export default function TradesTemplate({
   const showContact = filled.has('contact');
   const showFrameChrome = showHero;
 
-  const defaultTrustItems = (
-    <>
-      <div className="tstat">
-        <b>Local</b>
-        <span>& family-owned</span>
-      </div>
-      <div className="tstat">
-        <b>Fast</b>
-        <span>response, done right</span>
-      </div>
-      <div className="tstat">
-        <b>Honest</b>
-        <span>upfront pricing</span>
-      </div>
-      <div className="tstat">
-        <b>WV</b>
-        <span>owned & operated</span>
-      </div>
-    </>
-  );
+  // Chips: owner-stated badges only, else non-claim facts from the record
+  const safeChipLabels: string[] = [];
+  if (area) safeChipLabels.push(`Serving ${cap(area, 40)}`);
+  if (emergency) safeChipLabels.push('24/7');
+  const chipLabels =
+    badges.length > 0 ? badges.map((x) => cap(x, 24)).filter(Boolean) : safeChipLabels;
+  const showChipRow = chipLabels.length > 0;
 
-  const trustStats =
+  // Strip: prefer owner badges; else non-claim rhythm labels (no invented facts)
+  const stripItems: { title: string; sub: string }[] =
     badges.length > 0
-      ? badges.map((x) => (
-          <div className="tstat" key={x}>
-            <b>✓</b>
-            <span>{cap(x, 24)}</span>
-          </div>
-        ))
-      : defaultTrustItems;
+      ? badges.map((x) => ({ title: '✓', sub: cap(x, 24) }))
+      : [
+          { title: 'Local', sub: area ? cap(area, 28) : 'West Virginia' },
+          { title: 'Fast', sub: 'easy to reach' },
+          { title: 'Honest', sub: 'straight answers' },
+          {
+            title: 'WV',
+            sub: tradeLabel(record.trade_key || heroImg) || 'home base',
+          },
+        ];
 
-  const trustChips =
-    badges.length > 0
-      ? badges.map((x) => (
-          <span className="trust-chip" key={x}>
-            {cap(x, 24)}
-          </span>
-        ))
-      : (
-          <>
-            <span className="trust-chip">Licensed & insured</span>
-            <span className="trust-chip">Upfront pricing</span>
-            <span className="trust-chip">{est ? `Since ${est}` : 'Local crew'}</span>
-          </>
-        );
+  const trustStats = stripItems.map((item) => (
+    <div className="tstat" key={`${item.title}-${item.sub}`}>
+      <b>{item.title}</b>
+      <span>{item.sub}</span>
+    </div>
+  ));
 
   return (
     <div
@@ -242,17 +226,13 @@ export default function TradesTemplate({
                   <span className="btn btn--ghost">☎ {phone}</span>
                 ) : null}
               </div>
-              {layout === 'classic' ? (
+              {layout === 'classic' && showChipRow ? (
                 <div className="hero-trust">
-                  <span>
-                    <i className="dot" /> Licensed & insured
-                  </span>
-                  <span>
-                    <i className="dot" /> Upfront pricing
-                  </span>
-                  <span>
-                    <i className="dot" /> {est ? `Since ${est}` : 'Local crew'}
-                  </span>
+                  {chipLabels.map((label) => (
+                    <span key={label}>
+                      <i className="dot" /> {label}
+                    </span>
+                  ))}
                 </div>
               ) : null}
             </div>
@@ -295,9 +275,15 @@ export default function TradesTemplate({
         </section>
       ) : null}
 
-      {showTrust && showHero && layout === 'split' ? (
+      {showTrust && showHero && layout === 'split' && showChipRow ? (
         <section className="trust-chips fillin">
-          <div className="wrap trust-chips-in">{trustChips}</div>
+          <div className="wrap trust-chips-in">
+            {chipLabels.map((label) => (
+              <span className="trust-chip" key={label}>
+                {label}
+              </span>
+            ))}
+          </div>
         </section>
       ) : null}
 
