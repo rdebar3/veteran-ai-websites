@@ -245,7 +245,7 @@ function LiveSessionShell({
         setDraft('');
       } catch (err) {
         console.warn('[monti/live] sendText failed', err);
-        setCaption("Couldn't send that — try again.");
+        setCaption("Couldn't send — try again");
       } finally {
         setSendingText(false);
       }
@@ -506,13 +506,7 @@ function LiveSessionShell({
                   type="text"
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
-                  placeholder={
-                    connected
-                      ? micEnabled
-                        ? 'Type or talk…'
-                        : 'Type to Monti…'
-                      : 'Connecting…'
-                  }
+                  placeholder={connected ? 'Type to Monti…' : 'Connecting…'}
                   disabled={!connected || sendingText}
                   autoComplete="off"
                   aria-label="Message Monti"
@@ -694,6 +688,13 @@ export default function MontiLiveClient() {
           connect
           audio={micEnabled}
           video={false}
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+          }}
           onError={(err) => {
             console.error('[monti/live] room error', err);
             const msg = err?.message?.toLowerCase() ?? '';
