@@ -4,11 +4,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   LiveKitRoom,
   RoomAudioRenderer,
+  useConnectionState,
   useRoomContext,
   useVoiceAssistant,
 } from '@livekit/components-react';
 import type { TrackReference } from '@livekit/components-react';
-import { RoomEvent, type Participant, type DataPacket_Kind } from 'livekit-client';
+import {
+  ConnectionState,
+  RoomEvent,
+  type Participant,
+  type DataPacket_Kind,
+} from 'livekit-client';
 import BrowserFrame from '@/components/monti/BrowserFrame';
 import GlowCanvas, { type GlowCanvasHandle } from '@/components/monti/GlowCanvas';
 import LeadCard from '@/components/monti/LeadCard';
@@ -130,15 +136,19 @@ function useAgentAmplitude(
 
 function LiveSessionShell({
   glowRef,
-  onFatal,
   onEnd,
+  micEnabled,
+  noMicNote,
 }: {
   glowRef: React.RefObject<GlowCanvasHandle | null>;
-  onFatal: (message: string) => void;
   onEnd: () => void;
+  micEnabled: boolean;
+  noMicNote: boolean;
 }) {
   const room = useRoomContext();
+  const connectionState = useConnectionState(room);
   const { state: agentState, audioTrack } = useVoiceAssistant();
+  const connected = connectionState === ConnectionState.Connected;
 
   const recordRef = useRef<MontiRecord>(emptyRecord());
   const leadSentRef = useRef(false);
@@ -156,6 +166,8 @@ function LiveSessionShell({
   const [muted, setMuted] = useState(false);
   const [leadFailed, setLeadFailed] = useState(false);
   const [leadBusy, setLeadBusy] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [sendingText, setSendingText] = useState(false);
 
   useAgentAmplitude(audioTrack, glowRef, agentState, muted);
 
@@ -180,6 +192,7 @@ function LiveSessionShell({
     void room.startAudio().catch(() => {});
   }, [room]);
 
+  // Mic denied after connect: do not dead-end; typing path stays open
   useEffect(() => {
     const onMediaError = (err: Error) => {
       const msg = err?.message?.toLowerCase() ?? '';
@@ -189,16 +202,14 @@ function LiveSessionShell({
         msg.includes('denied') ||
         err?.name === 'NotAllowedError'
       ) {
-        onFatal(
-          'Microphone access is required for this test. Allow the mic and try again.',
-        );
+        console.warn('[monti/live] mic unavailable — type to Monti', err);
       }
     };
     room.on(RoomEvent.MediaDevicesError, onMediaError);
     return () => {
       room.off(RoomEvent.MediaDevicesError, onMediaError);
     };
-  }, [room, onFatal]);
+  }, [room]);
 
   // Captions from agent transcription when available
   useEffect(() => {
@@ -218,6 +229,29 @@ function LiveSessionShell({
       room.off(RoomEvent.TranscriptionReceived, onTx);
     };
   }, [room]);
+
+  const sendTypedMessage = useCallback(
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
+      const text = draft.trim();
+      if (!text || !connected || sendingText) return;
+
+      setSendingText(true);
+      try {
+        // LiveKit Agents text input: lk.chat topic → user turn
+        // https://docs.livekit.io/agents/build/text/
+        await room.localParticipant.sendText(text, { topic: 'lk.chat' });
+        setCaption(`You: ${text}`);
+        setDraft('');
+      } catch (err) {
+        console.warn('[monti/live] sendText failed', err);
+        setCaption("Couldn't send that — try again.");
+      } finally {
+        setSendingText(false);
+      }
+    },
+    [draft, connected, sendingText, room],
+  );
 
   const applySiteUpdate = useCallback(
     (opts: {
@@ -450,15 +484,48 @@ function LiveSessionShell({
                   )}
                 </div>
               )}
-              <div className="monti-controls" style={{ marginTop: 12 }}>
-                <button
-                  type="button"
-                  className="monti-chip"
-                  onClick={onEnd}
+              {noMicNote ? (
+                <p
+                  style={{
+                    margin: '10px 0 0',
+                    fontSize: 13,
+                    color: 'rgba(243, 230, 212, 0.55)',
+                    textAlign: 'center',
+                    lineHeight: 1.4,
+                  }}
                 >
-                  End
+                  No mic? No problem — type to Monti below.
+                </p>
+              ) : null}
+              <form
+                className="monti-ask"
+                style={{ marginTop: 12 }}
+                onSubmit={(e) => void sendTypedMessage(e)}
+              >
+                <input
+                  type="text"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder={
+                    connected
+                      ? micEnabled
+                        ? 'Type or talk…'
+                        : 'Type to Monti…'
+                      : 'Connecting…'
+                  }
+                  disabled={!connected || sendingText}
+                  autoComplete="off"
+                  aria-label="Message Monti"
+                />
+                <button
+                  type="submit"
+                  className="monti-go"
+                  disabled={!connected || sendingText || !draft.trim()}
+                  aria-label="Send"
+                >
+                  →
                 </button>
-              </div>
+              </form>
               <p
                 style={{
                   margin: '10px 0 0',
@@ -469,7 +536,8 @@ function LiveSessionShell({
                   textAlign: 'center',
                 }}
               >
-                {voiceStatusLabel(agentState)} · LiveKit
+                {voiceStatusLabel(agentState)}
+                {micEnabled ? '' : ' · text'} · LiveKit
               </p>
             </div>
           </div>
@@ -505,11 +573,30 @@ function LiveSessionShell({
   );
 }
 
+/** Probe mic once; release tracks immediately. Failure → text-only path. */
+async function probeMicrophone(): Promise<boolean> {
+  if (
+    typeof navigator === 'undefined' ||
+    !navigator.mediaDevices?.getUserMedia
+  ) {
+    return false;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach((t) => t.stop());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function MontiLiveClient() {
   const glowRef = useRef<GlowCanvasHandle>(null);
   const [phase, setPhase] = useState<SessionPhase>('idle');
   const [error, setError] = useState<string | null>(null);
   const [connection, setConnection] = useState<TokenPayload | null>(null);
+  const [micEnabled, setMicEnabled] = useState(true);
+  const [noMicNote, setNoMicNote] = useState(false);
 
   // Hide marketing chrome while on live Monti
   useEffect(() => {
@@ -546,13 +633,19 @@ export default function MontiLiveClient() {
   const start = useCallback(async () => {
     setError(null);
     setPhase('connecting');
+    setNoMicNote(false);
     try {
+      // Prefer voice; if mic denied/unavailable, still join without publishing audio
+      const hasMic = await probeMicrophone();
+      setMicEnabled(hasMic);
+      setNoMicNote(!hasMic);
+
       const res = await fetch('/api/monti/livekit-token', { method: 'POST' });
       const data = (await res.json().catch(() => ({}))) as TokenPayload & {
         error?: string;
       };
       if (!res.ok || !data.token || !data.url) {
-        throw new Error(data.error || 'Could not start a voice session');
+        throw new Error(data.error || 'Could not start a session');
       }
       setConnection({
         token: data.token,
@@ -562,7 +655,7 @@ export default function MontiLiveClient() {
       setPhase('live');
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Could not start a voice session';
+        err instanceof Error ? err.message : 'Could not start a session';
       setError(message);
       setPhase('error');
       setConnection(null);
@@ -573,6 +666,8 @@ export default function MontiLiveClient() {
     setConnection(null);
     setPhase('idle');
     setError(null);
+    setNoMicNote(false);
+    setMicEnabled(true);
     glowRef.current?.setAmplitude(0);
     glowRef.current?.setListening(false);
   }, []);
@@ -597,23 +692,23 @@ export default function MontiLiveClient() {
           serverUrl={connection.url}
           token={connection.token}
           connect
-          audio
+          audio={micEnabled}
           video={false}
           onError={(err) => {
             console.error('[monti/live] room error', err);
             const msg = err?.message?.toLowerCase() ?? '';
+            // Mic permission errors are non-fatal — we probe first; leftover
+            // device errors should not kill a text-capable session.
             if (
               msg.includes('permission') ||
               msg.includes('not allowed') ||
               msg.includes('denied') ||
               err?.name === 'NotAllowedError'
             ) {
-              handleFatal(
-                'Microphone access is required for this test. Allow the mic and try again.',
-              );
-            } else {
-              handleFatal(err?.message || 'Connection failed');
+              console.warn('[monti/live] mic error after connect — keep session');
+              return;
             }
+            handleFatal(err?.message || 'Connection failed');
           }}
           onDisconnected={() => {
             setPhase((p) => (p === 'live' ? 'idle' : p));
@@ -622,8 +717,9 @@ export default function MontiLiveClient() {
         >
           <LiveSessionShell
             glowRef={glowRef}
-            onFatal={handleFatal}
             onEnd={end}
+            micEnabled={micEnabled}
+            noMicNote={noMicNote}
           />
         </LiveKitRoom>
       ) : (
@@ -677,7 +773,7 @@ export default function MontiLiveClient() {
                     textAlign: 'center',
                   }}
                 >
-                  LiveKit · agent must be running locally
+                  Talk or type · LiveKit
                 </p>
               </div>
             </div>

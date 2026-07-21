@@ -231,10 +231,13 @@ async def entrypoint(ctx: JobContext) -> None:
         nc_filter = noise_cancellation.NC()
         logger.info("noise cancellation: Krisp NC (BVC not available)")
 
+    # text_input defaults on; set explicitly so typed lk.chat turns join the
+    # same conversation as speech (https://docs.livekit.io/agents/build/text/).
     await session.start(
         room=ctx.room,
         agent=agent,
         room_options=room_io.RoomOptions(
+            text_input=True,
             audio_input=room_io.AudioInputOptions(
                 noise_cancellation=nc_filter,
             ),
