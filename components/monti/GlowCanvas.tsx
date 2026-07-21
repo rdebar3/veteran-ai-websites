@@ -1,252 +1,315 @@
 'use client';
 
-import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import * as THREE from 'three';
 
 export interface GlowCanvasHandle {
-  /** Pulse the glow as if Monti is speaking for ~n words (typed fallback) */
-  speak: (wordCount: number) => void;
-  /** Brief impulse (e.g. visitor submitted) */
-  impulse: () => void;
-  /** Drive envelope from real output-audio amplitude (voice mode), 0..1 */
-  setAmplitude: (level: number) => void;
-  /** Subtle calmer shimmer while the visitor is talking (voice VAD) */
-  setListening: (on: boolean) => void;
+  speak(wordCount: number): void;
+  impulse(): void;
+  setAmplitude(level: number): void;
+  setListening(on: boolean): void;
 }
 
 interface GlowCanvasProps {
-  /** When true, dampens speech envelope (Phase 1 mute) */
   muted?: boolean;
   className?: string;
 }
 
+const PARTICLE_COUNT = 3000;
+const AMP_THRESHOLD = 0.045;
+
+const COLOR_BRIGHT = new THREE.Color('#E8A05C');
+const COLOR_EMBER = new THREE.Color('#C45C26');
+const COLOR_LISTENING = new THREE.Color('#A89070');
+const COLOR_IDLE = new THREE.Color('#8B5E3C');
+const BG = '#140e0a';
+
+function clamp01(v: number) {
+  return v < 0 ? 0 : v > 1 ? 1 : v;
+}
+
+function ParticleField({
+  amplitudeRef,
+  listeningRef,
+  energyRef,
+  mutedRef,
+  reducedMotionRef,
+  pausedRef,
+}: {
+  amplitudeRef: React.MutableRefObject<number>;
+  listeningRef: React.MutableRefObject<boolean>;
+  energyRef: React.MutableRefObject<number>;
+  mutedRef: React.MutableRefObject<boolean>;
+  reducedMotionRef: React.MutableRefObject<boolean>;
+  pausedRef: React.MutableRefObject<boolean>;
+}) {
+  const pointsRef = useRef<THREE.Points>(null);
+  const materialRef = useRef<THREE.PointsMaterial>(null);
+
+  const { positions, velocities, seeds } = useMemo(() => {
+    const positions = new Float32Array(PARTICLE_COUNT * 3);
+    const velocities = new Float32Array(PARTICLE_COUNT * 3);
+    const seeds = new Float32Array(PARTICLE_COUNT);
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const i3 = i * 3;
+      positions[i3] = (Math.random() - 0.5) * 8.6;
+      positions[i3 + 1] = Math.random() * 3.0 - 0.5;
+      positions[i3 + 2] = (Math.random() - 0.5) * 3.0;
+      velocities[i3] = (Math.random() - 0.5) * 0.0035;
+      velocities[i3 + 1] = 0.0018 + Math.random() * 0.0055;
+      velocities[i3 + 2] = (Math.random() - 0.5) * 0.0028;
+      seeds[i] = Math.random() * Math.PI * 2;
+    }
+    return { positions, velocities, seeds };
+  }, []);
+
+  const geometry = useMemo(() => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return geo;
+  }, [positions]);
+
+  const pointTexture = useMemo(() => {
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d')!;
+    const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.22, 'rgba(255,230,180,0.55)');
+    g.addColorStop(0.55, 'rgba(255,160,60,0.12)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, size, size);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+    return tex;
+  }, []);
+
+  useFrame((state, delta) => {
+    if (pausedRef.current) return;
+    const pts = pointsRef.current;
+    const mat = materialRef.current;
+    if (!pts || !mat) return;
+
+    const posAttr = pts.geometry.attributes.position as THREE.BufferAttribute;
+    const arr = posAttr.array as Float32Array;
+
+    const amp = amplitudeRef.current;
+    const listening = listeningRef.current;
+    const muted = mutedRef.current;
+    const reduced = reducedMotionRef.current;
+    let energy = energyRef.current;
+
+    if (energy > 0) {
+      energy = Math.max(0, energy - delta * 1.25);
+      energyRef.current = energy;
+    }
+
+    const forceCalm = muted || reduced;
+    const effectiveAmp = forceCalm ? 0 : amp;
+    const speaking = effectiveAmp > AMP_THRESHOLD;
+    const burst = forceCalm ? 0 : energy;
+
+    let sizeBase = 0.042;
+    let opacity = 0.52;
+    let liftMult = 1;
+    let wanderMult = 1;
+    const color = COLOR_IDLE.clone();
+
+    if (forceCalm) {
+      sizeBase = 0.03;
+      opacity = 0.32;
+      liftMult = 0.12;
+      wanderMult = 0.08;
+      color.copy(COLOR_IDLE).multiplyScalar(0.65);
+    } else if (listening && !speaking) {
+      sizeBase = 0.033;
+      opacity = 0.4;
+      liftMult = 0.42;
+      wanderMult = 0.5;
+      color.copy(COLOR_LISTENING);
+    } else if (speaking || burst > 0.04) {
+      const t = clamp01(effectiveAmp * 1.35 + burst * 0.75);
+      sizeBase = 0.046 + t * 0.05;
+      opacity = 0.52 + t * 0.28;
+      liftMult = 1.15 + t * 2.2;
+      wanderMult = 1.0 + t * 1.5;
+      color.copy(COLOR_EMBER).lerp(COLOR_BRIGHT, t);
+    } else {
+      const breathe = 0.5 + 0.5 * Math.sin(state.clock.elapsedTime * 0.52);
+      sizeBase = 0.036 + breathe * 0.011;
+      opacity = 0.4 + breathe * 0.11;
+      liftMult = 0.65 + breathe * 0.22;
+      wanderMult = 0.65;
+      color.copy(COLOR_IDLE).lerp(COLOR_EMBER, breathe * 0.32);
+    }
+
+    mat.size = sizeBase;
+    mat.opacity = opacity;
+    mat.color.copy(color);
+
+    const dt = Math.min(delta, 0.048);
+    const time = state.clock.elapsedTime;
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const i3 = i * 3;
+      const seed = seeds[i];
+      const wx = Math.sin(time * 0.33 + seed) * 0.0032 * wanderMult;
+      const wz = Math.cos(time * 0.27 + seed * 1.27) * 0.0026 * wanderMult;
+      arr[i3] += (velocities[i3] * wanderMult + wx) * (60 * dt);
+      arr[i3 + 2] += (velocities[i3 + 2] * wanderMult + wz) * (60 * dt);
+      const lift = velocities[i3 + 1] * liftMult * (0.55 + effectiveAmp * 1.75 + burst * 2.1);
+      arr[i3 + 1] += lift * (60 * dt);
+      if (arr[i3 + 1] > 3.7 || Math.abs(arr[i3]) > 5.1 || Math.abs(arr[i3 + 2]) > 2.35) {
+        arr[i3] = (Math.random() - 0.5) * 8.2;
+        arr[i3 + 1] = -0.55 + Math.random() * 0.45;
+        arr[i3 + 2] = (Math.random() - 0.5) * 2.9;
+      }
+    }
+    posAttr.needsUpdate = true;
+  });
+
+  useEffect(() => {
+    return () => {
+      geometry.dispose();
+      pointTexture.dispose();
+      materialRef.current?.dispose();
+    };
+  }, [geometry, pointTexture]);
+
+  return (
+    <points ref={pointsRef} geometry={geometry} frustumCulled={false}>
+      <pointsMaterial
+        ref={materialRef}
+        map={pointTexture}
+        size={0.042}
+        sizeAttenuation
+        transparent
+        opacity={0.52}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        color={COLOR_EMBER}
+        toneMapped={false}
+      />
+    </points>
+  );
+}
+
+function GLSetup() {
+  const { gl } = useThree();
+  useEffect(() => {
+    const dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 1.5);
+    gl.setPixelRatio(dpr);
+    gl.setClearColor(new THREE.Color(BG), 1);
+    return () => {
+      gl.dispose();
+    };
+  }, [gl]);
+  return null;
+}
+
 const GlowCanvas = forwardRef<GlowCanvasHandle, GlowCanvasProps>(
   function GlowCanvas({ muted = false, className }, ref) {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const stateRef = useRef({
-      speaking: false,
-      sylls: [] as { t: number; dur: number; peak: number }[],
-      speakStart: 0,
-      speakDur: 0,
-      ampS: 0,
-      impulse: 0,
-      muted: muted,
-      reduced: false,
-      /** Live voice amplitude (0..1); 0 when idle */
-      liveAmp: 0,
-      liveUntil: 0,
-      listening: false,
-    });
+    const amplitudeRef = useRef(0);
+    const listeningRef = useRef(false);
+    const energyRef = useRef(0);
+    const mutedRef = useRef(muted);
+    const reducedMotionRef = useRef(false);
+    const pausedRef = useRef(false);
+    // Client-only mount guard: WebGL canvas + document/texture work never runs during SSR.
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-      stateRef.current.muted = muted;
-    }, [muted]);
-
-    useImperativeHandle(ref, () => ({
-      speak(wordCount: number) {
-        const s = stateRef.current;
-        if (s.muted || s.reduced) {
-          s.impulse = 0.4;
-          return;
-        }
-        const sylls: { t: number; dur: number; peak: number }[] = [];
-        let t = 0.3;
-        const per = 0.32;
-        const n = Math.max(3, wordCount);
-        for (let i = 0; i < n * 1.7; i++) {
-          sylls.push({
-            t,
-            dur: 0.1 + Math.random() * 0.08,
-            peak: 0.55 + Math.random() * 0.45,
-          });
-          t += per * (0.6 + Math.random() * 0.8);
-        }
-        s.sylls = sylls;
-        s.speakDur = t + 0.4;
-        s.speaking = true;
-        s.speakStart = performance.now();
-        const durMs = Math.min(3200, Math.max(1000, n * 210));
-        s.speakDur = durMs / 1000 + 0.3;
-        window.setTimeout(() => {
-          s.speaking = false;
-        }, durMs + 150);
-      },
-      impulse() {
-        stateRef.current.impulse = 1;
-      },
-      setAmplitude(level: number) {
-        const s = stateRef.current;
-        const n = Math.max(0, Math.min(1, level));
-        s.liveAmp = n;
-        s.liveUntil = performance.now() + 180;
-        if (n > 0.05) s.speaking = true;
-      },
-      setListening(on: boolean) {
-        stateRef.current.listening = on;
-      },
-    }));
-
-    useEffect(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const gx = canvas.getContext('2d');
-      if (!gx) return;
-
-      const reduced =
-        typeof window !== 'undefined' &&
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      stateRef.current.reduced = reduced;
-
-      let SEED = 7;
-      function rnd() {
-        SEED = (SEED * 1103515245 + 12345) & 0x7fffffff;
-        return SEED / 0x7fffffff;
-      }
-
-      const blobs: {
-        dist: number;
-        r: number;
-        ph: number;
-        sp: number;
-        spin: number;
-      }[] = [];
-      for (let i = 0; i < 7; i++) {
-        blobs.push({
-          dist: 0.02 + rnd() * 0.06,
-          r: 0.13 + rnd() * 0.14,
-          ph: rnd() * 6.28,
-          sp: 0.00014 + rnd() * 0.00026,
-          spin: rnd() < 0.5 ? 1 : -1,
-        });
-      }
-
-      let raf = 0;
-      let cx = 0;
-      let cy = 0;
-      let unit = 0;
-
-      function size() {
-        if (!canvas) return;
-        const dpr = Math.min(2, window.devicePixelRatio || 1);
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
-        if (!w || !h) return;
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
-        gx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
-
-      function ampT(now: number) {
-        const s = stateRef.current;
-        let a = 0.08 + 0.04 * Math.sin(now * 0.0014);
-
-        // Voice mode: real output amplitude wins while fresh
-        if (!s.muted && !s.reduced && now < s.liveUntil && s.liveAmp > 0) {
-          a = Math.max(a, 0.12 + s.liveAmp * 0.95);
-        } else if (s.speaking && !s.muted && !s.reduced) {
-          // Typed fallback: simulated syllable envelope
-          const tt = (now - s.speakStart) / 1000;
-          let syAmp = 0;
-          for (const sy of s.sylls) {
-            const dz = (tt - sy.t) / sy.dur;
-            syAmp = Math.max(syAmp, sy.peak * Math.exp(-dz * dz));
-          }
-          a = Math.max(a, syAmp) + 0.04 * Math.sin(now * 0.02);
-        } else if (s.listening && !s.muted && !s.reduced) {
-          // Visitor talking — calmer shimmer
-          a = 0.1 + 0.06 * Math.sin(now * 0.003);
-        }
-
-        if (now >= s.liveUntil && s.liveAmp > 0) {
-          s.liveAmp *= 0.85;
-          if (s.liveAmp < 0.02) {
-            s.liveAmp = 0;
-            if (!s.sylls.length) s.speaking = false;
-          }
-        }
-
-        a += s.impulse * 0.5;
-        return Math.min(1.2, a);
-      }
-
-      function frame(now: number) {
-        if (!canvas || !gx) return;
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
-        cx = w / 2;
-        // Upper third — glow core sits above the caption/input dock
-        cy = h * 0.28;
-        unit = Math.min(w, h);
-
-        const s = stateRef.current;
-        const at = ampT(now);
-        s.ampS += (at - s.ampS) * 0.1;
-        s.impulse *= 0.94;
-        const amp = s.ampS;
-
-        gx.clearRect(0, 0, w, h);
-        gx.globalCompositeOperation = 'lighter';
-
-        const wash = gx.createRadialGradient(cx, cy, 0, cx, cy, unit * 0.8);
-        wash.addColorStop(0, `rgba(120,58,26,${0.06 + amp * 0.07})`);
-        wash.addColorStop(1, 'rgba(120,58,26,0)');
-        gx.fillStyle = wash;
-        gx.fillRect(0, 0, w, h);
-
-        const scale = 1 + amp * 0.45;
-        for (const b of blobs) {
-          const drift = 0.5 + amp * 0.8;
-          const bx =
-            cx + Math.cos(now * b.sp * b.spin + b.ph) * b.dist * unit * drift;
-          const by =
-            cy +
-            Math.sin(now * b.sp * 1.25 * b.spin + b.ph) * b.dist * unit * drift;
-          const br = b.r * unit * scale * (0.95 + amp * 0.45);
-          const g = gx.createRadialGradient(bx, by, 0, bx, by, br);
-          g.addColorStop(0, `rgba(255,194,120,${0.055 + amp * 0.06})`);
-          g.addColorStop(0.55, `rgba(220,132,60,${0.03 + amp * 0.035})`);
-          g.addColorStop(1, 'rgba(190,80,40,0)');
-          gx.fillStyle = g;
-          gx.beginPath();
-          gx.arc(bx, by, br, 0, 6.283);
-          gx.fill();
-        }
-
-        const cr = unit * 0.17 * scale;
-        const core = gx.createRadialGradient(cx, cy, 0, cx, cy, cr);
-        core.addColorStop(0, `rgba(255,224,175,${0.28 + amp * 0.26})`);
-        core.addColorStop(0.45, `rgba(240,160,95,${0.14 + amp * 0.16})`);
-        core.addColorStop(1, 'rgba(230,130,70,0)');
-        gx.fillStyle = core;
-        gx.beginPath();
-        gx.arc(cx, cy, cr, 0, 6.283);
-        gx.fill();
-
-        gx.globalCompositeOperation = 'source-over';
-        raf = requestAnimationFrame(frame);
-      }
-
-      size();
-      const ro = new ResizeObserver(size);
-      ro.observe(canvas);
-      window.addEventListener('resize', size);
-      raf = requestAnimationFrame(frame);
-
-      return () => {
-        cancelAnimationFrame(raf);
-        ro.disconnect();
-        window.removeEventListener('resize', size);
-      };
+      setMounted(true);
     }, []);
 
-    return (
-      <canvas
-        ref={canvasRef}
-        className={className}
-        id="glow"
-        aria-hidden="true"
-      />
+    useEffect(() => {
+      mutedRef.current = muted;
+      if (muted) energyRef.current = 0;
+    }, [muted]);
+
+    useEffect(() => {
+      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const update = () => {
+        reducedMotionRef.current = mq.matches;
+        if (mq.matches) energyRef.current = 0;
+      };
+      update();
+      mq.addEventListener('change', update);
+      return () => mq.removeEventListener('change', update);
+    }, []);
+
+    useEffect(() => {
+      const onVis = () => {
+        pausedRef.current = document.visibilityState !== 'visible';
+      };
+      onVis();
+      document.addEventListener('visibilitychange', onVis);
+      return () => document.removeEventListener('visibilitychange', onVis);
+    }, []);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        setAmplitude(level: number) {
+          amplitudeRef.current = clamp01(level);
+        },
+        setListening(on: boolean) {
+          listeningRef.current = on;
+        },
+        impulse() {
+          if (mutedRef.current || reducedMotionRef.current) return;
+          energyRef.current = Math.min(1, Math.max(energyRef.current, 0.85));
+        },
+        speak(wordCount: number) {
+          if (mutedRef.current || reducedMotionRef.current) return;
+          const boost = 0.4 + Math.min(Math.max(wordCount, 0), 14) * 0.035;
+          energyRef.current = Math.min(1, Math.max(energyRef.current, boost));
+        },
+      }),
+      []
     );
-  },
+
+    return (
+      <div
+        className={className}
+        style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, background: BG }}
+        aria-hidden
+      >
+        {mounted ? (
+          <Canvas
+            dpr={[1, 1.5]}
+            gl={{ antialias: false, alpha: false, powerPreference: 'high-performance', stencil: false, depth: false }}
+            camera={{ position: [0, 1.05, 5.4], fov: 45, near: 0.1, far: 40 }}
+            style={{ width: '100%', height: '100%' }}
+            frameloop="always"
+          >
+            <GLSetup />
+            <ParticleField
+              amplitudeRef={amplitudeRef}
+              listeningRef={listeningRef}
+              energyRef={energyRef}
+              mutedRef={mutedRef}
+              reducedMotionRef={reducedMotionRef}
+              pausedRef={pausedRef}
+            />
+          </Canvas>
+        ) : null}
+      </div>
+    );
+  }
 );
+
+GlowCanvas.displayName = 'GlowCanvas';
 
 export default GlowCanvas;
