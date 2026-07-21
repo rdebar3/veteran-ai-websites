@@ -12,7 +12,7 @@ import GlowCanvas, { type GlowCanvasHandle } from './GlowCanvas';
 import LeadCard from './LeadCard';
 import TradesTemplate from './TradesTemplate';
 import { useMontiVoice } from './useMontiVoice';
-import { emptyRecord } from '@/lib/monti/contract';
+import { emptyRecord, recordForLead } from '@/lib/monti/contract';
 import { tradeLabel } from '@/lib/monti/trade-labels';
 import type { ApplyFillResult } from '@/lib/monti/validate';
 import type {
@@ -216,7 +216,7 @@ export default function MontiExperience() {
       const res = await fetch('/api/monti/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ record: current }),
+        body: JSON.stringify({ record: recordForLead(current) }),
       });
       if (!res.ok) {
         return { ok: false, error: 'Failed to save lead' };

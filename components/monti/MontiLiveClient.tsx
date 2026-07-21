@@ -19,7 +19,7 @@ import BrowserFrame from '@/components/monti/BrowserFrame';
 import GlowCanvas, { type GlowCanvasHandle } from '@/components/monti/GlowCanvas';
 import LeadCard from '@/components/monti/LeadCard';
 import TradesTemplate from '@/components/monti/TradesTemplate';
-import { emptyRecord } from '@/lib/monti/contract';
+import { emptyRecord, recordForLead } from '@/lib/monti/contract';
 import { tradeLabel } from '@/lib/monti/trade-labels';
 import type { FillSection, MontiRecord } from '@/lib/monti/types';
 import { applyFill } from '@/lib/monti/validate';
@@ -335,7 +335,7 @@ function LiveSessionShell({
       const res = await fetch('/api/monti/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ record: current }),
+        body: JSON.stringify({ record: recordForLead(current) }),
       });
       if (!res.ok) {
         setLeadFailed(true);

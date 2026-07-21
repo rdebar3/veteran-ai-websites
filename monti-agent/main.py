@@ -8,6 +8,7 @@ Run locally: .venv\\Scripts\\python.exe main.py dev
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from pathlib import Path
@@ -20,6 +21,7 @@ from livekit.agents import (
     AgentSession,
     JobContext,
     RunContext,
+    UserStateChangedEvent,
     WorkerOptions,
     cli,
     function_tool,
@@ -41,6 +43,19 @@ MODEL = "grok-voice-latest"
 
 TOPIC_FILL = "monti_fill"
 TOPIC_LEAD = "monti_lead"
+
+# --- Session cost / quality guards (tune these) ---
+SESSION_MAX_SECONDS = 600  # ~10 min wall-clock hard stop
+SESSION_IDLE_SECONDS = 120  # ~2 min user-away → polite wrap + close
+
+# xAI RealtimeModel server VAD (0.6–0.75 threshold; modest silence for snappier turns)
+VAD_THRESHOLD = 0.65
+VAD_SILENCE_MS = 450
+VAD_PREFIX_PADDING_MS = 300
+
+WRAP_UP_LINE = (
+    "I'll let you go for now — start again anytime if you want to keep building. Take care."
+)
 
 FILL_SITE_SCHEMA: dict[str, Any] = {
     "type": "function",
@@ -154,7 +169,8 @@ SEND_TO_RICH_SCHEMA: dict[str, Any] = {
     "type": "function",
     "name": "send_to_rich",
     "description": (
-        "Visitor agreed to hand off to Rich. Call only when they clearly say yes."
+        "Visitor agreed to hand off to Rich. Call ONLY when they clearly say yes "
+        "AND business.phone was already filled via fill_site. Never call without a phone."
     ),
     "parameters": {
         "type": "object",
@@ -239,11 +255,35 @@ async def entrypoint(ctx: JobContext) -> None:
 
     agent = Monti(room=ctx.room)
 
+    # Prefer realtime model server VAD; threshold/silence tuned for snappier turns.
     session = AgentSession(
         llm=xai.realtime.RealtimeModel(
             model=MODEL,
             voice=VOICE,
+            turn_detection={
+                "type": "server_vad",
+                "threshold": VAD_THRESHOLD,
+                "silence_duration_ms": VAD_SILENCE_MS,
+                "prefix_padding_ms": VAD_PREFIX_PADDING_MS,
+            },
         ),
+        turn_handling={
+            "turn_detection": "realtime_llm",
+            "interruption": {
+                "enabled": True,
+                # With realtime server TD, many interruption knobs are ignored by the
+                # framework; resume_false still set for best-effort false-positive recovery.
+                "mode": "adaptive",
+                "resume_false_interruption": True,
+                "false_interruption_timeout": 1.5,
+                "min_duration": 0.35,
+            },
+            "endpointing": {
+                "min_delay": 0.35,
+                "max_delay": 2.5,
+            },
+        },
+        user_away_timeout=float(SESSION_IDLE_SECONDS),
     )
 
     # Krisp BVC: isolate primary speaker, strip background noise + echoed/secondary voices.
@@ -254,6 +294,28 @@ async def entrypoint(ctx: JobContext) -> None:
     except AttributeError:
         nc_filter = noise_cancellation.NC()
         logger.info("noise cancellation: Krisp NC (BVC not available)")
+
+    closing = False
+
+    async def polite_end(reason: str) -> None:
+        nonlocal closing
+        if closing:
+            return
+        closing = True
+        logger.info("session ending reason=%s room=%s", reason, ctx.room.name)
+        try:
+            await session.say(WRAP_UP_LINE, allow_interruptions=False)
+        except Exception:
+            logger.exception("wrap-up say failed")
+        try:
+            await session.aclose()
+        except Exception:
+            logger.exception("session aclose failed")
+
+    @session.on("user_state_changed")
+    def _on_user_state(ev: UserStateChangedEvent) -> None:
+        if ev.new_state == "away":
+            asyncio.create_task(polite_end("idle"))
 
     # text_input defaults on; set explicitly so typed lk.chat turns join the
     # same conversation as speech (https://docs.livekit.io/agents/build/text/).
@@ -267,6 +329,16 @@ async def entrypoint(ctx: JobContext) -> None:
             ),
         ),
     )
+
+    async def _max_timer() -> None:
+        try:
+            await asyncio.sleep(SESSION_MAX_SECONDS)
+            await polite_end("max_duration")
+        except asyncio.CancelledError:
+            return
+
+    # Keep task referenced so GC doesn't drop the max-duration guard.
+    session._monti_max_task = asyncio.create_task(_max_timer())  # type: ignore[attr-defined]
 
     await session.generate_reply(
         instructions=(

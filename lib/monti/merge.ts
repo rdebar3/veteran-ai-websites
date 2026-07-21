@@ -115,5 +115,8 @@ export function deepMergeRecord(
     out.palette = 'ember';
   }
 
+  // Keep nested theme in sync for lead draft / agent schema parity
+  out.theme = { palette: out.palette, mood: out.theme_mood };
+
   return out;
 }

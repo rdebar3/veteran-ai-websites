@@ -24,6 +24,12 @@ export type Palette = 'ember' | 'slate' | 'pine' | 'river' | 'sand';
 /** Density / type treatment on top of palette. */
 export type ThemeMood = 'clean' | 'rugged';
 
+/** Nested theme snapshot for lead draft / agent schema parity. */
+export interface MontiThemeSnapshot {
+  palette: Palette;
+  mood: ThemeMood;
+}
+
 export type CopyTone = 'grounded' | 'warm' | 'adventurous';
 
 export interface MontiService {
@@ -44,6 +50,8 @@ export interface MontiRecord {
   palette: Palette;
   /** clean = default airy; rugged = tighter / heavier type. */
   theme_mood: ThemeMood;
+  /** Mirror of palette + mood so monti_draft always has nested theme. */
+  theme: MontiThemeSnapshot;
   copy_tone: CopyTone;
   /** Closest trade key (for lead category + hero photo). */
   trade_key: TradeKey | null;
@@ -79,6 +87,7 @@ export type MontiPatch = {
   layout?: SiteLayout;
   palette?: Palette;
   theme_mood?: ThemeMood;
+  theme?: MontiThemeSnapshot;
   copy_tone?: CopyTone;
   trade_key?: TradeKey | null;
   business?: Partial<MontiRecord['business']>;

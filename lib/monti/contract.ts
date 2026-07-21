@@ -1,4 +1,4 @@
-import type { MontiRecord } from './types';
+import type { MontiRecord, Palette, ThemeMood } from './types';
 
 /** Packet §3 max lengths — validation gate uses these. */
 export const MAX = {
@@ -33,11 +33,14 @@ export const FILL_SECTIONS = [
 ] as const;
 
 export function emptyRecord(): MontiRecord {
+  const palette: Palette = 'ember';
+  const theme_mood: ThemeMood = 'clean';
   return {
     template_id: null,
     layout: 'classic',
-    palette: 'ember',
-    theme_mood: 'clean',
+    palette,
+    theme_mood,
+    theme: { palette, mood: theme_mood },
     copy_tone: 'grounded',
     trade_key: null,
     business: {
@@ -61,5 +64,23 @@ export function emptyRecord(): MontiRecord {
       phone_prompt: '',
       emergency: false,
     },
+  };
+}
+
+/**
+ * Ensure layout + nested theme are always present on lead payloads
+ * (monti_draft) so Rich sees exactly what the owner saw.
+ */
+export function recordForLead(r: MontiRecord): MontiRecord {
+  const palette = r.palette || 'ember';
+  const mood = r.theme_mood || 'clean';
+  return {
+    ...r,
+    layout: r.layout || 'classic',
+    palette,
+    theme_mood: mood,
+    theme: r.theme?.palette
+      ? r.theme
+      : { palette, mood },
   };
 }
