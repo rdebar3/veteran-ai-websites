@@ -28,6 +28,10 @@ const TOPIC_FILL = 'monti_fill';
 const TOPIC_LEAD = 'monti_lead';
 const CORE_FILLS: FillSection[] = ['hero', 'services', 'contact', 'about'];
 
+/** Web Audio playback gain — mobile needs headroom (element.volume is ignored on iOS). */
+const MONTI_GAIN_DESKTOP = 1.0;
+const MONTI_GAIN_MOBILE = 2.0;
+
 type SessionPhase = 'idle' | 'connecting' | 'live' | 'error';
 type BuildPhase = 'chat' | 'handoff' | 'done';
 
@@ -62,76 +66,196 @@ function voiceStatusLabel(agentState: string | undefined): string {
   }
 }
 
-/** Drive GlowCanvas from the agent's remote audio track via AnalyserNode. */
-function useAgentAmplitude(
+function getAudioContextCtor(): typeof AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  return (
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext ||
+    null
+  );
+}
+
+function isMobileAudioDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+}
+
+function targetPlaybackGain(muted: boolean): number {
+  if (muted) return 0;
+  return isMobileAudioDevice() ? MONTI_GAIN_MOBILE : MONTI_GAIN_DESKTOP;
+}
+
+/**
+ * Play Monti's remote track through Web Audio (gain + limiter) and drive glow.
+ * RoomAudioRenderer stays muted so we never double-play.
+ */
+function useAgentPlayback(
   audioTrack: TrackReference | undefined,
   glowRef: React.RefObject<GlowCanvasHandle | null>,
   agentState: string | undefined,
   muted: boolean,
+  audioCtxRef: React.RefObject<AudioContext | null>,
 ) {
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const mutedRef = useRef(muted);
+  mutedRef.current = muted;
+
+  // Wire track → gain → compressor → destination; analyser tap for glow
   useEffect(() => {
     const publication = audioTrack?.publication;
     const track = publication?.track;
     const mediaStreamTrack = track?.mediaStreamTrack;
-    if (!mediaStreamTrack || muted) {
+    if (!mediaStreamTrack) {
       glowRef.current?.setAmplitude(0);
+      gainNodeRef.current = null;
       return;
+    }
+
+    // Silence LiveKit HTML element path if present
+    if (track && 'setVolume' in track && typeof track.setVolume === 'function') {
+      track.setVolume(0);
     }
 
     let cancelled = false;
     let raf = 0;
-    let ctx: AudioContext | null = null;
     let source: MediaStreamAudioSourceNode | null = null;
     let analyser: AnalyserNode | null = null;
+    let gain: GainNode | null = null;
+    let compressor: DynamicsCompressorNode | null = null;
 
-    try {
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext;
-      ctx = new AudioCtx();
-      const stream = new MediaStream([mediaStreamTrack]);
-      source = ctx.createMediaStreamSource(stream);
-      analyser = ctx.createAnalyser();
-      analyser.fftSize = 256;
-      analyser.smoothingTimeConstant = 0.75;
-      source.connect(analyser);
+    const run = async () => {
+      try {
+        const Ctor = getAudioContextCtor();
+        if (!Ctor) return;
 
-      const data = new Uint8Array(analyser.fftSize);
-
-      const tick = () => {
-        if (cancelled || !analyser) return;
-        analyser.getByteTimeDomainData(data);
-        let sum = 0;
-        for (let i = 0; i < data.length; i++) {
-          const v = (data[i]! - 128) / 128;
-          sum += v * v;
+        let ctx = audioCtxRef.current;
+        if (!ctx || ctx.state === 'closed') {
+          ctx = new Ctor();
+          audioCtxRef.current = ctx;
         }
-        const rms = Math.sqrt(sum / data.length);
-        glowRef.current?.setAmplitude(Math.min(1, rms * 3.2));
+        if (ctx.state === 'suspended') {
+          await ctx.resume().catch(() => {});
+        }
+        if (cancelled || ctx.state === 'closed') return;
+
+        const stream = new MediaStream([mediaStreamTrack]);
+        source = ctx.createMediaStreamSource(stream);
+
+        gain = ctx.createGain();
+        gain.gain.value = targetPlaybackGain(mutedRef.current);
+        gainNodeRef.current = gain;
+
+        compressor = ctx.createDynamicsCompressor();
+        compressor.threshold.value = -10;
+        compressor.knee.value = 6;
+        compressor.ratio.value = 12;
+        compressor.attack.value = 0.003;
+        compressor.release.value = 0.25;
+
+        analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.75;
+
+        // source → gain → compressor → speakers
+        source.connect(gain);
+        gain.connect(compressor);
+        compressor.connect(ctx.destination);
+        // glow tap (pre-gain; mute zeros amp via mutedRef)
+        source.connect(analyser);
+
+        const data = new Uint8Array(analyser.fftSize);
+        const tick = () => {
+          if (cancelled || !analyser) return;
+          if (mutedRef.current) {
+            glowRef.current?.setAmplitude(0);
+          } else {
+            analyser.getByteTimeDomainData(data);
+            let sum = 0;
+            for (let i = 0; i < data.length; i++) {
+              const v = (data[i]! - 128) / 128;
+              sum += v * v;
+            }
+            const rms = Math.sqrt(sum / data.length);
+            glowRef.current?.setAmplitude(Math.min(1, rms * 3.2));
+          }
+          raf = requestAnimationFrame(tick);
+        };
         raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-    } catch (err) {
-      console.warn('[monti/live] amplitude analyser failed', err);
-    }
+      } catch (err) {
+        console.warn('[monti/live] Web Audio playback failed', err);
+      }
+    };
+
+    void run();
 
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
+      gainNodeRef.current = null;
       try {
         source?.disconnect();
       } catch {
         /* ignore */
       }
-      void ctx?.close();
+      try {
+        gain?.disconnect();
+      } catch {
+        /* ignore */
+      }
+      try {
+        compressor?.disconnect();
+      } catch {
+        /* ignore */
+      }
+      try {
+        analyser?.disconnect();
+      } catch {
+        /* ignore */
+      }
       glowRef.current?.setAmplitude(0);
     };
-  }, [audioTrack, glowRef, muted]);
+  }, [audioTrack, glowRef, audioCtxRef]);
+
+  // Mute / mobile gain without tearing down the graph
+  useEffect(() => {
+    const gain = gainNodeRef.current;
+    const ctx = audioCtxRef.current;
+    if (!gain) return;
+    const target = targetPlaybackGain(muted);
+    try {
+      if (ctx && ctx.state !== 'closed') {
+        gain.gain.setTargetAtTime(target, ctx.currentTime, 0.02);
+      } else {
+        gain.gain.value = target;
+      }
+    } catch {
+      gain.gain.value = target;
+    }
+    if (muted) glowRef.current?.setAmplitude(0);
+  }, [muted, audioCtxRef, glowRef]);
 
   useEffect(() => {
     glowRef.current?.setListening(!muted && agentState === 'listening');
   }, [agentState, glowRef, muted]);
+
+  // Resume suspended context on any user gesture (iOS recovery)
+  useEffect(() => {
+    const resume = () => {
+      const ctx = audioCtxRef.current;
+      if (ctx && ctx.state === 'suspended') {
+        void ctx.resume().catch(() => {});
+      }
+    };
+    window.addEventListener('pointerdown', resume, { passive: true });
+    window.addEventListener('touchstart', resume, { passive: true });
+    window.addEventListener('keydown', resume);
+    return () => {
+      window.removeEventListener('pointerdown', resume);
+      window.removeEventListener('touchstart', resume);
+      window.removeEventListener('keydown', resume);
+    };
+  }, [audioCtxRef]);
 }
 
 function LiveSessionShell({
@@ -139,11 +263,13 @@ function LiveSessionShell({
   onEnd,
   micEnabled,
   noMicNote,
+  audioCtxRef,
 }: {
   glowRef: React.RefObject<GlowCanvasHandle | null>;
   onEnd: () => void;
   micEnabled: boolean;
   noMicNote: boolean;
+  audioCtxRef: React.RefObject<AudioContext | null>;
 }) {
   const room = useRoomContext();
   const connectionState = useConnectionState(room);
@@ -185,20 +311,19 @@ function LiveSessionShell({
     return () => mq.removeEventListener('change', update);
   }, []);
 
-  useAgentAmplitude(audioTrack, glowRef, agentState, muted);
+  useAgentPlayback(audioTrack, glowRef, agentState, muted, audioCtxRef);
 
-  // Silence agent audio without ending the session
+  // Keep LiveKit element path silent — Web Audio owns output
   useEffect(() => {
-    const level = muted ? 0 : 1;
     room.remoteParticipants.forEach((p) => {
       p.audioTrackPublications.forEach((pub) => {
         const t = pub.track;
         if (t && 'setVolume' in t && typeof t.setVolume === 'function') {
-          t.setVolume(level);
+          t.setVolume(0);
         }
       });
     });
-  }, [room, muted, audioTrack]);
+  }, [room, audioTrack]);
 
   useEffect(() => {
     recordRef.current = record;
@@ -206,7 +331,11 @@ function LiveSessionShell({
 
   useEffect(() => {
     void room.startAudio().catch(() => {});
-  }, [room]);
+    const ctx = audioCtxRef.current;
+    if (ctx?.state === 'suspended') {
+      void ctx.resume().catch(() => {});
+    }
+  }, [room, audioCtxRef]);
 
   // Mic denied after connect: do not dead-end; typing path stays open
   useEffect(() => {
@@ -472,7 +601,8 @@ function LiveSessionShell({
 
   return (
     <>
-      <RoomAudioRenderer muted={muted} volume={muted ? 0 : 1} />
+      {/* Volume 0: Web Audio graph plays Monti; avoid double audio */}
+      <RoomAudioRenderer muted volume={0} />
       {/* Fixed controls — always on top of glow, dock, and site pane */}
       <div className="monti-live-fixed-bar" role="toolbar" aria-label="Session controls">
         <button
@@ -647,6 +777,7 @@ async function probeMicrophone(): Promise<boolean> {
 
 export default function MontiLiveClient() {
   const glowRef = useRef<GlowCanvasHandle>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
   const [phase, setPhase] = useState<SessionPhase>('idle');
   const [error, setError] = useState<string | null>(null);
   const [connection, setConnection] = useState<TokenPayload | null>(null);
@@ -690,6 +821,15 @@ export default function MontiLiveClient() {
     setPhase('connecting');
     setNoMicNote(false);
     try {
+      // User gesture: create/resume AudioContext so iOS allows later playback
+      const Ctor = getAudioContextCtor();
+      if (Ctor) {
+        if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+          audioCtxRef.current = new Ctor();
+        }
+        await audioCtxRef.current.resume().catch(() => {});
+      }
+
       // Prefer voice; if mic denied/unavailable, still join without publishing audio
       const hasMic = await probeMicrophone();
       setMicEnabled(hasMic);
@@ -725,6 +865,11 @@ export default function MontiLiveClient() {
     setMicEnabled(true);
     glowRef.current?.setAmplitude(0);
     glowRef.current?.setListening(false);
+    const ctx = audioCtxRef.current;
+    if (ctx && ctx.state !== 'closed') {
+      void ctx.close().catch(() => {});
+    }
+    audioCtxRef.current = null;
   }, []);
 
   return (
@@ -782,6 +927,7 @@ export default function MontiLiveClient() {
             onEnd={end}
             micEnabled={micEnabled}
             noMicNote={noMicNote}
+            audioCtxRef={audioCtxRef}
           />
         </LiveKitRoom>
       ) : (
