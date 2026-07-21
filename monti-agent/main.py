@@ -57,6 +57,30 @@ FILL_SITE_SCHEMA: dict[str, Any] = {
                 "type": "string",
                 "description": "Trade key for hero photo",
             },
+            "layout": {
+                "type": "string",
+                "enum": ["classic", "bold", "split"],
+                "description": "Structural homepage layout (safe set only)",
+            },
+            "theme": {
+                "type": "object",
+                "description": "Named color + mood presets only — never hex or CSS",
+                "properties": {
+                    "palette": {
+                        "type": "string",
+                        "enum": ["ember", "slate", "pine", "river", "sand"],
+                    },
+                    "mood": {
+                        "type": "string",
+                        "enum": ["clean", "rugged"],
+                    },
+                },
+            },
+            "palette": {
+                "type": "string",
+                "enum": ["ember", "slate", "pine", "river", "sand", "timber"],
+                "description": "Legacy top-level palette; timber aliases to pine",
+            },
             "business": {
                 "type": "object",
                 "properties": {

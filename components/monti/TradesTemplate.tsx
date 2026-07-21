@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { FillSection, MontiRecord } from '@/lib/monti/types';
+import type { FillSection, MontiRecord, SiteLayout } from '@/lib/monti/types';
 import { hasPhoto, photoUrl } from '@/lib/monti/photos';
 import './trades-template.css';
 
@@ -41,6 +41,11 @@ function ImgSlot({
   );
 }
 
+function resolveLayout(raw: MontiRecord['layout']): SiteLayout {
+  if (raw === 'bold' || raw === 'split') return raw;
+  return 'classic';
+}
+
 export interface TradesTemplateProps {
   record: MontiRecord;
   fill: FillSection[];
@@ -61,6 +66,10 @@ export default function TradesTemplate({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [hdrSolid, setHdrSolid] = useState(false);
 
+  const layout = resolveLayout(record.layout);
+  const palette = record.palette || 'ember';
+  const mood = record.theme_mood === 'rugged' ? 'rugged' : 'clean';
+
   useEffect(() => {
     const el = scrollRef.current?.parentElement;
     if (!el) return;
@@ -71,7 +80,12 @@ export default function TradesTemplate({
 
   if (!hasAny) {
     return (
-      <div className="mt-trades" data-palette={record.palette || 'ember'}>
+      <div
+        className="mt-trades"
+        data-layout={layout}
+        data-palette={palette}
+        data-mood={mood}
+      >
         <div className="empty-hint">Your site will appear here as we talk…</div>
       </div>
     );
@@ -98,16 +112,66 @@ export default function TradesTemplate({
   const showServices = filled.has('services');
   const showAbout = filled.has('about');
   const showContact = filled.has('contact');
-  const showFrameChrome = showHero; // band + steps once hero exists
+  const showFrameChrome = showHero;
+
+  const defaultTrustItems = (
+    <>
+      <div className="tstat">
+        <b>Local</b>
+        <span>& family-owned</span>
+      </div>
+      <div className="tstat">
+        <b>Fast</b>
+        <span>response, done right</span>
+      </div>
+      <div className="tstat">
+        <b>Honest</b>
+        <span>upfront pricing</span>
+      </div>
+      <div className="tstat">
+        <b>WV</b>
+        <span>owned & operated</span>
+      </div>
+    </>
+  );
+
+  const trustStats =
+    badges.length > 0
+      ? badges.map((x) => (
+          <div className="tstat" key={x}>
+            <b>✓</b>
+            <span>{cap(x, 24)}</span>
+          </div>
+        ))
+      : defaultTrustItems;
+
+  const trustChips =
+    badges.length > 0
+      ? badges.map((x) => (
+          <span className="trust-chip" key={x}>
+            {cap(x, 24)}
+          </span>
+        ))
+      : (
+          <>
+            <span className="trust-chip">Licensed & insured</span>
+            <span className="trust-chip">Upfront pricing</span>
+            <span className="trust-chip">{est ? `Since ${est}` : 'Local crew'}</span>
+          </>
+        );
 
   return (
     <div
       ref={scrollRef}
       className="mt-trades"
-      data-palette={record.palette || 'ember'}
+      data-layout={layout}
+      data-palette={palette}
+      data-mood={mood}
     >
       <header
-        className={`hdr ${hdrSolid ? 'solid' : ''} ${!showHero ? 'on-light' : ''}`}
+        className={`hdr ${hdrSolid ? 'solid' : ''} ${!showHero ? 'on-light' : ''} ${
+          layout === 'split' && showHero ? 'on-light' : ''
+        }`}
       >
         <div className="wrap hdr-in">
           <div className="brand">
@@ -129,85 +193,115 @@ export default function TradesTemplate({
         </div>
       </header>
 
+      {/* ── Hero ── */}
       {showHero ? (
-        <section className="hero fillin">
-          <ImgSlot
-            name={heroImg}
-            preset="hero"
-            alt={`${name} — serving ${area || 'West Virginia'}`}
-          />
-          <div className="scrim" />
-          <div className="wrap hero-in">
-            <span className="hero-chip">
-              ◆ {cap(area, 46) || 'Serving West Virginia'}
-            </span>
-            <h1>{cap(record.hero?.headline, 64) || name}</h1>
-            {record.hero?.subhead ? (
-              <p className="lead fillin">{cap(record.hero.subhead, 150)}</p>
-            ) : null}
-            <div className="hero-cta">
-              <span className="btn btn--primary">{heroCta}</span>
-              {phone ? (
-                <span className="btn btn--ghost">☎ {phone}</span>
+        layout === 'split' ? (
+          <section className="hero-split fillin">
+            <div className="hero-split-text">
+              <div className="wrap hero-split-in">
+                <span className="hero-chip hero-chip--ink">
+                  ◆ {cap(area, 46) || 'Serving West Virginia'}
+                </span>
+                <h1>{cap(record.hero?.headline, 64) || name}</h1>
+                {record.hero?.subhead ? (
+                  <p className="lead fillin">{cap(record.hero.subhead, 150)}</p>
+                ) : null}
+                <div className="hero-cta">
+                  <span className="btn btn--primary">{heroCta}</span>
+                  {phone ? <span className="btn btn--outline">☎ {phone}</span> : null}
+                </div>
+              </div>
+            </div>
+            <div className="hero-split-media">
+              <ImgSlot
+                name={heroImg}
+                preset="hero"
+                alt={`${name} — serving ${area || 'West Virginia'}`}
+              />
+            </div>
+          </section>
+        ) : (
+          <section className={`hero fillin${layout === 'bold' ? ' hero--bold' : ''}`}>
+            <ImgSlot
+              name={heroImg}
+              preset="hero"
+              alt={`${name} — serving ${area || 'West Virginia'}`}
+            />
+            <div className="scrim" />
+            <div className="wrap hero-in">
+              <span className="hero-chip">
+                ◆ {cap(area, 46) || 'Serving West Virginia'}
+              </span>
+              <h1>{cap(record.hero?.headline, 64) || name}</h1>
+              {record.hero?.subhead ? (
+                <p className="lead fillin">{cap(record.hero.subhead, 150)}</p>
+              ) : null}
+              <div className="hero-cta">
+                <span className="btn btn--primary">{heroCta}</span>
+                {phone ? (
+                  <span className="btn btn--ghost">☎ {phone}</span>
+                ) : null}
+              </div>
+              {layout === 'classic' ? (
+                <div className="hero-trust">
+                  <span>
+                    <i className="dot" /> Licensed & insured
+                  </span>
+                  <span>
+                    <i className="dot" /> Upfront pricing
+                  </span>
+                  <span>
+                    <i className="dot" /> {est ? `Since ${est}` : 'Local crew'}
+                  </span>
+                </div>
               ) : null}
             </div>
-            <div className="hero-trust">
-              <span>
-                <i className="dot" /> Licensed & insured
-              </span>
-              <span>
-                <i className="dot" /> Upfront pricing
-              </span>
-              <span>
-                <i className="dot" /> {est ? `Since ${est}` : 'Local crew'}
-              </span>
-            </div>
-          </div>
-        </section>
+            {layout === 'bold' && showTrust ? (
+              <div className="hero-accent-strip fillin">
+                <div className="wrap trustbar-in">{trustStats}</div>
+              </div>
+            ) : null}
+          </section>
+        )
       ) : showHeroSkeleton ? (
-        <section className="hero-skel">
-          <div className="wrap" style={{ width: '100%' }}>
-            <div className="sk sk-line" style={{ width: 120, height: 11 }} />
-            <div className="sk" style={{ height: 34, width: '70%', margin: '14px 0' }} />
-            <div className="sk sk-line" style={{ width: '52%' }} />
-          </div>
-        </section>
+        layout === 'split' ? (
+          <section className="hero-split hero-split--skel">
+            <div className="hero-split-text">
+              <div className="wrap hero-split-in">
+                <div className="sk sk-line" style={{ width: 120, height: 11 }} />
+                <div className="sk" style={{ height: 34, width: '70%', margin: '14px 0' }} />
+                <div className="sk sk-line" style={{ width: '52%' }} />
+              </div>
+            </div>
+            <div className="hero-split-media">
+              <div className="sk" style={{ width: '100%', height: '100%', borderRadius: 0 }} />
+            </div>
+          </section>
+        ) : (
+          <section className={`hero-skel${layout === 'bold' ? ' hero-skel--bold' : ''}`}>
+            <div className="wrap" style={{ width: '100%' }}>
+              <div className="sk sk-line" style={{ width: 120, height: 11 }} />
+              <div className="sk" style={{ height: 34, width: '70%', margin: '14px 0' }} />
+              <div className="sk sk-line" style={{ width: '52%' }} />
+            </div>
+          </section>
+        )
       ) : null}
 
-      {showTrust && showHero ? (
+      {/* ── Trust (classic bar / split chips; bold is on hero) ── */}
+      {showTrust && showHero && layout === 'classic' ? (
         <section className="trustbar fillin">
-          <div className="wrap trustbar-in">
-            {badges.length > 0 ? (
-              badges.map((x) => (
-                <div className="tstat" key={x}>
-                  <b>✓</b>
-                  <span>{cap(x, 24)}</span>
-                </div>
-              ))
-            ) : (
-              <>
-                <div className="tstat">
-                  <b>Local</b>
-                  <span>& family-owned</span>
-                </div>
-                <div className="tstat">
-                  <b>Fast</b>
-                  <span>response, done right</span>
-                </div>
-                <div className="tstat">
-                  <b>Honest</b>
-                  <span>upfront pricing</span>
-                </div>
-                <div className="tstat">
-                  <b>WV</b>
-                  <span>owned & operated</span>
-                </div>
-              </>
-            )}
-          </div>
+          <div className="wrap trustbar-in">{trustStats}</div>
         </section>
       ) : null}
 
+      {showTrust && showHero && layout === 'split' ? (
+        <section className="trust-chips fillin">
+          <div className="wrap trust-chips-in">{trustChips}</div>
+        </section>
+      ) : null}
+
+      {/* ── Services ── */}
       {showServices ? (
         <section className="sec fillin" id="services">
           <div className="wrap">
@@ -215,15 +309,45 @@ export default function TradesTemplate({
               <p className="kicker">What we do</p>
               <h2 className="title">Every job, done right the first time.</h2>
             </div>
-            <div className="grid">
-              {services.map((s) => (
-                <div className="card" key={s.title}>
-                  <span className="ic">◆</span>
-                  <h3>{cap(s.title, 30)}</h3>
-                  <p>{cap(s.description, 120)}</p>
-                </div>
-              ))}
-            </div>
+            {layout === 'bold' ? (
+              <div className="svc-list">
+                {services.map((s, i) => (
+                  <div className="svc-row" key={s.title}>
+                    <span className="svc-n">{String(i + 1).padStart(2, '0')}</span>
+                    <div>
+                      <h3>{cap(s.title, 30)}</h3>
+                      <p>{cap(s.description, 120)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : layout === 'split' ? (
+              <div className="svc-alt">
+                {services.map((s, i) => (
+                  <div
+                    className={`svc-alt-row${i % 2 === 1 ? ' rev' : ''}`}
+                    key={s.title}
+                  >
+                    <div className="svc-alt-copy">
+                      <span className="svc-n">{String(i + 1).padStart(2, '0')}</span>
+                      <h3>{cap(s.title, 30)}</h3>
+                      <p>{cap(s.description, 120)}</p>
+                    </div>
+                    <div className="svc-alt-rule" aria-hidden="true" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid">
+                {services.map((s) => (
+                  <div className="card" key={s.title}>
+                    <span className="ic">◆</span>
+                    <h3>{cap(s.title, 30)}</h3>
+                    <p>{cap(s.description, 120)}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       ) : showServicesSkeleton ? (
@@ -231,31 +355,69 @@ export default function TradesTemplate({
           <div className="wrap">
             <div className="sk sk-line" style={{ width: 90, height: 10 }} />
             <div className="sk" style={{ height: 24, width: '40%', margin: '12px 0 20px' }} />
-            <div className="grid">
-              {[0, 1, 2].map((i) => (
-                <div className="card" key={i}>
-                  <div
-                    className="sk"
-                    style={{ width: 38, height: 38, borderRadius: 10, marginBottom: 11 }}
-                  />
-                  <div className="sk sk-line" style={{ width: '80%' }} />
-                  <div className="sk sk-line" style={{ width: '60%' }} />
-                </div>
-              ))}
-            </div>
+            {layout === 'bold' || layout === 'split' ? (
+              <div className={layout === 'bold' ? 'svc-list' : 'svc-alt'}>
+                {[0, 1, 2].map((i) => (
+                  <div className={layout === 'bold' ? 'svc-row' : 'svc-alt-row'} key={i}>
+                    <div className="sk sk-line" style={{ width: 36, height: 18 }} />
+                    <div style={{ flex: 1 }}>
+                      <div className="sk sk-line" style={{ width: '50%', marginBottom: 8 }} />
+                      <div className="sk sk-line" style={{ width: '80%' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid">
+                {[0, 1, 2].map((i) => (
+                  <div className="card" key={i}>
+                    <div
+                      className="sk"
+                      style={{ width: 38, height: 38, borderRadius: 10, marginBottom: 11 }}
+                    />
+                    <div className="sk sk-line" style={{ width: '80%' }} />
+                    <div className="sk sk-line" style={{ width: '60%' }} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       ) : null}
 
+      {/* ── About ── */}
       {showAbout ? (
-        <section className="sec sec--tint fillin" id="about">
-          <div className="wrap">
-            <div className="feature">
+        layout === 'bold' ? (
+          <section className="about-bold fillin" id="about">
+            <div className="about-bold-photo">
               <ImgSlot name="work_truck" preset="feature" alt={`${name} — local crew`} />
+              <div className="scrim" />
+            </div>
+            <div className="wrap about-bold-copy">
+              <p className="kicker">Who you&apos;re hiring</p>
+              <h2>A real local crew — not a call center.</h2>
+              <p>{cap(record.about?.body, 320)}</p>
+              <ul className="points">
+                <li>
+                  <i>✓</i> Straight answers and honest quotes
+                </li>
+                <li>
+                  <i>✓</i> Clean, and respectful of your property
+                </li>
+                <li>
+                  <i>✓</i> Work we stand behind, every time
+                </li>
+              </ul>
+              <span className="btn btn--primary">{contactCta}</span>
+            </div>
+          </section>
+        ) : layout === 'split' ? (
+          <section className="sec sec--tint fillin" id="about">
+            <div className="wrap about-stack">
               <div>
                 <p className="kicker">Who you&apos;re hiring</p>
-                <h2>A real local crew — not a call center.</h2>
-                <p>{cap(record.about?.body, 320)}</p>
+                <h2 className="title">A real local crew — not a call center.</h2>
+                <p className="about-stack-body">{cap(record.about?.body, 320)}</p>
                 <ul className="points">
                   <li>
                     <i>✓</i> Straight answers and honest quotes
@@ -269,9 +431,35 @@ export default function TradesTemplate({
                 </ul>
                 <span className="btn btn--primary">{contactCta}</span>
               </div>
+              <ImgSlot name="work_truck" preset="feature" alt={`${name} — local crew`} />
             </div>
-          </div>
-        </section>
+          </section>
+        ) : (
+          <section className="sec sec--tint fillin" id="about">
+            <div className="wrap">
+              <div className="feature">
+                <ImgSlot name="work_truck" preset="feature" alt={`${name} — local crew`} />
+                <div>
+                  <p className="kicker">Who you&apos;re hiring</p>
+                  <h2>A real local crew — not a call center.</h2>
+                  <p>{cap(record.about?.body, 320)}</p>
+                  <ul className="points">
+                    <li>
+                      <i>✓</i> Straight answers and honest quotes
+                    </li>
+                    <li>
+                      <i>✓</i> Clean, and respectful of your property
+                    </li>
+                    <li>
+                      <i>✓</i> Work we stand behind, every time
+                    </li>
+                  </ul>
+                  <span className="btn btn--primary">{contactCta}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        )
       ) : null}
 
       {showFrameChrome ? (
@@ -330,11 +518,11 @@ export default function TradesTemplate({
       {showAbout && reviews.length > 0 ? (
         <section className="sec sec--tint fillin" id="reviews">
           <div className="wrap">
-            <div className="head center">
+            <div className={`head${layout === 'bold' ? ' center' : ' center'}`}>
               <p className="kicker">Reviews</p>
               <h2 className="title">Trusted in homes across WV.</h2>
             </div>
-            <div className="reviews">
+            <div className={`reviews${layout === 'bold' ? ' reviews--stack' : ''}`}>
               {reviews.map((r) => (
                 <div className="rev" key={r.name + r.quote.slice(0, 12)}>
                   <div className="stars">★★★★★</div>
@@ -351,10 +539,9 @@ export default function TradesTemplate({
       ) : null}
 
       {showContact ? (
-        <section className="sec fillin" id="contact">
-          <div className="wrap">
-            <div className="cta-band">
-              <div className="glow" />
+        layout === 'bold' ? (
+          <section className="cta-full fillin" id="contact">
+            <div className="wrap">
               <h2>
                 {emergency
                   ? "Need help now? We're standing by."
@@ -366,8 +553,48 @@ export default function TradesTemplate({
                 <span className="btn btn--ondark">{contactCta}</span>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : layout === 'split' ? (
+          <section className="sec fillin" id="contact">
+            <div className="wrap">
+              <div className="cta-split">
+                <div>
+                  <p className="kicker">Contact</p>
+                  <h2>
+                    {emergency
+                      ? "Need help now? We're standing by."
+                      : "Let's get your project started."}
+                  </h2>
+                  <p>{phonePrompt}.</p>
+                </div>
+                <div className="cta-split-actions">
+                  {phone ? (
+                    <span className="cta-phone">☎ {phone}</span>
+                  ) : null}
+                  <span className="btn btn--primary">{contactCta}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : (
+          <section className="sec fillin" id="contact">
+            <div className="wrap">
+              <div className="cta-band">
+                <div className="glow" />
+                <h2>
+                  {emergency
+                    ? "Need help now? We're standing by."
+                    : "Let's get your project started."}
+                </h2>
+                <p>{phonePrompt}.</p>
+                <div className="row">
+                  {phone ? <span className="btn btn--primary">☎ {phone}</span> : null}
+                  <span className="btn btn--ondark">{contactCta}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        )
       ) : null}
 
       {showHero ? (

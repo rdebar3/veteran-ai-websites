@@ -8,10 +8,40 @@ import type {
   MontiRecord,
   MontiReview,
   MontiService,
+  Palette,
+  SiteLayout,
+  ThemeMood,
   TradeKey,
   TurnResponse,
 } from './types';
 import { TRADE_KEYS } from './types';
+
+const LAYOUTS = new Set<SiteLayout>(['classic', 'bold', 'split']);
+const PALETTES = new Set<Palette>(['ember', 'slate', 'pine', 'river', 'sand']);
+const THEME_MOODS = new Set<ThemeMood>(['clean', 'rugged']);
+
+/** Accept named palettes; legacy timber → pine. Unknown → undefined (keep default). */
+function coercePalette(raw: unknown): Palette | undefined {
+  if (typeof raw !== 'string' || !raw.trim()) return undefined;
+  const id = raw.trim().toLowerCase();
+  if (id === 'timber') return 'pine';
+  if (PALETTES.has(id as Palette)) return id as Palette;
+  return undefined;
+}
+
+function coerceLayout(raw: unknown): SiteLayout | undefined {
+  if (typeof raw !== 'string') return undefined;
+  const id = raw.trim().toLowerCase();
+  if (LAYOUTS.has(id as SiteLayout)) return id as SiteLayout;
+  return undefined;
+}
+
+function coerceThemeMood(raw: unknown): ThemeMood | undefined {
+  if (typeof raw !== 'string') return undefined;
+  const id = raw.trim().toLowerCase();
+  if (THEME_MOODS.has(id as ThemeMood)) return id as ThemeMood;
+  return undefined;
+}
 
 export function cap(s: unknown, n: number): string {
   const t = s == null ? '' : String(s).trim();
@@ -104,9 +134,22 @@ export function coercePatch(raw: unknown): MontiPatch {
     patch.template_id = 'trades';
   }
 
-  if (p.palette === 'ember' || p.palette === 'timber') {
-    patch.palette = p.palette;
+  const layout = coerceLayout(p.layout);
+  if (layout) patch.layout = layout;
+
+  // Nested theme: { palette, mood } — agent-facing safe presets only
+  if (p.theme && typeof p.theme === 'object') {
+    const t = p.theme as Record<string, unknown>;
+    const themePal = coercePalette(t.palette);
+    if (themePal) patch.palette = themePal;
+    const mood = coerceThemeMood(t.mood);
+    if (mood) patch.theme_mood = mood;
   }
+
+  // Top-level palette (legacy + still valid)
+  const pal = coercePalette(p.palette);
+  if (pal) patch.palette = pal;
+
   if (
     p.copy_tone === 'grounded' ||
     p.copy_tone === 'warm' ||

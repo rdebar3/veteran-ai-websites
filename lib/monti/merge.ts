@@ -12,8 +12,24 @@ export function deepMergeRecord(
   if (patch.template_id === 'trades' || patch.template_id === null) {
     out.template_id = patch.template_id;
   }
-  if (patch.palette === 'ember' || patch.palette === 'timber') {
+  if (
+    patch.layout === 'classic' ||
+    patch.layout === 'bold' ||
+    patch.layout === 'split'
+  ) {
+    out.layout = patch.layout;
+  }
+  if (
+    patch.palette === 'ember' ||
+    patch.palette === 'slate' ||
+    patch.palette === 'pine' ||
+    patch.palette === 'river' ||
+    patch.palette === 'sand'
+  ) {
     out.palette = patch.palette;
+  }
+  if (patch.theme_mood === 'clean' || patch.theme_mood === 'rugged') {
+    out.theme_mood = patch.theme_mood;
   }
   if (
     patch.copy_tone === 'grounded' ||
@@ -76,6 +92,27 @@ export function deepMergeRecord(
     if (typeof c.cta_text === 'string') out.contact.cta_text = c.cta_text;
     if (typeof c.phone_prompt === 'string') out.contact.phone_prompt = c.phone_prompt;
     if (typeof c.emergency === 'boolean') out.contact.emergency = c.emergency;
+  }
+
+  // Runtime defaults for older in-memory records missing new fields
+  if (
+    out.layout !== 'classic' &&
+    out.layout !== 'bold' &&
+    out.layout !== 'split'
+  ) {
+    out.layout = 'classic';
+  }
+  if (out.theme_mood !== 'clean' && out.theme_mood !== 'rugged') {
+    out.theme_mood = 'clean';
+  }
+  if (
+    out.palette !== 'ember' &&
+    out.palette !== 'slate' &&
+    out.palette !== 'pine' &&
+    out.palette !== 'river' &&
+    out.palette !== 'sand'
+  ) {
+    out.palette = 'ember';
   }
 
   return out;

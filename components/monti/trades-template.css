@@ -1,4 +1,5 @@
 /* Monti Trades template — locked frame, scoped under .mt-trades */
+/* Palettes are named safe presets; agent never sends hex. timber = legacy alias of pine. */
 
 .mt-trades,
 .mt-trades[data-palette='ember'] {
@@ -16,8 +17,12 @@
   --ph2: #c4966e;
   --font-serif: var(--monti-serif, Fraunces, Georgia, serif);
   --font-sans: var(--monti-sans, Inter, system-ui, sans-serif);
+  --sec-pad: 36px;
+  --card-radius: 14px;
 }
 
+/* pine = current timber green family; timber kept as alias for BC */
+.mt-trades[data-palette='pine'],
 .mt-trades[data-palette='timber'] {
   --bg: #f5f6f2;
   --surface: #fff;
@@ -31,6 +36,72 @@
   --gold: #c9a24b;
   --ph1: #2f4a3a;
   --ph2: #8aa06f;
+}
+
+.mt-trades[data-palette='slate'] {
+  --bg: #f4f5f7;
+  --surface: #fff;
+  --ink: #1a1f28;
+  --muted: #5c6570;
+  --line: #dfe3e8;
+  --accent: #3d4f66;
+  --accent-d: #2f3d50;
+  --dark: #161b24;
+  --dark-2: #0f1218;
+  --gold: #b8a06a;
+  --ph1: #2a3548;
+  --ph2: #6b7c94;
+}
+
+.mt-trades[data-palette='river'] {
+  --bg: #f3f6f8;
+  --surface: #fff;
+  --ink: #17232c;
+  --muted: #5a6a74;
+  --line: #dce6eb;
+  --accent: #1f5f7a;
+  --accent-d: #184a5f;
+  --dark: #122029;
+  --dark-2: #0c161c;
+  --gold: #c4a35a;
+  --ph1: #1a4054;
+  --ph2: #5a8fa8;
+}
+
+.mt-trades[data-palette='sand'] {
+  --bg: #f8f4ec;
+  --surface: #fffcf7;
+  --ink: #2a241c;
+  --muted: #6e6456;
+  --line: #e8e0d2;
+  --accent: #9a7340;
+  --accent-d: #7d5c32;
+  --dark: #1f1a14;
+  --dark-2: #15110d;
+  --gold: #c9a24b;
+  --ph1: #4a3f32;
+  --ph2: #b89a72;
+}
+
+/* Mood: density / weight only */
+.mt-trades[data-mood='rugged'] {
+  --sec-pad: 28px;
+  --card-radius: 10px;
+}
+
+.mt-trades[data-mood='rugged'] h1,
+.mt-trades[data-mood='rugged'] h2,
+.mt-trades[data-mood='rugged'] .title,
+.mt-trades[data-mood='rugged'] .disp {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.mt-trades[data-mood='rugged'] .card,
+.mt-trades[data-mood='rugged'] .rev,
+.mt-trades[data-mood='rugged'] .cta-band {
+  border-width: 1.5px;
+  border-color: color-mix(in srgb, var(--ink) 12%, var(--line));
 }
 
 .mt-trades {
@@ -107,6 +178,12 @@
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   border-color: rgba(255, 255, 255, 0.25);
+}
+
+.mt-trades .btn--outline {
+  background: transparent;
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--ink) 22%, transparent);
 }
 
 .mt-trades .img {
@@ -347,7 +424,7 @@
 
 /* Sections */
 .mt-trades .sec {
-  padding: 36px 0;
+  padding: var(--sec-pad, 36px) 0;
 }
 
 .mt-trades .sec--tint {
@@ -387,7 +464,7 @@
   position: relative;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--card-radius, 14px);
   padding: 18px 16px;
   overflow: hidden;
 }
@@ -759,6 +836,393 @@
   color: #b7b0a4;
   text-align: center;
   font-size: 13.5px;
+}
+
+/* ── Layout: bold ── */
+.mt-trades .hero--bold {
+  min-height: 400px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+.mt-trades .hero--bold .hero-in {
+  max-width: 720px;
+  padding-bottom: 24px;
+}
+
+.mt-trades .hero--bold h1 {
+  font-size: clamp(28px, 4vw, 48px);
+  max-width: 14ch;
+}
+
+.mt-trades .hero-accent-strip {
+  background: var(--accent);
+  color: #fff;
+  margin-top: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.mt-trades .hero-accent-strip .trustbar-in {
+  padding: 14px 0;
+}
+
+.mt-trades .hero-accent-strip .tstat span {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.mt-trades .hero-accent-strip .tstat b {
+  color: #fff;
+}
+
+.mt-trades .svc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+.mt-trades .svc-row {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.mt-trades .svc-n {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  flex: 0 0 2.2rem;
+  line-height: 1.2;
+}
+
+.mt-trades .svc-row h3,
+.mt-trades .svc-alt-copy h3 {
+  font-size: 17px;
+  margin: 0 0 6px;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-weight: 600;
+}
+
+.mt-trades .svc-row p,
+.mt-trades .svc-alt-copy p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 0;
+  max-width: 56ch;
+}
+
+.mt-trades .about-bold {
+  background: var(--bg);
+}
+
+.mt-trades .about-bold-photo {
+  position: relative;
+  min-height: 200px;
+  isolation: isolate;
+}
+
+.mt-trades .about-bold-photo .img {
+  position: absolute;
+  inset: 0;
+}
+
+.mt-trades .about-bold-photo .scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, transparent 40%, var(--bg) 100%);
+}
+
+.mt-trades .about-bold-copy {
+  padding: 28px 0 40px;
+  max-width: 640px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mt-trades .about-bold-copy h2 {
+  font-size: clamp(22px, 2.8vw, 30px);
+  line-height: 1.1;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+
+.mt-trades .about-bold-copy > p {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+
+.mt-trades .about-bold-copy .points {
+  align-items: center;
+  text-align: left;
+  display: inline-flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.mt-trades .reviews--stack {
+  grid-template-columns: 1fr;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.mt-trades .cta-full {
+  background: var(--dark);
+  color: #fff;
+  padding: 48px 0;
+  text-align: center;
+}
+
+.mt-trades .cta-full h2 {
+  font-size: clamp(22px, 3vw, 32px);
+  line-height: 1.08;
+  margin: 0;
+  color: #fff;
+}
+
+.mt-trades .cta-full p {
+  margin: 12px auto 0;
+  max-width: 40ch;
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.mt-trades .cta-full .row {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.mt-trades .hero-skel--bold {
+  min-height: 360px;
+}
+
+/* ── Layout: split ── */
+.mt-trades .hero-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 320px;
+  margin-top: -56px;
+  padding-top: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 700px) {
+  .mt-trades .hero-split {
+    grid-template-columns: 1fr 1fr;
+    min-height: 380px;
+  }
+}
+
+.mt-trades .hero-split-text {
+  display: flex;
+  align-items: center;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.mt-trades .hero-split-in {
+  padding: 36px 0 40px;
+  max-width: 100%;
+}
+
+.mt-trades .hero-split-in h1 {
+  font-size: clamp(24px, 3vw, 38px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+  max-width: 14ch;
+}
+
+.mt-trades .hero-split-in .lead {
+  margin: 14px 0 0;
+  max-width: 40ch;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.mt-trades .hero-chip--ink {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+  color: var(--accent);
+}
+
+.mt-trades .hero-split-media {
+  position: relative;
+  min-height: 220px;
+}
+
+.mt-trades .hero-split-media .img {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+}
+
+.mt-trades .hero-split--skel {
+  background: var(--bg);
+}
+
+.mt-trades .trust-chips {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.mt-trades .trust-chips-in {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mt-trades .trust-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
+  padding: 7px 12px;
+  border-radius: 999px;
+}
+
+.mt-trades .svc-alt {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mt-trades .svc-alt-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.mt-trades .svc-alt-row.rev .svc-alt-copy {
+  order: 2;
+  text-align: right;
+}
+
+.mt-trades .svc-alt-row.rev .svc-alt-rule {
+  order: 1;
+}
+
+.mt-trades .svc-alt-row.rev .svc-n {
+  margin-left: auto;
+}
+
+.mt-trades .svc-alt-rule {
+  width: 4px;
+  min-height: 64px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 30%, transparent));
+  align-self: stretch;
+}
+
+.mt-trades .about-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mt-trades .about-stack .img {
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.3);
+}
+
+.mt-trades .about-stack-body {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 16px;
+  max-width: 58ch;
+}
+
+.mt-trades .about-stack .title {
+  margin-bottom: 12px;
+}
+
+.mt-trades .cta-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 28px 24px;
+}
+
+@media (min-width: 640px) {
+  .mt-trades .cta-split {
+    grid-template-columns: 1.2fr 1fr;
+  }
+}
+
+.mt-trades .cta-split h2 {
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1.1;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+
+.mt-trades .cta-split p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.mt-trades .cta-split-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .mt-trades .cta-split-actions {
+    align-items: flex-end;
+  }
+}
+
+.mt-trades .cta-phone {
+  font-family: var(--font-serif);
+  font-size: clamp(20px, 2.4vw, 26px);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+/* Split layout: header over light hero panel */
+.mt-trades[data-layout='split'] .hdr:not(.solid) .brand {
+  color: var(--ink);
+}
+
+.mt-trades[data-layout='split'] .hdr:not(.solid) .call {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 @media (prefers-reduced-motion: reduce) {

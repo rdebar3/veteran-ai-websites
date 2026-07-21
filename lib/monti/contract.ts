@@ -35,7 +35,9 @@ export const FILL_SECTIONS = [
 export function emptyRecord(): MontiRecord {
   return {
     template_id: null,
+    layout: 'classic',
     palette: 'ember',
+    theme_mood: 'clean',
     copy_tone: 'grounded',
     trade_key: null,
     business: {

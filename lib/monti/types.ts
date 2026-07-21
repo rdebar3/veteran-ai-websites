@@ -15,7 +15,15 @@ export type TradeKey = (typeof TRADE_KEYS)[number];
 
 export type FillSection = 'hero' | 'trust' | 'services' | 'about' | 'contact';
 
-export type Palette = 'ember' | 'timber';
+/** Safe layout set — agent picks; unknown coerces to classic. */
+export type SiteLayout = 'classic' | 'bold' | 'split';
+
+/** Safe palette presets — CSS tokens only; timber aliases to pine at the gate. */
+export type Palette = 'ember' | 'slate' | 'pine' | 'river' | 'sand';
+
+/** Density / type treatment on top of palette. */
+export type ThemeMood = 'clean' | 'rugged';
+
 export type CopyTone = 'grounded' | 'warm' | 'adventurous';
 
 export interface MontiService {
@@ -31,7 +39,11 @@ export interface MontiReview {
 
 export interface MontiRecord {
   template_id: 'trades' | null;
+  /** Structural layout variant (classic = today's Trades frame). */
+  layout: SiteLayout;
   palette: Palette;
+  /** clean = default airy; rugged = tighter / heavier type. */
+  theme_mood: ThemeMood;
   copy_tone: CopyTone;
   /** Closest trade key (for lead category + hero photo). */
   trade_key: TradeKey | null;
@@ -64,7 +76,9 @@ export interface MontiRecord {
 /** Partial §3 fields the model may patch each turn. */
 export type MontiPatch = {
   template_id?: 'trades' | null;
+  layout?: SiteLayout;
   palette?: Palette;
+  theme_mood?: ThemeMood;
   copy_tone?: CopyTone;
   trade_key?: TradeKey | null;
   business?: Partial<MontiRecord['business']>;
