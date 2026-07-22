@@ -19,6 +19,13 @@ import GlowCanvas, { type GlowCanvasHandle } from '@/components/monti/GlowCanvas
 import LeadCard from '@/components/monti/LeadCard';
 import TradesTemplate from '@/components/monti/TradesTemplate';
 import { emptyRecord, recordForLead } from '@/lib/monti/contract';
+import {
+  hasPhoto,
+  photoUrl,
+  pickTradePhotoVariants,
+  preloadPhotoUrl,
+  type PhotoVariants,
+} from '@/lib/monti/photos';
 import { tradeLabel } from '@/lib/monti/trade-labels';
 import type { FillSection, MontiRecord } from '@/lib/monti/types';
 import { applyFill } from '@/lib/monti/validate';
@@ -392,6 +399,8 @@ function LiveSessionShell({
   const recordRef = useRef<MontiRecord>(emptyRecord());
   const leadSentRef = useRef(false);
   const pendingTextsRef = useRef<string[]>([]);
+  /** Lock photo variants once trade is known — stable for the whole build. */
+  const photoTradeLockedRef = useRef<string | null>(null);
 
   const [record, setRecord] = useState<MontiRecord>(() => emptyRecord());
   const [fill, setFill] = useState<FillSection[]>([]);
@@ -409,6 +418,10 @@ function LiveSessionShell({
   const [draft, setDraft] = useState('');
   const [sendingText, setSendingText] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [photoVariants, setPhotoVariants] = useState<PhotoVariants>({
+    hero: 0,
+    support: 0,
+  });
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)');
@@ -423,6 +436,17 @@ function LiveSessionShell({
   useEffect(() => {
     recordRef.current = record;
   }, [record]);
+
+  // Per-session photo rotation: pick once when trade is first known, preload hero.
+  useEffect(() => {
+    const trade = record.trade_key || record.hero?.image_id || null;
+    if (!trade || !hasPhoto(trade) || trade === 'wv_hero') return;
+    if (photoTradeLockedRef.current === trade) return;
+    photoTradeLockedRef.current = trade;
+    const variants = pickTradePhotoVariants(trade);
+    setPhotoVariants(variants);
+    preloadPhotoUrl(photoUrl(trade, 'hero', variants.hero));
+  }, [record.trade_key, record.hero?.image_id]);
 
   useEffect(() => {
     void room.startAudio().catch(() => {});
@@ -837,6 +861,7 @@ function LiveSessionShell({
               showServicesSkeleton={
                 showServicesSkel && !fill.includes('services')
               }
+              photoVariants={photoVariants}
             />
           </BrowserFrame>
         </div>

@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { FillSection, MontiRecord, SiteLayout } from '@/lib/monti/types';
-import { hasPhoto, photoUrl } from '@/lib/monti/photos';
+import {
+  hasPhoto,
+  photoUrl,
+  type PhotoVariants,
+} from '@/lib/monti/photos';
 import { tradeLabel } from '@/lib/monti/trade-labels';
 import './trades-template.css';
 
@@ -25,18 +29,27 @@ function ImgSlot({
   name,
   preset,
   alt,
+  variant = 0,
 }: {
   name: string;
   preset: 'hero' | 'feature' | 'band';
   alt: string;
+  /** Per-session photo variant index (stable for the build). */
+  variant?: number;
 }) {
   const [hide, setHide] = useState(false);
-  const src = photoUrl(name, preset);
+  const src = photoUrl(name, preset, variant);
   return (
     <div className="img">
       {!hide && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={alt} loading="lazy" onError={() => setHide(true)} />
+        <img
+          key={src}
+          src={src}
+          alt={alt}
+          loading={preset === 'hero' ? 'eager' : 'lazy'}
+          onError={() => setHide(true)}
+        />
       )}
     </div>
   );
@@ -53,6 +66,8 @@ export interface TradesTemplateProps {
   /** Show hero skeleton while waiting for first hero fill */
   showHeroSkeleton?: boolean;
   showServicesSkeleton?: boolean;
+  /** Stable per-session photo picks (default 0 = v1 photo). */
+  photoVariants?: PhotoVariants;
 }
 
 export default function TradesTemplate({
@@ -60,6 +75,7 @@ export default function TradesTemplate({
   fill,
   showHeroSkeleton = false,
   showServicesSkeleton = false,
+  photoVariants = { hero: 0, support: 0 },
 }: TradesTemplateProps) {
   const filled = new Set(fill);
   const hasAny = filled.size > 0 || showHeroSkeleton;
@@ -99,6 +115,10 @@ export default function TradesTemplate({
     record.hero?.image_id && hasPhoto(record.hero.image_id)
       ? record.hero.image_id
       : 'wv_hero';
+  /** About/feature: trade support variant (never repeats session hero). */
+  const featureImg = hasPhoto(heroImg) && heroImg !== 'wv_hero' ? heroImg : 'work_truck';
+  const heroVariant = photoVariants.hero ?? 0;
+  const supportVariant = photoVariants.support ?? 0;
   const heroCta = cap(record.hero?.cta_text, 22) || 'Get a quote';
   const contactCta = cap(record.contact?.cta_text, 22) || heroCta;
   const phonePrompt =
@@ -200,6 +220,7 @@ export default function TradesTemplate({
               <ImgSlot
                 name={heroImg}
                 preset="hero"
+                variant={heroVariant}
                 alt={`${name} — serving ${area || 'West Virginia'}`}
               />
             </div>
@@ -209,6 +230,7 @@ export default function TradesTemplate({
             <ImgSlot
               name={heroImg}
               preset="hero"
+              variant={heroVariant}
               alt={`${name} — serving ${area || 'West Virginia'}`}
             />
             <div className="scrim" />
@@ -376,7 +398,12 @@ export default function TradesTemplate({
         layout === 'bold' ? (
           <section className="about-bold fillin" id="about">
             <div className="about-bold-photo">
-              <ImgSlot name="work_truck" preset="feature" alt={`${name} — local crew`} />
+              <ImgSlot
+                name={featureImg}
+                preset="feature"
+                variant={supportVariant}
+                alt={`${name} — local crew`}
+              />
               <div className="scrim" />
             </div>
             <div className="wrap about-bold-copy">
@@ -417,14 +444,24 @@ export default function TradesTemplate({
                 </ul>
                 <span className="btn btn--primary">{contactCta}</span>
               </div>
-              <ImgSlot name="work_truck" preset="feature" alt={`${name} — local crew`} />
+              <ImgSlot
+                name={featureImg}
+                preset="feature"
+                variant={supportVariant}
+                alt={`${name} — local crew`}
+              />
             </div>
           </section>
         ) : (
           <section className="sec sec--tint fillin" id="about">
             <div className="wrap">
               <div className="feature">
-                <ImgSlot name="work_truck" preset="feature" alt={`${name} — local crew`} />
+                <ImgSlot
+                  name={featureImg}
+                  preset="feature"
+                  variant={supportVariant}
+                  alt={`${name} — local crew`}
+                />
                 <div>
                   <p className="kicker">Who you&apos;re hiring</p>
                   <h2>A real local crew — not a call center.</h2>

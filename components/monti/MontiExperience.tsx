@@ -13,6 +13,13 @@ import LeadCard from './LeadCard';
 import TradesTemplate from './TradesTemplate';
 import { useMontiVoice } from './useMontiVoice';
 import { emptyRecord, recordForLead } from '@/lib/monti/contract';
+import {
+  hasPhoto,
+  photoUrl,
+  pickTradePhotoVariants,
+  preloadPhotoUrl,
+  type PhotoVariants,
+} from '@/lib/monti/photos';
 import { tradeLabel } from '@/lib/monti/trade-labels';
 import type { ApplyFillResult } from '@/lib/monti/validate';
 import type {
@@ -42,6 +49,8 @@ export default function MontiExperience() {
   const recordRef = useRef<MontiRecord>(emptyRecord());
   const leadSentRef = useRef(false);
   const messagesRef = useRef<ChatMessage[]>([]);
+  /** Lock photo variants once trade is known — stable for the whole build. */
+  const photoTradeLockedRef = useRef<string | null>(null);
 
   const [started, setStarted] = useState(false);
   const [mode, setMode] = useState<Mode>('typed');
@@ -63,6 +72,10 @@ export default function MontiExperience() {
   const [phase, setPhase] = useState<Phase>('start');
   const [showLead, setShowLead] = useState(false);
   const [allowEmpty, setAllowEmpty] = useState(false);
+  const [photoVariants, setPhotoVariants] = useState<PhotoVariants>({
+    hero: 0,
+    support: 0,
+  });
 
   useEffect(() => {
     recordRef.current = record;
@@ -71,6 +84,17 @@ export default function MontiExperience() {
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+
+  // Per-session photo rotation: pick once when trade is first known, preload hero.
+  useEffect(() => {
+    const trade = record.trade_key || record.hero?.image_id || null;
+    if (!trade || !hasPhoto(trade) || trade === 'wv_hero') return;
+    if (photoTradeLockedRef.current === trade) return;
+    photoTradeLockedRef.current = trade;
+    const variants = pickTradePhotoVariants(trade);
+    setPhotoVariants(variants);
+    preloadPhotoUrl(photoUrl(trade, 'hero', variants.hero));
+  }, [record.trade_key, record.hero?.image_id]);
 
   // Hide root marketing chrome while Monti is mounted
   useEffect(() => {
@@ -608,6 +632,7 @@ export default function MontiExperience() {
               showServicesSkeleton={
                 showServicesSkel && !fill.includes('services')
               }
+              photoVariants={photoVariants}
             />
           </BrowserFrame>
         </div>
