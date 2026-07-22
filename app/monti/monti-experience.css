@@ -42,13 +42,29 @@
   font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 999px;
   cursor: pointer;
+  white-space: nowrap;
   transition:
     background 0.15s ease,
     border-color 0.15s ease,
     color 0.15s ease;
+}
+
+/* Persistent dock hint when local mic is cut */
+.monti-live-status {
+  margin: 10px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(243, 230, 212, 0.35);
+  text-align: center;
+}
+
+.monti-live-status--mic-off {
+  color: rgba(224, 145, 63, 0.72);
+  letter-spacing: 0.04em;
 }
 
 .monti-live-fixed-btn:hover {
@@ -690,12 +706,17 @@
   .monti-live-fixed-bar {
     top: 10px;
     right: 10px;
-    padding: 4px 6px;
+    left: auto;
+    max-width: calc(100vw - 20px);
+    padding: 4px 5px;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .monti-live-fixed-btn {
-    font-size: 11.5px;
-    padding: 7px 12px;
+    font-size: 11px;
+    padding: 7px 10px;
   }
 
   .monti-top {

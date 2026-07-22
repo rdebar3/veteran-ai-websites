@@ -412,7 +412,13 @@ function LiveSessionShell({
   const [buildPhase, setBuildPhase] = useState<BuildPhase>('chat');
   const [showLead, setShowLead] = useState(false);
   const [caption, setCaption] = useState('');
+  /** Output mute — silences Monti's voice on visitor speakers only. */
   const [muted, setMuted] = useState(false);
+  /**
+   * Input mic publish. Starts on when the session joined with a mic.
+   * Typed-only sessions (micEnabled=false) never show a mic control.
+   */
+  const [micOn, setMicOn] = useState(micEnabled);
   const [leadFailed, setLeadFailed] = useState(false);
   const [leadBusy, setLeadBusy] = useState(false);
   const [draft, setDraft] = useState('');
@@ -552,6 +558,18 @@ function LiveSessionShell({
     },
     [draft, connected, sendingText, agentReady, deliverText],
   );
+
+  /** Cut local mic publish so room noise stops reaching the agent. */
+  const toggleMic = useCallback(async () => {
+    if (!micEnabled || !connected) return;
+    const next = !micOn;
+    try {
+      await room.localParticipant.setMicrophoneEnabled(next);
+      setMicOn(next);
+    } catch (err) {
+      console.warn('[monti/live] setMicrophoneEnabled failed', err);
+    }
+  }, [micEnabled, connected, micOn, room]);
 
   const applySiteUpdate = useCallback(
     (opts: {
@@ -725,6 +743,24 @@ function LiveSessionShell({
       {/* Agent audio: dedicated <audio> in useAgentPlayback (not RoomAudioRenderer) */}
       {/* Fixed controls — always on top of glow, dock, and site pane */}
       <div className="monti-live-fixed-bar" role="toolbar" aria-label="Session controls">
+        {micEnabled ? (
+          <button
+            type="button"
+            className={`monti-live-fixed-btn monti-live-fixed-btn--quiet${
+              !micOn ? ' is-quiet' : ''
+            }`}
+            onClick={() => void toggleMic()}
+            aria-pressed={!micOn}
+            aria-label={micOn ? 'Turn microphone off' : 'Turn microphone on'}
+            title={
+              micOn
+                ? 'Stop sending your mic to Monti'
+                : 'Send your mic to Monti again'
+            }
+          >
+            {micOn ? 'Mic off' : 'Mic on'}
+          </button>
+        ) : null}
         <button
           type="button"
           className={`monti-live-fixed-btn monti-live-fixed-btn--quiet${
@@ -732,8 +768,14 @@ function LiveSessionShell({
           }`}
           onClick={() => setMuted((m) => !m)}
           aria-pressed={muted}
+          aria-label={muted ? 'Turn sound on' : 'Turn sound off'}
+          title={
+            muted
+              ? "Hear Monti's voice again"
+              : "Silence Monti's voice (captions stay on)"
+          }
         >
-          {muted ? 'Unmute' : 'Mute'}
+          {muted ? 'Sound on' : 'Sound off'}
         </button>
         <button
           type="button"
@@ -832,17 +874,18 @@ function LiveSessionShell({
                 </button>
               </form>
               <p
-                style={{
-                  margin: '10px 0 0',
-                  fontSize: 11,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(243, 230, 212, 0.35)',
-                  textAlign: 'center',
-                }}
+                className={
+                  micEnabled && !micOn
+                    ? 'monti-live-status monti-live-status--mic-off'
+                    : 'monti-live-status'
+                }
+                role="status"
               >
-                {voiceStatusLabel(agentState)}
-                {micEnabled ? '' : ' · text'} · LiveKit
+                {micEnabled && !micOn
+                  ? 'Mic off — type to Monti'
+                  : `${voiceStatusLabel(agentState)}${
+                      micEnabled ? '' : ' · text'
+                    } · LiveKit`}
               </p>
             </div>
           </div>
