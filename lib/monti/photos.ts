@@ -74,10 +74,10 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
     support: ['1748027869634-fc2e545cfb0c', '1732660513320-a6b489f3fece'],
   },
   electrical: {
-    // Dropped 404: 1758101755915-01ec03d9ef57 (verified HEAD)
     hero: [
       '1621905251189-08b45d6a269e',
       '1621905251918-48416bd8575a',
+      '1758101755915-462eddc23f57',
       '1595856619767-ab739fa7daae',
       '1646640381839-02748ae8ddf0',
       '1595831708961-1b13c0dd2422',
