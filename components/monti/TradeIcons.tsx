@@ -136,7 +136,7 @@ const ICONS: Record<IconId, ReactNode> = {
   ),
 };
 
-const TRADE_DEFAULT: Record<TradeKey, IconId> = {
+const TRADE_DEFAULT: Record<TradeKey, IconId | null> = {
   landscaping: 'leaf',
   plumbing: 'droplet',
   towing: 'truck',
@@ -145,7 +145,12 @@ const TRADE_DEFAULT: Record<TradeKey, IconId> = {
   roofing: 'home',
   auto: 'wrench',
   cleaning: 'spray',
+  /** General: never a trade glyph — prefer none. */
+  general: null,
 };
+
+/** Icons allowed on general (unknown vertical) sites. */
+const GENERAL_SAFE_ICONS = new Set<IconId>(['mappin', 'clock', 'shield', 'phone']);
 
 const KEYWORDS: { re: RegExp; id: IconId }[] = [
   { re: /\b(tow|wrecker|hook|winch|roadside)\b/i, id: 'truck' },
@@ -172,8 +177,13 @@ export function resolveServiceIcon(
   description = '',
 ): IconId | null {
   const text = `${title} ${description}`.trim();
+  const isGeneral = trade === 'general';
+
   for (const { re, id } of KEYWORDS) {
-    if (re.test(text)) return id;
+    if (!re.test(text)) continue;
+    // General sites: only map-pin / clock / shield / phone — never a trade glyph.
+    if (isGeneral) return GENERAL_SAFE_ICONS.has(id) ? id : null;
+    return id;
   }
   if (trade && isTradeKey(trade)) return TRADE_DEFAULT[trade];
   // No diamond fallback — clean text card

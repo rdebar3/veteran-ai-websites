@@ -6,7 +6,12 @@
 import type { TradeKey } from './types';
 import { TRADE_KEYS } from './types';
 
-export type NicheShape = 'emergency' | 'checklist' | 'visual' | 'shop';
+export type NicheShape =
+  | 'emergency'
+  | 'checklist'
+  | 'visual'
+  | 'shop'
+  | 'general';
 
 export type SitePage = 'home' | 'services' | 'about' | 'contact';
 
@@ -69,6 +74,14 @@ const SHOP_PAGES: Record<SitePage, NicheBlock[]> = {
   services: ['services', 'steps', 'cta'],
   about: ['about', 'band', 'reviews'],
   contact: ['contact', 'availability'],
+};
+
+/** About-forward: story carries weight when photos are neutral stand-ins. */
+const GENERAL_PAGES: Record<SitePage, NicheBlock[]> = {
+  home: ['hero', 'aboutTeaser', 'servicesPreview', 'cta'],
+  services: ['services', 'cta'],
+  about: ['about', 'band', 'reviews'],
+  contact: ['contact'],
 };
 
 const DEFAULT_PAGES: Record<SitePage, NicheBlock[]> = {
@@ -206,6 +219,22 @@ export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
     bandHeadline: 'Your local bay.',
     bandBody:
       'Drop by or call — real people, real tools, and a clear estimate before we start.',
+  },
+  general: {
+    shape: 'general',
+    pages: GENERAL_PAGES,
+    servicesPresentation: 'cards',
+    heroPhoneDominant: false,
+    showAvailabilityEarly: false,
+    stickyCallOnEmergency: false,
+    defaultHeroCta: 'GET IN TOUCH',
+    defaultContactCta: 'Get in touch',
+    defaultPhonePrompt: 'We are glad to hear from you',
+    servicesKicker: 'WHAT WE DO',
+    servicesTitle: 'What we do for people around here.',
+    bandHeadline: 'Proud to serve this community.',
+    bandBody:
+      'Local roots, personal service — a real place for the people who know us.',
   },
 };
 

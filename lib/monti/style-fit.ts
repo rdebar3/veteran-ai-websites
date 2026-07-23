@@ -61,7 +61,23 @@ export const TRADE_FIT_SETS: Record<TradeKey, StylePick[]> = {
     { layout: 'split', palette: 'river' },
     { layout: 'bold', palette: 'river' },
   ],
+  /** Conservative — no bold. Unknown verticals should not shout. */
+  general: [
+    { layout: 'classic', palette: 'sand' },
+    { layout: 'classic', palette: 'slate' },
+    { layout: 'classic', palette: 'pine' },
+    { layout: 'split', palette: 'river' },
+    { layout: 'split', palette: 'sand' },
+  ],
 };
+
+const GENERAL_FALLBACK_FIT: StylePick[] = [
+  { layout: 'classic', palette: 'sand' },
+  { layout: 'classic', palette: 'slate' },
+  { layout: 'classic', palette: 'pine' },
+  { layout: 'split', palette: 'river' },
+  { layout: 'split', palette: 'sand' },
+];
 
 function isTradeKey(name: string): name is TradeKey {
   return (TRADE_KEYS as readonly string[]).includes(name);
@@ -69,11 +85,7 @@ function isTradeKey(name: string): name is TradeKey {
 
 export function getTradeFitSet(trade: string | null | undefined): StylePick[] {
   if (!trade || !isTradeKey(trade)) {
-    return [
-      { layout: 'classic', palette: 'ember' },
-      { layout: 'bold', palette: 'slate' },
-      { layout: 'split', palette: 'river' },
-    ];
+    return GENERAL_FALLBACK_FIT;
   }
   return TRADE_FIT_SETS[trade];
 }

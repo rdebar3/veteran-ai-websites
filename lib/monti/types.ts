@@ -9,6 +9,8 @@ export const TRADE_KEYS = [
   'roofing',
   'auto',
   'cleaning',
+  /** Honest fallback when the business is not one of the eight trades. */
+  'general',
 ] as const;
 
 export type TradeKey = (typeof TRADE_KEYS)[number];
@@ -53,7 +55,7 @@ export interface MontiRecord {
   /** Mirror of palette + mood so monti_draft always has nested theme. */
   theme: MontiThemeSnapshot;
   copy_tone: CopyTone;
-  /** Closest trade key (for lead category + hero photo). */
+  /** Exact trade key, or `general` when no clear vertical (never a forced nearest trade). */
   trade_key: TradeKey | null;
   business: {
     name: string;

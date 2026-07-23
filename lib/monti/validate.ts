@@ -109,7 +109,7 @@ function coerceImageId(raw: unknown): string | undefined {
   if (typeof raw !== 'string' || !raw.trim()) return undefined;
   const id = raw.trim().toLowerCase();
   if (isTradeKey(id) || id === 'wv_hero' || hasPhoto(id)) return id;
-  // map common aliases
+  // Clear aliases only — never invent a wrong vertical for an unknown business.
   if (id.includes('lawn') || id.includes('landscape')) return 'landscaping';
   if (id.includes('plumb')) return 'plumbing';
   if (id.includes('tow')) return 'towing';
@@ -118,7 +118,8 @@ function coerceImageId(raw: unknown): string | undefined {
   if (id.includes('roof')) return 'roofing';
   if (id.includes('auto') || id.includes('mechanic')) return 'auto';
   if (id.includes('clean')) return 'cleaning';
-  return undefined;
+  // Unknown/invalid keys → general (neutral photos). Never wv_hero or a forced trade.
+  return 'general';
 }
 
 /** Coerce a raw model patch into a safe MontiPatch (drop malformed). */

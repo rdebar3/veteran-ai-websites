@@ -175,6 +175,27 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
       '1585417238790-f6d290d6490c',
     ],
   },
+  /**
+   * Neutral local-business pool for anything that is not one of the eight trades.
+   * No lawns, trucks, or trade-specific gear — storefronts, main street, hands, doors.
+   * No videos for general (photo heroes only).
+   */
+  general: {
+    hero: [
+      '1761783536272-2fb78dd52c76',
+      '1559631658-9705048d977e',
+      '1605542202587-5849be5054a4',
+      '1560580393-bd7d9b095b44',
+      '1779397143344-792befabb210',
+      '1579196179453-1531eddf62e3',
+    ],
+    support: [
+      '1575663620136-5ebbfcc2c597',
+      '1506806732259-39c2d0268443',
+      '1621267528275-16f68d18c4ca',
+      '1696699651613-b81a429a0fec',
+    ],
+  },
 };
 
 /** Non-trade fixed images. */

@@ -10,6 +10,7 @@ const LABELS: Record<TradeKey, string> = {
   roofing: 'Roofing',
   auto: 'Auto',
   cleaning: 'Cleaning',
+  general: 'Local business',
 };
 
 export function tradeLabel(key: string | null | undefined): string {
