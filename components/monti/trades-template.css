@@ -15,8 +15,9 @@
   --gold: #c9a24b;
   --ph1: #3a546e;
   --ph2: #c4966e;
-  --font-serif: var(--monti-serif, Fraunces, Georgia, serif);
-  --font-sans: var(--monti-sans, Inter, system-ui, sans-serif);
+  /* Prefer next/font vars from monti layout; never bare Times */
+  --font-serif: var(--font-monti-serif), var(--monti-serif), "Fraunces", Georgia, serif;
+  --font-sans: var(--font-monti-sans), var(--monti-sans), "Inter", system-ui, sans-serif;
   --sec-pad: 36px;
   --card-radius: 14px;
 }
@@ -290,10 +291,10 @@
   color: #fff;
 }
 
-/* Hero */
+/* Hero — mobile-first full-bleed photo (z-index stack, not negative) */
 .mt-trades .hero {
   position: relative;
-  min-height: 340px;
+  min-height: clamp(280px, 48vh, 520px);
   display: flex;
   align-items: flex-end;
   color: #fff;
@@ -305,13 +306,14 @@
 .mt-trades .hero .img {
   position: absolute;
   inset: 0;
-  z-index: -2;
+  z-index: 0;
+  min-height: 100%;
 }
 
 .mt-trades .hero .scrim {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
   background:
     linear-gradient(
       180deg,
@@ -324,6 +326,8 @@
 }
 
 .mt-trades .hero-in {
+  position: relative;
+  z-index: 2;
   padding: 28px 0 32px;
   max-width: 640px;
 }
@@ -344,7 +348,7 @@
 }
 
 .mt-trades .hero h1 {
-  font-size: clamp(24px, 3.2vw, 40px);
+  font-size: clamp(22px, 6.4vw, 40px);
   line-height: 1.04;
   letter-spacing: -0.02em;
   margin: 0;
@@ -456,8 +460,14 @@
 
 .mt-trades .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: 1fr;
   gap: 12px;
+}
+
+@media (min-width: 480px) {
+  .mt-trades .grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
 }
 
 .mt-trades .card {
@@ -565,23 +575,26 @@
   position: relative;
   color: #fff;
   isolation: isolate;
-  min-height: 180px;
+  min-height: clamp(160px, 28vh, 280px);
 }
 
 .mt-trades .band-photo .img {
   position: absolute;
   inset: 0;
-  z-index: -2;
+  z-index: 0;
+  min-height: 100%;
 }
 
 .mt-trades .band-photo .scrim {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
   background: linear-gradient(90deg, rgba(15, 18, 24, 0.8), rgba(15, 18, 24, 0.42));
 }
 
 .mt-trades .band-photo .inner {
+  position: relative;
+  z-index: 2;
   padding: 48px 0;
   max-width: 520px;
 }
@@ -838,9 +851,9 @@
   font-size: 13.5px;
 }
 
-/* ── Layout: bold ── */
+/* ── Layout: bold (big type + accent strip — distinct at 390px) ── */
 .mt-trades .hero--bold {
-  min-height: 400px;
+  min-height: clamp(320px, 52vh, 560px);
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-end;
@@ -848,12 +861,13 @@
 
 .mt-trades .hero--bold .hero-in {
   max-width: 720px;
-  padding-bottom: 24px;
+  padding-bottom: 20px;
 }
 
 .mt-trades .hero--bold h1 {
-  font-size: clamp(28px, 4vw, 48px);
-  max-width: 14ch;
+  font-size: clamp(26px, 7vw, 48px);
+  max-width: 12ch;
+  font-weight: 700;
 }
 
 .mt-trades .hero-accent-strip {
@@ -925,13 +939,15 @@
 
 .mt-trades .about-bold-photo {
   position: relative;
-  min-height: 200px;
+  min-height: clamp(180px, 36vh, 320px);
   isolation: isolate;
 }
 
 .mt-trades .about-bold-photo .img {
   position: absolute;
   inset: 0;
+  z-index: 0;
+  min-height: 100%;
 }
 
 .mt-trades .about-bold-photo .scrim {
@@ -1010,11 +1026,11 @@
   min-height: 360px;
 }
 
-/* ── Layout: split ── */
+/* ── Layout: split — stacked photo-under-text on phone; side-by-side on desktop ── */
 .mt-trades .hero-split {
-  display: grid;
-  grid-template-columns: 1fr;
-  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   margin-top: -56px;
   padding-top: 56px;
   background: var(--surface);
@@ -1023,6 +1039,7 @@
 
 @media (min-width: 700px) {
   .mt-trades .hero-split {
+    display: grid;
     grid-template-columns: 1fr 1fr;
     min-height: 380px;
   }
@@ -1033,15 +1050,16 @@
   align-items: center;
   background: var(--bg);
   color: var(--ink);
+  flex: 0 0 auto;
 }
 
 .mt-trades .hero-split-in {
-  padding: 36px 0 40px;
+  padding: 28px 0 24px;
   max-width: 100%;
 }
 
 .mt-trades .hero-split-in h1 {
-  font-size: clamp(24px, 3vw, 38px);
+  font-size: clamp(22px, 6vw, 38px);
   line-height: 1.05;
   letter-spacing: -0.02em;
   margin: 0;
@@ -1063,15 +1081,30 @@
   color: var(--accent);
 }
 
+/* Real height so absolute img never collapses on mobile */
 .mt-trades .hero-split-media {
   position: relative;
-  min-height: 220px;
+  width: 100%;
+  min-height: clamp(200px, 42vh, 420px);
+  aspect-ratio: 4 / 3;
+  flex: 0 0 auto;
+  background: linear-gradient(140deg, var(--ph1), var(--ph2));
+}
+
+@media (min-width: 700px) {
+  .mt-trades .hero-split-media {
+    min-height: 100%;
+    aspect-ratio: auto;
+    height: 100%;
+  }
 }
 
 .mt-trades .hero-split-media .img {
   position: absolute;
   inset: 0;
   border-radius: 0;
+  min-height: 100%;
+  z-index: 0;
 }
 
 .mt-trades .hero-split--skel {
@@ -1117,17 +1150,33 @@
   border-bottom: 1px solid var(--line);
 }
 
+/* On mobile keep left-aligned (no cramped right-align); flip only on wider screens */
 .mt-trades .svc-alt-row.rev .svc-alt-copy {
-  order: 2;
-  text-align: right;
+  order: 0;
+  text-align: left;
 }
 
 .mt-trades .svc-alt-row.rev .svc-alt-rule {
-  order: 1;
+  order: 0;
 }
 
 .mt-trades .svc-alt-row.rev .svc-n {
-  margin-left: auto;
+  margin-left: 0;
+}
+
+@media (min-width: 640px) {
+  .mt-trades .svc-alt-row.rev .svc-alt-copy {
+    order: 2;
+    text-align: right;
+  }
+
+  .mt-trades .svc-alt-row.rev .svc-alt-rule {
+    order: 1;
+  }
+
+  .mt-trades .svc-alt-row.rev .svc-n {
+    margin-left: auto;
+  }
 }
 
 .mt-trades .svc-alt-rule {
@@ -1223,6 +1272,53 @@
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
+}
+
+/* ── Mobile layout identity (≤480px) — three looks stay distinct ── */
+@media (max-width: 480px) {
+  /* classic: card services already; tighten hero chips */
+  .mt-trades[data-layout='classic'] .hero-trust {
+    gap: 8px;
+  }
+
+  .mt-trades[data-layout='classic'] .card {
+    box-shadow: 0 10px 28px -18px rgba(0, 0, 0, 0.22);
+  }
+
+  /* bold: accent strip reads as the signature */
+  .mt-trades[data-layout='bold'] .hero-accent-strip .trustbar-in {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+  }
+
+  .mt-trades[data-layout='bold'] .hero--bold h1 {
+    font-size: clamp(26px, 7.2vw, 36px);
+  }
+
+  /* split: photo block is the signature under copy */
+  .mt-trades[data-layout='split'] .hero-split-media {
+    min-height: 40vh;
+    border-top: 3px solid var(--accent);
+  }
+
+  .mt-trades[data-layout='split'] .hero-split-in {
+    padding-bottom: 20px;
+  }
+
+  .mt-trades .ft-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .mt-trades .hdr .call {
+    font-size: 11.5px;
+    padding: 7px 10px;
+  }
+
+  .mt-trades .wrap {
+    padding: 0 16px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

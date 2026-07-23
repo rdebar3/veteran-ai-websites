@@ -1,8 +1,11 @@
 /* Monti experience shell — ported from monti-experience.html */
 
 .monti-app-root {
-  --monti-serif: var(--font-monti-serif, Fraunces, Georgia, serif);
-  --monti-sans: var(--font-monti-sans, Inter, system-ui, sans-serif);
+  /* next/font vars from app/monti/layout.tsx — always resolve to real faces */
+  --monti-serif: var(--font-monti-serif), "Fraunces", Georgia, serif;
+  --monti-sans: var(--font-monti-sans), "Inter", system-ui, sans-serif;
+  --font-serif: var(--monti-serif);
+  --font-sans: var(--monti-sans);
   font-family: var(--monti-sans);
   color: #f3ece2;
   overflow: hidden;
@@ -397,6 +400,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  position: relative;
 }
 
 .monti-bar {
@@ -430,12 +434,62 @@
 }
 
 .monti-cv {
-  flex: 1;
+  flex: 1 1 auto;
+  overflow-x: hidden;
   overflow-y: auto;
   background: #f7f4ef;
   min-height: 0;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  /* Always-visible thin scrollbar (affordance) */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.28) transparent;
+}
+
+.monti-cv::-webkit-scrollbar {
+  width: 6px;
+}
+
+.monti-cv::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.monti-cv::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 999px;
+}
+
+/* Subtle scroll affordance — visible until first scroll */
+.monti-scroll-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%) translateY(6px);
+  z-index: 5;
+  pointer-events: none;
+  font-family: var(--monti-sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(25, 28, 34, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 7px 12px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease,
+    visibility 0.45s ease;
+}
+
+.monti-scroll-hint.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* Start overlay */
@@ -631,6 +685,14 @@
   .monti-app {
     flex-direction: column;
     overflow: hidden;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .monti-app.building {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .monti-pane {
@@ -648,6 +710,29 @@
     min-height: 0;
     opacity: 1;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Height chain down to .monti-cv so touch scroll works inside the frame */
+  .monti-app.building .monti-site-pane,
+  .monti-app.building .monti-frame {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .monti-app.building .monti-cv {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
 
   .monti-app.building .monti-pane {

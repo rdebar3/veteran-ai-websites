@@ -26,6 +26,10 @@ import {
   preloadPhotoUrl,
   type PhotoVariants,
 } from '@/lib/monti/photos';
+import {
+  resolveSessionStyle,
+  type StylePick,
+} from '@/lib/monti/style-fit';
 import { tradeLabel } from '@/lib/monti/trade-labels';
 import type { FillSection, MontiRecord } from '@/lib/monti/types';
 import { applyFill } from '@/lib/monti/validate';
@@ -92,9 +96,10 @@ function isMobileAudioDevice(): boolean {
 }
 
 /**
- * Fail-OPEN agent audio:
+ * Fail-OPEN agent audio with strict mutual exclusion:
  * - Always attach a playing <audio> (WebRTC needs it; desktop hears this).
- * - Mobile: try gain(2)+compressor → speakers with element muted; watchdog falls back to element.
+ * - Mobile: try gain(2)+compressor → speakers with element hard-muted.
+ * - At any moment exactly ONE path is audible (element XOR webaudio).
  * - Never call track.setVolume(0) — that can silence LiveKit webAudioMix entirely.
  */
 function useAgentPlayback(
@@ -112,14 +117,15 @@ function useAgentPlayback(
   const agentStateRef = useRef(agentState);
   agentStateRef.current = agentState;
 
-  const applyMuteToOutputs = useCallback(() => {
+  /** Enforce: webaudio → element always muted; element → element.muted = user mute. */
+  const reassertPathExclusion = useCallback((reason?: string) => {
     const el = audioElRef.current;
     const mode = modeRef.current;
     const isMuted = mutedRef.current;
     if (mode === 'webaudio' && gainNodeRef.current) {
       gainNodeRef.current.gain.value = isMuted ? 0 : MONTI_GAIN_MOBILE;
       if (el) {
-        el.muted = true; // element stays muted while boost owns speakers
+        el.muted = true;
         el.volume = 1;
       }
     } else if (el) {
@@ -127,7 +133,16 @@ function useAgentPlayback(
       el.volume = 1;
     }
     if (isMuted) glowRef.current?.setAmplitude(0);
+    if (reason) {
+      console.info(
+        `[monti/live] audio path=${modeRef.current} reassert (${reason})`,
+      );
+    }
   }, [glowRef]);
+
+  const applyMuteToOutputs = useCallback(() => {
+    reassertPathExclusion();
+  }, [reassertPathExclusion]);
 
   useEffect(() => {
     applyMuteToOutputs();
@@ -144,6 +159,7 @@ function useAgentPlayback(
       if (ctx && ctx.state === 'suspended') {
         void ctx.resume().then(() => {
           console.info('[monti/live] AudioContext resumed →', ctx.state);
+          reassertPathExclusion('gesture-resume');
         });
       }
     };
@@ -155,7 +171,18 @@ function useAgentPlayback(
       window.removeEventListener('touchstart', resume);
       window.removeEventListener('keydown', resume);
     };
-  }, [audioCtxRef]);
+  }, [audioCtxRef, reassertPathExclusion]);
+
+  // Tab resume: re-assert which path owns the speakers
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === 'visible') {
+        reassertPathExclusion('visibilitychange');
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [reassertPathExclusion]);
 
   useEffect(() => {
     const publication = audioTrack?.publication;
@@ -182,30 +209,29 @@ function useAgentPlayback(
     let sawAgentSpeaking = false;
     let boostDisconnected = false;
 
-    // Always-on element path (desktop output + WebRTC requirement)
+    const wantBoost = isMobileAudioDevice();
+
+    // Always-on element (desktop output + WebRTC). On mobile-boost intent, mute
+    // BEFORE play so element never races with the WebAudio graph.
     const el = document.createElement('audio');
     el.autoplay = true;
     el.setAttribute('playsinline', 'true');
     el.setAttribute('webkit-playsinline', 'true');
     el.volume = 1;
-    el.muted = mutedRef.current;
-    // Keep in DOM for autoplay policies on some browsers
+    el.muted = wantBoost ? true : mutedRef.current;
     el.style.display = 'none';
     document.body.appendChild(el);
     track.attach(el);
     audioElRef.current = el;
-    void el.play().catch((err) => {
-      console.warn('[monti/live] audio element play() failed', err);
-    });
-
-    modeRef.current = 'element';
+    modeRef.current = wantBoost ? 'webaudio' : 'element';
     gainNodeRef.current = null;
 
-    const disconnectBoost = (reason: string) => {
-      if (boostDisconnected) return;
-      boostDisconnected = true;
-      modeRef.current = 'element';
-      gainNodeRef.current = null;
+    const logPath = (path: PlaybackMode, reason: string) => {
+      console.info(`[monti/live] audio path=${path} reason=${reason}`);
+    };
+
+    /** Tear down boost graph completely BEFORE unmuting the element. */
+    const teardownBoostGraph = () => {
       try {
         gain?.disconnect();
       } catch {
@@ -216,21 +242,74 @@ function useAgentPlayback(
       } catch {
         /* ignore */
       }
-      // Keep source→analyser for glow if present
       try {
         if (source && gain) source.disconnect(gain);
       } catch {
         /* ignore */
       }
+      gain = null;
+      compressor = null;
+      gainNodeRef.current = null;
+    };
+
+    const activateElementPath = (reason: string) => {
+      if (boostDisconnected && modeRef.current === 'element') {
+        // still re-assert mute
+        el.muted = mutedRef.current;
+        el.volume = 1;
+        return;
+      }
+      boostDisconnected = true;
+      // Disconnect graph FIRST — then unmute element (strict exclusion)
+      teardownBoostGraph();
+      modeRef.current = 'element';
       el.muted = mutedRef.current;
       el.volume = 1;
-      void el.play().catch(() => {});
+      void el.play().then(() => {
+        if (cancelled) return;
+        el.muted = mutedRef.current;
+        logPath('element', reason);
+      }).catch(() => {
+        logPath('element', `${reason}+play-failed`);
+      });
       console.warn(
-        `[monti/live] WebAudio boost failed — fell back to element playback (${reason})`,
+        `[monti/live] WebAudio boost off — element path live (${reason})`,
       );
     };
 
-    const wantBoost = isMobileAudioDevice();
+    const activateWebAudioPath = (g: GainNode, reason: string) => {
+      el.muted = true;
+      el.volume = 1;
+      modeRef.current = 'webaudio';
+      gainNodeRef.current = g;
+      g.gain.value = mutedRef.current ? 0 : MONTI_GAIN_MOBILE;
+      void el.play().then(() => {
+        if (cancelled) return;
+        // iOS can unmute after play() — re-assert hard mute
+        el.muted = true;
+        logPath('webaudio', reason);
+      }).catch(() => {
+        el.muted = true;
+        logPath('webaudio', `${reason}+play-failed`);
+      });
+    };
+
+    void el.play().then(() => {
+      if (cancelled) return;
+      // After first play: re-assert exclusion for the intended path
+      if (modeRef.current === 'webaudio') {
+        el.muted = true;
+      } else {
+        el.muted = mutedRef.current;
+      }
+    }).catch((err) => {
+      console.warn('[monti/live] audio element play() failed', err);
+    });
+
+    if (!wantBoost) {
+      logPath('element', 'desktop');
+    }
+
     const ctx = audioCtxRef.current;
 
     // Glow analyser (and optional mobile boost) need a running AudioContext
@@ -249,9 +328,6 @@ function useAgentPlayback(
 
           if (wantBoost && ctx.state === 'running') {
             gain = ctx.createGain();
-            gain.gain.value = mutedRef.current ? 0 : MONTI_GAIN_MOBILE;
-            gainNodeRef.current = gain;
-
             compressor = ctx.createDynamicsCompressor();
             compressor.threshold.value = -10;
             compressor.knee.value = 6;
@@ -263,38 +339,36 @@ function useAgentPlayback(
             gain.connect(compressor);
             compressor.connect(ctx.destination);
 
-            // Element silent while boost owns speakers (no setVolume on track)
-            el.muted = true;
-            modeRef.current = 'webaudio';
-            console.info('[monti/live] mobile boost path active (gain=', MONTI_GAIN_MOBILE, ')');
+            activateWebAudioPath(gain, `mobile-boost gain=${MONTI_GAIN_MOBILE}`);
 
             watchdogTimer = window.setTimeout(() => {
               if (cancelled || boostDisconnected) return;
               if (ctx.state !== 'running') {
-                disconnectBoost(`ctx.state=${ctx.state}`);
+                activateElementPath(`watchdog-ctx.state=${ctx.state}`);
                 return;
               }
-              // If agent spoke but analyser stayed dead, boost graph is not hearing
               if (sawAgentSpeaking && !sawEnergy) {
-                disconnectBoost('no analyser energy while agent speaking');
+                activateElementPath('watchdog-no-analyser-energy');
               }
             }, BOOST_WATCHDOG_MS);
           } else if (wantBoost && ctx.state !== 'running') {
-            console.warn(
-              '[monti/live] AudioContext not running on mobile — element playback only, state=',
-              ctx.state,
-            );
-            el.muted = mutedRef.current;
+            activateElementPath(`ctx-not-running state=${ctx.state}`);
           } else {
             // Desktop: element is the speaker; analyser is glow-only
-            el.muted = mutedRef.current;
             modeRef.current = 'element';
+            el.muted = mutedRef.current;
+            logPath('element', 'desktop-glow-only');
           }
 
           const data = new Uint8Array(analyser.fftSize);
           const tick = () => {
             if (cancelled || !analyser) return;
             if (agentStateRef.current === 'speaking') sawAgentSpeaking = true;
+
+            // Keep exclusion hot — iOS may flip muted during playback
+            if (modeRef.current === 'webaudio' && el && !el.muted) {
+              el.muted = true;
+            }
 
             if (mutedRef.current) {
               glowRef.current?.setAmplitude(0);
@@ -314,15 +388,21 @@ function useAgentPlayback(
           raf = requestAnimationFrame(tick);
         } catch (err) {
           console.warn('[monti/live] Web Audio graph setup failed', err);
-          el.muted = mutedRef.current;
-          modeRef.current = 'element';
+          activateElementPath('graph-setup-failed');
         }
       });
     } else {
       console.warn(
         '[monti/live] No AudioContext — element playback only (glow amplitude limited)',
       );
-      el.muted = mutedRef.current;
+      if (wantBoost) {
+        // Had hoped for boost; fall back cleanly
+        activateElementPath('no-audiocontext');
+      } else {
+        el.muted = mutedRef.current;
+        modeRef.current = 'element';
+        logPath('element', 'no-audiocontext-desktop');
+      }
     }
 
     applyMuteToOutputs();
@@ -331,21 +411,12 @@ function useAgentPlayback(
       cancelled = true;
       cancelAnimationFrame(raf);
       if (watchdogTimer) window.clearTimeout(watchdogTimer);
+      teardownBoostGraph();
       gainNodeRef.current = null;
       audioElRef.current = null;
       modeRef.current = 'element';
       try {
         source?.disconnect();
-      } catch {
-        /* ignore */
-      }
-      try {
-        gain?.disconnect();
-      } catch {
-        /* ignore */
-      }
-      try {
-        compressor?.disconnect();
       } catch {
         /* ignore */
       }
@@ -401,6 +472,10 @@ function LiveSessionShell({
   const pendingTextsRef = useRef<string[]>([]);
   /** Lock photo variants once trade is known — stable for the whole build. */
   const photoTradeLockedRef = useRef<string | null>(null);
+  /** Lock layout×palette once trade is known — stable for the whole build. */
+  const styleTradeLockedRef = useRef<string | null>(null);
+  const sessionStyleRef = useRef<StylePick | null>(null);
+  const previewScrollRef = useRef<HTMLDivElement | null>(null);
 
   const [record, setRecord] = useState<MontiRecord>(() => emptyRecord());
   const [fill, setFill] = useState<FillSection[]>([]);
@@ -428,6 +503,8 @@ function LiveSessionShell({
     hero: 0,
     support: 0,
   });
+  /** "↓ scroll the site" chip — shown once build starts, fades after first scroll. */
+  const [showScrollHint, setShowScrollHint] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)');
@@ -443,16 +520,68 @@ function LiveSessionShell({
     recordRef.current = record;
   }, [record]);
 
-  // Per-session photo rotation: pick once when trade is first known, preload hero.
+  /** Stamp locked session style onto a record (layout + palette + theme). */
+  const applySessionStyle = useCallback((r: MontiRecord): MontiRecord => {
+    const style = sessionStyleRef.current;
+    if (!style) return r;
+    const mood = r.theme_mood || 'clean';
+    return {
+      ...r,
+      layout: style.layout,
+      palette: style.palette,
+      theme_mood: mood,
+      theme: { palette: style.palette, mood },
+    };
+  }, []);
+
+  // Per-session photo + style: pick once when trade is first known.
   useEffect(() => {
     const trade = record.trade_key || record.hero?.image_id || null;
     if (!trade || !hasPhoto(trade) || trade === 'wv_hero') return;
-    if (photoTradeLockedRef.current === trade) return;
-    photoTradeLockedRef.current = trade;
-    const variants = pickTradePhotoVariants(trade);
-    setPhotoVariants(variants);
-    preloadPhotoUrl(photoUrl(trade, 'hero', variants.hero));
-  }, [record.trade_key, record.hero?.image_id]);
+
+    if (photoTradeLockedRef.current !== trade) {
+      photoTradeLockedRef.current = trade;
+      const variants = pickTradePhotoVariants(trade);
+      setPhotoVariants(variants);
+      preloadPhotoUrl(photoUrl(trade, 'hero', variants.hero));
+    }
+
+    if (styleTradeLockedRef.current !== trade) {
+      styleTradeLockedRef.current = trade;
+      // Honor agent layout+palette only when the combo is in the trade fit set;
+      // otherwise client random (so back-to-back same-trade demos vary).
+      const pick = resolveSessionStyle(trade, record.layout, record.palette);
+      sessionStyleRef.current = pick;
+      console.info(
+        `[monti/live] session style locked trade=${trade} layout=${pick.layout} palette=${pick.palette}`,
+      );
+      setRecord((prev) => {
+        const next = applySessionStyle({
+          ...prev,
+          // ensure trade_key is set for lead payload
+          trade_key: prev.trade_key || (trade as MontiRecord['trade_key']),
+        });
+        recordRef.current = next;
+        return next;
+      });
+    }
+  }, [record.trade_key, record.hero?.image_id, record.layout, record.palette, applySessionStyle]);
+
+  // Scroll-hint chip: show when building starts; dismiss on first preview scroll
+  useEffect(() => {
+    if (building) setShowScrollHint(true);
+  }, [building]);
+
+  useEffect(() => {
+    if (!building || !showScrollHint) return;
+    const el = previewScrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      if (el.scrollTop > 8) setShowScrollHint(false);
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [building, showScrollHint]);
 
   useEffect(() => {
     void room.startAudio().catch(() => {});
@@ -579,21 +708,44 @@ function LiveSessionShell({
       hero_image_id?: string | null;
       forceHandoff?: boolean;
     }) => {
-      setRecord(opts.record);
-      recordRef.current = opts.record;
+      // If trade is newly known, lock style before applying (same rules as effect).
+      const trade =
+        opts.record.trade_key || opts.record.hero?.image_id || null;
+      if (
+        trade &&
+        hasPhoto(trade) &&
+        trade !== 'wv_hero' &&
+        styleTradeLockedRef.current !== trade
+      ) {
+        styleTradeLockedRef.current = trade;
+        const pick = resolveSessionStyle(
+          trade,
+          opts.record.layout,
+          opts.record.palette,
+        );
+        sessionStyleRef.current = pick;
+        console.info(
+          `[monti/live] session style locked trade=${trade} layout=${pick.layout} palette=${pick.palette}`,
+        );
+      }
+
+      // Once locked, session style wins for the whole build (agent out-of-set ignored).
+      const styled = applySessionStyle(opts.record);
+      setRecord(styled);
+      recordRef.current = styled;
 
       setFill((prev) => {
         const next = new Set(prev);
         for (const f of opts.fill) next.add(f);
         const arr = Array.from(next) as FillSection[];
 
-        const name = opts.record.business?.name || '';
+        const name = styled.business?.name || '';
         const hasHero =
           arr.includes('hero') ||
           opts.template_id === 'trades' ||
-          opts.record.template_id === 'trades' ||
+          styled.template_id === 'trades' ||
           !!opts.hero_image_id ||
-          !!opts.record.trade_key;
+          !!styled.trade_key;
 
         if (name) {
           setBuilding(true);
@@ -631,7 +783,7 @@ function LiveSessionShell({
         return arr;
       });
     },
-    [],
+    [applySessionStyle],
   );
 
   const sendLeadOnce = useCallback(async (): Promise<{
@@ -896,6 +1048,8 @@ function LiveSessionShell({
             url={url}
             statusText={statusText}
             statusDone={statusDone}
+            scrollContainerRef={previewScrollRef}
+            showScrollHint={showScrollHint && building}
           >
             <TradesTemplate
               record={record}

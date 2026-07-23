@@ -36,8 +36,13 @@ export default function MontiLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // CSS variables (--font-monti-serif / --font-monti-sans) scope to all /monti routes
+  // including /monti/live so TradesTemplate never falls back to Times.
   return (
-    <div className={`${montiSerif.variable} ${montiSans.variable}`}>
+    <div
+      className={`monti-font-root ${montiSerif.variable} ${montiSans.variable}`}
+      style={{ minHeight: '100%', height: '100%' }}
+    >
       {children}
     </div>
   );

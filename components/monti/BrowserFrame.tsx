@@ -1,12 +1,16 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 
 interface BrowserFrameProps {
   url: string;
   statusText: string;
   statusDone?: boolean;
   children: ReactNode;
+  /** Ref to the scrollable preview body (.monti-cv). */
+  scrollContainerRef?: Ref<HTMLDivElement>;
+  /** Show “↓ scroll the site” chip until first scroll. */
+  showScrollHint?: boolean;
 }
 
 export default function BrowserFrame({
@@ -14,6 +18,8 @@ export default function BrowserFrame({
   statusText,
   statusDone = false,
   children,
+  scrollContainerRef,
+  showScrollHint = false,
 }: BrowserFrameProps) {
   return (
     <div className="monti-site-pane">
@@ -31,7 +37,15 @@ export default function BrowserFrame({
           <span className="monti-dot" />
           <span className="monti-url">{url}</span>
         </div>
-        <div className="monti-cv">{children}</div>
+        <div className="monti-cv" ref={scrollContainerRef}>
+          {children}
+        </div>
+        <div
+          className={`monti-scroll-hint${showScrollHint ? ' is-visible' : ''}`}
+          aria-hidden={!showScrollHint}
+        >
+          ↓ scroll the site
+        </div>
       </div>
     </div>
   );
