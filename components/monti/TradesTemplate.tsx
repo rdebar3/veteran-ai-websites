@@ -7,8 +7,14 @@ import {
   photoUrl,
   type PhotoVariants,
 } from '@/lib/monti/photos';
-import { getNichePreset, type NicheBlock, type NichePreset } from '@/lib/monti/niche-presets';
+import {
+  getNichePreset,
+  type NicheBlock,
+  type NichePreset,
+  type SitePage,
+} from '@/lib/monti/niche-presets';
 import { tradeLabel } from '@/lib/monti/trade-labels';
+import { resolveServiceIcon, ServiceIcon } from '@/components/monti/TradeIcons';
 import './trades-template.css';
 
 function cap(s: unknown, n: number): string {
@@ -60,49 +66,78 @@ function resolveLayout(raw: MontiRecord['layout']): SiteLayout {
   return 'classic';
 }
 
-function ServicesBlock({
+const NAV_PAGES: { id: SitePage; label: string }[] = [
+  { id: 'home', label: 'Home' },
+  { id: 'services', label: 'Services' },
+  { id: 'about', label: 'About' },
+  { id: 'contact', label: 'Contact' },
+];
+
+function ServicesList({
   layout,
   services,
   presentation,
   kicker,
   title,
+  trade,
+  preview,
+  onViewAll,
 }: {
   layout: SiteLayout;
   services: MontiService[];
   presentation: NichePreset['servicesPresentation'];
   kicker: string;
   title: string;
+  trade: string | null;
+  preview?: boolean;
+  onViewAll?: () => void;
 }) {
+  const list = preview ? services.slice(0, 3) : services;
+
   const body =
     presentation === 'checklist' ? (
       <ul className="svc-check">
-        {services.map((s) => (
-          <li className="svc-check-item" key={s.title}>
-            <i className="svc-check-mark" aria-hidden="true">
-              ✓
-            </i>
-            <div>
-              <h3>{cap(s.title, 30)}</h3>
-              <p>{cap(s.description, 120)}</p>
-            </div>
-          </li>
-        ))}
+        {list.map((s) => {
+          const ic = resolveServiceIcon(trade, s.title, s.description);
+          return (
+            <li className="svc-check-item" key={s.title}>
+              {ic ? (
+                <ServiceIcon id={ic} className="svc-ic svc-ic--check" />
+              ) : (
+                <i className="svc-check-mark" aria-hidden="true">
+                  ✓
+                </i>
+              )}
+              <div>
+                <h3>{cap(s.title, 30)}</h3>
+                <p>{cap(s.description, 120)}</p>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     ) : presentation === 'list' || layout === 'bold' ? (
       <div className="svc-list">
-        {services.map((s, i) => (
-          <div className="svc-row" key={s.title}>
-            <span className="svc-n">{String(i + 1).padStart(2, '0')}</span>
-            <div>
-              <h3>{cap(s.title, 30)}</h3>
-              <p>{cap(s.description, 120)}</p>
+        {list.map((s, i) => {
+          const ic = resolveServiceIcon(trade, s.title, s.description);
+          return (
+            <div className="svc-row" key={s.title}>
+              {ic ? (
+                <ServiceIcon id={ic} className="svc-ic" />
+              ) : (
+                <span className="svc-n">{String(i + 1).padStart(2, '0')}</span>
+              )}
+              <div>
+                <h3>{cap(s.title, 30)}</h3>
+                <p>{cap(s.description, 120)}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-    ) : layout === 'split' ? (
+    ) : layout === 'split' && !preview ? (
       <div className="svc-alt">
-        {services.map((s, i) => (
+        {list.map((s, i) => (
           <div
             className={`svc-alt-row${i % 2 === 1 ? ' rev' : ''}`}
             key={s.title}
@@ -118,24 +153,32 @@ function ServicesBlock({
       </div>
     ) : (
       <div className={`grid${presentation === 'proof' ? ' grid--proof' : ''}`}>
-        {services.map((s) => (
-          <div className="card" key={s.title}>
-            <span className="ic">◆</span>
-            <h3>{cap(s.title, 30)}</h3>
-            <p>{cap(s.description, 120)}</p>
-          </div>
-        ))}
+        {list.map((s) => {
+          const ic = resolveServiceIcon(trade, s.title, s.description);
+          return (
+            <div className="card" key={s.title}>
+              {ic ? <ServiceIcon id={ic} className="svc-ic svc-ic--card" /> : null}
+              <h3>{cap(s.title, 30)}</h3>
+              <p>{cap(s.description, 120)}</p>
+            </div>
+          );
+        })}
       </div>
     );
 
   return (
-    <section className="sec fillin" id="services">
+    <section className={`sec fillin${preview ? ' sec--preview' : ''}`} id={preview ? undefined : 'services'}>
       <div className="wrap">
         <div className="head">
           <p className="kicker">{kicker}</p>
-          <h2 className="title">{title}</h2>
+          <h2 className="title">{preview ? 'What we do best.' : title}</h2>
         </div>
         {body}
+        {preview && onViewAll ? (
+          <button type="button" className="page-link" onClick={onViewAll}>
+            View all services →
+          </button>
+        ) : null}
       </div>
     </section>
   );
@@ -158,9 +201,18 @@ export default function TradesTemplate({
 }: TradesTemplateProps) {
   const filled = new Set(fill);
   const hasAny = filled.size > 0 || showHeroSkeleton;
-  const b = record.business || { name: '', phone: '', service_area: '', established: null };
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const b = record.business || {
+    name: '',
+    phone: '',
+    service_area: '',
+    established: null,
+    hours: null,
+  };
+  const rootRef = useRef<HTMLDivElement>(null);
   const [hdrSolid, setHdrSolid] = useState(false);
+  const [page, setPage] = useState<SitePage>('home');
+  const unlockedOnce = useRef<Set<SitePage>>(new Set(['home']));
+  const [, bump] = useState(0);
 
   const layout = resolveLayout(record.layout);
   const palette = record.palette || 'ember';
@@ -170,16 +222,49 @@ export default function TradesTemplate({
     record.hero?.image_id && hasPhoto(record.hero.image_id)
       ? record.hero.image_id
       : 'wv_hero';
-  const tradeKey = record.trade_key || (hasPhoto(heroImgEarly) ? heroImgEarly : null);
+  const tradeKey =
+    record.trade_key || (hasPhoto(heroImgEarly) ? heroImgEarly : null);
   const niche = getNichePreset(tradeKey);
 
+  const showHero = filled.has('hero');
+  const showTrust = filled.has('trust') || filled.has('hero');
+  const showServices = filled.has('services');
+  const showAbout = filled.has('about');
+  const showContact = filled.has('contact');
+
+  const unlocked: Record<SitePage, boolean> = {
+    home: hasAny,
+    services: showServices,
+    about: showAbout,
+    contact: showContact,
+  };
+
+  // Track unlock pops
   useEffect(() => {
-    const el = scrollRef.current?.parentElement;
-    if (!el) return;
-    const onScroll = () => setHdrSolid(el.scrollTop > 40);
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
+    let changed = false;
+    (Object.keys(unlocked) as SitePage[]).forEach((p) => {
+      if (unlocked[p] && !unlockedOnce.current.has(p)) {
+        unlockedOnce.current.add(p);
+        changed = true;
+      }
+    });
+    if (changed) bump((n) => n + 1);
+  });
+
+  useEffect(() => {
+    const scroller = rootRef.current?.parentElement;
+    if (!scroller) return;
+    const onScroll = () => setHdrSolid(scroller.scrollTop > 40);
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    return () => scroller.removeEventListener('scroll', onScroll);
   }, []);
+
+  const go = (p: SitePage) => {
+    if (!unlocked[p]) return;
+    setPage(p);
+    const scroller = rootRef.current?.parentElement;
+    if (scroller) scroller.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (!hasAny) {
     return (
@@ -189,6 +274,7 @@ export default function TradesTemplate({
         data-palette={palette}
         data-mood={mood}
         data-niche={niche.shape}
+        data-page="home"
       >
         <div className="empty-hint">Your site will appear here as we talk…</div>
       </div>
@@ -198,20 +284,19 @@ export default function TradesTemplate({
   const name = cap(b.name, 40) || 'Your business';
   const phone = cap(b.phone, 20);
   const area = cap(b.service_area, 60);
+  const hours = b.hours ? cap(b.hours, 40) : '';
   const heroImg =
     record.hero?.image_id && hasPhoto(record.hero.image_id)
       ? record.hero.image_id
       : 'wv_hero';
-  const featureImg = hasPhoto(heroImg) && heroImg !== 'wv_hero' ? heroImg : 'work_truck';
+  const featureImg =
+    hasPhoto(heroImg) && heroImg !== 'wv_hero' ? heroImg : 'work_truck';
   const heroVariant = photoVariants.hero ?? 0;
   const supportVariant = photoVariants.support ?? 0;
 
   const emergency = !!record.contact?.emergency;
   const phoneDominant = niche.heroPhoneDominant || emergency;
-
-  const heroCta =
-    cap(record.hero?.cta_text, 22) ||
-    (phoneDominant && phone ? niche.defaultHeroCta : niche.defaultHeroCta);
+  const heroCta = cap(record.hero?.cta_text, 22) || niche.defaultHeroCta;
   const contactCta = cap(record.contact?.cta_text, 22) || niche.defaultContactCta;
   const phonePrompt =
     cap(record.contact?.phone_prompt, 48) || niche.defaultPhonePrompt;
@@ -220,18 +305,15 @@ export default function TradesTemplate({
   const badges = (record.trust?.badges || []).slice(0, 4);
   const reviews = (record.trust?.reviews || []).slice(0, 3);
   const est = b.established;
-  const showHero = filled.has('hero');
-  const showTrust = filled.has('trust') || filled.has('hero');
-  const showServices = filled.has('services');
-  const showAbout = filled.has('about');
-  const showContact = filled.has('contact');
-  const showFrameChrome = showHero;
 
   const safeChipLabels: string[] = [];
   if (area) safeChipLabels.push(`Serving ${cap(area, 40)}`);
   if (emergency) safeChipLabels.push('24/7');
+  if (hours) safeChipLabels.push(hours);
   const chipLabels =
-    badges.length > 0 ? badges.map((x) => cap(x, 24)).filter(Boolean) : safeChipLabels;
+    badges.length > 0
+      ? badges.map((x) => cap(x, 24)).filter(Boolean)
+      : safeChipLabels;
   const showChipRow = chipLabels.length > 0;
 
   const stripItems: { title: string; sub: string }[] =
@@ -265,31 +347,15 @@ export default function TradesTemplate({
   ));
 
   const showStickyCall =
-    emergency && !!phone && niche.stickyCallOnEmergency;
+    emergency && !!phone && niche.stickyCallOnEmergency && page !== 'contact';
 
-  // ── Section builders ──────────────────────────────────────────
+  // ── Block renderers ───────────────────────────────────────────
 
-  const renderHero = (): ReactNode => {
+  const renderHero = (key: string): ReactNode => {
     if (!showHero) {
       if (!showHeroSkeleton) return null;
-      return layout === 'split' ? (
-        <section className="hero-split hero-split--skel" key="hero-skel">
-          <div className="hero-split-text">
-            <div className="wrap hero-split-in">
-              <div className="sk sk-line" style={{ width: 120, height: 11 }} />
-              <div className="sk" style={{ height: 34, width: '70%', margin: '14px 0' }} />
-              <div className="sk sk-line" style={{ width: '52%' }} />
-            </div>
-          </div>
-          <div className="hero-split-media">
-            <div className="sk" style={{ width: '100%', height: '100%', borderRadius: 0 }} />
-          </div>
-        </section>
-      ) : (
-        <section
-          className={`hero-skel${layout === 'bold' ? ' hero-skel--bold' : ''}`}
-          key="hero-skel"
-        >
+      return (
+        <section className="hero-skel fillin" key={key}>
           <div className="wrap" style={{ width: '100%' }}>
             <div className="sk sk-line" style={{ width: 120, height: 11 }} />
             <div className="sk" style={{ height: 34, width: '70%', margin: '14px 0' }} />
@@ -310,7 +376,11 @@ export default function TradesTemplate({
           <>
             <span className="btn btn--primary">{heroCta}</span>
             {phone ? (
-              <span className={layout === 'split' ? 'btn btn--outline' : 'btn btn--ghost'}>
+              <span
+                className={
+                  layout === 'split' ? 'btn btn--outline' : 'btn btn--ghost'
+                }
+              >
                 ☎ {phone}
               </span>
             ) : null}
@@ -321,7 +391,7 @@ export default function TradesTemplate({
 
     if (layout === 'split') {
       return (
-        <section className="hero-split fillin" key="hero">
+        <section className="hero-split fillin" key={key}>
           <div className="hero-split-text">
             <div className="wrap hero-split-in">
               <span className="hero-chip hero-chip--ink">
@@ -351,7 +421,7 @@ export default function TradesTemplate({
         className={`hero fillin${layout === 'bold' ? ' hero--bold' : ''}${
           phoneDominant ? ' hero--call' : ''
         }`}
-        key="hero"
+        key={key}
       >
         <ImgSlot
           name={heroImg}
@@ -388,16 +458,16 @@ export default function TradesTemplate({
     );
   };
 
-  const renderAvailability = (): ReactNode => {
+  const renderAvailability = (key: string): ReactNode => {
     if (!showTrust || !showHero) return null;
-    // Bold already has accent strip on hero — skip duplicate mid-page strip
-    // unless niche wants availability early and layout isn't bold.
-    if (layout === 'bold' && !niche.showAvailabilityEarly) return null;
-    if (layout === 'bold') return null;
+    if (layout === 'bold' && page === 'home') return null;
 
     if (layout === 'split' && showChipRow) {
       return (
-        <section className="trust-chips availability-strip fillin" key="availability">
+        <section
+          className="trust-chips availability-strip fillin"
+          key={key}
+        >
           <div className="wrap trust-chips-in">
             {chipLabels.map((label) => (
               <span className="trust-chip" key={label}>
@@ -410,77 +480,83 @@ export default function TradesTemplate({
     }
 
     return (
-      <section className="trustbar availability-strip fillin" key="availability">
+      <section className="trustbar availability-strip fillin" key={key}>
         <div className="wrap trustbar-in">{trustStats}</div>
       </section>
     );
   };
 
-  const renderServices = (): ReactNode => {
-    if (showServices) {
+  const renderServices = (key: string, preview: boolean): ReactNode => {
+    if (showServices && services.length) {
       return (
-        <ServicesBlock
-          key="services"
+        <ServicesList
+          key={key}
           layout={layout}
           services={services}
           presentation={niche.servicesPresentation}
           kicker={niche.servicesKicker}
           title={niche.servicesTitle}
+          trade={typeof tradeKey === 'string' ? tradeKey : null}
+          preview={preview}
+          onViewAll={preview ? () => go('services') : undefined}
         />
       );
     }
-    if (!showServicesSkeleton) return null;
-    return (
-      <section className="sec" key="services-skel">
-        <div className="wrap">
-          <div className="sk sk-line" style={{ width: 90, height: 10 }} />
-          <div className="sk" style={{ height: 24, width: '40%', margin: '12px 0 20px' }} />
-          {niche.servicesPresentation === 'list' ||
-          niche.servicesPresentation === 'checklist' ||
-          layout === 'bold' ||
-          layout === 'split' ? (
-            <div className={layout === 'bold' || niche.servicesPresentation === 'list' ? 'svc-list' : 'svc-alt'}>
-              {[0, 1, 2].map((i) => (
-                <div
-                  className={
-                    layout === 'bold' || niche.servicesPresentation === 'list'
-                      ? 'svc-row'
-                      : 'svc-alt-row'
-                  }
-                  key={i}
-                >
-                  <div className="sk sk-line" style={{ width: 36, height: 18 }} />
-                  <div style={{ flex: 1 }}>
-                    <div className="sk sk-line" style={{ width: '50%', marginBottom: 8 }} />
-                    <div className="sk sk-line" style={{ width: '80%' }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
+    if (preview && showServicesSkeleton) {
+      return (
+        <section className="sec" key={key}>
+          <div className="wrap">
+            <div className="sk sk-line" style={{ width: 90, height: 10 }} />
+            <div
+              className="sk"
+              style={{ height: 24, width: '40%', margin: '12px 0 20px' }}
+            />
             <div className="grid">
               {[0, 1, 2].map((i) => (
                 <div className="card" key={i}>
                   <div
                     className="sk"
-                    style={{ width: 38, height: 38, borderRadius: 10, marginBottom: 11 }}
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 10,
+                      marginBottom: 11,
+                    }}
                   />
                   <div className="sk sk-line" style={{ width: '80%' }} />
                   <div className="sk sk-line" style={{ width: '60%' }} />
                 </div>
               ))}
             </div>
-          )}
-        </div>
-      </section>
-    );
+          </div>
+        </section>
+      );
+    }
+    return null;
   };
 
-  const renderAbout = (): ReactNode => {
-    if (!showAbout) return null;
+  const renderAbout = (key: string, teaser: boolean): ReactNode => {
+    if (!showAbout || !record.about?.body) return null;
+    const body = cap(record.about.body, teaser ? 160 : 320);
+
+    if (teaser) {
+      return (
+        <section className="sec sec--tint fillin" key={key}>
+          <div className="wrap about-teaser">
+            <p className="kicker">Who you&apos;re hiring</p>
+            <h2 className="title">A real local crew.</h2>
+            <p className="about-stack-body">{body}</p>
+            <button type="button" className="page-link" onClick={() => go('about')}>
+              Our story →
+            </button>
+          </div>
+        </section>
+      );
+    }
+
     if (layout === 'bold') {
       return (
-        <section className="about-bold fillin" id="about" key="about">
+        <section className="about-bold fillin" id="about" key={key}>
           <div className="about-bold-photo">
             <ImgSlot
               name={featureImg}
@@ -493,7 +569,19 @@ export default function TradesTemplate({
           <div className="wrap about-bold-copy">
             <p className="kicker">Who you&apos;re hiring</p>
             <h2>A real local crew — not a call center.</h2>
-            <p>{cap(record.about?.body, 320)}</p>
+            {est ? (
+              <p className="about-years">Serving the area since {est}</p>
+            ) : null}
+            <p>{body}</p>
+            {badges.length > 0 ? (
+              <div className="trust-chips-in about-badges">
+                {badges.map((x) => (
+                  <span className="trust-chip" key={x}>
+                    {cap(x, 24)}
+                  </span>
+                ))}
+              </div>
+            ) : null}
             <ul className="points">
               <li>
                 <i>✓</i> Straight answers and honest quotes
@@ -505,44 +593,13 @@ export default function TradesTemplate({
                 <i>✓</i> Work we stand behind, every time
               </li>
             </ul>
-            <span className="btn btn--primary">{contactCta}</span>
           </div>
         </section>
       );
     }
-    if (layout === 'split') {
-      return (
-        <section className="sec sec--tint fillin" id="about" key="about">
-          <div className="wrap about-stack">
-            <div>
-              <p className="kicker">Who you&apos;re hiring</p>
-              <h2 className="title">A real local crew — not a call center.</h2>
-              <p className="about-stack-body">{cap(record.about?.body, 320)}</p>
-              <ul className="points">
-                <li>
-                  <i>✓</i> Straight answers and honest quotes
-                </li>
-                <li>
-                  <i>✓</i> Clean, and respectful of your property
-                </li>
-                <li>
-                  <i>✓</i> Work we stand behind, every time
-                </li>
-              </ul>
-              <span className="btn btn--primary">{contactCta}</span>
-            </div>
-            <ImgSlot
-              name={featureImg}
-              preset="feature"
-              variant={supportVariant}
-              alt={`${name} — local crew`}
-            />
-          </div>
-        </section>
-      );
-    }
+
     return (
-      <section className="sec sec--tint fillin" id="about" key="about">
+      <section className="sec sec--tint fillin" id="about" key={key}>
         <div className="wrap">
           <div className="feature">
             <ImgSlot
@@ -554,7 +611,19 @@ export default function TradesTemplate({
             <div>
               <p className="kicker">Who you&apos;re hiring</p>
               <h2>A real local crew — not a call center.</h2>
-              <p>{cap(record.about?.body, 320)}</p>
+              {est ? (
+                <p className="about-years">Serving the area since {est}</p>
+              ) : null}
+              <p>{body}</p>
+              {badges.length > 0 ? (
+                <div className="trust-chips-in about-badges">
+                  {badges.map((x) => (
+                    <span className="trust-chip" key={x}>
+                      {cap(x, 24)}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
               <ul className="points">
                 <li>
                   <i>✓</i> Straight answers and honest quotes
@@ -566,7 +635,6 @@ export default function TradesTemplate({
                   <i>✓</i> Work we stand behind, every time
                 </li>
               </ul>
-              <span className="btn btn--primary">{contactCta}</span>
             </div>
           </div>
         </div>
@@ -574,10 +642,10 @@ export default function TradesTemplate({
     );
   };
 
-  const renderBand = (): ReactNode => {
-    if (!showFrameChrome) return null;
+  const renderBand = (key: string): ReactNode => {
+    if (!showHero) return null;
     return (
-      <section className="band-photo fillin" key="band">
+      <section className="band-photo fillin" key={key}>
         <ImgSlot
           name="wv_band"
           preset="band"
@@ -592,10 +660,10 @@ export default function TradesTemplate({
     );
   };
 
-  const renderSteps = (): ReactNode => {
-    if (!showFrameChrome) return null;
+  const renderSteps = (key: string): ReactNode => {
+    if (!showHero) return null;
     return (
-      <section className="sec" key="steps">
+      <section className="sec fillin" key={key}>
         <div className="wrap">
           <div className="head">
             <p className="kicker">How it works</p>
@@ -606,22 +674,24 @@ export default function TradesTemplate({
               <span className="n">01</span>
               <h4>Reach out</h4>
               <p>
-                Call or drop a message. We give you a straight answer and a real time —
-                no runaround.
+                Call or drop a message. We give you a straight answer and a real
+                time — no runaround.
               </p>
             </div>
             <div className="step">
               <span className="n">02</span>
               <h4>We show up prepared</h4>
               <p>
-                A clean, uniformed crew arrives on time with the right tools for the job.
+                A clean, uniformed crew arrives on time with the right tools for
+                the job.
               </p>
             </div>
             <div className="step">
               <span className="n">03</span>
               <h4>Done & guaranteed</h4>
               <p>
-                We finish right, clean up after ourselves, and stand behind the work.
+                We finish right, clean up after ourselves, and stand behind the
+                work.
               </p>
             </div>
           </div>
@@ -630,16 +700,18 @@ export default function TradesTemplate({
     );
   };
 
-  const renderReviews = (): ReactNode => {
+  const renderReviews = (key: string): ReactNode => {
     if (!showAbout || reviews.length === 0) return null;
     return (
-      <section className="sec sec--tint fillin" id="reviews" key="reviews">
+      <section className="sec sec--tint fillin" id="reviews" key={key}>
         <div className="wrap">
           <div className="head center">
             <p className="kicker">Reviews</p>
             <h2 className="title">Trusted in homes across WV.</h2>
           </div>
-          <div className={`reviews${layout === 'bold' ? ' reviews--stack' : ''}`}>
+          <div
+            className={`reviews${layout === 'bold' ? ' reviews--stack' : ''}`}
+          >
             {reviews.map((r) => (
               <div className="rev" key={r.name + r.quote.slice(0, 12)}>
                 <div className="stars">★★★★★</div>
@@ -656,54 +728,30 @@ export default function TradesTemplate({
     );
   };
 
-  const renderContact = (): ReactNode => {
+  const renderContact = (key: string): ReactNode => {
     if (!showContact) return null;
     const heading = emergency
       ? "Need help now? We're standing by."
       : "Let's get your project started.";
 
-    if (layout === 'bold') {
-      return (
-        <section className="cta-full fillin" id="contact" key="contact">
-          <div className="wrap">
-            <h2>{heading}</h2>
-            <p>{phonePrompt}.</p>
-            <div className="row">
-              {phone ? <span className="btn btn--primary">☎ {phone}</span> : null}
-              <span className="btn btn--ondark">{contactCta}</span>
-            </div>
-          </div>
-        </section>
-      );
-    }
-    if (layout === 'split') {
-      return (
-        <section className="sec fillin" id="contact" key="contact">
-          <div className="wrap">
-            <div className="cta-split">
-              <div>
-                <p className="kicker">Contact</p>
-                <h2>{heading}</h2>
-                <p>{phonePrompt}.</p>
-              </div>
-              <div className="cta-split-actions">
-                {phone ? <span className="cta-phone">☎ {phone}</span> : null}
-                <span className="btn btn--primary">{contactCta}</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    }
     return (
-      <section className="sec fillin" id="contact" key="contact">
+      <section className="sec fillin contact-page" id="contact" key={key}>
         <div className="wrap">
-          <div className="cta-band">
+          <div className={`cta-band${emergency ? ' cta-band--emergency' : ''}`}>
             <div className="glow" />
             <h2>{heading}</h2>
             <p>{phonePrompt}.</p>
+            {phone ? <div className="contact-phone-xl">☎ {phone}</div> : null}
+            {area ? (
+              <p className="contact-meta">
+                Serving {cap(area, 60)}
+                {hours ? ` · ${hours}` : ''}
+              </p>
+            ) : null}
             <div className="row">
-              {phone ? <span className="btn btn--primary">☎ {phone}</span> : null}
+              {phone ? (
+                <span className="btn btn--primary">☎ {phone}</span>
+              ) : null}
               <span className="btn btn--ondark">{contactCta}</span>
             </div>
           </div>
@@ -712,20 +760,86 @@ export default function TradesTemplate({
     );
   };
 
-  const blockMap: Record<NicheBlock, () => ReactNode> = {
-    hero: renderHero,
-    availability: renderAvailability,
-    services: renderServices,
-    about: renderAbout,
-    band: renderBand,
-    steps: renderSteps,
-    reviews: renderReviews,
-    contact: renderContact,
+  const renderCta = (key: string): ReactNode => {
+    if (!showHero && !showContact) return null;
+    return (
+      <section className="sec fillin" key={key}>
+        <div className="wrap">
+          <div className="home-cta">
+            <h2 className="title">
+              {emergency ? 'Ready when you are.' : 'Let’s talk about your project.'}
+            </h2>
+            <p className="home-cta-sub">{phonePrompt}.</p>
+            <div className="row" style={{ justifyContent: 'flex-start', marginTop: 16 }}>
+              {phone ? (
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  onClick={() => go('contact')}
+                >
+                  ☎ {phone}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  onClick={() => (unlocked.contact ? go('contact') : undefined)}
+                  disabled={!unlocked.contact}
+                >
+                  {contactCta}
+                </button>
+              )}
+              {unlocked.services ? (
+                <button
+                  type="button"
+                  className="btn btn--outline"
+                  onClick={() => go('services')}
+                >
+                  See services
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
   };
+
+  const blockRender = (block: NicheBlock, idx: number): ReactNode => {
+    const key = `${page}-${block}-${idx}`;
+    switch (block) {
+      case 'hero':
+        return renderHero(key);
+      case 'availability':
+        return renderAvailability(key);
+      case 'services':
+        return renderServices(key, false);
+      case 'servicesPreview':
+        return renderServices(key, true);
+      case 'about':
+        return renderAbout(key, false);
+      case 'aboutTeaser':
+        return renderAbout(key, true);
+      case 'band':
+        return renderBand(key);
+      case 'steps':
+        return renderSteps(key);
+      case 'reviews':
+        return renderReviews(key);
+      case 'contact':
+        return renderContact(key);
+      case 'cta':
+        return renderCta(key);
+      default:
+        return null;
+    }
+  };
+
+  const pageBlocks = niche.pages[page] || niche.pages.home;
 
   return (
     <div
-      ref={scrollRef}
+      ref={rootRef}
       className={`mt-trades${showStickyCall ? ' has-sticky-call' : ''}`}
       data-layout={layout}
       data-palette={palette}
@@ -733,21 +847,45 @@ export default function TradesTemplate({
       data-niche={niche.shape}
       data-svc={niche.servicesPresentation}
       data-emergency={emergency ? 'true' : 'false'}
+      data-page={page}
     >
       <header
-        className={`hdr ${hdrSolid ? 'solid' : ''} ${!showHero ? 'on-light' : ''} ${
-          layout === 'split' && showHero ? 'on-light' : ''
-        }`}
+        className={`hdr ${hdrSolid ? 'solid' : ''} ${
+          !showHero || page !== 'home' ? 'on-light solid' : ''
+        } ${layout === 'split' && showHero && page === 'home' ? 'on-light' : ''}`}
       >
         <div className="wrap hdr-in">
-          <div className="brand">
+          <button
+            type="button"
+            className="brand brand-btn"
+            onClick={() => go('home')}
+          >
             <span className="brand-mark">{initials(name)}</span>
-            {cap(name, 34)}
-          </div>
-          <nav className="nav" aria-hidden="true">
-            <a href="#services">Services</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
+            {cap(name, 28)}
+          </button>
+          <nav className="nav" aria-label="Site">
+            {NAV_PAGES.map(({ id, label }) => {
+              const isOn = page === id;
+              const isOpen = unlocked[id];
+              const justUnlocked =
+                isOpen &&
+                unlockedOnce.current.has(id) &&
+                id !== 'home';
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  className={`nav-item${isOn ? ' is-active' : ''}${
+                    !isOpen ? ' is-locked' : ''
+                  }${justUnlocked ? ' is-unlock' : ''}`}
+                  disabled={!isOpen}
+                  aria-current={isOn ? 'page' : undefined}
+                  onClick={() => go(id)}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </nav>
           {phone ? (
             <span className="call">☎ {phone}</span>
@@ -759,18 +897,41 @@ export default function TradesTemplate({
         </div>
       </header>
 
-      {niche.blocks.map((block) => blockMap[block]())}
+      <main className="mt-page" key={page}>
+        {pageBlocks.map((block, i) => blockRender(block, i))}
+      </main>
 
       {showHero ? (
         <footer className="ft">
           <div className="wrap">
             <div className="ft-grid">
               <div style={{ maxWidth: '30ch' }}>
-                <div className="brand" style={{ color: '#fff', marginBottom: 12 }}>
+                <div
+                  className="brand"
+                  style={{ color: '#fff', marginBottom: 12 }}
+                >
                   <span className="brand-mark">{initials(name)}</span>
                   {cap(name, 34)}
                 </div>
-                <p>Honest, professional work for the mountains of West Virginia.</p>
+                <p>
+                  Honest, professional work for the mountains of West Virginia.
+                </p>
+              </div>
+              <div>
+                <h5>PAGES</h5>
+                <p className="ft-nav">
+                  {NAV_PAGES.map(({ id, label }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      className="ft-link"
+                      disabled={!unlocked[id]}
+                      onClick={() => go(id)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </p>
               </div>
               <div>
                 <h5>CONTACT</h5>
@@ -778,13 +939,12 @@ export default function TradesTemplate({
                   {phone || '—'}
                   <br />
                   {cap(area, 50) || 'West Virginia'}
-                </p>
-              </div>
-              <div>
-                <h5>SERVICE AREA</h5>
-                <p>
-                  {cap(area, 60) || 'West Virginia'}
-                  <br />& surrounding WV
+                  {hours ? (
+                    <>
+                      <br />
+                      {hours}
+                    </>
+                  ) : null}
                 </p>
               </div>
             </div>

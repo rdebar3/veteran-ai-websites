@@ -51,6 +51,8 @@ export default function MontiExperience() {
   const messagesRef = useRef<ChatMessage[]>([]);
   /** Lock photo variants once trade is known — stable for the whole build. */
   const photoTradeLockedRef = useRef<string | null>(null);
+  const appRef = useRef<HTMLDivElement | null>(null);
+  const previewScrollRef = useRef<HTMLDivElement | null>(null);
 
   const [started, setStarted] = useState(false);
   const [mode, setMode] = useState<Mode>('typed');
@@ -95,6 +97,30 @@ export default function MontiExperience() {
     setPhotoVariants(variants);
     preloadPhotoUrl(photoUrl(trade, 'hero', variants.hero));
   }, [record.trade_key, record.hero?.image_id]);
+
+  // Desktop wheel → site preview (same assist as /monti/live)
+  useEffect(() => {
+    if (!building) return;
+    const root = appRef.current;
+    if (!root) return;
+    const onWheel = (e: WheelEvent) => {
+      const cv = previewScrollRef.current;
+      if (!cv) return;
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      if (t.closest('input, textarea, select, [contenteditable="true"]')) return;
+      const inCv = cv.contains(t);
+      if (inCv) {
+        const media = t.closest(
+          'img, video, .img, .hero, .hero-split, .hero-split-media, .band-photo, .about-bold-photo, .scrim',
+        );
+        if (!media) return;
+      }
+      cv.scrollTop += e.deltaY;
+    };
+    root.addEventListener('wheel', onWheel, { passive: true });
+    return () => root.removeEventListener('wheel', onWheel);
+  }, [building]);
 
   // Hide root marketing chrome while Monti is mounted
   useEffect(() => {
@@ -494,7 +520,10 @@ export default function MontiExperience() {
 
   return (
     <div className="monti-app-root">
-      <div className={`monti-app${building ? ' building' : ''}`}>
+      <div
+        ref={appRef}
+        className={`monti-app${building ? ' building' : ''}`}
+      >
         <div className="monti-pane">
           <GlowCanvas ref={glowRef} muted={muted} className="monti-glow" />
           <div className="monti-top">
@@ -624,6 +653,7 @@ export default function MontiExperience() {
             url={url}
             statusText={statusText}
             statusDone={statusDone}
+            scrollContainerRef={previewScrollRef}
           >
             <TradesTemplate
               record={record}

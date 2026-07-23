@@ -1,5 +1,5 @@
 /**
- * Per-trade site SHAPE presets — structure, emphasis, and copy defaults.
+ * Per-trade site SHAPE presets — multi-page composition, emphasis, copy defaults.
  * Orthogonal to layout×palette (style-fit) and photo variants.
  * Never invents facts; defaults only fill empty CTA/title strings.
  */
@@ -8,24 +8,29 @@ import { TRADE_KEYS } from './types';
 
 export type NicheShape = 'emergency' | 'checklist' | 'visual' | 'shop';
 
-/** Logical content blocks (header/footer always bookend). */
+export type SitePage = 'home' | 'services' | 'about' | 'contact';
+
+/** Logical content blocks within a page. */
 export type NicheBlock =
   | 'hero'
   | 'availability'
   | 'services'
+  | 'servicesPreview'
   | 'about'
+  | 'aboutTeaser'
   | 'band'
   | 'steps'
   | 'reviews'
-  | 'contact';
+  | 'contact'
+  | 'cta';
 
 export type ServicesPresentation = 'cards' | 'list' | 'checklist' | 'proof';
 
 export interface NichePreset {
   shape: NicheShape;
-  blocks: NicheBlock[];
+  /** Which blocks appear on each of the 4 pages (order matters). */
+  pages: Record<SitePage, NicheBlock[]>;
   servicesPresentation: ServicesPresentation;
-  /** Huge phone + CALL NOW energy when phone is on the record */
   heroPhoneDominant: boolean;
   showAvailabilityEarly: boolean;
   stickyCallOnEmergency: boolean;
@@ -38,66 +43,45 @@ export interface NichePreset {
   bandBody: string;
 }
 
-const EMERGENCY_BLOCKS: NicheBlock[] = [
-  'hero',
-  'availability',
-  'services',
-  'contact',
-  'about',
-  'band',
-  'steps',
-  'reviews',
-];
+const EMERGENCY_PAGES: Record<SitePage, NicheBlock[]> = {
+  home: ['hero', 'availability', 'servicesPreview', 'cta'],
+  services: ['services', 'steps', 'cta'],
+  about: ['about', 'availability', 'reviews'],
+  contact: ['contact', 'availability'],
+};
 
-const VISUAL_BLOCKS: NicheBlock[] = [
-  'hero',
-  'band',
-  'services',
-  'about',
-  'availability',
-  'contact',
-  'steps',
-  'reviews',
-];
+const CHECKLIST_PAGES: Record<SitePage, NicheBlock[]> = {
+  home: ['hero', 'servicesPreview', 'aboutTeaser', 'cta'],
+  services: ['services', 'steps', 'cta'],
+  about: ['about', 'band', 'reviews'],
+  contact: ['contact'],
+};
 
-const CHECKLIST_BLOCKS: NicheBlock[] = [
-  'hero',
-  'services',
-  'about',
-  'availability',
-  'contact',
-  'band',
-  'steps',
-  'reviews',
-];
+const VISUAL_PAGES: Record<SitePage, NicheBlock[]> = {
+  home: ['hero', 'band', 'servicesPreview', 'aboutTeaser', 'cta'],
+  services: ['services', 'steps', 'cta'],
+  about: ['about', 'band', 'reviews'],
+  contact: ['contact'],
+};
 
-const SHOP_BLOCKS: NicheBlock[] = [
-  'hero',
-  'availability',
-  'services',
-  'about',
-  'contact',
-  'band',
-  'steps',
-  'reviews',
-];
+const SHOP_PAGES: Record<SitePage, NicheBlock[]> = {
+  home: ['hero', 'availability', 'servicesPreview', 'cta'],
+  services: ['services', 'steps', 'cta'],
+  about: ['about', 'band', 'reviews'],
+  contact: ['contact', 'availability'],
+};
 
-/** Classic progressive order when trade unknown. */
-const DEFAULT_BLOCKS: NicheBlock[] = [
-  'hero',
-  'availability',
-  'services',
-  'about',
-  'band',
-  'steps',
-  'reviews',
-  'contact',
-];
+const DEFAULT_PAGES: Record<SitePage, NicheBlock[]> = {
+  home: ['hero', 'availability', 'servicesPreview', 'aboutTeaser', 'cta'],
+  services: ['services', 'steps', 'cta'],
+  about: ['about', 'band', 'reviews'],
+  contact: ['contact'],
+};
 
 export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
   towing: {
     shape: 'emergency',
-    blocks: EMERGENCY_BLOCKS,
+    pages: EMERGENCY_PAGES,
     servicesPresentation: 'list',
     heroPhoneDominant: true,
     showAvailabilityEarly: true,
@@ -113,7 +97,7 @@ export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
   },
   plumbing: {
     shape: 'emergency',
-    blocks: EMERGENCY_BLOCKS,
+    pages: EMERGENCY_PAGES,
     servicesPresentation: 'list',
     heroPhoneDominant: true,
     showAvailabilityEarly: true,
@@ -129,7 +113,7 @@ export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
   },
   hvac: {
     shape: 'emergency',
-    blocks: EMERGENCY_BLOCKS,
+    pages: EMERGENCY_PAGES,
     servicesPresentation: 'list',
     heroPhoneDominant: true,
     showAvailabilityEarly: true,
@@ -145,7 +129,7 @@ export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
   },
   electrical: {
     shape: 'emergency',
-    blocks: EMERGENCY_BLOCKS,
+    pages: EMERGENCY_PAGES,
     servicesPresentation: 'list',
     heroPhoneDominant: true,
     showAvailabilityEarly: true,
@@ -161,7 +145,7 @@ export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
   },
   cleaning: {
     shape: 'checklist',
-    blocks: CHECKLIST_BLOCKS,
+    pages: CHECKLIST_PAGES,
     servicesPresentation: 'checklist',
     heroPhoneDominant: false,
     showAvailabilityEarly: false,
@@ -177,7 +161,7 @@ export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
   },
   landscaping: {
     shape: 'visual',
-    blocks: VISUAL_BLOCKS,
+    pages: VISUAL_PAGES,
     servicesPresentation: 'proof',
     heroPhoneDominant: false,
     showAvailabilityEarly: false,
@@ -193,7 +177,7 @@ export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
   },
   roofing: {
     shape: 'visual',
-    blocks: VISUAL_BLOCKS,
+    pages: VISUAL_PAGES,
     servicesPresentation: 'proof',
     heroPhoneDominant: false,
     showAvailabilityEarly: false,
@@ -209,7 +193,7 @@ export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
   },
   auto: {
     shape: 'shop',
-    blocks: SHOP_BLOCKS,
+    pages: SHOP_PAGES,
     servicesPresentation: 'cards',
     heroPhoneDominant: false,
     showAvailabilityEarly: true,
@@ -227,7 +211,7 @@ export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
 
 export const DEFAULT_NICHE: NichePreset = {
   shape: 'shop',
-  blocks: DEFAULT_BLOCKS,
+  pages: DEFAULT_PAGES,
   servicesPresentation: 'cards',
   heroPhoneDominant: false,
   showAvailabilityEarly: true,

@@ -13,6 +13,10 @@ interface BrowserFrameProps {
   showScrollHint?: boolean;
 }
 
+/**
+ * Minimal site shell — no fake browser chrome.
+ * Domain pill is decorative only (pointer-events: none).
+ */
 export default function BrowserFrame({
   url,
   statusText,
@@ -30,14 +34,13 @@ export default function BrowserFrame({
           <span>{statusText}</span>
         </span>
       </div>
-      <div className="monti-frame">
-        <div className="monti-bar">
-          <span className="monti-dot" />
-          <span className="monti-dot" />
-          <span className="monti-dot" />
-          <span className="monti-url">{url}</span>
-        </div>
-        <div className="monti-cv" ref={scrollContainerRef}>
+      <div className="monti-frame monti-frame--bare">
+        {url ? (
+          <div className="monti-domain-pill" aria-hidden="true">
+            {url}
+          </div>
+        ) : null}
+        <div className="monti-cv" ref={scrollContainerRef} data-scrollable>
           {children}
         </div>
         <div

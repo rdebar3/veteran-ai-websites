@@ -585,8 +585,8 @@ function LiveSessionShell({
     return () => el.removeEventListener('scroll', onScroll);
   }, [building, showScrollHint]);
 
-  // Desktop: wheel anywhere on the building layout drives .monti-cv (page is overflow:hidden).
-  // Skip when the event is already over the scroller (native) or over form controls.
+  // Desktop: wheel drives .monti-cv when building. Outside the scroller always;
+  // inside, assist full-bleed media (hero/band) where native wheel can stall.
   useEffect(() => {
     if (!building) return;
     const root = appRef.current;
@@ -597,13 +597,15 @@ function LiveSessionShell({
       if (!cv) return;
       const t = e.target;
       if (!(t instanceof Element)) return;
-      // Already over the preview — browser handles it (no double-scroll)
-      if (cv.contains(t)) return;
-      // Don't hijack typing / form controls
       if (t.closest('input, textarea, select, [contenteditable="true"]')) return;
-      // Guard: other intentional scroll regions (none today)
-      const other = t.closest('[data-scrollable]');
-      if (other && other !== cv) return;
+
+      const inCv = cv.contains(t);
+      if (inCv) {
+        const media = t.closest(
+          'img, video, .img, .hero, .hero-split, .hero-split-media, .band-photo, .about-bold-photo, .scrim',
+        );
+        if (!media) return; // normal content — native only
+      }
 
       cv.scrollTop += e.deltaY;
     };
