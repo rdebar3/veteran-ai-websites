@@ -36,6 +36,9 @@ import { applyFill } from '@/lib/monti/validate';
 
 const TOPIC_FILL = 'monti_fill';
 const TOPIC_LEAD = 'monti_lead';
+/** Client → agent: visitor is composing a typed reply (silence nudge must wait). */
+const TOPIC_TYPING = 'monti_typing';
+const TYPING_THROTTLE_MS = 3000;
 const CORE_FILLS: FillSection[] = ['hero', 'services', 'contact', 'about'];
 
 /** Mobile boost only — desktop stays plain <audio> (pre-regression behavior). */
@@ -671,6 +674,45 @@ function LiveSessionShell({
     [room],
   );
 
+  // ── Typing signal: tell the agent a keyboard user is mid-sentence ──
+  const lastTypingPublishRef = useRef(0);
+  const typingActiveRef = useRef(false);
+
+  const publishTyping = useCallback(
+    async (payload: { typing: boolean; text_sent?: boolean }) => {
+      if (!connected) return;
+      try {
+        const data = new TextEncoder().encode(JSON.stringify(payload));
+        await room.localParticipant.publishData(data, {
+          reliable: true,
+          topic: TOPIC_TYPING,
+        });
+        typingActiveRef.current = payload.typing === true;
+        if (payload.typing) lastTypingPublishRef.current = Date.now();
+      } catch (err) {
+        console.warn('[monti/live] publishTyping failed', err);
+      }
+    },
+    [room, connected],
+  );
+
+  // While draft is non-empty, pulse typing:true (throttled). Empty → cleared.
+  useEffect(() => {
+    if (!connected) return;
+    const hasText = draft.trim().length > 0;
+    if (hasText) {
+      const now = Date.now();
+      if (
+        !typingActiveRef.current ||
+        now - lastTypingPublishRef.current >= TYPING_THROTTLE_MS
+      ) {
+        void publishTyping({ typing: true });
+      }
+    } else if (typingActiveRef.current) {
+      void publishTyping({ typing: false });
+    }
+  }, [draft, connected, publishTyping]);
+
   // Flush messages typed before the agent finished joining
   useEffect(() => {
     if (!agentReady || pendingTextsRef.current.length === 0) return;
@@ -700,6 +742,8 @@ function LiveSessionShell({
 
       setCaption(`You: ${text}`);
       setDraft('');
+      // Clear typing + mark a real text turn for typed-dominant patience on the agent
+      void publishTyping({ typing: false, text_sent: true });
 
       if (!agentReady) {
         pendingTextsRef.current.push(text);
@@ -716,7 +760,7 @@ function LiveSessionShell({
         setSendingText(false);
       }
     },
-    [draft, connected, sendingText, agentReady, deliverText],
+    [draft, connected, sendingText, agentReady, deliverText, publishTyping],
   );
 
   /** Cut local mic publish so room noise stops reaching the agent. */
@@ -1039,6 +1083,14 @@ function LiveSessionShell({
                   type="text"
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
+                  onFocus={() => {
+                    if (draft.trim()) void publishTyping({ typing: true });
+                  }}
+                  onBlur={() => {
+                    if (typingActiveRef.current) {
+                      void publishTyping({ typing: false });
+                    }
+                  }}
                   placeholder={
                     !connected
                       ? 'Connecting…'

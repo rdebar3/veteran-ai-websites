@@ -43,13 +43,18 @@ MODEL = "grok-voice-latest"
 
 TOPIC_FILL = "monti_fill"
 TOPIC_LEAD = "monti_lead"
+TOPIC_TYPING = "monti_typing"  # client: visitor is composing a typed reply
 
 # --- Session cost / quality guards (tune these) ---
 SESSION_MAX_SECONDS = 600  # ~10 min wall-clock hard stop
-SESSION_NUDGE_SECONDS = 22  # user_away_timeout → first soft re-engage
+SESSION_NUDGE_SECONDS = 22  # user_away_timeout → first soft re-engage (voice)
 SESSION_NUDGE_GAP_SECONDS = 25  # wait after a nudge before the next
 SESSION_IDLE_SECONDS = 120  # total quiet after first "away" → polite wrap
 SESSION_MAX_NUDGES = 2  # max re-engages per quiet spell
+# Typing is silent by definition — extend patience once the session is typed-dominant
+SESSION_NUDGE_TYPED_MULT = 2.5
+# Hold all nudges while a typing signal is this fresh
+TYPING_FRESH_SECONDS = 8.0
 
 # xAI RealtimeModel server VAD (0.6–0.75 threshold; modest silence for snappier turns)
 VAD_THRESHOLD = 0.65
@@ -307,15 +312,26 @@ async def entrypoint(ctx: JobContext) -> None:
 
     closing = False
     silence_task: asyncio.Task[None] | None = None
+    typing_recheck_task: asyncio.Task[None] | None = None
     user_is_away = False
+    last_typing_at = 0.0
+    typed_dominant = False
+
+    def _now() -> float:
+        return asyncio.get_event_loop().time()
+
+    def is_typing_fresh() -> bool:
+        return last_typing_at > 0 and (_now() - last_typing_at) < TYPING_FRESH_SECONDS
 
     async def polite_end(reason: str) -> None:
-        nonlocal closing, silence_task
+        nonlocal closing, silence_task, typing_recheck_task
         if closing:
             return
         closing = True
         if silence_task and not silence_task.done():
             silence_task.cancel()
+        if typing_recheck_task and not typing_recheck_task.done():
+            typing_recheck_task.cancel()
         logger.info("session ending reason=%s room=%s", reason, ctx.room.name)
         try:
             await session.say(WRAP_UP_LINE, allow_interruptions=False)
@@ -326,18 +342,73 @@ async def entrypoint(ctx: JobContext) -> None:
         except Exception:
             logger.exception("session aclose failed")
 
+    def _cancel_silence(*, keep_recheck: bool = False) -> None:
+        """Stop silence pipeline. keep_recheck=True when typing is still active
+        so we resume patience once typing goes stale (away may not re-fire)."""
+        nonlocal silence_task, user_is_away, typing_recheck_task
+        user_is_away = False
+        if silence_task and not silence_task.done():
+            silence_task.cancel()
+        silence_task = None
+        if not keep_recheck:
+            if typing_recheck_task and not typing_recheck_task.done():
+                typing_recheck_task.cancel()
+            typing_recheck_task = None
+
+    async def _sleep_interruptible(seconds: float) -> bool:
+        """Sleep in chunks; return False if we should abort silence pipeline."""
+        end = _now() + seconds
+        while _now() < end:
+            if closing or not user_is_away:
+                return False
+            if is_typing_fresh():
+                return False
+            await asyncio.sleep(min(1.0, end - _now()))
+        return not closing and user_is_away and not is_typing_fresh()
+
     async def silence_pipeline() -> None:
         """Re-engage up to SESSION_MAX_NUDGES times, then wrap at SESSION_IDLE_SECONDS."""
         nonlocal user_is_away
-        started = asyncio.get_event_loop().time()
+        started = _now()
         nudges = 0
         try:
+            # Typed sessions need more patience (keyboard is slow / silent)
+            if typed_dominant:
+                extra = float(SESSION_NUDGE_SECONDS) * (SESSION_NUDGE_TYPED_MULT - 1.0)
+                logger.info(
+                    "typed-dominant extra wait %.1fs room=%s",
+                    extra,
+                    ctx.room.name,
+                )
+                if not await _sleep_interruptible(extra):
+                    logger.info(
+                        "silence pipeline aborted during typed wait room=%s",
+                        ctx.room.name,
+                    )
+                    return
+
             while not closing and user_is_away and nudges < SESSION_MAX_NUDGES:
-                if nudges > 0:
-                    await asyncio.sleep(SESSION_NUDGE_GAP_SECONDS)
+                if is_typing_fresh():
+                    logger.info(
+                        "silence nudge skipped-due-to-typing room=%s",
+                        ctx.room.name,
+                    )
+                    # Wait until typing goes stale (or user returns)
+                    while is_typing_fresh() and user_is_away and not closing:
+                        await asyncio.sleep(1.0)
                     if closing or not user_is_away:
                         return
-                logger.info("silence nudge %s room=%s", nudges + 1, ctx.room.name)
+                    continue
+
+                if nudges > 0:
+                    if not await _sleep_interruptible(float(SESSION_NUDGE_GAP_SECONDS)):
+                        return
+                logger.info(
+                    "silence nudge %s room=%s typed_dominant=%s",
+                    nudges + 1,
+                    ctx.room.name,
+                    typed_dominant,
+                )
                 try:
                     await session.generate_reply(instructions=NUDGE_INSTRUCTIONS)
                 except Exception:
@@ -345,34 +416,89 @@ async def entrypoint(ctx: JobContext) -> None:
                 nudges += 1
 
             # Wait out remaining idle budget from first away signal
-            elapsed = asyncio.get_event_loop().time() - started
+            elapsed = _now() - started
             remaining = max(0.0, float(SESSION_IDLE_SECONDS) - elapsed)
             if remaining > 0:
-                await asyncio.sleep(remaining)
-            if not closing and user_is_away:
+                if not await _sleep_interruptible(remaining):
+                    return
+            if not closing and user_is_away and not is_typing_fresh():
                 await polite_end("idle")
         except asyncio.CancelledError:
             return
 
-    def _cancel_silence() -> None:
+    def _start_silence_pipeline() -> None:
         nonlocal silence_task, user_is_away
-        user_is_away = False
+        user_is_away = True
         if silence_task and not silence_task.done():
             silence_task.cancel()
-        silence_task = None
+        silence_task = asyncio.create_task(silence_pipeline())
+
+    async def typing_recheck_after_away() -> None:
+        """Resume silence path once typing goes stale (away may not re-fire)."""
+        try:
+            while not closing and is_typing_fresh():
+                await asyncio.sleep(0.5)
+            if closing:
+                return
+            # User returned to speaking/listening would have cancelled this task
+            logger.info(
+                "typing stale — starting silence pipeline room=%s typed_dominant=%s",
+                ctx.room.name,
+                typed_dominant,
+            )
+            _start_silence_pipeline()
+        except asyncio.CancelledError:
+            return
+
+    def mark_typing(*, active: bool, text_sent: bool = False) -> None:
+        nonlocal last_typing_at, typed_dominant
+        last_typing_at = _now()
+        if active or text_sent:
+            typed_dominant = True
+        if active:
+            # Cancel in-flight nudges; keep a deferred-away recheck if any so
+            # we resume after typing ends without needing a second "away".
+            _cancel_silence(keep_recheck=True)
+            logger.info(
+                "typing active — silence cancelled typed_dominant=%s room=%s",
+                typed_dominant,
+                ctx.room.name,
+            )
+        elif text_sent:
+            _cancel_silence(keep_recheck=False)
+            logger.info(
+                "text_sent — silence cancelled typed_dominant=%s room=%s",
+                typed_dominant,
+                ctx.room.name,
+            )
+        else:
+            # Cleared: still "fresh" for TYPING_FRESH_SECONDS so mid-sentence
+            # pause before send doesn't get a nudge.
+            logger.info(
+                "typing cleared (fresh for %.0fs) room=%s",
+                TYPING_FRESH_SECONDS,
+                ctx.room.name,
+            )
 
     @session.on("user_state_changed")
     def _on_user_state(ev: UserStateChangedEvent) -> None:
-        nonlocal silence_task, user_is_away
+        nonlocal silence_task, user_is_away, typing_recheck_task
         if closing:
             return
         if ev.new_state == "away":
+            if is_typing_fresh():
+                logger.info(
+                    "silence skip away-start due-to-typing room=%s",
+                    ctx.room.name,
+                )
+                # Defer pipeline until typing goes stale
+                if typing_recheck_task and not typing_recheck_task.done():
+                    typing_recheck_task.cancel()
+                typing_recheck_task = asyncio.create_task(typing_recheck_after_away())
+                return
             if user_is_away:
                 return
-            user_is_away = True
-            if silence_task and not silence_task.done():
-                silence_task.cancel()
-            silence_task = asyncio.create_task(silence_pipeline())
+            _start_silence_pipeline()
         elif ev.new_state in ("speaking", "listening"):
             _cancel_silence()
 
@@ -388,6 +514,27 @@ async def entrypoint(ctx: JobContext) -> None:
             ),
         ),
     )
+
+    @ctx.room.on("data_received")
+    def _on_data(packet: rtc.DataPacket) -> None:
+        if packet.topic != TOPIC_TYPING:
+            return
+        try:
+            raw = packet.data
+            if isinstance(raw, memoryview):
+                raw = raw.tobytes()
+            msg = json.loads(raw.decode("utf-8"))
+        except Exception:
+            logger.warning("monti_typing decode failed room=%s", ctx.room.name)
+            return
+        if not isinstance(msg, dict):
+            return
+        if msg.get("text_sent"):
+            mark_typing(active=False, text_sent=True)
+        elif msg.get("typing") is True:
+            mark_typing(active=True)
+        elif msg.get("typing") is False:
+            mark_typing(active=False)
 
     async def _max_timer() -> None:
         try:
