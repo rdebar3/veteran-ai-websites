@@ -1274,6 +1274,175 @@
   color: #fff;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Niche shapes — structure/emphasis (compose with layout×palette)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Emergency: phone-forward hero */
+.mt-trades[data-niche='emergency'] .hero--call,
+.mt-trades[data-niche='emergency'] .hero--bold {
+  min-height: clamp(300px, 50vh, 540px);
+}
+
+.mt-trades .hero-cta--phone {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mt-trades .hero-phone-xl {
+  font-family: var(--font-serif);
+  font-size: clamp(22px, 6.2vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
+}
+
+.mt-trades[data-layout='split'] .hero-phone-xl {
+  color: var(--ink);
+  text-shadow: none;
+}
+
+.mt-trades[data-niche='emergency'] .availability-strip .tstat b {
+  color: var(--accent);
+}
+
+.mt-trades[data-niche='emergency'] .svc-list {
+  max-width: 52rem;
+}
+
+/* Checklist services (cleaning) */
+.mt-trades .svc-check {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+.mt-trades .svc-check-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.mt-trades .svc-check-mark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 800;
+  font-size: 13px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.mt-trades .svc-check-item h3 {
+  font-size: 16px;
+  margin: 0 0 4px;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-weight: 600;
+}
+
+.mt-trades .svc-check-item p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 0;
+  max-width: 52ch;
+}
+
+/* Visual trades: bigger band + proof cards */
+.mt-trades[data-niche='visual'] .hero {
+  min-height: clamp(300px, 52vh, 560px);
+}
+
+.mt-trades[data-niche='visual'] .band-photo {
+  min-height: clamp(200px, 40vh, 380px);
+}
+
+.mt-trades[data-niche='visual'] .band-photo .inner {
+  max-width: 36rem;
+}
+
+.mt-trades[data-niche='visual'] .grid--proof .card {
+  box-shadow: 0 16px 40px -28px rgba(0, 0, 0, 0.35);
+  border-color: color-mix(in srgb, var(--accent) 12%, var(--line));
+}
+
+.mt-trades[data-niche='visual'] .grid--proof .card .ic {
+  width: 42px;
+  height: 42px;
+  font-size: 17px;
+}
+
+/* Shop: availability strip carries location weight */
+.mt-trades[data-niche='shop'] .availability-strip {
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  border-bottom: 1px solid var(--line);
+}
+
+.mt-trades[data-niche='shop'] .availability-strip .tstat b {
+  font-size: 15px;
+}
+
+/* Sticky emergency call bar (mobile) */
+.mt-trades.has-sticky-call {
+  padding-bottom: 72px;
+}
+
+.mt-trades .sticky-call {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 -8px 28px -12px rgba(0, 0, 0, 0.45);
+  font-weight: 600;
+}
+
+.mt-trades .sticky-call-label {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.mt-trades .sticky-call-phone {
+  font-family: var(--font-serif);
+  font-size: clamp(16px, 4.5vw, 20px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+@media (min-width: 900px) {
+  .mt-trades .sticky-call {
+    display: none;
+  }
+
+  .mt-trades.has-sticky-call {
+    padding-bottom: 0;
+  }
+}
+
 /* ── Mobile layout identity (≤480px) — three looks stay distinct ── */
 @media (max-width: 480px) {
   /* classic: card services already; tighten hero chips */
