@@ -16,7 +16,7 @@ import { emptyRecord, recordForLead } from '@/lib/monti/contract';
 import {
   hasPhoto,
   photoUrl,
-  pickTradePhotoVariants,
+  pickTradeHeroMedia,
   preloadPhotoUrl,
   type PhotoVariants,
 } from '@/lib/monti/photos';
@@ -78,6 +78,8 @@ export default function MontiExperience() {
     hero: 0,
     support: 0,
   });
+  /** Session-locked video hero path (null = photo-only for this build). */
+  const [heroVideoSrc, setHeroVideoSrc] = useState<string | null>(null);
 
   useEffect(() => {
     recordRef.current = record;
@@ -87,15 +89,16 @@ export default function MontiExperience() {
     messagesRef.current = messages;
   }, [messages]);
 
-  // Per-session photo rotation: pick once when trade is first known, preload hero.
+  // Per-session photo + optional video hero: pick once when trade is first known.
   useEffect(() => {
     const trade = record.trade_key || record.hero?.image_id || null;
     if (!trade || !hasPhoto(trade) || trade === 'wv_hero') return;
     if (photoTradeLockedRef.current === trade) return;
     photoTradeLockedRef.current = trade;
-    const variants = pickTradePhotoVariants(trade);
-    setPhotoVariants(variants);
-    preloadPhotoUrl(photoUrl(trade, 'hero', variants.hero));
+    const media = pickTradeHeroMedia(trade);
+    setPhotoVariants(media.photo);
+    setHeroVideoSrc(media.videoSrc);
+    preloadPhotoUrl(photoUrl(trade, 'hero', media.photo.hero));
   }, [record.trade_key, record.hero?.image_id]);
 
   // Desktop wheel → site preview (same assist as /monti/live)
@@ -663,6 +666,7 @@ export default function MontiExperience() {
                 showServicesSkel && !fill.includes('services')
               }
               photoVariants={photoVariants}
+              heroVideoSrc={heroVideoSrc}
             />
           </BrowserFrame>
         </div>

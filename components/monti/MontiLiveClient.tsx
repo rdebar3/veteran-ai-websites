@@ -22,7 +22,7 @@ import { emptyRecord, recordForLead } from '@/lib/monti/contract';
 import {
   hasPhoto,
   photoUrl,
-  pickTradePhotoVariants,
+  pickTradeHeroMedia,
   preloadPhotoUrl,
   type PhotoVariants,
 } from '@/lib/monti/photos';
@@ -508,6 +508,8 @@ function LiveSessionShell({
     hero: 0,
     support: 0,
   });
+  /** Session-locked video hero path (null = photo-only for this build). */
+  const [heroVideoSrc, setHeroVideoSrc] = useState<string | null>(null);
   /** "↓ scroll the site" chip — shown once build starts, fades after first scroll. */
   const [showScrollHint, setShowScrollHint] = useState(false);
 
@@ -546,9 +548,10 @@ function LiveSessionShell({
 
     if (photoTradeLockedRef.current !== trade) {
       photoTradeLockedRef.current = trade;
-      const variants = pickTradePhotoVariants(trade);
-      setPhotoVariants(variants);
-      preloadPhotoUrl(photoUrl(trade, 'hero', variants.hero));
+      const media = pickTradeHeroMedia(trade);
+      setPhotoVariants(media.photo);
+      setHeroVideoSrc(media.videoSrc);
+      preloadPhotoUrl(photoUrl(trade, 'hero', media.photo.hero));
     }
 
     if (styleTradeLockedRef.current !== trade) {
@@ -1145,6 +1148,7 @@ function LiveSessionShell({
                 showServicesSkel && !fill.includes('services')
               }
               photoVariants={photoVariants}
+              heroVideoSrc={heroVideoSrc}
             />
           </BrowserFrame>
         </div>

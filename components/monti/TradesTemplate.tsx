@@ -61,6 +61,129 @@ function ImgSlot({
   );
 }
 
+/**
+ * Hero media: photo always (poster + mobile/reduced-motion/saveData fallback).
+ * Video only on desktop-class screens when the session drew a video clip —
+ * muted autoplay loop, paused off-screen / hidden tab.
+ */
+function HeroMedia({
+  name,
+  alt,
+  variant = 0,
+  videoSrc = null,
+}: {
+  name: string;
+  alt: string;
+  variant?: number;
+  videoSrc?: string | null;
+}) {
+  const [hideImg, setHideImg] = useState(false);
+  const [allowVideo, setAllowVideo] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const poster = photoUrl(name, 'hero', variant);
+
+  // Gate video: desktop min-width 769, no reduced-motion, no saveData.
+  useEffect(() => {
+    if (!videoSrc || typeof window === 'undefined') {
+      setAllowVideo(false);
+      return;
+    }
+    const desktopMq = window.matchMedia('(min-width: 769px)');
+    const motionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const conn = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean };
+      }
+    ).connection;
+    const compute = () => {
+      const saveData = !!conn?.saveData;
+      setAllowVideo(desktopMq.matches && !motionMq.matches && !saveData);
+    };
+    compute();
+    desktopMq.addEventListener('change', compute);
+    motionMq.addEventListener('change', compute);
+    return () => {
+      desktopMq.removeEventListener('change', compute);
+      motionMq.removeEventListener('change', compute);
+    };
+  }, [videoSrc]);
+
+  // Pause when hero off-screen or tab hidden — no background GPU burn.
+  useEffect(() => {
+    if (!allowVideo || !videoSrc) return;
+    const el = wrapRef.current;
+    const vid = videoRef.current;
+    if (!el || !vid) return;
+
+    let visible = true;
+    let inView = true;
+
+    const sync = () => {
+      if (visible && inView) {
+        const p = vid.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      } else {
+        vid.pause();
+      }
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        inView = !!entry?.isIntersecting;
+        sync();
+      },
+      { threshold: 0.15 },
+    );
+    io.observe(el);
+
+    const onVis = () => {
+      visible = document.visibilityState === 'visible';
+      sync();
+    };
+    document.addEventListener('visibilitychange', onVis);
+    sync();
+
+    return () => {
+      io.disconnect();
+      document.removeEventListener('visibilitychange', onVis);
+      vid.pause();
+    };
+  }, [allowVideo, videoSrc, videoReady]);
+
+  return (
+    <div className="img hero-media" ref={wrapRef}>
+      {!hideImg && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={poster}
+          src={poster}
+          alt={alt}
+          loading="eager"
+          onError={() => setHideImg(true)}
+        />
+      )}
+      {allowVideo && videoSrc ? (
+        <video
+          ref={videoRef}
+          className={`hero-video${videoReady ? ' hero-video--ready' : ''}`}
+          src={videoSrc}
+          poster={poster}
+          muted
+          autoPlay
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          onCanPlay={() => setVideoReady(true)}
+          onLoadedData={() => setVideoReady(true)}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 function resolveLayout(raw: MontiRecord['layout']): SiteLayout {
   if (raw === 'bold' || raw === 'split') return raw;
   return 'classic';
@@ -190,6 +313,8 @@ export interface TradesTemplateProps {
   showHeroSkeleton?: boolean;
   showServicesSkeleton?: boolean;
   photoVariants?: PhotoVariants;
+  /** Session-locked video hero path, or null for photo-only. */
+  heroVideoSrc?: string | null;
 }
 
 export default function TradesTemplate({
@@ -198,6 +323,7 @@ export default function TradesTemplate({
   showHeroSkeleton = false,
   showServicesSkeleton = false,
   photoVariants = { hero: 0, support: 0 },
+  heroVideoSrc = null,
 }: TradesTemplateProps) {
   const filled = new Set(fill);
   const hasAny = filled.size > 0 || showHeroSkeleton;
@@ -405,10 +531,10 @@ export default function TradesTemplate({
             </div>
           </div>
           <div className="hero-split-media">
-            <ImgSlot
+            <HeroMedia
               name={heroImg}
-              preset="hero"
               variant={heroVariant}
+              videoSrc={heroVideoSrc}
               alt={`${name} — serving ${area || 'West Virginia'}`}
             />
           </div>
@@ -423,10 +549,10 @@ export default function TradesTemplate({
         }`}
         key={key}
       >
-        <ImgSlot
+        <HeroMedia
           name={heroImg}
-          preset="hero"
           variant={heroVariant}
+          videoSrc={heroVideoSrc}
           alt={`${name} — serving ${area || 'West Virginia'}`}
         />
         <div className="scrim" />

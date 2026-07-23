@@ -37,8 +37,16 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
       '1690068023694-053da714f95f',
       '1590820292118-e256c3ac2676',
       '1597201278257-3687be27d954',
+      '1623358519330-00f61d89396b',
+      '1668120089662-42642838cfef',
+      '1734079692160-fcbe4be6ab96',
+      '1700689807667-82630348b301',
     ],
-    support: ['1558904541-efa843a96f01', '1629575063988-881596e38d31'],
+    support: [
+      '1558904541-efa843a96f01',
+      '1629575063988-881596e38d31',
+      '1624190011779-081f7cd23eae',
+    ],
   },
   plumbing: {
     hero: [
@@ -48,8 +56,16 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
       '1748442001865-5583ec02ae22',
       '1613839397604-65fffe7fc3d4',
       '1615749721143-3a38368d3d05',
+      '1542013936693-884638332954',
+      '1650551182991-b07558247564',
+      '1585704032915-c3400ca199e7',
+      '1562159937-194305937c6a',
     ],
-    support: ['1771122453274-d3270e73cf94', '1750749761538-3aea36066a4f'],
+    support: [
+      '1771122453274-d3270e73cf94',
+      '1750749761538-3aea36066a4f',
+      '1454988501794-2992f706932e',
+    ],
   },
   towing: {
     hero: [
@@ -59,8 +75,16 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
       '1686966933735-305bd8fe0a77',
       '1730514785075-b065c757b653',
       '1738101996177-13110d20a973',
+      '1764200458388-65c4b0c19a95',
+      '1616340786004-7c444e530ce3',
+      '1742069028920-c2acf52aaa9e',
+      '1742069029211-44d5c98b2514',
     ],
-    support: ['1601508836900-ee2aa7840a7b', '1562146748-5cbf9bd1030e'],
+    support: [
+      '1601508836900-ee2aa7840a7b',
+      '1562146748-5cbf9bd1030e',
+      '1742069029212-60e03b0e938d',
+    ],
   },
   hvac: {
     hero: [
@@ -70,6 +94,9 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
       '1705579604902-eb832f58bf85',
       '1705579605238-24a90c8799c5',
       '1615774925655-a0e97fc85c14',
+      '1724488751821-1415f5cf4960',
+      '1545649311-24d0ac00ae82',
+      '1711654361161-c595961a8ce0',
     ],
     support: ['1748027869634-fc2e545cfb0c', '1732660513320-a6b489f3fece'],
   },
@@ -81,8 +108,15 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
       '1595856619767-ab739fa7daae',
       '1646640381839-02748ae8ddf0',
       '1595831708961-1b13c0dd2422',
+      '1635335874521-7987db781153',
+      '1732660780054-0cf9fadb9d30',
     ],
-    support: ['1618090584126-129cd1f3fbae', '1597502310092-31cdaa35b46d'],
+    support: [
+      '1618090584126-129cd1f3fbae',
+      '1597502310092-31cdaa35b46d',
+      '1576446470246-499c738d1c8e',
+      '1652715564391-38cc4475b7f5',
+    ],
   },
   roofing: {
     hero: [
@@ -92,8 +126,15 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
       '1681049400158-0ff6249ac315',
       '1633759593085-1eaeb724fc88',
       '1634750009079-6bf7bede038b',
+      '1635424825057-7fb6dcd651ef',
+      '1635424824800-692767998d07',
+      '1635424709961-f3a150459ad4',
     ],
-    support: ['1590365876016-da05ac533e83', '1635424709870-cdc6e64f0e20'],
+    support: [
+      '1590365876016-da05ac533e83',
+      '1635424709870-cdc6e64f0e20',
+      '1755114203680-d39d95efa82c',
+    ],
   },
   auto: {
     hero: [
@@ -103,8 +144,17 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
       '1636761358783-209512dccd98',
       '1702146715426-2380c6ad54c5',
       '1618783129985-dd97dbe4ad99',
+      '1632733711679-529326f6db12',
+      '1615906655593-ad0386982a0f',
+      '1723099971299-3789db53604c',
+      '1487754180451-c456f719a1fc',
     ],
-    support: ['1698382318239-2b134ca8fa4c', '1637640125496-31852f042a60'],
+    support: [
+      '1698382318239-2b134ca8fa4c',
+      '1637640125496-31852f042a60',
+      '1675034743372-672c3c3f8377',
+      '1593699199342-59b40e08f0ac',
+    ],
   },
   cleaning: {
     hero: [
@@ -114,8 +164,16 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
       '1740657254989-42fe9c3b8cce',
       '1647381518264-97ff1835026f',
       '1758272421751-963195322eaa',
+      '1581578731548-c64695cc6952',
+      '1563453392212-326f5e854473',
+      '1585421514284-efb74c2b69ba',
+      '1603712725038-e9334ae8f39f',
     ],
-    support: ['1713110824336-f78c320dcf8e', '1758523670739-0d26a3ee976d'],
+    support: [
+      '1713110824336-f78c320dcf8e',
+      '1758523670739-0d26a3ee976d',
+      '1585417238790-f6d290d6490c',
+    ],
   },
 };
 
@@ -197,6 +255,68 @@ export function pickTradePhotoVariants(
     hero: Math.floor(Math.random() * heroLen),
     support: Math.floor(Math.random() * supportLen),
   };
+}
+
+/**
+ * Local cinematic hero clips.
+ * Source: Pexels (https://www.pexels.com/license/) — free for commercial use,
+ * no attribution required. SD/HD renditions re-encoded ≤1280px for hero loops.
+ * Paths are public URLs under /monti/video/. Only trades with ≥1 clip participate
+ * in the ~40% video-hero session roll.
+ */
+export const TRADE_VIDEOS: Partial<Record<TradeKey, string[]>> = {
+  towing: ['/monti/video/towing-1.mp4', '/monti/video/towing-2.mp4'],
+  plumbing: ['/monti/video/plumbing-1.mp4', '/monti/video/plumbing-2.mp4'],
+  hvac: ['/monti/video/hvac-1.mp4'],
+  electrical: [
+    '/monti/video/electrical-1.mp4',
+    '/monti/video/electrical-2.mp4',
+  ],
+  // roofing-2 = 4198817, roofing-3 = 4198818 (both verified good drone cuts)
+  roofing: [
+    '/monti/video/roofing-1.mp4',
+    '/monti/video/roofing-2.mp4',
+    '/monti/video/roofing-3.mp4',
+  ],
+  landscaping: [
+    '/monti/video/landscaping-1.mp4',
+    '/monti/video/landscaping-2.mp4',
+  ],
+  auto: ['/monti/video/auto-1.mp4', '/monti/video/auto-2.mp4'],
+  // cleaning-2 dropped: face-dominant lifestyle, not trade-professional
+  cleaning: ['/monti/video/cleaning-1.mp4'],
+};
+
+/** ~40% of sessions with clips get a video hero (stable for the whole build). */
+const VIDEO_HERO_CHANCE = 0.4;
+
+export type HeroMediaPick = {
+  photo: PhotoVariants;
+  /** Public path to a local mp4, or null for photo-only hero. */
+  videoSrc: string | null;
+};
+
+/**
+ * Pick photo variants + optional video hero for a session.
+ * Call once when trade is first known. Video is a session-level axis:
+ * trades with clips roll ~40% video; poster = the session hero photo.
+ */
+export function pickTradeHeroMedia(
+  trade: string | null | undefined,
+): HeroMediaPick {
+  const photo = pickTradePhotoVariants(trade);
+  if (!trade || !isTradeKey(trade)) {
+    return { photo, videoSrc: null };
+  }
+  const clips = TRADE_VIDEOS[trade];
+  if (!clips || clips.length === 0) {
+    return { photo, videoSrc: null };
+  }
+  if (Math.random() >= VIDEO_HERO_CHANCE) {
+    return { photo, videoSrc: null };
+  }
+  const idx = Math.floor(Math.random() * clips.length);
+  return { photo, videoSrc: clips[idx] ?? null };
 }
 
 /** Warm the browser cache so skeleton → photo does not flash empty. */
