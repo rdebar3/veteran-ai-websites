@@ -476,6 +476,8 @@ function LiveSessionShell({
   const styleTradeLockedRef = useRef<string | null>(null);
   const sessionStyleRef = useRef<StylePick | null>(null);
   const previewScrollRef = useRef<HTMLDivElement | null>(null);
+  /** Desktop wheel bridge: .monti-app root while building. */
+  const appRef = useRef<HTMLDivElement | null>(null);
 
   const [record, setRecord] = useState<MontiRecord>(() => emptyRecord());
   const [fill, setFill] = useState<FillSection[]>([]);
@@ -582,6 +584,33 @@ function LiveSessionShell({
     el.addEventListener('scroll', onScroll, { passive: true });
     return () => el.removeEventListener('scroll', onScroll);
   }, [building, showScrollHint]);
+
+  // Desktop: wheel anywhere on the building layout drives .monti-cv (page is overflow:hidden).
+  // Skip when the event is already over the scroller (native) or over form controls.
+  useEffect(() => {
+    if (!building) return;
+    const root = appRef.current;
+    if (!root) return;
+
+    const onWheel = (e: WheelEvent) => {
+      const cv = previewScrollRef.current;
+      if (!cv) return;
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      // Already over the preview — browser handles it (no double-scroll)
+      if (cv.contains(t)) return;
+      // Don't hijack typing / form controls
+      if (t.closest('input, textarea, select, [contenteditable="true"]')) return;
+      // Guard: other intentional scroll regions (none today)
+      const other = t.closest('[data-scrollable]');
+      if (other && other !== cv) return;
+
+      cv.scrollTop += e.deltaY;
+    };
+
+    root.addEventListener('wheel', onWheel, { passive: true });
+    return () => root.removeEventListener('wheel', onWheel);
+  }, [building]);
 
   useEffect(() => {
     void room.startAudio().catch(() => {});
@@ -937,7 +966,10 @@ function LiveSessionShell({
           End
         </button>
       </div>
-      <div className={`monti-app${building ? ' building' : ''}`}>
+      <div
+        ref={appRef}
+        className={`monti-app${building ? ' building' : ''}`}
+      >
         <div className="monti-pane">
           <GlowCanvas
             ref={glowRef}

@@ -125,6 +125,8 @@
   width: 100%;
   height: 100%;
   z-index: 1;
+  /* Visual only — wheel/click pass through; dock stays interactive via z-index */
+  pointer-events: none;
 }
 
 .monti-top {
