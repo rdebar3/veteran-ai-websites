@@ -11,7 +11,8 @@ export type NicheShape =
   | 'checklist'
   | 'visual'
   | 'shop'
-  | 'general';
+  | 'general'
+  | 'care';
 
 export type SitePage = 'home' | 'services' | 'about' | 'contact';
 
@@ -79,6 +80,14 @@ const SHOP_PAGES: Record<SitePage, NicheBlock[]> = {
 /** About-forward: story carries weight when photos are neutral stand-ins. */
 const GENERAL_PAGES: Record<SitePage, NicheBlock[]> = {
   home: ['hero', 'aboutTeaser', 'servicesPreview', 'cta'],
+  services: ['services', 'cta'],
+  about: ['about', 'band', 'reviews'],
+  contact: ['contact'],
+};
+
+/** Appointment-based care verticals (pet care, future spa/salon-style). */
+const CARE_PAGES: Record<SitePage, NicheBlock[]> = {
+  home: ['hero', 'servicesPreview', 'aboutTeaser', 'cta'],
   services: ['services', 'cta'],
   about: ['about', 'band', 'reviews'],
   contact: ['contact'],
@@ -235,6 +244,22 @@ export const TRADE_NICHES: Record<TradeKey, NichePreset> = {
     bandHeadline: 'Proud to serve this community.',
     bandBody:
       'Local roots, personal service — a real place for the people who know us.',
+  },
+  pet_care: {
+    shape: 'care',
+    pages: CARE_PAGES,
+    servicesPresentation: 'checklist',
+    heroPhoneDominant: false,
+    showAvailabilityEarly: false,
+    stickyCallOnEmergency: false,
+    defaultHeroCta: 'BOOK AN APPOINTMENT',
+    defaultContactCta: 'Book an appointment',
+    defaultPhonePrompt: 'Tell us about your pet',
+    servicesKicker: 'THE MENU',
+    servicesTitle: 'What we do for your pet.',
+    bandHeadline: 'Gentle hands. Local care.',
+    bandBody:
+      'Patient with the nervous ones — your pet is treated like part of the family.',
   },
 };
 

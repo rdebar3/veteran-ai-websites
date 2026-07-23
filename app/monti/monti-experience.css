@@ -193,15 +193,28 @@
   line-height: 1.5;
   color: #f0e6d8;
   min-height: 22px;
-  max-height: calc(1.5em * 3);
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  transition: color 0.3s;
+  /* Up to 6 lines visible; longer captions scroll — never ellipsis mid-sentence */
+  max-height: calc(1.5em * 6);
+  overflow-x: hidden;
+  overflow-y: auto;
+  transition: max-height 0.25s ease, color 0.3s;
   font-family: var(--monti-serif);
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(240, 230, 216, 0.35) transparent;
+}
+
+.monti-prompt::-webkit-scrollbar {
+  width: 4px;
+}
+
+.monti-prompt::-webkit-scrollbar-thumb {
+  background: rgba(240, 230, 216, 0.35);
+  border-radius: 4px;
+}
+
+.monti-prompt::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .monti-prompt.busy {
@@ -767,9 +780,8 @@
 
   .monti-app.building .monti-prompt {
     font-size: 13.5px;
-    max-height: calc(1.5em * 2);
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+    /* Compact dock: 4 lines then scroll — input stays anchored */
+    max-height: calc(1.5em * 4);
   }
 
   .monti-app.building .monti-ask {

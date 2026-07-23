@@ -18,7 +18,10 @@ export type IconId =
   | 'shield'
   | 'clock'
   | 'mappin'
-  | 'phone';
+  | 'phone'
+  | 'paw'
+  | 'scissors'
+  | 'sparkle';
 
 const STROKE = {
   fill: 'none',
@@ -134,6 +137,31 @@ const ICONS: Record<IconId, ReactNode> = {
       />
     </Svg>
   ),
+  paw: (
+    <Svg>
+      <circle {...STROKE} cx="8" cy="9" r="1.75" />
+      <circle {...STROKE} cx="16" cy="9" r="1.75" />
+      <circle {...STROKE} cx="6.5" cy="13.5" r="1.5" />
+      <circle {...STROKE} cx="17.5" cy="13.5" r="1.5" />
+      <path
+        {...STROKE}
+        d="M9.5 17.5c0-1.5 1.2-2.5 2.5-2.5s2.5 1 2.5 2.5c0 1.8-1.2 3-2.5 3s-2.5-1.2-2.5-3z"
+      />
+    </Svg>
+  ),
+  scissors: (
+    <Svg>
+      <circle {...STROKE} cx="6" cy="6" r="2.5" />
+      <circle {...STROKE} cx="6" cy="18" r="2.5" />
+      <path {...STROKE} d="M8.2 7.5 20 18M8.2 16.5 20 6" />
+    </Svg>
+  ),
+  sparkle: (
+    <Svg>
+      <path {...STROKE} d="M12 3v4M12 17v4M3 12h4M17 12h4" />
+      <path {...STROKE} d="M6.5 6.5 9 9M15 15l2.5 2.5M17.5 6.5 15 9M9 15l-2.5 2.5" />
+    </Svg>
+  ),
 };
 
 const TRADE_DEFAULT: Record<TradeKey, IconId | null> = {
@@ -147,6 +175,7 @@ const TRADE_DEFAULT: Record<TradeKey, IconId | null> = {
   cleaning: 'spray',
   /** General: never a trade glyph — prefer none. */
   general: null,
+  pet_care: 'paw',
 };
 
 /** Icons allowed on general (unknown vertical) sites. */
@@ -162,8 +191,11 @@ const KEYWORDS: { re: RegExp; id: IconId }[] = [
   { re: /\b(lawn|mow|landscap|garden|tree|mulch)\b/i, id: 'leaf' },
   { re: /\b(clean|maid|janitor|sanitize|carpet)\b/i, id: 'spray' },
   { re: /\b(brake|oil|engine|mechanic|auto|tire)\b/i, id: 'wrench' },
+  { re: /\b(groom|nail|bath|brush|haircut|trim)\b/i, id: 'scissors' },
+  { re: /\b(dog|cat|pet|board|kennel|sitter|walker|puppy)\b/i, id: 'paw' },
   { re: /\b(24\/7|emergency|after.?hours)\b/i, id: 'clock' },
   { re: /\b(warrant|insured|protect)\b/i, id: 'shield' },
+  { re: /\b(special|spa|luxury|premium)\b/i, id: 'sparkle' },
 ];
 
 function isTradeKey(name: string): name is TradeKey {

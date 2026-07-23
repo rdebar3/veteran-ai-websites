@@ -69,6 +69,13 @@ export const TRADE_FIT_SETS: Record<TradeKey, StylePick[]> = {
     { layout: 'split', palette: 'river' },
     { layout: 'split', palette: 'sand' },
   ],
+  /** Friendly and warm — no bold. */
+  pet_care: [
+    { layout: 'classic', palette: 'sand' },
+    { layout: 'split', palette: 'sand' },
+    { layout: 'classic', palette: 'river' },
+    { layout: 'split', palette: 'pine' },
+  ],
 };
 
 const GENERAL_FALLBACK_FIT: StylePick[] = [

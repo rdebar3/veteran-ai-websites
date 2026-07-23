@@ -11,6 +11,7 @@ const LABELS: Record<TradeKey, string> = {
   auto: 'Auto',
   cleaning: 'Cleaning',
   general: 'Local business',
+  pet_care: 'Pet care',
 };
 
 export function tradeLabel(key: string | null | undefined): string {

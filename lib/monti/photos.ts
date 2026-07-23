@@ -176,15 +176,18 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
     ],
   },
   /**
-   * Neutral local-business pool for anything that is not one of the eight trades.
+   * Neutral local-business pool for anything that is not a known vertical.
    * No lawns, trucks, or trade-specific gear — storefronts, main street, hands, doors.
    * No videos for general (photo heroes only).
+   *
+   * Rule: neutral/general photos must contain NO legible business names, dates, or brand
+   * signage. Generic words like "OPEN" or "thank you for supporting local" are fine.
+   * (Removed 1605542202587-5849be5054a4 — legible "Candy Store / Page & Shaw / Est 1885".)
    */
   general: {
     hero: [
       '1761783536272-2fb78dd52c76',
       '1559631658-9705048d977e',
-      '1605542202587-5849be5054a4',
       '1560580393-bd7d9b095b44',
       '1779397143344-792befabb210',
       '1579196179453-1531eddf62e3',
@@ -194,6 +197,21 @@ export const TRADE_PHOTOS: Record<TradeKey, TradePhotoSet> = {
       '1506806732259-39c2d0268443',
       '1621267528275-16f68d18c4ca',
       '1696699651613-b81a429a0fec',
+    ],
+  },
+  /** Pet groomers, boarders, sitters, walkers — no videos yet. */
+  pet_care: {
+    hero: [
+      '1719464454959-9cf304ef4774',
+      '1611173622933-91942d394b04',
+      '1678153184494-1f6fc14a673d',
+      '1560807707-8cc77767d783',
+      '1581887936036-3f4f7f0b6679',
+      '1537151608828-ea2b11777ee8',
+    ],
+    support: [
+      '1534361960057-19889db9621e',
+      '1548199973-03cce0bbc87b',
     ],
   },
 };

@@ -118,6 +118,17 @@ function coerceImageId(raw: unknown): string | undefined {
   if (id.includes('roof')) return 'roofing';
   if (id.includes('auto') || id.includes('mechanic')) return 'auto';
   if (id.includes('clean')) return 'cleaning';
+  if (
+    id.includes('pet') ||
+    id.includes('groom') ||
+    id.includes('dog') ||
+    id.includes('cat') ||
+    id.includes('kennel') ||
+    id.includes('sitter') ||
+    id.includes('walker')
+  ) {
+    return 'pet_care';
+  }
   // Unknown/invalid keys → general (neutral photos). Never wv_hero or a forced trade.
   return 'general';
 }

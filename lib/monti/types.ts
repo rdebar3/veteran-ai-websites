@@ -9,8 +9,10 @@ export const TRADE_KEYS = [
   'roofing',
   'auto',
   'cleaning',
-  /** Honest fallback when the business is not one of the eight trades. */
+  /** Honest fallback when the business is not a known vertical. */
   'general',
+  /** Tier-2: groomers, boarders, sitters, walkers. */
+  'pet_care',
 ] as const;
 
 export type TradeKey = (typeof TRADE_KEYS)[number];
