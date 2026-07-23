@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +41,27 @@ INSTRUCTIONS = INSTRUCTIONS_PATH.read_text(encoding="utf-8")
 
 VOICE = "castor"
 MODEL = "grok-voice-latest"
+
+
+def session_date_line() -> str:
+    """America/New_York calendar date as 'Month D, YYYY' (computed at session start)."""
+    try:
+        from zoneinfo import ZoneInfo
+
+        now = datetime.now(ZoneInfo("America/New_York"))
+    except Exception:
+        # Windows without tzdata, or missing zone: fall back to local wall clock
+        now = datetime.now().astimezone()
+    return f"{now.strftime('%B')} {now.day}, {now.year}"
+
+
+def session_instructions() -> str:
+    """Base instructions + live session clock (not hardcoded)."""
+    date_line = session_date_line()
+    return (
+        INSTRUCTIONS.rstrip()
+        + f"\n\n### Session clock\nToday's date is {date_line}.\n"
+    )
 
 TOPIC_FILL = "monti_fill"
 TOPIC_LEAD = "monti_lead"
@@ -205,9 +227,13 @@ async def _publish_json(room: rtc.Room, topic: str, payload: dict[str, Any]) -> 
 
 
 class Monti(Agent):
-    def __init__(self, room: rtc.Room) -> None:
+    def __init__(
+        self,
+        room: rtc.Room,
+        instructions: str | None = None,
+    ) -> None:
         super().__init__(
-            instructions=INSTRUCTIONS,
+            instructions=instructions if instructions is not None else INSTRUCTIONS,
             tools=[
                 self._make_fill_site_tool(),
                 self._make_send_to_rich_tool(),
@@ -267,7 +293,9 @@ async def entrypoint(ctx: JobContext) -> None:
     logger.info("connecting to room %s", ctx.room.name)
     await ctx.connect()
 
-    agent = Monti(room=ctx.room)
+    instr = session_instructions()
+    logger.info("session clock: Today's date is %s.", session_date_line())
+    agent = Monti(room=ctx.room, instructions=instr)
 
     # Prefer realtime model server VAD; threshold/silence tuned for snappier turns.
     session = AgentSession(
