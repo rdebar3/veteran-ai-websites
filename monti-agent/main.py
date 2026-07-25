@@ -66,6 +66,9 @@ def session_instructions() -> str:
 TOPIC_FILL = "monti_fill"
 TOPIC_LEAD = "monti_lead"
 TOPIC_TYPING = "monti_typing"  # client: visitor is composing a typed reply
+TOPIC_ACK = "monti_ack"  # agent → client: typed message received (payload {id})
+TOPIC_READY = "monti_ready"  # agent → client: text path live (payload {ready:true})
+ATTR_MSG_ID = "monti_msg_id"  # lk.chat text-stream attribute
 
 # --- Session cost / quality guards (tune these) ---
 SESSION_MAX_SECONDS = 600  # ~10 min wall-clock hard stop
@@ -530,18 +533,81 @@ async def entrypoint(ctx: JobContext) -> None:
         elif ev.new_state in ("speaking", "listening"):
             _cancel_silence()
 
-    # text_input defaults on; set explicitly so typed lk.chat turns join the
-    # same conversation as speech (https://docs.livekit.io/agents/build/text/).
+    # Per-session dedupe set for typed message ids. Lifetime = this entrypoint /
+    # AgentSession only (not module-global). Client retries reuse the same id;
+    # repeats must never inject a second user turn.
+    seen_typed_ids: set[str] = set()
+
+    async def on_text_input(
+        sess: AgentSession, ev: room_io.TextInputEvent
+    ) -> None:
+        """Ack + dedupe typed lk.chat, then default user-turn handling."""
+        msg_id: str | None = None
+        if ev.info is not None and ev.info.attributes:
+            raw_id = ev.info.attributes.get(ATTR_MSG_ID)
+            if isinstance(raw_id, str) and raw_id.strip():
+                msg_id = raw_id.strip()
+
+        # Always ack (including duplicates) so the client pending map clears.
+        if msg_id:
+            try:
+                await _publish_json(ctx.room, TOPIC_ACK, {"id": msg_id})
+                logger.info(
+                    "typed ack id=%s room=%s", msg_id, ctx.room.name
+                )
+            except Exception:
+                logger.exception(
+                    "typed ack publish failed id=%s room=%s",
+                    msg_id,
+                    ctx.room.name,
+                )
+
+        if msg_id and msg_id in seen_typed_ids:
+            logger.info(
+                "typed dedupe ignore id=%s room=%s", msg_id, ctx.room.name
+            )
+            return
+
+        if msg_id:
+            seen_typed_ids.add(msg_id)
+
+        # Same as framework default text_input_cb
+        async with sess._claim_user_turn():
+            await sess.interrupt()
+            sess.generate_reply(user_input=ev.text)
+
+    # text_input defaults on; custom cb for ack + id-dedupe.
+    # https://docs.livekit.io/agents/build/text/
     await session.start(
         room=ctx.room,
         agent=agent,
         room_options=room_io.RoomOptions(
-            text_input=True,
+            text_input=room_io.TextInputOptions(text_input_cb=on_text_input),
             audio_input=room_io.AudioInputOptions(
                 noise_cancellation=nc_filter,
             ),
         ),
     )
+
+    async def publish_ready() -> None:
+        try:
+            await _publish_json(ctx.room, TOPIC_READY, {"ready": True})
+            logger.info("monti_ready published room=%s", ctx.room.name)
+        except Exception:
+            logger.exception("monti_ready publish failed room=%s", ctx.room.name)
+
+    # Text stream handler is registered after session.start — signal readiness.
+    await publish_ready()
+
+    @ctx.room.on("participant_connected")
+    def _on_participant_connected(participant: rtc.RemoteParticipant) -> None:
+        # Visitor may join after the agent; re-signal so the client does not miss it.
+        logger.info(
+            "participant_connected identity=%s — re-publish monti_ready room=%s",
+            participant.identity,
+            ctx.room.name,
+        )
+        asyncio.create_task(publish_ready())
 
     @ctx.room.on("data_received")
     def _on_data(packet: rtc.DataPacket) -> None:

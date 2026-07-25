@@ -38,7 +38,15 @@ const TOPIC_FILL = 'monti_fill';
 const TOPIC_LEAD = 'monti_lead';
 /** Client → agent: visitor is composing a typed reply (silence nudge must wait). */
 const TOPIC_TYPING = 'monti_typing';
+/** Agent → client: typed message received (payload { id }). */
+const TOPIC_ACK = 'monti_ack';
+/** Agent → client: text path live (payload { ready: true }). */
+const TOPIC_READY = 'monti_ready';
+/** lk.chat text-stream attribute for client message id. */
+const ATTR_MSG_ID = 'monti_msg_id';
 const TYPING_THROTTLE_MS = 3000;
+/** Wait for monti_ack before retry / timeout restore. */
+const ACK_TIMEOUT_MS = 4000;
 const CORE_FILLS: FillSection[] = ['hero', 'services', 'contact', 'about'];
 
 /** Mobile boost only — desktop stays plain <audio> (pre-regression behavior). */
@@ -463,16 +471,19 @@ function LiveSessionShell({
   const connectionState = useConnectionState(room);
   const { state: agentState, audioTrack } = useVoiceAssistant();
   const connected = connectionState === ConnectionState.Connected;
-  const agentReady =
-    connected &&
-    !!agentState &&
-    agentState !== 'connecting' &&
-    agentState !== 'initializing' &&
-    agentState !== 'disconnected';
 
   const recordRef = useRef<MontiRecord>(emptyRecord());
   const leadSentRef = useRef(false);
-  const pendingTextsRef = useRef<string[]>([]);
+  /** Submitted before agent readiness — flushed in order once canSendTyped. */
+  const holdQueueRef = useRef<Array<{ id: string; text: string }>>([]);
+  /** Sent, awaiting monti_ack. */
+  const pendingMapRef = useRef<
+    Map<string, { text: string; attempt: number; timerId: ReturnType<typeof setTimeout> }>
+  >(new Map());
+  /** Got monti_ready for this room session. */
+  const agentSignalReadyRef = useRef(false);
+  /** Remote agent participant present this session. */
+  const agentPresentRef = useRef(false);
   /** Lock photo variants once trade is known — stable for the whole build. */
   const photoTradeLockedRef = useRef<string | null>(null);
   /** Lock layout×palette once trade is known — stable for the whole build. */
@@ -503,6 +514,12 @@ function LiveSessionShell({
   const [leadBusy, setLeadBusy] = useState(false);
   const [draft, setDraft] = useState('');
   const [sendingText, setSendingText] = useState(false);
+  /** Agent published monti_ready this session. */
+  const [agentSignalReady, setAgentSignalReady] = useState(false);
+  /** At least one remote agent participant in the room. */
+  const [agentPresent, setAgentPresent] = useState(false);
+  /** Quiet inline send failure — not a toast/modal. */
+  const [sendError, setSendError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [photoVariants, setPhotoVariants] = useState<PhotoVariants>({
     hero: 0,
@@ -668,14 +685,84 @@ function LiveSessionShell({
     };
   }, [room]);
 
-  const deliverText = useCallback(
-    async (text: string) => {
-      // LiveKit Agents text input: lk.chat topic → user turn
-      // https://docs.livekit.io/agents/build/text/
-      await room.localParticipant.sendText(text, { topic: 'lk.chat' });
+  const roomLogId = useCallback(() => room.name || 'unknown', [room]);
+
+  const logTyped = useCallback(
+    (
+      event: 'send' | 'ack' | 'retry' | 'timeout',
+      id: string,
+      len: number,
+    ) => {
+      console.info(
+        `[monti/typed] event=${event} id=${id} room=${roomLogId()} len=${len}`,
+      );
     },
-    [room],
+    [roomLogId],
   );
+
+  /** Hard-reset typed session state — nothing may survive reconnect. */
+  const hardResetTypedSession = useCallback(() => {
+    holdQueueRef.current = [];
+    for (const entry of pendingMapRef.current.values()) {
+      clearTimeout(entry.timerId);
+    }
+    pendingMapRef.current.clear();
+    agentSignalReadyRef.current = false;
+    agentPresentRef.current = false;
+    setAgentSignalReady(false);
+    setAgentPresent(false);
+    setSendError(null);
+    setSendingText(false);
+    console.info(`[monti/typed] event=reset room=${roomLogId()} len=0`);
+  }, [roomLogId]);
+
+  // Detect remote agent participant presence
+  const refreshAgentPresent = useCallback(() => {
+    let found = false;
+    room.remoteParticipants.forEach((p) => {
+      if (p.isAgent) found = true;
+    });
+    agentPresentRef.current = found;
+    setAgentPresent(found);
+  }, [room]);
+
+  useEffect(() => {
+    const onConnected = () => {
+      hardResetTypedSession();
+      refreshAgentPresent();
+    };
+    const onDisconnected = () => {
+      hardResetTypedSession();
+    };
+    const onParticipantConnected = (p: Participant) => {
+      if (p.isAgent) {
+        agentPresentRef.current = true;
+        setAgentPresent(true);
+      }
+    };
+    const onParticipantDisconnected = () => {
+      refreshAgentPresent();
+    };
+
+    room.on(RoomEvent.Connected, onConnected);
+    room.on(RoomEvent.Disconnected, onDisconnected);
+    room.on(RoomEvent.ParticipantConnected, onParticipantConnected);
+    room.on(RoomEvent.ParticipantDisconnected, onParticipantDisconnected);
+    // Initial snapshot (room may already be connected when shell mounts)
+    if (connected) {
+      refreshAgentPresent();
+    }
+    return () => {
+      room.off(RoomEvent.Connected, onConnected);
+      room.off(RoomEvent.Disconnected, onDisconnected);
+      room.off(RoomEvent.ParticipantConnected, onParticipantConnected);
+      room.off(RoomEvent.ParticipantDisconnected, onParticipantDisconnected);
+    };
+  }, [room, connected, hardResetTypedSession, refreshAgentPresent]);
+
+  // Gate sends on room + agent participant + monti_ready (not agentState alone)
+  const canSendTyped =
+    connected && agentPresent && agentSignalReady;
 
   // ── Typing signal: tell the agent a keyboard user is mid-sentence ──
   const lastTypingPublishRef = useRef(0);
@@ -716,26 +803,76 @@ function LiveSessionShell({
     }
   }, [draft, connected, publishTyping]);
 
-  // Flush messages typed before the agent finished joining
-  useEffect(() => {
-    if (!agentReady || pendingTextsRef.current.length === 0) return;
-    const queued = pendingTextsRef.current.splice(0);
-    void (async () => {
-      for (const text of queued) {
-        try {
-          await deliverText(text);
-        } catch (err) {
-          console.warn('[monti/live] flush sendText failed', err);
-          setCaption("Couldn't send — try again");
-          // Re-queue remaining on hard failure
-          pendingTextsRef.current.unshift(
-            ...queued.slice(queued.indexOf(text) + 1),
-          );
-          break;
+  const clearPendingTimer = useCallback((id: string) => {
+    const entry = pendingMapRef.current.get(id);
+    if (entry) clearTimeout(entry.timerId);
+  }, []);
+
+  const sendWithAck = useCallback(
+    async (id: string, text: string, attempt: number) => {
+      const event = attempt === 1 ? 'send' : 'retry';
+      logTyped(event, id, text.length);
+
+      clearPendingTimer(id);
+
+      try {
+        // LiveKit Agents text input: lk.chat + client id attribute
+        // https://docs.livekit.io/agents/build/text/
+        await room.localParticipant.sendText(text, {
+          topic: 'lk.chat',
+          attributes: { [ATTR_MSG_ID]: id },
+        });
+      } catch (err) {
+        console.warn('[monti/live] sendText failed', err);
+        // Fall through to timeout path via timer if still pending
+      }
+
+      const timerId = setTimeout(() => {
+        const cur = pendingMapRef.current.get(id);
+        if (!cur) return;
+        if (cur.attempt < 2) {
+          // Exactly one retry with the same id
+          void sendWithAck(id, cur.text, 2);
+          return;
         }
+        // Second attempt timed out
+        logTyped('timeout', id, cur.text.length);
+        pendingMapRef.current.delete(id);
+        setDraft((prev) => (prev.trim() ? prev : cur.text));
+        setSendError("didn't send, try again.");
+        setSendingText(false);
+      }, ACK_TIMEOUT_MS);
+
+      pendingMapRef.current.set(id, { text, attempt, timerId });
+    },
+    [room, logTyped, clearPendingTimer],
+  );
+
+  // Flush hold queue once agent is confirmed ready
+  useEffect(() => {
+    if (!canSendTyped || holdQueueRef.current.length === 0) return;
+    const queued = holdQueueRef.current.splice(0);
+    void (async () => {
+      for (const item of queued) {
+        await sendWithAck(item.id, item.text, 1);
       }
     })();
-  }, [agentReady, deliverText]);
+  }, [canSendTyped, sendWithAck]);
+
+  const handleTypedAck = useCallback(
+    (id: string) => {
+      const entry = pendingMapRef.current.get(id);
+      if (!entry) return;
+      clearTimeout(entry.timerId);
+      pendingMapRef.current.delete(id);
+      logTyped('ack', id, entry.text.length);
+      if (pendingMapRef.current.size === 0) {
+        setSendingText(false);
+        setSendError(null);
+      }
+    },
+    [logTyped],
+  );
 
   const sendTypedMessage = useCallback(
     async (e?: React.FormEvent) => {
@@ -743,27 +880,27 @@ function LiveSessionShell({
       const text = draft.trim();
       if (!text || !connected || sendingText) return;
 
+      const id =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `m-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
       setCaption(`You: ${text}`);
       setDraft('');
+      setSendError(null);
       // Clear typing + mark a real text turn for typed-dominant patience on the agent
       void publishTyping({ typing: false, text_sent: true });
 
-      if (!agentReady) {
-        pendingTextsRef.current.push(text);
+      if (!canSendTyped) {
+        // Hold until monti_ready + agent present — never silent-drop
+        holdQueueRef.current.push({ id, text });
         return;
       }
 
       setSendingText(true);
-      try {
-        await deliverText(text);
-      } catch (err) {
-        console.warn('[monti/live] sendText failed', err);
-        setCaption("Couldn't send — try again");
-      } finally {
-        setSendingText(false);
-      }
+      await sendWithAck(id, text, 1);
     },
-    [draft, connected, sendingText, agentReady, deliverText, publishTyping],
+    [draft, connected, sendingText, canSendTyped, sendWithAck, publishTyping],
   );
 
   /** Cut local mic publish so room noise stops reaching the agent. */
@@ -910,7 +1047,7 @@ function LiveSessionShell({
     }
   }, [leadBusy]);
 
-  // LiveKit data messages from agent tools
+  // LiveKit data messages from agent tools + typed ack/ready
   useEffect(() => {
     const decoder = new TextDecoder();
     const onData = (
@@ -920,6 +1057,35 @@ function LiveSessionShell({
       topic?: string,
     ) => {
       const text = decoder.decode(payload);
+
+      if (topic === TOPIC_READY) {
+        try {
+          const parsed = JSON.parse(text) as { ready?: boolean };
+          if (parsed && parsed.ready === true) {
+            agentSignalReadyRef.current = true;
+            setAgentSignalReady(true);
+            console.info(
+              `[monti/typed] event=ready room=${room.name || 'unknown'} len=0`,
+            );
+          }
+        } catch {
+          // ignore malformed
+        }
+        return;
+      }
+
+      if (topic === TOPIC_ACK) {
+        try {
+          const parsed = JSON.parse(text) as { id?: string };
+          if (parsed?.id && typeof parsed.id === 'string') {
+            handleTypedAck(parsed.id);
+          }
+        } catch {
+          // ignore malformed
+        }
+        return;
+      }
+
       if (topic === TOPIC_FILL || (!topic && text.includes('"business"'))) {
         try {
           const parsed = JSON.parse(text) as unknown;
@@ -953,7 +1119,7 @@ function LiveSessionShell({
     return () => {
       room.off(RoomEvent.DataReceived, onData);
     };
-  }, [room, applySiteUpdate, sendLeadOnce]);
+  }, [room, applySiteUpdate, sendLeadOnce, handleTypedAck]);
 
   const url = `${slug(record.business.name)}.com`;
   const promptText =
@@ -1085,7 +1251,10 @@ function LiveSessionShell({
                 <input
                   type="text"
                   value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
+                  onChange={(e) => {
+                    setDraft(e.target.value);
+                    if (sendError) setSendError(null);
+                  }}
                   onFocus={() => {
                     if (draft.trim()) void publishTyping({ typing: true });
                   }}
@@ -1095,11 +1264,9 @@ function LiveSessionShell({
                     }
                   }}
                   placeholder={
-                    !connected
+                    !connected || !canSendTyped
                       ? 'Connecting…'
-                      : !agentReady
-                        ? 'Almost ready…'
-                        : 'Type to Monti…'
+                      : 'Type to Monti…'
                   }
                   disabled={!connected || sendingText}
                   autoComplete="off"
@@ -1114,6 +1281,33 @@ function LiveSessionShell({
                   →
                 </button>
               </form>
+              {sendError ? (
+                <p
+                  style={{
+                    margin: '6px 0 0',
+                    fontSize: 12,
+                    color: '#e8b4a0',
+                    textAlign: 'center',
+                    lineHeight: 1.35,
+                  }}
+                  role="status"
+                >
+                  {sendError}
+                </p>
+              ) : !connected || !canSendTyped ? (
+                <p
+                  style={{
+                    margin: '6px 0 0',
+                    fontSize: 12,
+                    color: 'rgba(243, 230, 212, 0.45)',
+                    textAlign: 'center',
+                    lineHeight: 1.35,
+                  }}
+                  role="status"
+                >
+                  connecting…
+                </p>
+              ) : null}
               <p
                 className={
                   micEnabled && !micOn
