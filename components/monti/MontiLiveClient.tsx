@@ -11,6 +11,7 @@ import type { TrackReference } from '@livekit/components-react';
 import {
   ConnectionState,
   RoomEvent,
+  Track,
   type Participant,
   type DataPacket_Kind,
 } from 'livekit-client';
@@ -42,6 +43,8 @@ const TOPIC_TYPING = 'monti_typing';
 const TOPIC_ACK = 'monti_ack';
 /** Agent → client: text path live (payload { ready: true }). */
 const TOPIC_READY = 'monti_ready';
+/** Client → agent: fill applied / animated (payload { fill_id }). */
+const TOPIC_RENDER_DONE = 'monti_render_done';
 /** lk.chat text-stream attribute for client message id. */
 const ATTR_MSG_ID = 'monti_msg_id';
 const TYPING_THROTTLE_MS = 3000;
@@ -54,6 +57,8 @@ const MONTI_GAIN_MOBILE = 2.0;
 const BOOST_WATCHDOG_MS = 1500;
 /** Analyser RMS while agent speaking below this → treat graph as dead. */
 const BOOST_SILENCE_RMS = 0.004;
+/** Local mic level floor for pulse (same spirit as agent glow). */
+const MIC_SILENCE_RMS = 0.004;
 
 type SessionPhase = 'idle' | 'connecting' | 'live' | 'error';
 type BuildPhase = 'chat' | 'handoff' | 'done';
@@ -510,6 +515,8 @@ function LiveSessionShell({
    * Typed-only sessions (micEnabled=false) never show a mic control.
    */
   const [micOn, setMicOn] = useState(micEnabled);
+  /** Measured local mic RMS 0–1 for chat-bar pulse. */
+  const [micLevel, setMicLevel] = useState(0);
   const [leadFailed, setLeadFailed] = useState(false);
   const [leadBusy, setLeadBusy] = useState(false);
   const [draft, setDraft] = useState('');
@@ -666,24 +673,61 @@ function LiveSessionShell({
     };
   }, [room]);
 
-  // Captions from agent transcription when available
+  // Captions from agent transcription (same stream as spoken audio)
+  const captionFinalRef = useRef('');
+  const captionPartialRef = useRef('');
+  const prevAgentStateRef = useRef(agentState);
+
   useEffect(() => {
     const onTx = (
       segments: Array<{ text?: string; final?: boolean }>,
       participant?: Participant,
     ) => {
       if (!participant?.isAgent) return;
-      const text = segments
-        .map((s) => s.text || '')
-        .join(' ')
-        .trim();
-      if (text) setCaption(text);
+      const finals: string[] = [];
+      const partials: string[] = [];
+      for (const s of segments) {
+        const t = (s.text || '').trim();
+        if (!t) continue;
+        if (s.final === true) finals.push(t);
+        else partials.push(t);
+      }
+      if (finals.length) {
+        const joined = finals.join(' ').trim();
+        captionFinalRef.current = joined;
+        captionPartialRef.current = '';
+        setCaption(joined);
+        return;
+      }
+      if (partials.length) {
+        const joined = partials.join(' ').trim();
+        captionPartialRef.current = joined;
+        setCaption(joined);
+      }
     };
     room.on(RoomEvent.TranscriptionReceived, onTx);
     return () => {
       room.off(RoomEvent.TranscriptionReceived, onTx);
     };
   }, [room]);
+
+  // Flush partial captions when a speaking turn ends — never leave dangling mid-words
+  useEffect(() => {
+    const prev = prevAgentStateRef.current;
+    prevAgentStateRef.current = agentState;
+    if (prev === 'speaking' && agentState !== 'speaking') {
+      const partial = captionPartialRef.current.trim();
+      if (partial) {
+        captionFinalRef.current = partial;
+        captionPartialRef.current = '';
+        setCaption(partial);
+      }
+    }
+    // New speaking turn: clear partial so the next line starts clean
+    if (agentState === 'speaking' && prev !== 'speaking') {
+      captionPartialRef.current = '';
+    }
+  }, [agentState]);
 
   const roomLogId = useCallback(() => room.name || 'unknown', [room]);
 
@@ -910,10 +954,100 @@ function LiveSessionShell({
     try {
       await room.localParticipant.setMicrophoneEnabled(next);
       setMicOn(next);
+      if (!next) setMicLevel(0);
     } catch (err) {
       console.warn('[monti/live] setMicrophoneEnabled failed', err);
     }
   }, [micEnabled, connected, micOn, room]);
+
+  // Real local mic amplitude for the chat-bar pulse (not a decorative loop)
+  useEffect(() => {
+    if (!micEnabled || !micOn || !connected) {
+      setMicLevel(0);
+      return;
+    }
+
+    let cancelled = false;
+    let raf = 0;
+    let source: MediaStreamAudioSourceNode | null = null;
+    let analyser: AnalyserNode | null = null;
+
+    const pub = room.localParticipant.getTrackPublication(Track.Source.Microphone);
+    const track = pub?.track;
+    const mst = track && 'mediaStreamTrack' in track
+      ? (track as { mediaStreamTrack?: MediaStreamTrack }).mediaStreamTrack
+      : undefined;
+    if (!mst || mst.readyState !== 'live') {
+      setMicLevel(0);
+      return;
+    }
+
+    const ctx = audioCtxRef.current;
+    if (!ctx || ctx.state === 'closed') {
+      setMicLevel(0);
+      return;
+    }
+
+    void ctx.resume().then(() => {
+      if (cancelled) return;
+      try {
+        const stream = new MediaStream([mst]);
+        source = ctx.createMediaStreamSource(stream);
+        analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.7;
+        source.connect(analyser);
+        const data = new Uint8Array(analyser.fftSize);
+        const tick = () => {
+          if (cancelled || !analyser) return;
+          analyser.getByteTimeDomainData(data);
+          let sum = 0;
+          for (let i = 0; i < data.length; i++) {
+            const v = (data[i]! - 128) / 128;
+            sum += v * v;
+          }
+          const rms = Math.sqrt(sum / data.length);
+          const level =
+            rms < MIC_SILENCE_RMS ? 0 : Math.min(1, (rms - MIC_SILENCE_RMS) * 8);
+          setMicLevel(level);
+          raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      } catch (err) {
+        console.warn('[monti/live] local mic analyser failed', err);
+        setMicLevel(0);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      if (raf) cancelAnimationFrame(raf);
+      try {
+        source?.disconnect();
+      } catch {
+        /* ignore */
+      }
+      setMicLevel(0);
+    };
+  }, [micEnabled, micOn, connected, room, audioCtxRef]);
+
+  const publishRenderDone = useCallback(
+    async (fillId: string) => {
+      try {
+        const data = new TextEncoder().encode(
+          JSON.stringify({ fill_id: fillId }),
+        );
+        await room.localParticipant.publishData(data, {
+          reliable: true,
+          topic: TOPIC_RENDER_DONE,
+        });
+        console.info(`[monti/live] render_done fill_id=${fillId}`);
+      } catch (err) {
+        console.warn('[monti/live] render_done publish failed', err);
+      }
+    },
+    [room],
+  );
 
   const applySiteUpdate = useCallback(
     (opts: {
@@ -1098,6 +1232,12 @@ function LiveSessionShell({
             void sendLeadOnce();
             return;
           }
+          const fillId =
+            parsed &&
+            typeof parsed === 'object' &&
+            typeof (parsed as { fill_id?: unknown }).fill_id === 'string'
+              ? (parsed as { fill_id: string }).fill_id
+              : null;
           const result = applyFill(recordRef.current, parsed);
           applySiteUpdate({
             record: result.record,
@@ -1105,6 +1245,14 @@ function LiveSessionShell({
             template_id: result.template_id,
             hero_image_id: result.hero_image_id,
           });
+          // Confirm render after paint so agent can continue (2.5s fallback on agent)
+          if (fillId) {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                void publishRenderDone(fillId);
+              });
+            });
+          }
         } catch (err) {
           console.warn('[monti/live] bad monti_fill payload', err);
         }
@@ -1119,7 +1267,7 @@ function LiveSessionShell({
     return () => {
       room.off(RoomEvent.DataReceived, onData);
     };
-  }, [room, applySiteUpdate, sendLeadOnce, handleTypedAck]);
+  }, [room, applySiteUpdate, sendLeadOnce, handleTypedAck, publishRenderDone]);
 
   const url = `${slug(record.business.name)}.com`;
   const promptText =
@@ -1137,26 +1285,8 @@ function LiveSessionShell({
   return (
     <>
       {/* Agent audio: dedicated <audio> in useAgentPlayback (not RoomAudioRenderer) */}
-      {/* Fixed controls — always on top of glow, dock, and site pane */}
+      {/* Fixed controls — Sound + End only; mic lives in the chat bar */}
       <div className="monti-live-fixed-bar" role="toolbar" aria-label="Session controls">
-        {micEnabled ? (
-          <button
-            type="button"
-            className={`monti-live-fixed-btn monti-live-fixed-btn--quiet${
-              !micOn ? ' is-quiet' : ''
-            }`}
-            onClick={() => void toggleMic()}
-            aria-pressed={!micOn}
-            aria-label={micOn ? 'Turn microphone off' : 'Turn microphone on'}
-            title={
-              micOn
-                ? 'Stop sending your mic to Monti'
-                : 'Send your mic to Monti again'
-            }
-          >
-            {micOn ? 'Mic off' : 'Mic on'}
-          </button>
-        ) : null}
         <button
           type="button"
           className={`monti-live-fixed-btn monti-live-fixed-btn--quiet${
@@ -1248,6 +1378,34 @@ function LiveSessionShell({
                 style={{ marginTop: 12 }}
                 onSubmit={(e) => void sendTypedMessage(e)}
               >
+                {micEnabled ? (
+                  <button
+                    type="button"
+                    className={`monti-ask-mic${micOn ? '' : ' is-off'}`}
+                    onClick={() => void toggleMic()}
+                    aria-pressed={micOn}
+                    aria-label={
+                      micOn ? 'Turn microphone off' : 'Turn microphone on'
+                    }
+                    title={
+                      micOn
+                        ? 'Stop sending your mic to Monti'
+                        : 'Send your mic to Monti again'
+                    }
+                    style={
+                      {
+                        ['--mic-level' as string]: String(
+                          micOn ? micLevel : 0,
+                        ),
+                      } as React.CSSProperties
+                    }
+                  >
+                    <span className="monti-ask-mic__dot" aria-hidden="true" />
+                    <span className="monti-ask-mic__icon" aria-hidden="true">
+                      {micOn ? '🎙' : '🔇'}
+                    </span>
+                  </button>
+                ) : null}
                 <input
                   type="text"
                   value={draft}
@@ -1266,7 +1424,9 @@ function LiveSessionShell({
                   placeholder={
                     !connected || !canSendTyped
                       ? 'Connecting…'
-                      : 'Type to Monti…'
+                      : micEnabled && !micOn
+                        ? 'Mic off — type to Monti.'
+                        : 'Type to Monti…'
                   }
                   disabled={!connected || sendingText}
                   autoComplete="off"
@@ -1308,19 +1468,10 @@ function LiveSessionShell({
                   connecting…
                 </p>
               ) : null}
-              <p
-                className={
-                  micEnabled && !micOn
-                    ? 'monti-live-status monti-live-status--mic-off'
-                    : 'monti-live-status'
-                }
-                role="status"
-              >
-                {micEnabled && !micOn
-                  ? 'Mic off — type to Monti'
-                  : `${voiceStatusLabel(agentState)}${
-                      micEnabled ? '' : ' · text'
-                    } · LiveKit`}
+              <p className="monti-live-status" role="status">
+                {`${voiceStatusLabel(agentState)}${
+                  micEnabled ? '' : ' · text'
+                } · LiveKit`}
               </p>
             </div>
           </div>

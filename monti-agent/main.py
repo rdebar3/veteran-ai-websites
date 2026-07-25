@@ -11,6 +11,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import uuid
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -68,6 +70,7 @@ TOPIC_LEAD = "monti_lead"
 TOPIC_TYPING = "monti_typing"  # client: visitor is composing a typed reply
 TOPIC_ACK = "monti_ack"  # agent → client: typed message received (payload {id})
 TOPIC_READY = "monti_ready"  # agent → client: text path live (payload {ready:true})
+TOPIC_RENDER_DONE = "monti_render_done"  # client → agent: fill applied (payload {fill_id})
 ATTR_MSG_ID = "monti_msg_id"  # lk.chat text-stream attribute
 
 # --- Session cost / quality guards (tune these) ---
@@ -80,6 +83,8 @@ SESSION_MAX_NUDGES = 2  # max re-engages per quiet spell
 SESSION_NUDGE_TYPED_MULT = 2.5
 # Hold all nudges while a typing signal is this fresh
 TYPING_FRESH_SECONDS = 8.0
+# After publishing a fill, wait for client confirm — never longer than this
+RENDER_DONE_TIMEOUT = 2.5
 
 # xAI RealtimeModel server VAD (0.6–0.75 threshold; modest silence for snappier turns)
 VAD_THRESHOLD = 0.65
@@ -101,7 +106,8 @@ FILL_SITE_SCHEMA: dict[str, Any] = {
     "name": "fill_site",
     "description": (
         "Push homepage section fields so the live site fills in. "
-        "Call once per step when content is ready. Structured fields only — never HTML."
+        "Call AFTER a short spoken acknowledgment and NEVER in the same spoken beat as a question. "
+        "Batch all ready fields/sections into one call. Structured fields only — never HTML."
     ),
     "parameters": {
         "type": "object",
@@ -234,6 +240,7 @@ class Monti(Agent):
         self,
         room: rtc.Room,
         instructions: str | None = None,
+        wait_render_done: Callable[[str], Awaitable[None]] | None = None,
     ) -> None:
         super().__init__(
             instructions=instructions if instructions is not None else INSTRUCTIONS,
@@ -243,6 +250,7 @@ class Monti(Agent):
             ],
         )
         self._room = room
+        self._wait_render_done = wait_render_done
 
     def _make_fill_site_tool(self):
         agent = self
@@ -252,16 +260,30 @@ class Monti(Agent):
             raw_arguments: dict[str, Any],
             context: RunContext,
         ) -> dict[str, Any]:
-            """Publish site fill args to the browser (no server-side validation)."""
+            """Publish site fill after speech playout; wait briefly for client render."""
             try:
-                args = raw_arguments if isinstance(raw_arguments, dict) else {}
+                # Finish any speech from this step before publishing (avoids mid-word cut).
+                await context.wait_for_playout()
+
+                args = (
+                    dict(raw_arguments) if isinstance(raw_arguments, dict) else {}
+                )
+                fill_id = str(uuid.uuid4())
+                args["fill_id"] = fill_id
+
                 await _publish_json(agent._room, TOPIC_FILL, args)
                 logger.info(
-                    "fill_site published sections=%s keys=%s",
+                    "fill_site published fill_id=%s sections=%s keys=%s room=%s",
+                    fill_id,
                     args.get("sections"),
                     list(args.keys()),
+                    agent._room.name,
                 )
-                return {"ok": True}
+
+                if agent._wait_render_done is not None:
+                    await agent._wait_render_done(fill_id)
+
+                return {"ok": True, "fill_id": fill_id}
             except Exception as e:
                 logger.exception("fill_site publish failed")
                 return {"ok": False, "error": str(e)}
@@ -296,9 +318,37 @@ async def entrypoint(ctx: JobContext) -> None:
     logger.info("connecting to room %s", ctx.room.name)
     await ctx.connect()
 
+    # Per-session render confirms — one Event per fill_id, never shared across rooms.
+    render_events: dict[str, asyncio.Event] = {}
+
+    async def wait_render_done(fill_id: str) -> None:
+        """Block until client acks render, or RENDER_DONE_TIMEOUT — never deadlock."""
+        ev = asyncio.Event()
+        render_events[fill_id] = ev
+        try:
+            await asyncio.wait_for(ev.wait(), timeout=RENDER_DONE_TIMEOUT)
+            logger.info(
+                "render_done received fill_id=%s room=%s",
+                fill_id,
+                ctx.room.name,
+            )
+        except asyncio.TimeoutError:
+            logger.warning(
+                "render_done timeout (%.1fs) fill_id=%s room=%s — continuing",
+                RENDER_DONE_TIMEOUT,
+                fill_id,
+                ctx.room.name,
+            )
+        finally:
+            render_events.pop(fill_id, None)
+
     instr = session_instructions()
     logger.info("session clock: Today's date is %s.", session_date_line())
-    agent = Monti(room=ctx.room, instructions=instr)
+    agent = Monti(
+        room=ctx.room,
+        instructions=instr,
+        wait_render_done=wait_render_done,
+    )
 
     # Prefer realtime model server VAD; threshold/silence tuned for snappier turns.
     session = AgentSession(
@@ -611,17 +661,31 @@ async def entrypoint(ctx: JobContext) -> None:
 
     @ctx.room.on("data_received")
     def _on_data(packet: rtc.DataPacket) -> None:
-        if packet.topic != TOPIC_TYPING:
-            return
         try:
             raw = packet.data
             if isinstance(raw, memoryview):
                 raw = raw.tobytes()
             msg = json.loads(raw.decode("utf-8"))
         except Exception:
-            logger.warning("monti_typing decode failed room=%s", ctx.room.name)
+            if packet.topic == TOPIC_TYPING:
+                logger.warning(
+                    "monti_typing decode failed room=%s", ctx.room.name
+                )
+            elif packet.topic == TOPIC_RENDER_DONE:
+                logger.warning(
+                    "monti_render_done decode failed room=%s", ctx.room.name
+                )
             return
         if not isinstance(msg, dict):
+            return
+
+        if packet.topic == TOPIC_RENDER_DONE:
+            fill_id = msg.get("fill_id")
+            if isinstance(fill_id, str) and fill_id in render_events:
+                render_events[fill_id].set()
+            return
+
+        if packet.topic != TOPIC_TYPING:
             return
         if msg.get("text_sent"):
             mark_typing(active=False, text_sent=True)
