@@ -44,10 +44,16 @@ const TOPIC_TYPING = 'monti_typing';
 const TOPIC_ACK = 'monti_ack';
 /** Agent → client: text path live (payload { ready: true }). */
 const TOPIC_READY = 'monti_ready';
+/** Agent → client: unrecoverable brain failure (payload { code }). */
+const TOPIC_ERROR = 'monti_error';
 /** Client → agent: fill applied / animated (payload { fill_id }). */
 const TOPIC_RENDER_DONE = 'monti_render_done';
 /** Agent → client: re-roll layout×palette; content stays (payload { restyle, fill_id }). */
 const TOPIC_RESTYLE = 'monti_restyle';
+/** If no speech/caption/error after connect — show offline notice. */
+const BRAIN_OFFLINE_FALLBACK_MS = 20_000;
+const BRAIN_OFFLINE_NOTICE =
+  "Monti's having trouble right now. Give him a few minutes, or leave your name and number and Rich will reach out.";
 /** lk.chat text-stream attribute for client message id. */
 const ATTR_MSG_ID = 'monti_msg_id';
 const TYPING_THROTTLE_MS = 3000;
@@ -530,7 +536,12 @@ function LiveSessionShell({
   const [agentPresent, setAgentPresent] = useState(false);
   /** Quiet inline send failure — not a toast/modal. */
   const [sendError, setSendError] = useState<string | null>(null);
+  /** Agent brain dead (xAI/realtime) — honest notice, keep typed input. */
+  const [brainOffline, setBrainOffline] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const sawCaptionRef = useRef(false);
+  const sawAgentSpeechRef = useRef(false);
+  const brainOfflineRef = useRef(false);
   const [photoVariants, setPhotoVariants] = useState<PhotoVariants>({
     hero: 0,
     support: 0,
@@ -681,6 +692,13 @@ function LiveSessionShell({
   const captionPartialRef = useRef('');
   const prevAgentStateRef = useRef(agentState);
 
+  const markBrainOffline = useCallback(() => {
+    if (brainOfflineRef.current) return;
+    brainOfflineRef.current = true;
+    setBrainOffline(true);
+    console.warn('[monti/live] brain_offline notice shown');
+  }, []);
+
   useEffect(() => {
     const onTx = (
       segments: Array<{ text?: string; final?: boolean }>,
@@ -699,12 +717,14 @@ function LiveSessionShell({
         const joined = finals.join(' ').trim();
         captionFinalRef.current = joined;
         captionPartialRef.current = '';
+        sawCaptionRef.current = true;
         setCaption(joined);
         return;
       }
       if (partials.length) {
         const joined = partials.join(' ').trim();
         captionPartialRef.current = joined;
+        sawCaptionRef.current = true;
         setCaption(joined);
       }
     };
@@ -718,6 +738,9 @@ function LiveSessionShell({
   useEffect(() => {
     const prev = prevAgentStateRef.current;
     prevAgentStateRef.current = agentState;
+    if (agentState === 'speaking') {
+      sawAgentSpeechRef.current = true;
+    }
     if (prev === 'speaking' && agentState !== 'speaking') {
       const partial = captionPartialRef.current.trim();
       if (partial) {
@@ -731,6 +754,17 @@ function LiveSessionShell({
       captionPartialRef.current = '';
     }
   }, [agentState]);
+
+  // 20s fallback: connected but no speech, caption, or monti_error → honest notice
+  useEffect(() => {
+    if (!connected || brainOffline) return;
+    const timer = window.setTimeout(() => {
+      if (brainOfflineRef.current) return;
+      if (sawCaptionRef.current || sawAgentSpeechRef.current) return;
+      markBrainOffline();
+    }, BRAIN_OFFLINE_FALLBACK_MS);
+    return () => window.clearTimeout(timer);
+  }, [connected, brainOffline, markBrainOffline]);
 
   const roomLogId = useCallback(() => room.name || 'unknown', [room]);
 
@@ -756,10 +790,14 @@ function LiveSessionShell({
     pendingMapRef.current.clear();
     agentSignalReadyRef.current = false;
     agentPresentRef.current = false;
+    sawCaptionRef.current = false;
+    sawAgentSpeechRef.current = false;
+    brainOfflineRef.current = false;
     setAgentSignalReady(false);
     setAgentPresent(false);
     setSendError(null);
     setSendingText(false);
+    setBrainOffline(false);
     console.info(`[monti/typed] event=reset room=${roomLogId()} len=0`);
   }, [roomLogId]);
 
@@ -1211,6 +1249,18 @@ function LiveSessionShell({
         return;
       }
 
+      if (topic === TOPIC_ERROR) {
+        try {
+          const parsed = JSON.parse(text) as { code?: string };
+          if (parsed?.code === 'brain_offline') {
+            markBrainOffline();
+          }
+        } catch {
+          // ignore malformed
+        }
+        return;
+      }
+
       if (topic === TOPIC_ACK) {
         try {
           const parsed = JSON.parse(text) as { id?: string };
@@ -1311,16 +1361,18 @@ function LiveSessionShell({
     handleTypedAck,
     publishRenderDone,
     applySessionStyle,
+    markBrainOffline,
   ]);
 
   const url = `${slug(record.business.name)}.com`;
-  const promptText =
-    caption ||
-    (buildPhase === 'done'
-      ? 'All set.'
-      : agentState === 'speaking'
-        ? 'Monti speaking…'
-        : voiceStatusLabel(agentState));
+  const promptText = brainOffline
+    ? BRAIN_OFFLINE_NOTICE
+    : caption ||
+      (buildPhase === 'done'
+        ? 'All set.'
+        : agentState === 'speaking'
+          ? 'Monti speaking…'
+          : voiceStatusLabel(agentState));
 
   const showHandoffChip =
     buildPhase === 'handoff' && !showLead && !leadFailed;
@@ -1375,9 +1427,24 @@ function LiveSessionShell({
           <div className="monti-dock">
             <div className="monti-dock-panel">
               <div
-                className={`monti-prompt${agentState === 'thinking' ? ' busy' : ''}`}
+                className={`monti-prompt${
+                  brainOffline
+                    ? ''
+                    : agentState === 'thinking'
+                      ? ' busy'
+                      : ''
+                }`}
                 role="status"
                 aria-live="polite"
+                style={
+                  brainOffline
+                    ? {
+                        color: 'rgba(243, 230, 212, 0.85)',
+                        lineHeight: 1.45,
+                        fontSize: 15,
+                      }
+                    : undefined
+                }
               >
                 {promptText}
               </div>
@@ -1513,9 +1580,11 @@ function LiveSessionShell({
                 </p>
               ) : null}
               <p className="monti-live-status" role="status">
-                {`${voiceStatusLabel(agentState)}${
-                  micEnabled ? '' : ' · text'
-                } · LiveKit`}
+                {brainOffline
+                  ? 'Temporarily offline · typed input still open'
+                  : `${voiceStatusLabel(agentState)}${
+                      micEnabled ? '' : ' · text'
+                    } · LiveKit`}
               </p>
             </div>
           </div>

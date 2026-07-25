@@ -22,6 +22,8 @@ from livekit import rtc
 from livekit.agents import (
     Agent,
     AgentSession,
+    CloseEvent,
+    CloseReason,
     JobContext,
     RunContext,
     UserStateChangedEvent,
@@ -70,6 +72,7 @@ TOPIC_LEAD = "monti_lead"
 TOPIC_TYPING = "monti_typing"  # client: visitor is composing a typed reply
 TOPIC_ACK = "monti_ack"  # agent → client: typed message received (payload {id})
 TOPIC_READY = "monti_ready"  # agent → client: text path live (payload {ready:true})
+TOPIC_ERROR = "monti_error"  # agent → client: unrecoverable brain failure (payload {code})
 TOPIC_RENDER_DONE = "monti_render_done"  # client → agent: fill applied (payload {fill_id})
 TOPIC_RESTYLE = "monti_restyle"  # agent → client: re-roll layout×palette (payload {restyle, fill_id})
 ATTR_MSG_ID = "monti_msg_id"  # lk.chat text-stream attribute
@@ -715,6 +718,35 @@ async def entrypoint(ctx: JobContext) -> None:
             await sess.interrupt()
             sess.generate_reply(user_input=ev.text)
 
+    # Brain readiness: only signal monti_ready after a successful realtime greeting.
+    # session.start wires RoomIO; it does NOT prove xAI realtime can speak.
+    brain_ready = False
+    error_sent = False
+
+    async def publish_error(*, code: str = "brain_offline") -> None:
+        nonlocal error_sent
+        if error_sent:
+            return
+        error_sent = True
+        try:
+            await _publish_json(ctx.room, TOPIC_ERROR, {"code": code})
+            logger.info(
+                "monti_error published code=%s room=%s", code, ctx.room.name
+            )
+        except Exception:
+            logger.exception(
+                "monti_error publish failed room=%s", ctx.room.name
+            )
+
+    async def publish_ready() -> None:
+        if not brain_ready:
+            return
+        try:
+            await _publish_json(ctx.room, TOPIC_READY, {"ready": True})
+            logger.info("monti_ready published room=%s", ctx.room.name)
+        except Exception:
+            logger.exception("monti_ready publish failed room=%s", ctx.room.name)
+
     # text_input defaults on; custom cb for ack + id-dedupe.
     # https://docs.livekit.io/agents/build/text/
     await session.start(
@@ -728,19 +760,22 @@ async def entrypoint(ctx: JobContext) -> None:
         ),
     )
 
-    async def publish_ready() -> None:
-        try:
-            await _publish_json(ctx.room, TOPIC_READY, {"ready": True})
-            logger.info("monti_ready published room=%s", ctx.room.name)
-        except Exception:
-            logger.exception("monti_ready publish failed room=%s", ctx.room.name)
-
-    # Text stream handler is registered after session.start — signal readiness.
-    await publish_ready()
+    @session.on("close")
+    def _on_session_close(ev: CloseEvent) -> None:
+        # xAI 403 / unrecoverable realtime failures land here.
+        if ev.reason == CloseReason.ERROR or ev.error is not None:
+            logger.warning(
+                "session close with error reason=%s room=%s — publishing monti_error",
+                ev.reason,
+                ctx.room.name,
+            )
+            asyncio.create_task(publish_error())
 
     @ctx.room.on("participant_connected")
     def _on_participant_connected(participant: rtc.RemoteParticipant) -> None:
-        # Visitor may join after the agent; re-signal so the client does not miss it.
+        # Re-signal only after brain is proven live (visitor may join late).
+        if not brain_ready:
+            return
         logger.info(
             "participant_connected identity=%s — re-publish monti_ready room=%s",
             participant.identity,
@@ -793,13 +828,24 @@ async def entrypoint(ctx: JobContext) -> None:
     # Keep task referenced so GC doesn't drop the max-duration guard.
     session._monti_max_task = asyncio.create_task(_max_timer())  # type: ignore[attr-defined]
 
-    await session.generate_reply(
-        instructions=(
-            "Greet the visitor warmly as Monti — short, natural, Appalachian-plain. "
-            "Ask for their name first (who you're talking to). One short question only. "
-            "Do not mention tools or AI. Do not ask for the business name yet."
-        ),
-    )
+    try:
+        await session.generate_reply(
+            instructions=(
+                "Greet the visitor warmly as Monti — short, natural, Appalachian-plain. "
+                "Ask for their name first (who you're talking to). One short question only. "
+                "Do not mention tools or AI. Do not ask for the business name yet."
+            ),
+        )
+    except Exception:
+        logger.exception(
+            "greeting generate_reply failed room=%s — publishing monti_error",
+            ctx.room.name,
+        )
+        await publish_error()
+        return
+
+    brain_ready = True
+    await publish_ready()
     logger.info("Monti session started in room %s", ctx.room.name)
 
 
