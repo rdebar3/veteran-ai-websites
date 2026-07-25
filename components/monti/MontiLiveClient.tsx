@@ -28,6 +28,7 @@ import {
   type PhotoVariants,
 } from '@/lib/monti/photos';
 import {
+  pickAlternateStyle,
   resolveSessionStyle,
   type StylePick,
 } from '@/lib/monti/style-fit';
@@ -45,6 +46,8 @@ const TOPIC_ACK = 'monti_ack';
 const TOPIC_READY = 'monti_ready';
 /** Client → agent: fill applied / animated (payload { fill_id }). */
 const TOPIC_RENDER_DONE = 'monti_render_done';
+/** Agent → client: re-roll layout×palette; content stays (payload { restyle, fill_id }). */
+const TOPIC_RESTYLE = 'monti_restyle';
 /** lk.chat text-stream attribute for client message id. */
 const ATTR_MSG_ID = 'monti_msg_id';
 const TYPING_THROTTLE_MS = 3000;
@@ -1220,6 +1223,40 @@ function LiveSessionShell({
         return;
       }
 
+      if (topic === TOPIC_RESTYLE) {
+        try {
+          const parsed = JSON.parse(text) as {
+            restyle?: boolean;
+            fill_id?: string;
+          };
+          if (!parsed || parsed.restyle !== true) return;
+          const fillId =
+            typeof parsed.fill_id === 'string' ? parsed.fill_id : null;
+          const current = recordRef.current;
+          const trade =
+            current.trade_key || current.hero?.image_id || null;
+          const next = pickAlternateStyle(trade, sessionStyleRef.current);
+          sessionStyleRef.current = next;
+          const styled = applySessionStyle(current);
+          setRecord(styled);
+          recordRef.current = styled;
+          setStatusText('trying a different look…');
+          console.info(
+            `[monti/live] restyle layout=${next.layout} palette=${next.palette} trade=${trade || 'none'}`,
+          );
+          if (fillId) {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                void publishRenderDone(fillId);
+              });
+            });
+          }
+        } catch (err) {
+          console.warn('[monti/live] bad monti_restyle payload', err);
+        }
+        return;
+      }
+
       if (topic === TOPIC_FILL || (!topic && text.includes('"business"'))) {
         try {
           const parsed = JSON.parse(text) as unknown;
@@ -1267,7 +1304,14 @@ function LiveSessionShell({
     return () => {
       room.off(RoomEvent.DataReceived, onData);
     };
-  }, [room, applySiteUpdate, sendLeadOnce, handleTypedAck, publishRenderDone]);
+  }, [
+    room,
+    applySiteUpdate,
+    sendLeadOnce,
+    handleTypedAck,
+    publishRenderDone,
+    applySessionStyle,
+  ]);
 
   const url = `${slug(record.business.name)}.com`;
   const promptText =

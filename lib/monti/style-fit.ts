@@ -128,3 +128,24 @@ export function resolveSessionStyle(
   }
   return pickTradeStyleFit(trade);
 }
+
+/**
+ * Re-roll a different layout×palette from the trade fit set (never the current combo).
+ * Used for live restyle after owner feedback — content stays; style changes.
+ */
+export function pickAlternateStyle(
+  trade: string | null | undefined,
+  current: StylePick | null | undefined,
+): StylePick {
+  const set = getTradeFitSet(trade);
+  const options = current
+    ? set.filter(
+        (p) => p.layout !== current.layout || p.palette !== current.palette,
+      )
+    : set;
+  if (options.length === 0) {
+    return current ?? pickTradeStyleFit(trade);
+  }
+  const i = Math.floor(Math.random() * options.length);
+  return options[i] ?? current ?? { layout: 'classic', palette: 'ember' };
+}

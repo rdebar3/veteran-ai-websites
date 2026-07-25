@@ -71,6 +71,7 @@ TOPIC_TYPING = "monti_typing"  # client: visitor is composing a typed reply
 TOPIC_ACK = "monti_ack"  # agent → client: typed message received (payload {id})
 TOPIC_READY = "monti_ready"  # agent → client: text path live (payload {ready:true})
 TOPIC_RENDER_DONE = "monti_render_done"  # client → agent: fill applied (payload {fill_id})
+TOPIC_RESTYLE = "monti_restyle"  # agent → client: re-roll layout×palette (payload {restyle, fill_id})
 ATTR_MSG_ID = "monti_msg_id"  # lk.chat text-stream attribute
 
 # --- Session cost / quality guards (tune these) ---
@@ -85,6 +86,8 @@ SESSION_NUDGE_TYPED_MULT = 2.5
 TYPING_FRESH_SECONDS = 8.0
 # After publishing a fill, wait for client confirm — never longer than this
 RENDER_DONE_TIMEOUT = 2.5
+# Max live restyles per session (recovery + owner "show me something different")
+RESTYLE_MAX = 2
 
 # xAI RealtimeModel server VAD (0.6–0.75 threshold; modest silence for snappier turns)
 VAD_THRESHOLD = 0.65
@@ -225,6 +228,26 @@ SEND_TO_RICH_SCHEMA: dict[str, Any] = {
     },
 }
 
+RESTYLE_SITE_SCHEMA: dict[str, Any] = {
+    "type": "function",
+    "name": "restyle_site",
+    "description": (
+        "Re-roll the live site's layout and color palette (same content, different look). "
+        "Call AFTER a short spoken ack and NEVER in the same beat as a question. "
+        "Use when the owner wants a different look, or after they said the look is off. "
+        "At most twice per session. Do not pass layout/palette — the client picks a fit combo."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "reason": {
+                "type": "string",
+                "description": "Optional short note for logs (e.g. recovery, owner_request)",
+            },
+        },
+    },
+}
+
 
 async def _publish_json(room: rtc.Room, topic: str, payload: dict[str, Any]) -> None:
     data = json.dumps(payload, default=str)
@@ -241,16 +264,19 @@ class Monti(Agent):
         room: rtc.Room,
         instructions: str | None = None,
         wait_render_done: Callable[[str], Awaitable[None]] | None = None,
+        try_restyle: Callable[[], Awaitable[dict[str, Any]]] | None = None,
     ) -> None:
         super().__init__(
             instructions=instructions if instructions is not None else INSTRUCTIONS,
             tools=[
                 self._make_fill_site_tool(),
+                self._make_restyle_site_tool(),
                 self._make_send_to_rich_tool(),
             ],
         )
         self._room = room
         self._wait_render_done = wait_render_done
+        self._try_restyle = try_restyle
 
     def _make_fill_site_tool(self):
         agent = self
@@ -290,6 +316,39 @@ class Monti(Agent):
 
         return fill_site
 
+    def _make_restyle_site_tool(self):
+        agent = self
+
+        @function_tool(raw_schema=RESTYLE_SITE_SCHEMA)
+        async def restyle_site(
+            raw_arguments: dict[str, Any],
+            context: RunContext,
+        ) -> dict[str, Any]:
+            """Re-roll layout×palette after speech playout; client picks from fit set."""
+            try:
+                await context.wait_for_playout()
+                if agent._try_restyle is None:
+                    return {"ok": False, "error": "restyle_unavailable"}
+                reason = ""
+                if isinstance(raw_arguments, dict):
+                    r = raw_arguments.get("reason")
+                    if isinstance(r, str):
+                        reason = r.strip()[:48]
+                result = await agent._try_restyle()
+                if reason:
+                    logger.info(
+                        "restyle_site reason=%s result=%s room=%s",
+                        reason,
+                        result,
+                        agent._room.name,
+                    )
+                return result
+            except Exception as e:
+                logger.exception("restyle_site failed")
+                return {"ok": False, "error": str(e)}
+
+        return restyle_site
+
     def _make_send_to_rich_tool(self):
         agent = self
 
@@ -320,6 +379,8 @@ async def entrypoint(ctx: JobContext) -> None:
 
     # Per-session render confirms — one Event per fill_id, never shared across rooms.
     render_events: dict[str, asyncio.Event] = {}
+    # Per-session restyle budget (recovery + owner-requested spins).
+    restyle_count = 0
 
     async def wait_render_done(fill_id: str) -> None:
         """Block until client acks render, or RENDER_DONE_TIMEOUT — never deadlock."""
@@ -342,12 +403,40 @@ async def entrypoint(ctx: JobContext) -> None:
         finally:
             render_events.pop(fill_id, None)
 
+    async def try_restyle() -> dict[str, Any]:
+        nonlocal restyle_count
+        if restyle_count >= RESTYLE_MAX:
+            logger.info(
+                "restyle_cap hit count=%s max=%s room=%s",
+                restyle_count,
+                RESTYLE_MAX,
+                ctx.room.name,
+            )
+            return {"ok": False, "error": "restyle_cap"}
+        restyle_count += 1
+        fill_id = str(uuid.uuid4())
+        await _publish_json(
+            ctx.room,
+            TOPIC_RESTYLE,
+            {"restyle": True, "fill_id": fill_id},
+        )
+        logger.info(
+            "restyle published fill_id=%s count=%s/%s room=%s",
+            fill_id,
+            restyle_count,
+            RESTYLE_MAX,
+            ctx.room.name,
+        )
+        await wait_render_done(fill_id)
+        return {"ok": True, "fill_id": fill_id, "count": restyle_count}
+
     instr = session_instructions()
     logger.info("session clock: Today's date is %s.", session_date_line())
     agent = Monti(
         room=ctx.room,
         instructions=instr,
         wait_render_done=wait_render_done,
+        try_restyle=try_restyle,
     )
 
     # Prefer realtime model server VAD; threshold/silence tuned for snappier turns.
