@@ -1,5 +1,6 @@
-import MontiExperience from '@/components/monti/MontiExperience';
+import { permanentRedirect } from 'next/navigation';
 
+/** Typed-only Monti retired — single experience at /monti/live. */
 export default function MontiPage() {
-  return <MontiExperience />;
+  permanentRedirect('/monti/live');
 }

@@ -1,8 +1,8 @@
 import MontiLiveClient from '@/components/monti/MontiLiveClient';
 
 /**
- * Phase A LiveKit voice test route.
- * Hidden (inherits monti layout noindex). Does not replace /monti.
+ * Monti live (voice + typed). Hidden (inherits monti layout noindex).
+ * /monti permanently redirects here.
  */
 export default function MontiLivePage() {
   return <MontiLiveClient />;
