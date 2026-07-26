@@ -38,6 +38,8 @@ import { applyFill } from '@/lib/monti/validate';
 
 const TOPIC_FILL = 'monti_fill';
 const TOPIC_LEAD = 'monti_lead';
+/** Client → agent: real outcome of lead POST (payload { lead_id, ok, error? }). */
+const TOPIC_LEAD_RESULT = 'monti_lead_result';
 /** Client → agent: visitor is composing a typed reply (silence nudge must wait). */
 const TOPIC_TYPING = 'monti_typing';
 /** Agent → client: typed message received (payload { id }). */
@@ -1222,6 +1224,36 @@ function LiveSessionShell({
     }
   }, [leadBusy]);
 
+  /** Run lead POST and always report truth to the agent (monti_lead_result). */
+  const runLeadAndReport = useCallback(
+    async (leadId?: string | null) => {
+      const result = await sendLeadOnce();
+      try {
+        const payload: {
+          lead_id: string | null;
+          ok: boolean;
+          error?: string;
+        } = {
+          lead_id: leadId && leadId.trim() ? leadId.trim() : null,
+          ok: result.ok,
+        };
+        if (!result.ok && result.error) payload.error = result.error;
+        const data = new TextEncoder().encode(JSON.stringify(payload));
+        await room.localParticipant.publishData(data, {
+          reliable: true,
+          topic: TOPIC_LEAD_RESULT,
+        });
+        console.info(
+          `[monti/live] lead_result ok=${result.ok} lead_id=${payload.lead_id || 'none'}`,
+        );
+      } catch (err) {
+        console.warn('[monti/live] lead_result publish failed', err);
+      }
+      return result;
+    },
+    [sendLeadOnce, room],
+  );
+
   // LiveKit data messages from agent tools + typed ack/ready
   useEffect(() => {
     const decoder = new TextDecoder();
@@ -1316,7 +1348,11 @@ function LiveSessionShell({
             typeof parsed === 'object' &&
             (parsed as { type?: string }).type === 'send_to_rich'
           ) {
-            void sendLeadOnce();
+            const leadId =
+              typeof (parsed as { lead_id?: unknown }).lead_id === 'string'
+                ? (parsed as { lead_id: string }).lead_id
+                : null;
+            void runLeadAndReport(leadId);
             return;
           }
           const fillId =
@@ -1346,7 +1382,14 @@ function LiveSessionShell({
         return;
       }
       if (topic === TOPIC_LEAD) {
-        void sendLeadOnce();
+        try {
+          const parsed = JSON.parse(text) as { lead_id?: string };
+          const leadId =
+            typeof parsed?.lead_id === 'string' ? parsed.lead_id : null;
+          void runLeadAndReport(leadId);
+        } catch {
+          void runLeadAndReport(null);
+        }
       }
     };
 
@@ -1357,7 +1400,7 @@ function LiveSessionShell({
   }, [
     room,
     applySiteUpdate,
-    sendLeadOnce,
+    runLeadAndReport,
     handleTypedAck,
     publishRenderDone,
     applySessionStyle,
@@ -1455,7 +1498,7 @@ function LiveSessionShell({
                       type="button"
                       className="monti-chip"
                       disabled={leadBusy}
-                      onClick={() => void sendLeadOnce()}
+                      onClick={() => void runLeadAndReport(null)}
                     >
                       {leadBusy ? 'Sending…' : 'Try again — send it to Rich'}
                     </button>
@@ -1464,7 +1507,7 @@ function LiveSessionShell({
                       type="button"
                       className="monti-chip"
                       disabled={leadBusy}
-                      onClick={() => void sendLeadOnce()}
+                      onClick={() => void runLeadAndReport(null)}
                     >
                       {leadBusy ? 'Sending…' : 'Send it to Rich'}
                     </button>

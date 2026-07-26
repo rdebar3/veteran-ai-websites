@@ -69,6 +69,7 @@ def session_instructions() -> str:
 
 TOPIC_FILL = "monti_fill"
 TOPIC_LEAD = "monti_lead"
+TOPIC_LEAD_RESULT = "monti_lead_result"  # client → agent: real lead POST outcome
 TOPIC_TYPING = "monti_typing"  # client: visitor is composing a typed reply
 TOPIC_ACK = "monti_ack"  # agent → client: typed message received (payload {id})
 TOPIC_READY = "monti_ready"  # agent → client: text path live (payload {ready:true})
@@ -91,6 +92,10 @@ TYPING_FRESH_SECONDS = 8.0
 RENDER_DONE_TIMEOUT = 2.5
 # Max live restyles per session (recovery + owner "show me something different")
 RESTYLE_MAX = 2
+# Wait for browser lead POST outcome after monti_lead
+LEAD_RESULT_TIMEOUT = 8.0
+# Max send_to_rich attempts per session (agent-initiated)
+LEAD_SEND_MAX = 2
 
 # xAI RealtimeModel server VAD (0.6–0.75 threshold; modest silence for snappier turns)
 VAD_THRESHOLD = 0.65
@@ -261,6 +266,54 @@ async def _publish_json(room: rtc.Room, topic: str, payload: dict[str, Any]) -> 
     )
 
 
+def _nonempty_str(v: Any) -> bool:
+    return isinstance(v, str) and bool(v.strip())
+
+
+def _update_checklist(slots: dict[str, bool], args: dict[str, Any]) -> None:
+    """Merge fill_site args into per-session required-slots checklist (sticky True)."""
+    business = args.get("business")
+    if isinstance(business, dict):
+        if _nonempty_str(business.get("name")):
+            slots["business_name"] = True
+        if _nonempty_str(business.get("phone")):
+            slots["phone"] = True
+        if _nonempty_str(business.get("service_area")):
+            slots["service_area"] = True
+
+    hero = args.get("hero")
+    if isinstance(hero, dict):
+        if (
+            _nonempty_str(hero.get("headline"))
+            or _nonempty_str(hero.get("subhead"))
+            or _nonempty_str(hero.get("image_id"))
+        ):
+            slots["hero"] = True
+        if _nonempty_str(hero.get("image_id")):
+            slots["trade"] = True
+
+    if _nonempty_str(args.get("hero_image_id")):
+        slots["trade"] = True
+        slots["hero"] = True
+
+    services = args.get("services")
+    if isinstance(services, list) and len(services) >= 3:
+        slots["services_ge_3"] = True
+
+    about = args.get("about")
+    if isinstance(about, dict) and _nonempty_str(about.get("body")):
+        slots["about"] = True
+
+    sections = args.get("sections")
+    if isinstance(sections, list):
+        if "hero" in sections:
+            slots["hero"] = True
+        if "about" in sections:
+            slots["about"] = True
+        if "services" in sections and isinstance(services, list) and len(services) >= 3:
+            slots["services_ge_3"] = True
+
+
 class Monti(Agent):
     def __init__(
         self,
@@ -268,6 +321,8 @@ class Monti(Agent):
         instructions: str | None = None,
         wait_render_done: Callable[[str], Awaitable[None]] | None = None,
         try_restyle: Callable[[], Awaitable[dict[str, Any]]] | None = None,
+        try_send_to_rich: Callable[[], Awaitable[dict[str, Any]]] | None = None,
+        on_fill_args: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         super().__init__(
             instructions=instructions if instructions is not None else INSTRUCTIONS,
@@ -280,6 +335,8 @@ class Monti(Agent):
         self._room = room
         self._wait_render_done = wait_render_done
         self._try_restyle = try_restyle
+        self._try_send_to_rich = try_send_to_rich
+        self._on_fill_args = on_fill_args
 
     def _make_fill_site_tool(self):
         agent = self
@@ -299,6 +356,9 @@ class Monti(Agent):
                 )
                 fill_id = str(uuid.uuid4())
                 args["fill_id"] = fill_id
+
+                if agent._on_fill_args is not None:
+                    agent._on_fill_args(args)
 
                 await _publish_json(agent._room, TOPIC_FILL, args)
                 logger.info(
@@ -360,17 +420,14 @@ class Monti(Agent):
             raw_arguments: dict[str, Any],
             context: RunContext,
         ) -> dict[str, Any]:
-            """Signal the browser to POST the lead to Rich."""
+            """Ask browser to POST lead; return only after real save (or fail/timeout)."""
             try:
-                await _publish_json(
-                    agent._room,
-                    TOPIC_LEAD,
-                    {"type": "send_to_rich"},
-                )
-                logger.info("send_to_rich published")
-                return {"ok": True}
+                await context.wait_for_playout()
+                if agent._try_send_to_rich is None:
+                    return {"ok": False, "error": "lead_unavailable"}
+                return await agent._try_send_to_rich()
             except Exception as e:
-                logger.exception("send_to_rich publish failed")
+                logger.exception("send_to_rich failed")
                 return {"ok": False, "error": str(e)}
 
         return send_to_rich
@@ -382,8 +439,30 @@ async def entrypoint(ctx: JobContext) -> None:
 
     # Per-session render confirms — one Event per fill_id, never shared across rooms.
     render_events: dict[str, asyncio.Event] = {}
+    # Per-session lead-result wait (keyed by lead_id).
+    lead_events: dict[str, asyncio.Event] = {}
+    lead_results: dict[str, dict[str, Any]] = {}
     # Per-session restyle budget (recovery + owner-requested spins).
     restyle_count = 0
+    lead_send_count = 0
+    # Sticky required-slots checklist (updated on every fill_site).
+    checklist: dict[str, bool] = {
+        "business_name": False,
+        "phone": False,
+        "trade": False,
+        "service_area": False,
+        "services_ge_3": False,
+        "hero": False,
+        "about": False,
+    }
+
+    def on_fill_args(args: dict[str, Any]) -> None:
+        _update_checklist(checklist, args)
+        logger.info(
+            "checklist %s room=%s",
+            checklist,
+            ctx.room.name,
+        )
 
     async def wait_render_done(fill_id: str) -> None:
         """Block until client acks render, or RENDER_DONE_TIMEOUT — never deadlock."""
@@ -405,6 +484,34 @@ async def entrypoint(ctx: JobContext) -> None:
             )
         finally:
             render_events.pop(fill_id, None)
+
+    async def wait_lead_result(lead_id: str) -> dict[str, Any]:
+        """Wait for browser monti_lead_result; always clean up Event key."""
+        ev = asyncio.Event()
+        lead_events[lead_id] = ev
+        try:
+            await asyncio.wait_for(ev.wait(), timeout=LEAD_RESULT_TIMEOUT)
+            result = lead_results.pop(
+                lead_id, {"ok": False, "error": "missing_result"}
+            )
+            logger.info(
+                "lead_result received lead_id=%s ok=%s room=%s",
+                lead_id,
+                result.get("ok"),
+                ctx.room.name,
+            )
+            return result
+        except asyncio.TimeoutError:
+            logger.warning(
+                "lead_result timeout (%.1fs) lead_id=%s room=%s",
+                LEAD_RESULT_TIMEOUT,
+                lead_id,
+                ctx.room.name,
+            )
+            return {"ok": False, "error": "lead_timeout"}
+        finally:
+            lead_events.pop(lead_id, None)
+            lead_results.pop(lead_id, None)
 
     async def try_restyle() -> dict[str, Any]:
         nonlocal restyle_count
@@ -433,6 +540,50 @@ async def entrypoint(ctx: JobContext) -> None:
         await wait_render_done(fill_id)
         return {"ok": True, "fill_id": fill_id, "count": restyle_count}
 
+    async def try_send_to_rich() -> dict[str, Any]:
+        """Gate checklist → publish monti_lead → wait for real browser save."""
+        nonlocal lead_send_count
+
+        missing: list[str] = []
+        if not checklist.get("business_name"):
+            missing.append("business_name")
+        if not checklist.get("phone"):
+            missing.append("phone")
+        if missing:
+            logger.warning(
+                "send_to_rich blocked missing=%s checklist=%s room=%s",
+                missing,
+                checklist,
+                ctx.room.name,
+            )
+            # Publish NOTHING to monti_lead
+            return {"ok": False, "error": "missing", "missing": missing}
+
+        if lead_send_count >= LEAD_SEND_MAX:
+            logger.info(
+                "lead_retry_cap hit count=%s max=%s room=%s",
+                lead_send_count,
+                LEAD_SEND_MAX,
+                ctx.room.name,
+            )
+            return {"ok": False, "error": "lead_retry_cap"}
+
+        lead_send_count += 1
+        lead_id = str(uuid.uuid4())
+        await _publish_json(
+            ctx.room,
+            TOPIC_LEAD,
+            {"type": "send_to_rich", "lead_id": lead_id},
+        )
+        logger.info(
+            "send_to_rich published lead_id=%s attempt=%s/%s room=%s",
+            lead_id,
+            lead_send_count,
+            LEAD_SEND_MAX,
+            ctx.room.name,
+        )
+        return await wait_lead_result(lead_id)
+
     instr = session_instructions()
     logger.info("session clock: Today's date is %s.", session_date_line())
     agent = Monti(
@@ -440,6 +591,8 @@ async def entrypoint(ctx: JobContext) -> None:
         instructions=instr,
         wait_render_done=wait_render_done,
         try_restyle=try_restyle,
+        try_send_to_rich=try_send_to_rich,
+        on_fill_args=on_fill_args,
     )
 
     # Prefer realtime model server VAD; threshold/silence tuned for snappier turns.
@@ -807,6 +960,17 @@ async def entrypoint(ctx: JobContext) -> None:
             fill_id = msg.get("fill_id")
             if isinstance(fill_id, str) and fill_id in render_events:
                 render_events[fill_id].set()
+            return
+
+        if packet.topic == TOPIC_LEAD_RESULT:
+            lead_id = msg.get("lead_id")
+            if isinstance(lead_id, str) and lead_id in lead_events:
+                err = msg.get("error")
+                lead_results[lead_id] = {
+                    "ok": bool(msg.get("ok")),
+                    "error": err if isinstance(err, str) else None,
+                }
+                lead_events[lead_id].set()
             return
 
         if packet.topic != TOPIC_TYPING:
