@@ -62,6 +62,35 @@ const TYPING_THROTTLE_MS = 3000;
 /** Wait for monti_ack before retry / timeout restore. */
 const ACK_TIMEOUT_MS = 4000;
 const CORE_FILLS: FillSection[] = ['hero', 'services', 'contact', 'about'];
+/** All section keys that can appear on a fill_site / monti_fill payload. */
+const FILL_SECTION_KEYS: readonly FillSection[] = [
+  'hero',
+  'trust',
+  'services',
+  'about',
+  'contact',
+];
+
+/** Sections the agent requested (content keys present ∪ sections[] names). */
+function requestedSections(parsed: Record<string, unknown>): FillSection[] {
+  const out = new Set<FillSection>();
+  for (const k of FILL_SECTION_KEYS) {
+    const v = parsed[k];
+    if (v != null && typeof v === 'object') out.add(k);
+  }
+  const arr = parsed.sections ?? parsed.fills;
+  if (Array.isArray(arr)) {
+    for (const x of arr) {
+      if (
+        typeof x === 'string' &&
+        (FILL_SECTION_KEYS as readonly string[]).includes(x)
+      ) {
+        out.add(x as FillSection);
+      }
+    }
+  }
+  return Array.from(out);
+}
 
 /** Mobile boost only — desktop stays plain <audio> (pre-regression behavior). */
 const MONTI_GAIN_MOBILE = 2.0;
@@ -1075,16 +1104,30 @@ function LiveSessionShell({
   }, [micEnabled, micOn, connected, room, audioCtxRef]);
 
   const publishRenderDone = useCallback(
-    async (fillId: string) => {
+    async (
+      fillId: string,
+      outcome: {
+        ok: boolean;
+        applied: FillSection[];
+        dropped: FillSection[];
+      },
+    ) => {
       try {
         const data = new TextEncoder().encode(
-          JSON.stringify({ fill_id: fillId }),
+          JSON.stringify({
+            fill_id: fillId,
+            ok: outcome.ok,
+            applied: outcome.applied,
+            dropped: outcome.dropped,
+          }),
         );
         await room.localParticipant.publishData(data, {
           reliable: true,
           topic: TOPIC_RENDER_DONE,
         });
-        console.info(`[monti/live] render_done fill_id=${fillId}`);
+        console.info(
+          `[monti/live] render_done fill_id=${fillId} ok=${outcome.ok} applied=${outcome.applied.join(',')} dropped=${outcome.dropped.join(',')}`,
+        );
       } catch (err) {
         console.warn('[monti/live] render_done publish failed', err);
       }
@@ -1329,7 +1372,12 @@ function LiveSessionShell({
           if (fillId) {
             requestAnimationFrame(() => {
               requestAnimationFrame(() => {
-                void publishRenderDone(fillId);
+                // Restyle has no section fills — report clean success to unblock wait
+                void publishRenderDone(fillId, {
+                  ok: true,
+                  applied: [],
+                  dropped: [],
+                });
               });
             });
           }
@@ -1368,11 +1416,17 @@ function LiveSessionShell({
             template_id: result.template_id,
             hero_image_id: result.hero_image_id,
           });
-          // Confirm render after paint so agent can continue (2.5s fallback on agent)
-          if (fillId) {
+          // Report real accepted/dropped after paint (does not change what rendered)
+          if (fillId && parsed && typeof parsed === 'object') {
+            const requested = requestedSections(
+              parsed as Record<string, unknown>,
+            );
+            const applied = result.fill;
+            const dropped = requested.filter((s) => !applied.includes(s));
+            const ok = dropped.length === 0;
             requestAnimationFrame(() => {
               requestAnimationFrame(() => {
-                void publishRenderDone(fillId);
+                void publishRenderDone(fillId, { ok, applied, dropped });
               });
             });
           }

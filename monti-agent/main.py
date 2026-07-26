@@ -96,6 +96,8 @@ RESTYLE_MAX = 2
 LEAD_RESULT_TIMEOUT = 8.0
 # Max send_to_rich attempts per session (agent-initiated)
 LEAD_SEND_MAX = 2
+# Max times a section may be reported dropped before refill_cap (successes free)
+REFILL_MAX_PER_SECTION = 1
 
 # xAI RealtimeModel server VAD (0.6–0.75 threshold; modest silence for snappier turns)
 VAD_THRESHOLD = 0.65
@@ -319,10 +321,11 @@ class Monti(Agent):
         self,
         room: rtc.Room,
         instructions: str | None = None,
-        wait_render_done: Callable[[str], Awaitable[None]] | None = None,
+        wait_render_done: Callable[[str], Awaitable[dict[str, Any]]] | None = None,
         try_restyle: Callable[[], Awaitable[dict[str, Any]]] | None = None,
         try_send_to_rich: Callable[[], Awaitable[dict[str, Any]]] | None = None,
         on_fill_args: Callable[[dict[str, Any]], None] | None = None,
+        dropped_counts: dict[str, int] | None = None,
     ) -> None:
         super().__init__(
             instructions=instructions if instructions is not None else INSTRUCTIONS,
@@ -337,6 +340,10 @@ class Monti(Agent):
         self._try_restyle = try_restyle
         self._try_send_to_rich = try_send_to_rich
         self._on_fill_args = on_fill_args
+        # Per-session map of section → drop count (shared with entrypoint)
+        self._dropped_counts: dict[str, int] = (
+            dropped_counts if dropped_counts is not None else {}
+        )
 
     def _make_fill_site_tool(self):
         agent = self
@@ -369,8 +376,58 @@ class Monti(Agent):
                     agent._room.name,
                 )
 
-                if agent._wait_render_done is not None:
-                    await agent._wait_render_done(fill_id)
+                if agent._wait_render_done is None:
+                    return {"ok": True, "fill_id": fill_id}
+
+                result = await agent._wait_render_done(fill_id)
+                if result.get("error") == "render_timeout":
+                    return {
+                        "ok": False,
+                        "error": "render_timeout",
+                        "fill_id": fill_id,
+                    }
+
+                dropped_raw = result.get("dropped") or []
+                dropped = [
+                    s for s in dropped_raw if isinstance(s, str) and s.strip()
+                ]
+                if dropped:
+                    # Cap is on repeated *failures* only — successful refills free.
+                    capped = [
+                        s
+                        for s in dropped
+                        if agent._dropped_counts.get(s, 0)
+                        >= REFILL_MAX_PER_SECTION
+                    ]
+                    if capped:
+                        logger.warning(
+                            "fill_site refill_cap sections=%s counts=%s room=%s",
+                            capped,
+                            agent._dropped_counts,
+                            agent._room.name,
+                        )
+                        return {
+                            "ok": False,
+                            "error": "refill_cap",
+                            "dropped": dropped,
+                            "fill_id": fill_id,
+                        }
+                    for s in dropped:
+                        agent._dropped_counts[s] = (
+                            agent._dropped_counts.get(s, 0) + 1
+                        )
+                    logger.warning(
+                        "fill_site dropped sections=%s counts=%s room=%s",
+                        dropped,
+                        agent._dropped_counts,
+                        agent._room.name,
+                    )
+                    return {
+                        "ok": False,
+                        "error": "dropped",
+                        "dropped": dropped,
+                        "fill_id": fill_id,
+                    }
 
                 return {"ok": True, "fill_id": fill_id}
             except Exception as e:
@@ -439,12 +496,15 @@ async def entrypoint(ctx: JobContext) -> None:
 
     # Per-session render confirms — one Event per fill_id, never shared across rooms.
     render_events: dict[str, asyncio.Event] = {}
+    render_results: dict[str, dict[str, Any]] = {}
     # Per-session lead-result wait (keyed by lead_id).
     lead_events: dict[str, asyncio.Event] = {}
     lead_results: dict[str, dict[str, Any]] = {}
     # Per-session restyle budget (recovery + owner-requested spins).
     restyle_count = 0
     lead_send_count = 0
+    # Per-section drop counts (failures only — successful fills free).
+    dropped_counts: dict[str, int] = {}
     # Sticky required-slots checklist (updated on every fill_site).
     checklist: dict[str, bool] = {
         "business_name": False,
@@ -464,26 +524,35 @@ async def entrypoint(ctx: JobContext) -> None:
             ctx.room.name,
         )
 
-    async def wait_render_done(fill_id: str) -> None:
-        """Block until client acks render, or RENDER_DONE_TIMEOUT — never deadlock."""
+    async def wait_render_done(fill_id: str) -> dict[str, Any]:
+        """Wait for monti_render_done; return real result or render_timeout."""
         ev = asyncio.Event()
         render_events[fill_id] = ev
         try:
             await asyncio.wait_for(ev.wait(), timeout=RENDER_DONE_TIMEOUT)
-            logger.info(
-                "render_done received fill_id=%s room=%s",
+            result = render_results.pop(
                 fill_id,
+                {"ok": True, "applied": [], "dropped": []},
+            )
+            logger.info(
+                "render_done received fill_id=%s ok=%s dropped=%s room=%s",
+                fill_id,
+                result.get("ok"),
+                result.get("dropped"),
                 ctx.room.name,
             )
+            return result
         except asyncio.TimeoutError:
             logger.warning(
-                "render_done timeout (%.1fs) fill_id=%s room=%s — continuing",
+                "render_done timeout (%.1fs) fill_id=%s room=%s",
                 RENDER_DONE_TIMEOUT,
                 fill_id,
                 ctx.room.name,
             )
+            return {"ok": False, "error": "render_timeout"}
         finally:
             render_events.pop(fill_id, None)
+            render_results.pop(fill_id, None)
 
     async def wait_lead_result(lead_id: str) -> dict[str, Any]:
         """Wait for browser monti_lead_result; always clean up Event key."""
@@ -593,6 +662,7 @@ async def entrypoint(ctx: JobContext) -> None:
         try_restyle=try_restyle,
         try_send_to_rich=try_send_to_rich,
         on_fill_args=on_fill_args,
+        dropped_counts=dropped_counts,
     )
 
     # Prefer realtime model server VAD; threshold/silence tuned for snappier turns.
@@ -959,6 +1029,25 @@ async def entrypoint(ctx: JobContext) -> None:
         if packet.topic == TOPIC_RENDER_DONE:
             fill_id = msg.get("fill_id")
             if isinstance(fill_id, str) and fill_id in render_events:
+                # Backward compat: old clients publish {fill_id} only → treat as ok.
+                if "ok" not in msg:
+                    render_results[fill_id] = {
+                        "ok": True,
+                        "applied": [],
+                        "dropped": [],
+                    }
+                else:
+                    applied = msg.get("applied") or []
+                    dropped = msg.get("dropped") or []
+                    render_results[fill_id] = {
+                        "ok": bool(msg.get("ok")),
+                        "applied": (
+                            list(applied) if isinstance(applied, list) else []
+                        ),
+                        "dropped": (
+                            list(dropped) if isinstance(dropped, list) else []
+                        ),
+                    }
                 render_events[fill_id].set()
             return
 
