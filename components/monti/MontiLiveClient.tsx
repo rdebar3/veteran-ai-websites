@@ -92,6 +92,147 @@ function requestedSections(parsed: Record<string, unknown>): FillSection[] {
   return Array.from(out);
 }
 
+function nonemptyStr(s: unknown): boolean {
+  return typeof s === 'string' && s.trim().length > 0;
+}
+
+/** Whether a section object looks non-empty on the merged record. */
+function sectionNonEmptyOnRecord(
+  section: FillSection,
+  record: MontiRecord,
+): boolean {
+  switch (section) {
+    case 'hero':
+      return (
+        nonemptyStr(record.hero.headline) ||
+        nonemptyStr(record.hero.subhead) ||
+        nonemptyStr(record.hero.cta_text) ||
+        nonemptyStr(record.hero.image_id)
+      );
+    case 'about':
+      return nonemptyStr(record.about.body);
+    case 'services':
+      return record.services.some(
+        (s) => nonemptyStr(s.title) || nonemptyStr(s.description),
+      );
+    case 'trust':
+      return (
+        record.trust.badges.some((b) => nonemptyStr(b)) ||
+        record.trust.reviews.some((r) => nonemptyStr(r.quote))
+      );
+    case 'contact':
+      return (
+        nonemptyStr(record.contact.cta_text) ||
+        nonemptyStr(record.contact.phone_prompt) ||
+        record.contact.emergency === true
+      );
+    default:
+      return false;
+  }
+}
+
+/**
+ * True if payload services[] has any item that would survive coerceServices
+ * (non-empty title or description). Entirely junk arrays → false.
+ */
+function payloadServicesWouldLand(raw: unknown): boolean {
+  if (!Array.isArray(raw)) return false;
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const o = item as Record<string, unknown>;
+    if (nonemptyStr(o.title) || nonemptyStr(o.description)) return true;
+  }
+  return false;
+}
+
+/**
+ * Section applied if at least one field the payload attempted is non-empty on
+ * result.record after merge. Named only in sections[] with no object → fall
+ * back to non-empty section on the record.
+ */
+function sectionAppliedOnRecord(
+  section: FillSection,
+  record: MontiRecord,
+  payload: Record<string, unknown>,
+): boolean {
+  const obj = payload[section];
+  if (obj == null || typeof obj !== 'object') {
+    return sectionNonEmptyOnRecord(section, record);
+  }
+
+  if (section === 'services') {
+    // Array (or array-like) — reject entirely if every item is empty junk
+    if (!payloadServicesWouldLand(obj)) return false;
+    return sectionNonEmptyOnRecord('services', record);
+  }
+
+  const o = obj as Record<string, unknown>;
+  switch (section) {
+    case 'hero': {
+      const fields = [
+        'headline',
+        'subhead',
+        'cta_text',
+        'image_id',
+      ] as const;
+      let attempted = false;
+      for (const f of fields) {
+        if (o[f] != null) {
+          attempted = true;
+          if (nonemptyStr(record.hero[f])) return true;
+        }
+      }
+      return attempted ? false : sectionNonEmptyOnRecord('hero', record);
+    }
+    case 'about': {
+      if (o.body != null) return nonemptyStr(record.about.body);
+      return sectionNonEmptyOnRecord('about', record);
+    }
+    case 'trust': {
+      let attempted = false;
+      if (o.badges != null) {
+        attempted = true;
+        if (record.trust.badges.some((b) => nonemptyStr(b))) return true;
+      }
+      if (o.reviews != null) {
+        attempted = true;
+        if (record.trust.reviews.some((r) => nonemptyStr(r.quote))) return true;
+      }
+      return attempted ? false : sectionNonEmptyOnRecord('trust', record);
+    }
+    case 'contact': {
+      let attempted = false;
+      if (o.cta_text != null) {
+        attempted = true;
+        if (nonemptyStr(record.contact.cta_text)) return true;
+      }
+      if (o.phone_prompt != null) {
+        attempted = true;
+        if (nonemptyStr(record.contact.phone_prompt)) return true;
+      }
+      if (o.emergency != null) {
+        attempted = true;
+        if (record.contact.emergency === true || o.emergency === false) {
+          // false is a valid landed boolean attempt
+          if (typeof record.contact.emergency === 'boolean') return true;
+        }
+      }
+      return attempted ? false : sectionNonEmptyOnRecord('contact', record);
+    }
+    default:
+      return false;
+  }
+}
+
+/** applied = sections that actually landed on the merged record (not result.fill echo). */
+function appliedSections(
+  requested: FillSection[],
+  record: MontiRecord,
+  payload: Record<string, unknown>,
+): FillSection[] {
+  return requested.filter((s) => sectionAppliedOnRecord(s, record, payload));
+}
+
 /** Mobile boost only — desktop stays plain <audio> (pre-regression behavior). */
 const MONTI_GAIN_MOBILE = 2.0;
 const BOOST_WATCHDOG_MS = 1500;
@@ -1416,12 +1557,15 @@ function LiveSessionShell({
             template_id: result.template_id,
             hero_image_id: result.hero_image_id,
           });
-          // Report real accepted/dropped after paint (does not change what rendered)
+          // Report real accepted/dropped from merged record (not result.fill echo)
           if (fillId && parsed && typeof parsed === 'object') {
-            const requested = requestedSections(
-              parsed as Record<string, unknown>,
+            const payload = parsed as Record<string, unknown>;
+            const requested = requestedSections(payload);
+            const applied = appliedSections(
+              requested,
+              result.record,
+              payload,
             );
-            const applied = result.fill;
             const dropped = requested.filter((s) => !applied.includes(s));
             const ok = dropped.length === 0;
             requestAnimationFrame(() => {
