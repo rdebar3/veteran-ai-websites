@@ -99,6 +99,7 @@ LEAD_RESULT_TIMEOUT = 8.0
 LEAD_SEND_MAX = 2
 # Max times a section may be reported dropped before refill_cap (successes free)
 REFILL_MAX_PER_SECTION = 1
+VOICE_RATE_PER_MINUTE = 0.05  # xAI speech-to-speech, $3.00/hr
 
 # xAI RealtimeModel server VAD (0.6–0.75 threshold; modest silence for snappier turns)
 VAD_THRESHOLD = 0.65
@@ -494,6 +495,8 @@ class Monti(Agent):
 async def entrypoint(ctx: JobContext) -> None:
     logger.info("connecting to room %s", ctx.room.name)
     await ctx.connect()
+    session_started_at = time.monotonic()
+    cost_logged = False
 
     # Per-session render confirms — one Event per fill_id, never shared across rooms.
     render_events: dict[str, asyncio.Event] = {}
@@ -725,7 +728,21 @@ async def entrypoint(ctx: JobContext) -> None:
     def is_typing_fresh() -> bool:
         return last_typing_at > 0 and (_now() - last_typing_at) < TYPING_FRESH_SECONDS
 
-    async def polite_end(reason: str) -> None:
+    def _log_session_cost(reason: str) -> None:
+        nonlocal cost_logged
+        if cost_logged:
+            return
+        cost_logged = True
+        elapsed_s = time.monotonic() - session_started_at
+        logger.info(
+            "session_cost reason=%s elapsed_s=%.1f est_usd=%.3f room=%s",
+            reason,
+            elapsed_s,
+            (elapsed_s / 60.0) * VOICE_RATE_PER_MINUTE,
+            ctx.room.name,
+        )
+
+    async def polite_end(reason: str, *, speak: bool = True) -> None:
         nonlocal closing, silence_task, typing_recheck_task
         if closing:
             return
@@ -735,10 +752,12 @@ async def entrypoint(ctx: JobContext) -> None:
         if typing_recheck_task and not typing_recheck_task.done():
             typing_recheck_task.cancel()
         logger.info("session ending reason=%s room=%s", reason, ctx.room.name)
-        try:
-            await session.say(WRAP_UP_LINE, allow_interruptions=False)
-        except Exception:
-            logger.exception("wrap-up say failed")
+        if speak:
+            try:
+                await session.say(WRAP_UP_LINE, allow_interruptions=False)
+            except Exception:
+                logger.exception("wrap-up say failed")
+        _log_session_cost(reason)
         try:
             await session.aclose()
         except Exception:
@@ -999,6 +1018,8 @@ async def entrypoint(ctx: JobContext) -> None:
                 ctx.room.name,
             )
             asyncio.create_task(publish_error())
+        # Error-closes and other aclose paths — once-guarded with polite_end.
+        _log_session_cost(f"close_{ev.reason}")
 
     @ctx.room.on("participant_connected")
     def _on_participant_connected(participant: rtc.RemoteParticipant) -> None:
@@ -1011,6 +1032,28 @@ async def entrypoint(ctx: JobContext) -> None:
             ctx.room.name,
         )
         asyncio.create_task(publish_ready())
+
+    @ctx.room.on("participant_disconnected")
+    def _on_participant_disconnected(participant: rtc.RemoteParticipant) -> None:
+        remaining = [
+            p
+            for p in ctx.room.remote_participants.values()
+            if p.identity != participant.identity
+        ]
+        if remaining:
+            logger.info(
+                "participant_disconnected identity=%s — %s remain, staying room=%s",
+                participant.identity,
+                len(remaining),
+                ctx.room.name,
+            )
+            return
+        logger.info(
+            "participant_disconnected identity=%s — room empty, ending room=%s",
+            participant.identity,
+            ctx.room.name,
+        )
+        asyncio.create_task(polite_end("visitor_left", speak=False))
 
     @ctx.room.on("data_received")
     def _on_data(packet: rtc.DataPacket) -> None:

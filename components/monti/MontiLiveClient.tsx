@@ -660,6 +660,17 @@ function LiveSessionShell({
   const { state: agentState, audioTrack } = useVoiceAssistant();
   const connected = connectionState === ConnectionState.Connected;
 
+  // Disconnect immediately on tab close so the agent ends (not idle-nudge path)
+  useEffect(() => {
+    if (!room) return;
+    const onPageHide = () => {
+      console.info('[monti/live] pagehide — disconnecting room');
+      void room.disconnect();
+    };
+    window.addEventListener('pagehide', onPageHide);
+    return () => window.removeEventListener('pagehide', onPageHide);
+  }, [room]);
+
   const recordRef = useRef<MontiRecord>(emptyRecord());
   const leadSentRef = useRef(false);
   /** Submitted before agent readiness — flushed in order once canSendTyped. */
