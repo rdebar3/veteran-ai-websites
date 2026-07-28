@@ -16,7 +16,7 @@ import {
   type DataPacket_Kind,
 } from 'livekit-client';
 import BrowserFrame from '@/components/monti/BrowserFrame';
-import GlowCanvas, { type GlowCanvasHandle } from '@/components/monti/GlowCanvas';
+import type { GlowCanvasHandle } from '@/components/monti/GlowCanvas';
 import LeadCard from '@/components/monti/LeadCard';
 import TradesTemplate from '@/components/monti/TradesTemplate';
 import { emptyRecord, recordForLead } from '@/lib/monti/contract';
@@ -61,6 +61,8 @@ const ATTR_MSG_ID = 'monti_msg_id';
 const TYPING_THROTTLE_MS = 3000;
 /** Wait for monti_ack before retry / timeout restore. */
 const ACK_TIMEOUT_MS = 4000;
+/** Publish render_done no later than this after fill apply (rAF happy path first). */
+const RENDER_CONFIRM_FALLBACK_MS = 1200;
 const CORE_FILLS: FillSection[] = ['hero', 'services', 'contact', 'about'];
 /** All section keys that can appear on a fill_site / monti_fill payload. */
 const FILL_SECTION_KEYS: readonly FillSection[] = [
@@ -1251,6 +1253,7 @@ function LiveSessionShell({
         ok: boolean;
         applied: FillSection[];
         dropped: FillSection[];
+        elapsed: number;
       },
     ) => {
       try {
@@ -1260,6 +1263,7 @@ function LiveSessionShell({
             ok: outcome.ok,
             applied: outcome.applied,
             dropped: outcome.dropped,
+            elapsed: outcome.elapsed,
           }),
         );
         await room.localParticipant.publishData(data, {
@@ -1267,13 +1271,42 @@ function LiveSessionShell({
           topic: TOPIC_RENDER_DONE,
         });
         console.info(
-          `[monti/live] render_done fill_id=${fillId} ok=${outcome.ok} applied=${outcome.applied.join(',')} dropped=${outcome.dropped.join(',')}`,
+          `[monti/live] render_done fill_id=${fillId} ok=${outcome.ok} applied=${outcome.applied.join(',')} dropped=${outcome.dropped.join(',')} elapsed=${outcome.elapsed}`,
         );
       } catch (err) {
         console.warn('[monti/live] render_done publish failed', err);
       }
     },
     [room],
+  );
+
+  /**
+   * Happy path: two rAFs after paint. Fallback: publish by 1200ms either way.
+   * A late confirm beats a confirm that never fires.
+   */
+  const scheduleRenderDone = useCallback(
+    (
+      fillId: string,
+      outcome: {
+        ok: boolean;
+        applied: FillSection[];
+        dropped: FillSection[];
+      },
+      startedAt: number,
+    ) => {
+      let published = false;
+      const publish = () => {
+        if (published) return;
+        published = true;
+        const elapsed = Math.round(performance.now() - startedAt);
+        void publishRenderDone(fillId, { ...outcome, elapsed });
+      };
+      requestAnimationFrame(() => {
+        requestAnimationFrame(publish);
+      });
+      window.setTimeout(publish, RENDER_CONFIRM_FALLBACK_MS);
+    },
+    [publishRenderDone],
   );
 
   const applySiteUpdate = useCallback(
@@ -1511,16 +1544,12 @@ function LiveSessionShell({
             `[monti/live] restyle layout=${next.layout} palette=${next.palette} trade=${trade || 'none'}`,
           );
           if (fillId) {
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                // Restyle has no section fills — report clean success to unblock wait
-                void publishRenderDone(fillId, {
-                  ok: true,
-                  applied: [],
-                  dropped: [],
-                });
-              });
-            });
+            // Restyle has no section fills — report clean success to unblock wait
+            scheduleRenderDone(
+              fillId,
+              { ok: true, applied: [], dropped: [] },
+              performance.now(),
+            );
           }
         } catch (err) {
           console.warn('[monti/live] bad monti_restyle payload', err);
@@ -1559,6 +1588,7 @@ function LiveSessionShell({
           });
           // Report real accepted/dropped from merged record (not result.fill echo)
           if (fillId && parsed && typeof parsed === 'object') {
+            const receivedAt = performance.now();
             const payload = parsed as Record<string, unknown>;
             const requested = requestedSections(payload);
             const applied = appliedSections(
@@ -1568,11 +1598,7 @@ function LiveSessionShell({
             );
             const dropped = requested.filter((s) => !applied.includes(s));
             const ok = dropped.length === 0;
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                void publishRenderDone(fillId, { ok, applied, dropped });
-              });
-            });
+            scheduleRenderDone(fillId, { ok, applied, dropped }, receivedAt);
           }
         } catch (err) {
           console.warn('[monti/live] bad monti_fill payload', err);
@@ -1600,7 +1626,7 @@ function LiveSessionShell({
     applySiteUpdate,
     runLeadAndReport,
     handleTypedAck,
-    publishRenderDone,
+    scheduleRenderDone,
     applySessionStyle,
     markBrainOffline,
   ]);
@@ -1653,12 +1679,6 @@ function LiveSessionShell({
         className={`monti-app${building ? ' building' : ''}`}
       >
         <div className="monti-pane">
-          <GlowCanvas
-            ref={glowRef}
-            muted={muted}
-            paused={building && isMobile}
-            className="monti-glow"
-          />
           <div className="monti-top">
             <div className="monti-logo">
               <b>▲</b> M O N T I
@@ -2044,7 +2064,6 @@ export default function MontiLiveClient() {
       ) : (
         <div className="monti-app">
           <div className="monti-pane" style={{ width: '100%' }}>
-            <GlowCanvas ref={glowRef} className="monti-glow" />
             <div className="monti-top">
               <div className="monti-logo">
                 <b>▲</b> M O N T I

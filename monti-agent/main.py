@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import time
 import uuid
 from collections.abc import Awaitable, Callable
 from datetime import datetime
@@ -89,7 +90,7 @@ SESSION_NUDGE_TYPED_MULT = 2.5
 # Hold all nudges while a typing signal is this fresh
 TYPING_FRESH_SECONDS = 8.0
 # After publishing a fill, wait for client confirm — never longer than this
-RENDER_DONE_TIMEOUT = 2.5
+RENDER_DONE_TIMEOUT = 6.0
 # Max live restyles per session (recovery + owner "show me something different")
 RESTYLE_MAX = 2
 # Wait for browser lead POST outcome after monti_lead
@@ -526,26 +527,31 @@ async def entrypoint(ctx: JobContext) -> None:
 
     async def wait_render_done(fill_id: str) -> dict[str, Any]:
         """Wait for monti_render_done; return real result or render_timeout."""
+        started = time.monotonic()
         ev = asyncio.Event()
         render_events[fill_id] = ev
         try:
             await asyncio.wait_for(ev.wait(), timeout=RENDER_DONE_TIMEOUT)
+            elapsed_ms = (time.monotonic() - started) * 1000.0
             result = render_results.pop(
                 fill_id,
                 {"ok": True, "applied": [], "dropped": []},
             )
             logger.info(
-                "render_done received fill_id=%s ok=%s dropped=%s room=%s",
+                "render_done received fill_id=%s ok=%s dropped=%s elapsed_ms=%.0f room=%s",
                 fill_id,
                 result.get("ok"),
                 result.get("dropped"),
+                elapsed_ms,
                 ctx.room.name,
             )
             return result
         except asyncio.TimeoutError:
+            elapsed_ms = (time.monotonic() - started) * 1000.0
             logger.warning(
-                "render_done timeout (%.1fs) fill_id=%s room=%s",
+                "render_done timeout budget=%.1fs elapsed_ms=%.0f fill_id=%s room=%s",
                 RENDER_DONE_TIMEOUT,
+                elapsed_ms,
                 fill_id,
                 ctx.room.name,
             )
