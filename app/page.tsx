@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import VideoHero from '@/components/VideoHero';
 import VeteranBand from '@/components/VeteranBand';
-import MontiTeaser from '@/components/MontiTeaser';
 import Demos from '@/components/Demos';
 import Packages from '@/components/Packages';
 import Reviews from '@/components/Reviews';
@@ -14,7 +13,7 @@ import { scrollToY, resizeScroll } from '@/lib/scroll-driver';
 
 /**
  * Clean homepage:
- * Scroll-scrubbed video hero → veteran band → Monti teaser → live demos → packages & checkout → reviews → project intake.
+ * Scroll-scrubbed video hero → veteran band → live demos → packages & checkout → reviews → project intake.
  */
 export default function Home() {
   // Return visitors to the exact spot they left from when they open a demo.
@@ -46,7 +45,6 @@ export default function Home() {
       <VideoHero />
       <LowerBackdrop>
         <VeteranBand />
-        <MontiTeaser />
         <Demos />
         <Packages />
         <Veterans />
