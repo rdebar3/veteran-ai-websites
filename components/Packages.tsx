@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { pricingTiers, getDisplayPrice } from '@/lib/data';
+import { PHONE, PHONE_HREF } from '@/lib/contact';
 
 const demoLinks: Record<string, string> = {
   Starter: '/examples/starter-plumbing',
@@ -92,6 +93,9 @@ const styles = `
 .pk__buy:hover::after{opacity:1;transform:scale(1)}
 .pk__buy:disabled{opacity:.6;cursor:default;transform:none}
 .pk__buy--wide{margin-top:6px;width:100%;max-width:340px}
+.pk__cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px}
+.pk__phone{font-family:var(--font-sans);font-size:14px;font-weight:600;color:#f4f7fa;text-decoration:none;border-bottom:1px solid rgba(244,247,250,.35);padding:2px 0;transition:border-color .2s,color .2s;white-space:nowrap}
+.pk__phone:hover{color:#fff;border-bottom-color:#fff}
 .pk__err{color:#ff9b9b;font-size:14px;margin-top:12px}
 .pk__note{max-width:1000px;margin:20px auto 0;font-size:13px;color:rgba(233,240,246,.72);text-align:center}
 .pk__incl{max-width:1000px;margin:clamp(30px,4vw,50px) auto 0;display:flex;flex-wrap:wrap;justify-content:center;gap:12px 26px}
@@ -251,9 +255,12 @@ export default function Packages() {
                 ${ownTotal} <small>one-time · you own it</small>
               </p>
             </div>
-            <button type="button" className="pk__buy" onClick={buyOwn} disabled={loading}>
-              {loading ? 'Starting checkout…' : 'Continue to secure checkout →'}
-            </button>
+            <div className="pk__cta-row">
+              <button type="button" className="pk__buy" onClick={buyOwn} disabled={loading}>
+                {loading ? 'Starting checkout…' : 'Continue to secure checkout →'}
+              </button>
+              <a href={PHONE_HREF} className="pk__phone">{PHONE}</a>
+            </div>
             {error && <p className="pk__err">{error}</p>}
           </div>
 
@@ -276,14 +283,17 @@ export default function Packages() {
                 <li key={item}>{item}</li>
               ))}
             </ul>
-            <button
-              type="button"
-              className="pk__buy pk__buy--wide"
-              onClick={buyManaged}
-              disabled={loading}
-            >
-              {loading ? 'Starting checkout…' : 'Start managed plan — $97/mo →'}
-            </button>
+            <div className="pk__cta-row" style={{ justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="pk__buy pk__buy--wide"
+                onClick={buyManaged}
+                disabled={loading}
+              >
+                {loading ? 'Starting checkout…' : 'Start managed plan — $97/mo →'}
+              </button>
+              <a href={PHONE_HREF} className="pk__phone">{PHONE}</a>
+            </div>
             {error && <p className="pk__err">{error}</p>}
           </div>
           <p className="pk__note">

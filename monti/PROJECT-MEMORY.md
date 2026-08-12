@@ -87,3 +87,42 @@ Ran the outreach AI-upgrade plan past Grok (Heavy) for brutal critique, argued i
 the main point (dual-model A/B is premature over-engineering at low volume); Claude won two side
 points (failover ≠ A/B; internal enrichment ≠ customer-facing fabrication). Net: plan shrank to
 "Phase 1 only — kill the noise." Per the bet, Claude conceded most → owed Grok "daddy." Paid up.
+
+## PINNED — Grok Voice Think Fast 2.0 (added 2026-07-30)
+**Do not lose this. Check it when Monti unpauses, and before Aug 5 2026 either way.**
+
+Rich got the launch email. Verified against x.ai and the repo — here is the real situation.
+
+**Monti is ALREADY pointed at the new model.** `monti-agent/main.py` line 48 reads
+`MODEL = "grok-voice-latest"`. Per x.ai, that alias **auto-upgrades to Think Fast 2.0 on
+Aug 5, 2026** unless 1.0 is explicitly pinned first. So there is nothing to "hook up" —
+the switch happens on its own. The only decision is whether to let it flip unattended or
+pin `grok-voice-think-fast-2.0` now and test on purpose.
+
+**Memory correction:** the Monti section above is stale. It says "not built yet" and
+"xAI TTS." Reality: Monti is built and runs a LiveKit agent worker (`monti-agent/main.py`,
+`livekit-agents[xai]~=1.5`, Krisp BVC noise cancellation) against the xAI **realtime
+speech-to-speech** API — not TTS. Voice = `castor`. The "1.5" in the repo is the
+livekit-agents SDK version, NOT a voice model version.
+
+**COST BUG — must fix before or at the Aug 5 flip.** `main.py` line 102 has
+`VOICE_RATE_PER_MINUTE = 0.05` (comment says "$3.00/hr"). Think Fast 2.0 is **$0.08/min**
+($4.80/hr). Every session cost estimate Monti reports will be 37.5% low the moment the
+alias flips. One-line fix, but it silently corrupts the numbers if missed.
+
+**Why 2.0 actually matters for Monti** (not hype — this is Monti's exact use case):
+- ~10x better transcription in NOISY conditions. Monti's users are in shops, garages,
+  kitchens, job sites. This is the single biggest real-world win.
+- Speech-to-speech quality 82.9% vs 75.7% on 1.0. Conversational dynamics 95.1% vs 77.8%.
+- Time to first audio 0.70s — under a second, among the fastest available.
+- Better + snappier tool calling. Monti's whole contract is structured-JSON-only tool
+  output that fills the live site, so tool reliability is load-bearing here.
+
+**TO DO when unpinned:**
+1. Fix `VOICE_RATE_PER_MINUTE` 0.05 -> 0.08.
+2. Decide: pin `grok-voice-think-fast-2.0` explicitly, or ride `grok-voice-latest`.
+3. Confirm `livekit-agents[xai]~=1.5` plugin accepts the 2.0 model string — bump if not.
+4. Re-run the Monti bench after the switch. Do not assume it improved; verify.
+5. Still open from before: rotate LIVEKIT_API_KEY / LIVEKIT_API_SECRET (7/20 spill).
+
+Source: https://x.ai/news/grok-voice-think-fast-2

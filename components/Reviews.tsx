@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PHONE, PHONE_HREF } from '@/lib/contact';
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -55,6 +56,9 @@ textarea.rv__field{resize:vertical;min-height:110px;line-height:1.5}
 .rv__submit:hover{color:#0a0e14;border-color:transparent;transform:translateY(-2px);box-shadow:0 14px 32px rgba(0,0,0,.5)}
 .rv__submit:hover::after{opacity:1;transform:scale(1)}
 .rv__submit:disabled{opacity:.6;cursor:default;transform:none}
+.rv__cta-row{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:4px}
+.rv__phone{font-family:var(--font-sans);font-size:14px;font-weight:600;color:#f4f7fa;text-decoration:none;border-bottom:1px solid rgba(244,247,250,.35);padding:2px 0;transition:border-color .2s,color .2s}
+.rv__phone:hover{color:#fff;border-bottom-color:#fff}
 .rv__msg{text-align:center;font-size:15px;margin-top:14px}
 .rv__msg.ok{color:#8fe3b0}
 .rv__msg.err{color:#ff9b9b}
@@ -232,9 +236,12 @@ export default function Reviews() {
               required
             />
           </label>
-          <button className="rv__submit" type="submit" disabled={submitting}>
-            {submitting ? 'Submitting…' : 'Submit review'}
-          </button>
+          <div className="rv__cta-row">
+            <button className="rv__submit" type="submit" disabled={submitting} style={{ marginTop: 0 }}>
+              {submitting ? 'Submitting…' : 'Submit review'}
+            </button>
+            <a href={PHONE_HREF} className="rv__phone">{PHONE}</a>
+          </div>
           {error && <p className="rv__msg err">{error}</p>}
         </form>
       )}

@@ -10,6 +10,7 @@ import {
   type MotionValue,
 } from 'framer-motion';
 import MagneticButton from '@/components/MagneticButton';
+import { PHONE, PHONE_HREF } from '@/lib/contact';
 
 const VIDEO = '/hero/hero-gorge-loop.mp4';
 const MOBILE_VIDEO = '/hero/hero-gorge-mobile.mp4';
@@ -62,6 +63,8 @@ const styles = `
 .vh-cta .btn--primary:hover{background:#fff;transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,0,0,.55)}
 .vh-cta .btn--ghost{min-width:min(100%,210px);background:#12161d;color:#fff;border:1px solid rgba(255,255,255,.38);font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.5);transition:transform .25s,box-shadow .25s,background .25s,color .25s,border-color .25s}
 .vh-cta .btn--ghost:hover{background:#fff;color:#0a0e14;border-color:#fff;transform:translateY(-2px);box-shadow:0 16px 38px rgba(0,0,0,.5)}
+.vh-cta-phone{font-family:var(--font-sans);font-size:15px;font-weight:600;color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.45);padding:4px 2px;text-shadow:0 2px 10px rgba(0,0,0,.55);transition:border-color .2s,color .2s}
+.vh-cta-phone:hover{border-bottom-color:#fff;color:#fff}
 .vh-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--font-sans);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(233,240,246,.72);text-align:center}
 .vh-hint i{display:block;width:1px;height:28px;margin:10px auto 0;background:linear-gradient(rgba(233,240,246,.7),transparent)}
 .vh-dots{position:absolute;top:50%;right:clamp(14px,2vw,28px);transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:12px}
@@ -72,7 +75,7 @@ const styles = `
 .vh-simple video,.vh-simple img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .vh-simple .vh-veil{z-index:1}
 .vh-simple .vh-stack{position:relative;z-index:2;padding:0 24px}
-@media(max-width:640px){.vh-cta{flex-direction:column;align-items:stretch}.vh-cta .btn--primary,.vh-cta .btn--ghost{min-width:0;width:100%;justify-content:center}}
+@media(max-width:640px){.vh-cta{flex-direction:column;align-items:stretch}.vh-cta .btn--primary,.vh-cta .btn--ghost{min-width:0;width:100%;justify-content:center}.vh-cta-phone{text-align:center;width:100%}}
 /* mobile: shorter scroll region so the hero text advances quicker */
 @media(max-width:768px){.vh-root{height:260vh}}
 `;
@@ -123,6 +126,7 @@ function CtaBlock({
       <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
         Claim my $397 site
       </MagneticButton>
+      <a href={PHONE_HREF} className="vh-cta-phone">{PHONE}</a>
       <a href="#pricing" className="btn btn--ghost btn--lg">View packages</a>
     </motion.div>
   );
@@ -195,6 +199,7 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
             <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
               Claim my $397 site
             </MagneticButton>
+            <a href={PHONE_HREF} className="vh-cta-phone">{PHONE}</a>
             <a href="#pricing" className="btn btn--ghost btn--lg">View packages</a>
           </div>
         </div>

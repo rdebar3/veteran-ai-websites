@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import VideoHero from '@/components/VideoHero';
+import OwnerIntro from '@/components/OwnerIntro';
 import VeteranBand from '@/components/VeteranBand';
 import Demos from '@/components/Demos';
 import Packages from '@/components/Packages';
@@ -13,7 +14,7 @@ import { scrollToY, resizeScroll } from '@/lib/scroll-driver';
 
 /**
  * Clean homepage:
- * Scroll-scrubbed video hero → veteran band → live demos → packages & checkout → reviews → project intake.
+ * Scroll-scrubbed video hero → owner trust block → veteran band → demos → packages → reviews → intake.
  */
 export default function Home() {
   // Return visitors to the exact spot they left from when they open a demo.
@@ -43,6 +44,7 @@ export default function Home() {
     <main className="relative flex-1">
       <h1 className="sr-only">Veteran AI Websites — West Virginia veteran-owned web design</h1>
       <VideoHero />
+      <OwnerIntro />
       <LowerBackdrop>
         <VeteranBand />
         <Demos />

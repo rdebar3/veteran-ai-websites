@@ -1,5 +1,7 @@
 'use client';
 
+import { PHONE, PHONE_HREF } from '@/lib/contact';
+
 const styles = `
 .vets{position:relative;color:#eef4f8;padding:clamp(40px,6vw,80px) clamp(20px,6vw,72px)}
 .vets__panel{position:relative;overflow:hidden;max-width:760px;margin:0 auto;border:1px solid rgba(227,178,60,.32);border-radius:24px;background:rgba(12,16,22,.72);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);padding:clamp(30px,5vw,52px);text-align:center;box-shadow:0 30px 70px rgba(0,0,0,.5)}
@@ -13,7 +15,9 @@ const styles = `
 .vets__list li b{color:#fff;font-weight:700}
 .vets__check{flex:0 0 auto;display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:rgba(227,178,60,.16);color:#e3b23c;font-size:14px;font-weight:800;margin-top:1px}
 .vets__fine{margin:20px auto 0;max-width:48ch;font-size:13px;line-height:1.5;color:rgba(233,240,246,.72)}
-.vets__cta{margin-top:26px}
+.vets__cta{margin-top:26px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 18px}
+.vets__phone{font-family:var(--font-sans);font-size:15px;font-weight:600;color:#f6e3bd;text-decoration:none;border-bottom:1px solid rgba(246,227,189,.4);padding:2px 0;transition:border-color .2s,color .2s}
+.vets__phone:hover{color:#fff;border-bottom-color:#fff}
 .vets__btn{position:relative;isolation:isolate;overflow:hidden;display:inline-flex;align-items:center;gap:10px;font-family:var(--font-sans);font-size:16px;font-weight:700;padding:16px 30px;border-radius:999px;cursor:pointer;text-decoration:none;border:1px solid rgba(227,178,60,.7);background:rgba(227,178,60,.14);color:#f6e3bd;transition:color .25s,border-color .25s,transform .25s,box-shadow .25s}
 .vets__btn::after{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:linear-gradient(135deg,#f0c862,#e3b23c);opacity:0;transform:scale(.92);transition:opacity .28s,transform .28s}
 .vets__btn:hover{color:#1a1206;border-color:transparent;transform:translateY(-2px);box-shadow:0 16px 38px rgba(0,0,0,.5)}
@@ -51,6 +55,7 @@ export default function Veterans() {
         </p>
         <div className="vets__cta">
           <a href="#contact" className="vets__btn">Claim your veteran offer <span className="arw" aria-hidden="true">→</span></a>
+          <a href={PHONE_HREF} className="vets__phone">{PHONE}</a>
         </div>
         <p className="vets__note">From one veteran to another — thank you for your service.</p>
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { PHONE, PHONE_HREF } from '@/lib/contact';
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -31,6 +32,9 @@ textarea.iq__field{resize:vertical;min-height:120px;line-height:1.5}
 .iq__submit:hover{color:#0a0e14;border-color:transparent;transform:translateY(-2px);box-shadow:0 14px 32px rgba(0,0,0,.5)}
 .iq__submit:hover::after{opacity:1;transform:scale(1)}
 .iq__submit:disabled{opacity:.6;cursor:default;transform:none}
+.iq__cta-row{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:6px}
+.iq__phone{font-family:var(--font-sans);font-size:14px;font-weight:600;color:#f4f7fa;text-decoration:none;border-bottom:1px solid rgba(244,247,250,.35);padding:2px 0;transition:border-color .2s,color .2s}
+.iq__phone:hover{color:#fff;border-bottom-color:#fff}
 .iq__msg{text-align:center;font-size:14px;margin-top:14px}
 .iq__msg.err{color:#ff9b9b}
 .iq__note{text-align:center;font-size:13px;color:rgba(233,240,246,.72);margin:16px 0 0}
@@ -142,11 +146,14 @@ export default function Intake() {
               <textarea className="iq__field" value={message} maxLength={3000} onChange={(e) => setMessage(e.target.value)} placeholder="What kind of site are you looking for? Any examples you like, timeline, or goals?" required />
             </div>
 
-            <button className="iq__submit" type="submit" disabled={submitting}>
-              {submitting ? 'Sending…' : 'Send my inquiry'}
-            </button>
+            <div className="iq__cta-row">
+              <button className="iq__submit" type="submit" disabled={submitting} style={{ marginTop: 0 }}>
+                {submitting ? 'Sending…' : 'Send my inquiry'}
+              </button>
+              <a href={PHONE_HREF} className="iq__phone">{PHONE}</a>
+            </div>
             {error && <p className="iq__msg err">{error}</p>}
-            <p className="iq__note">Prefer to talk? Your inquiry reaches me directly — I’ll follow up personally.</p>
+            <p className="iq__note">Prefer to talk? Call or text — it reaches me directly.</p>
           </form>
         )}
       </div>
