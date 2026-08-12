@@ -16,13 +16,16 @@ const VIDEO = '/hero/hero-gorge-loop.mp4';
 const MOBILE_VIDEO = '/hero/hero-gorge-mobile.mp4';
 const POSTER = '/hero/hero-gorge-poster.jpg';
 
-type Scene = { eyebrow?: string; title: string; cta?: boolean };
+type Scene = { eyebrow?: string; title: string; sub?: string; cta?: boolean };
 
 const scenes: Scene[] = [
-  { eyebrow: 'West Virginia · Veteran-Owned', title: 'A professional website in a day.' },
+  {
+    title: 'More calls for your business. Built in a day.',
+    sub: 'West Virginia veteran-owned. You own your site — always.',
+  },
   { title: "By someone who's been in your shoes." },
-  { title: 'You own it. 100%.' },
-  { eyebrow: 'From $397', title: 'Let’s build yours.', cta: true },
+  { title: 'You own it. Always.' },
+  { title: 'Let’s build yours.', cta: true },
 ];
 
 const N = scenes.length;
@@ -54,17 +57,18 @@ const styles = `
   linear-gradient(180deg,rgba(6,9,15,.5) 0%,transparent 30%,transparent 55%,rgba(6,9,15,.72) 80%,rgba(6,9,15,.94) 100%)}
 .vh-scenes{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 24px}
 .vh-stack{position:relative;width:100%;max-width:min(92vw,1040px);display:flex;flex-direction:column;align-items:center}
-.vh-titles{position:relative;width:100%;min-height:clamp(120px,18vw,200px)}
+.vh-titles{position:relative;width:100%;min-height:clamp(140px,22vw,240px)}
 .vh-scene{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:opacity}
 .vh-eyebrow{font-family:var(--font-sans);font-size:clamp(12px,1.45vw,16px);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#fff;margin:0 0 22px;text-shadow:0 2px 14px rgba(0,0,0,.8),0 1px 3px rgba(0,0,0,.7)}
-.vh-title{font-family:var(--font-sans);font-size:clamp(32px,5.6vw,86px);font-weight:600;letter-spacing:-.035em;line-height:1;color:#fff;margin:0;text-shadow:0 2px 3px rgba(0,0,0,.6),0 3px 14px rgba(0,0,0,.55),0 8px 40px rgba(0,0,0,.45);-webkit-text-stroke:0.5px rgba(0,0,0,.2)}
+.vh-title{font-family:var(--font-sans);font-size:clamp(28px,5.2vw,72px);font-weight:600;letter-spacing:-.035em;line-height:1.05;color:#fff;margin:0;text-shadow:0 2px 3px rgba(0,0,0,.6),0 3px 14px rgba(0,0,0,.55),0 8px 40px rgba(0,0,0,.45);-webkit-text-stroke:0.5px rgba(0,0,0,.2)}
+.vh-sub{font-family:var(--font-sans);font-size:clamp(15px,1.8vw,22px);font-weight:500;letter-spacing:-.01em;line-height:1.45;color:rgba(255,255,255,.92);margin:18px 0 0;max-width:36ch;text-shadow:0 2px 12px rgba(0,0,0,.7),0 1px 3px rgba(0,0,0,.6)}
 .vh-cta{margin-top:38px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center}
 .vh-cta .btn--primary{min-width:min(100%,220px);background:#fff;color:#0a0e14;border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 34px rgba(0,0,0,.45);font-weight:700;transition:transform .25s,box-shadow .25s,background .25s}
 .vh-cta .btn--primary:hover{background:#fff;transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,0,0,.55)}
 .vh-cta .btn--ghost{min-width:min(100%,210px);background:#12161d;color:#fff;border:1px solid rgba(255,255,255,.38);font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.5);transition:transform .25s,box-shadow .25s,background .25s,color .25s,border-color .25s}
 .vh-cta .btn--ghost:hover{background:#fff;color:#0a0e14;border-color:#fff;transform:translateY(-2px);box-shadow:0 16px 38px rgba(0,0,0,.5)}
-.vh-cta-phone{font-family:var(--font-sans);font-size:15px;font-weight:600;color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.45);padding:4px 2px;text-shadow:0 2px 10px rgba(0,0,0,.55);transition:border-color .2s,color .2s}
-.vh-cta-phone:hover{border-bottom-color:#fff;color:#fff}
+.vh-cta-phone{min-width:min(100%,210px);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-sans);font-size:16px;font-weight:700;color:#0a0e14;text-decoration:none;background:#fff;border:1px solid rgba(255,255,255,.9);border-radius:999px;padding:14px 22px;box-shadow:0 12px 34px rgba(0,0,0,.45);transition:transform .25s,box-shadow .25s,background .25s}
+.vh-cta-phone:hover{background:#fff;transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,0,0,.55)}
 .vh-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--font-sans);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(233,240,246,.72);text-align:center}
 .vh-hint i{display:block;width:1px;height:28px;margin:10px auto 0;background:linear-gradient(rgba(233,240,246,.7),transparent)}
 .vh-dots{position:absolute;top:50%;right:clamp(14px,2vw,28px);transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:12px}
@@ -101,6 +105,7 @@ function SceneText({
     <motion.div className="vh-scene" style={{ opacity, visibility }} aria-hidden={false}>
       {scene.eyebrow && <p className="vh-eyebrow">{scene.eyebrow}</p>}
       <h2 className="vh-title">{scene.title}</h2>
+      {scene.sub && <p className="vh-sub">{scene.sub}</p>}
     </motion.div>
   );
 }
@@ -123,11 +128,13 @@ function CtaBlock({
 
   return (
     <motion.div className="vh-cta" style={{ opacity, pointerEvents, visibility }}>
-      <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
-        Claim my $397 site
+      <a href={PHONE_HREF} className="vh-cta-phone">
+        Call {PHONE}
+      </a>
+      <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--ghost btn--lg">
+        Get started
       </MagneticButton>
-      <a href={PHONE_HREF} className="vh-cta-phone">{PHONE}</a>
-      <a href="#pricing" className="btn btn--ghost btn--lg">View packages</a>
+      <a href="#pricing" className="btn btn--ghost btn--lg">View pricing</a>
     </motion.div>
   );
 }
@@ -188,19 +195,30 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
   // Fallback: autoplay loop + static headline (reduced motion)
   if (simple) {
     return (
-      <div className="vh-simple">
+      <div className="vh-simple" id="hero">
         <style dangerouslySetInnerHTML={{ __html: styles }} />
-        <video src={isMobile ? MOBILE_VIDEO : VIDEO} poster={POSTER} autoPlay muted loop playsInline preload="metadata" />
+        <video
+          src={isMobile ? MOBILE_VIDEO : VIDEO}
+          poster={POSTER}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+        />
         <div className="vh-veil" aria-hidden="true" />
         <div className="vh-stack">
-          <p className="vh-eyebrow">West Virginia · Veteran-Owned</p>
-          <h2 className="vh-title">A professional website in a day.</h2>
+          <h2 className="vh-title">More calls for your business. Built in a day.</h2>
+          <p className="vh-sub">West Virginia veteran-owned. You own your site — always.</p>
           <div className="vh-cta">
-            <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
-              Claim my $397 site
+            <a href={PHONE_HREF} className="vh-cta-phone">
+              Call {PHONE}
+            </a>
+            <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--ghost btn--lg">
+              Get started
             </MagneticButton>
-            <a href={PHONE_HREF} className="vh-cta-phone">{PHONE}</a>
-            <a href="#pricing" className="btn btn--ghost btn--lg">View packages</a>
+            <a href="#pricing" className="btn btn--ghost btn--lg">View pricing</a>
           </div>
         </div>
       </div>
@@ -208,7 +226,7 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
   }
 
   return (
-    <div className="vh-root" ref={rootRef}>
+    <div className="vh-root" id="hero" ref={rootRef}>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <div className="vh-stage">
         <video
@@ -220,6 +238,7 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
           loop
           playsInline
           preload="auto"
+          aria-hidden="true"
         />
         <div className="vh-veil" aria-hidden="true" />
         <div className="vh-scenes">

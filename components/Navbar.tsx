@@ -116,11 +116,8 @@ export default function Navbar() {
               </a>
             );
           })}
-          <a href="#build" className="nav__cta">
-            $397 Offer
-          </a>
-          <a href={PHONE_HREF} className="nav__cta-phone">
-            {PHONE}
+          <a href={PHONE_HREF} className="nav__cta">
+            Call {PHONE}
           </a>
         </div>
 

@@ -1,81 +1,129 @@
-import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import SmoothScroll from "@/components/SmoothScroll";
+import type { Metadata } from 'next';
+import { Analytics } from '@vercel/analytics/next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import SmoothScroll from '@/components/SmoothScroll';
+import {
+  FULL_NAME,
+  MAILING,
+  PHONE_RAW,
+  TOWN,
+  PHONE,
+} from '@/lib/contact';
+import { FACEBOOK_URL } from '@/lib/data';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
 });
 
-const SITE = "https://veteranaiwebsites.com";
+const SITE = 'https://veteranaiwebsites.com';
 
-const businessSchema = {
-  "@context": "https://schema.org",
-  "@type": "ProfessionalService",
-  "@id": `${SITE}/#business`,
-  name: "Veteran AI Websites",
+const META_TITLE =
+  'Veteran AI Websites | Websites for West Virginia Small Businesses';
+
+const META_DESCRIPTION = `Veteran-owned web design in ${TOWN}, West Virginia. Professional websites built in a day, plus Google listing and review management that brings in calls. You own your site — always. Call ${PHONE}.`;
+
+/**
+ * LocalBusiness + ProfessionalService JSON-LD.
+ * Rendered in <head> of the root Server Component layout so it is present in
+ * the initial HTML — not deferred via a client component.
+ */
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': ['LocalBusiness', 'ProfessionalService'],
+  '@id': `${SITE}/#business`,
+  name: 'Veteran AI Websites',
   url: SITE,
-  image: `${SITE}/logo-mark.svg`,
+  // Prefer owner photo when present; OG poster is the reliable public image today.
+  image: [
+    `${SITE}/hero/hero-gorge-poster.jpg`,
+    `${SITE}/logo-mark.svg`,
+  ],
   logo: `${SITE}/logo-mark.svg`,
-  description:
-    "Veteran-owned web design in West Virginia. Professional, mobile-first small-business websites built in a day — you keep 100% ownership. Starter $397, Complete $697, Premium $997.",
-  slogan: "Fast, professional websites, built in a day.",
-  priceRange: "$397–$997",
-  areaServed: { "@type": "State", name: "West Virginia" },
-  address: { "@type": "PostalAddress", addressRegion: "WV", addressCountry: "US" },
-  founder: { "@type": "Person", name: "Rich", description: "U.S. Army veteran" },
-  knowsAbout: ["Web design", "Small business websites", "Local SEO", "One-day websites"],
-  sameAs: ["https://www.facebook.com/profile.php?id=61590561850536"],
-  makesOffer: [
-    { "@type": "Offer", name: "Starter Website", price: "397", priceCurrency: "USD" },
-    { "@type": "Offer", name: "Complete Website", price: "697", priceCurrency: "USD" },
-    { "@type": "Offer", name: "Premium Website", price: "997", priceCurrency: "USD" },
+  description: META_DESCRIPTION,
+  priceRange: '$$',
+  telephone: `+1${PHONE_RAW}`,
+  founder: {
+    '@type': 'Person',
+    name: FULL_NAME,
+    jobTitle: 'Owner',
+    description: 'U.S. Army veteran',
+  },
+  owner: {
+    '@type': 'Person',
+    name: FULL_NAME,
+  },
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: MAILING.streetAddress,
+    addressLocality: MAILING.addressLocality,
+    addressRegion: MAILING.addressRegion,
+    postalCode: MAILING.postalCode,
+    addressCountry: MAILING.addressCountry,
+  },
+  areaServed: {
+    '@type': 'State',
+    name: 'West Virginia',
+  },
+  sameAs: [FACEBOOK_URL],
+  knowsAbout: [
+    'Web design',
+    'Small business websites',
+    'Local SEO',
+    'Google Business Profile',
+    'One-day websites',
   ],
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: "Veteran AI Websites | One-Day Websites by a West Virginia Veteran",
-  description: "Professional one-day websites for West Virginia small businesses. Starter $397 • Complete $697 • Premium $997. Add-ons: Shoppable Store & Monthly Care. Veteran-owned — you keep full ownership.",
+  title: META_TITLE,
+  description: META_DESCRIPTION,
   keywords: [
-    "West Virginia web design",
-    "veteran owned web designer",
-    "one day website",
-    "small business website West Virginia",
-    "affordable website designer WV",
+    'West Virginia web design',
+    'veteran owned web designer',
+    'Horner WV web design',
+    'small business website West Virginia',
+    'one day website',
+    'Google listing management WV',
   ],
-  applicationName: "Veteran AI Websites",
-  authors: [{ name: "Veteran AI Websites" }],
-  alternates: { canonical: "/" },
+  applicationName: 'Veteran AI Websites',
+  authors: [{ name: FULL_NAME }, { name: 'Veteran AI Websites' }],
+  alternates: { canonical: '/' },
   openGraph: {
-    type: "website",
+    type: 'website',
     url: SITE,
-    siteName: "Veteran AI Websites",
-    title: "Veteran AI Websites | One-Day Websites by a West Virginia Veteran",
-    description:
-      "Veteran-owned, mobile-first websites for West Virginia small businesses — built in a day, you own everything. From $397.",
-    images: [{ url: "/hero/hero-gorge-poster.jpg", width: 1440, height: 942, alt: "Veteran AI Websites — West Virginia" }],
+    siteName: 'Veteran AI Websites',
+    title: META_TITLE,
+    description: META_DESCRIPTION,
+    locale: 'en_US',
+    images: [
+      {
+        url: '/hero/hero-gorge-poster.jpg',
+        width: 1440,
+        height: 942,
+        alt: 'Veteran AI Websites — West Virginia',
+      },
+    ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Veteran AI Websites | One-Day Websites by a West Virginia Veteran",
-    description:
-      "Veteran-owned, mobile-first websites for West Virginia small businesses — built in a day. From $397.",
-    images: ["/hero/hero-gorge-poster.jpg"],
+    card: 'summary_large_image',
+    title: META_TITLE,
+    description: META_DESCRIPTION,
+    images: ['/hero/hero-gorge-poster.jpg'],
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: '/favicon.ico',
   },
 };
 
@@ -86,11 +134,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+      <head>
+        {/* Phase 8b — LocalBusiness JSON-LD in <head>, server-rendered */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(businessSchema) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(localBusinessSchema),
+          }}
         />
+      </head>
+      <body className="min-h-full flex flex-col">
+        {/* Phase 10 — first focusable element */}
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
         <SmoothScroll>
           <Navbar />
           {children}

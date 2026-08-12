@@ -6,6 +6,7 @@ import OwnerIntro from '@/components/OwnerIntro';
 import VeteranBand from '@/components/VeteranBand';
 import Demos from '@/components/Demos';
 import Packages from '@/components/Packages';
+import Ownership from '@/components/Ownership';
 import Reviews from '@/components/Reviews';
 import Intake from '@/components/Intake';
 import LowerBackdrop from '@/components/LowerBackdrop';
@@ -14,7 +15,7 @@ import { scrollToY, resizeScroll } from '@/lib/scroll-driver';
 
 /**
  * Clean homepage:
- * Scroll-scrubbed video hero → owner trust block → veteran band → demos → packages → reviews → intake.
+ * Video hero → owner → demos → packages → ownership → veterans → contact → review.
  */
 export default function Home() {
   // Return visitors to the exact spot they left from when they open a demo.
@@ -41,17 +42,18 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="relative flex-1">
-      <h1 className="sr-only">Veteran AI Websites — West Virginia veteran-owned web design</h1>
+    <main id="main-content" className="relative flex-1">
+      <h1 className="sr-only">More calls for your business. Built in a day.</h1>
       <VideoHero />
       <OwnerIntro />
       <LowerBackdrop>
         <VeteranBand />
         <Demos />
         <Packages />
+        <Ownership />
         <Veterans />
-        <Reviews />
         <Intake />
+        <Reviews />
       </LowerBackdrop>
     </main>
   );
