@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
 import { navLinks } from '@/lib/navigation';
 import { registerScrollTask } from '@/lib/scroll-driver';
-import { PHONE, PHONE_HREF } from '@/lib/contact';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -73,14 +72,6 @@ export default function Navbar() {
     <nav ref={navRef} className="nav">
       <div className="nav__progress" aria-hidden="true" />
 
-      {/* Contact bar — always visible on every screen size */}
-      <div className="nav__contact">
-        <a href={PHONE_HREF} className="nav__contact-phone">
-          {PHONE}
-        </a>
-        <span className="nav__contact-label">Call or text — reaches me directly</span>
-      </div>
-
       <div className="nav__inner">
         <a href="#hero" className="nav__logo">
           <svg className="nav__logo-mark" viewBox="16 16 88 102" fill="#e3b23c" aria-hidden="true">
@@ -89,7 +80,9 @@ export default function Navbar() {
             <path d="M24 70 L60 52 L96 70 L96 81 L60 63 L24 81 Z" />
             <path d="M24 88 Q60 100 96 88 L96 99 Q60 111 24 99 Z" />
           </svg>
-          <span className="nav__logo-text">Veteran <span className="nav__logo-accent">AI</span> Websites</span>
+          <span className="nav__logo-text">
+            Veteran <span className="nav__logo-accent">AI</span> Websites
+          </span>
         </a>
 
         <div className="nav__links" ref={linksRef}>
@@ -116,12 +109,8 @@ export default function Navbar() {
               </a>
             );
           })}
-          <a href={PHONE_HREF} className="nav__cta">
-            Call {PHONE}
-          </a>
         </div>
 
-        {/* Hamburger only — phone lives in nav__contact, never behind the menu */}
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
@@ -145,9 +134,6 @@ export default function Navbar() {
               {link.label}
             </a>
           ))}
-          <a href={PHONE_HREF} onClick={() => setIsOpen(false)} className="nav__cta text-center mt-2">
-            Call {PHONE}
-          </a>
         </div>
       )}
     </nav>

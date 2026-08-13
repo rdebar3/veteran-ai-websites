@@ -5,13 +5,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SmoothScroll from '@/components/SmoothScroll';
-import {
-  FULL_NAME,
-  MAILING,
-  PHONE_RAW,
-  TOWN,
-  PHONE,
-} from '@/lib/contact';
+import { MAILING, TOWN } from '@/lib/contact';
 import { FACEBOOK_URL } from '@/lib/data';
 
 const geistSans = Geist({
@@ -31,7 +25,7 @@ const SITE = 'https://veteranaiwebsites.com';
 const META_TITLE =
   'Veteran AI Websites | Websites for West Virginia Small Businesses';
 
-const META_DESCRIPTION = `Veteran-owned web design in ${TOWN}, West Virginia. Professional websites built in a day, plus Google listing and review management that brings in calls. You own your site — always. Call ${PHONE}.`;
+const META_DESCRIPTION = `Veteran-owned web design in ${TOWN}, West Virginia. Professional websites built in a day for small businesses. You own your site — always.`;
 
 /**
  * LocalBusiness + ProfessionalService JSON-LD.
@@ -52,17 +46,6 @@ const localBusinessSchema = {
   logo: `${SITE}/logo-mark.svg`,
   description: META_DESCRIPTION,
   priceRange: '$$',
-  telephone: `+1${PHONE_RAW}`,
-  founder: {
-    '@type': 'Person',
-    name: FULL_NAME,
-    jobTitle: 'Owner',
-    description: 'U.S. Army veteran',
-  },
-  owner: {
-    '@type': 'Person',
-    name: FULL_NAME,
-  },
   address: {
     '@type': 'PostalAddress',
     streetAddress: MAILING.streetAddress,
@@ -98,7 +81,7 @@ export const metadata: Metadata = {
     'Google listing management WV',
   ],
   applicationName: 'Veteran AI Websites',
-  authors: [{ name: FULL_NAME }, { name: 'Veteran AI Websites' }],
+  authors: [{ name: 'Veteran AI Websites' }],
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',

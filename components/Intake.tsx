@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PHONE, PHONE_HREF } from '@/lib/contact';
+
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -17,6 +17,7 @@ const styles = `
 .iq__sub{margin:14px auto 0;font-size:clamp(14px,1.1vw,16px);line-height:1.6;color:rgba(233,240,246,.82)}
 .iq__form{position:relative;overflow:hidden;border:1px solid rgba(233,240,246,.14);border-radius:22px;background:rgba(12,16,22,.62);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);padding:clamp(24px,4vw,40px)}
 .iq__form::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#5b9bd5,#e0912f,#c2452f);z-index:3}
+.iq__direct{margin:0 0 18px;font-size:14px;line-height:1.5;color:rgba(233,240,246,.82);text-align:center}
 .iq__row{display:flex;gap:14px;margin-bottom:14px}
 .iq__row>*{flex:1}
 .iq__label{display:block;font-size:13px;font-weight:600;color:rgba(233,240,246,.88);margin:0 0 7px}
@@ -33,8 +34,6 @@ textarea.iq__field{resize:vertical;min-height:120px;line-height:1.5}
 .iq__submit:hover::after{opacity:1;transform:scale(1)}
 .iq__submit:disabled{opacity:.6;cursor:default;transform:none}
 .iq__cta-row{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:6px}
-.iq__phone{font-family:var(--font-sans);font-size:14px;font-weight:600;color:#f4f7fa;text-decoration:none;border-bottom:1px solid rgba(244,247,250,.35);padding:2px 0;transition:border-color .2s,color .2s}
-.iq__phone:hover{color:#fff;border-bottom-color:#fff}
 .iq__msg{text-align:center;font-size:14px;margin-top:14px}
 .iq__msg.err{color:#ff9b9b}
 .iq__note{text-align:center;font-size:13px;color:rgba(233,240,246,.82);margin:16px 0 0}
@@ -110,6 +109,7 @@ export default function Intake() {
           </div>
         ) : (
           <form className="iq__form" onSubmit={submit}>
+            <p className="iq__direct">Your message comes straight to me — not a sales team.</p>
             <div className="iq__row">
               <div>
                 <label className="iq__label" htmlFor="iq-name">
@@ -212,10 +212,9 @@ export default function Intake() {
               <button className="iq__submit" type="submit" disabled={submitting} style={{ marginTop: 0 }}>
                 {submitting ? 'Sending…' : 'Send my inquiry'}
               </button>
-              <a href={PHONE_HREF} className="iq__phone">{PHONE}</a>
             </div>
             {error && <p className="iq__msg err">{error}</p>}
-            <p className="iq__note">Prefer to talk? Call or text — it reaches me directly.</p>
+            <p className="iq__note">Prefer to talk? Use Call in the header or footer — it reaches me directly.</p>
           </form>
         )}
       </div>

@@ -1,32 +1,15 @@
 import Stripe from 'stripe';
-import type { CheckoutPlanId } from '@/lib/data';
+import { SHOPPABLE_STORE_PRICE, MANAGED_MONTHLY } from '@/lib/data';
 
 /** One-time package amounts in cents (matches public pricing). */
 const PACKAGE_AMOUNTS: Record<string, number> = {
-  Essential: 997_00,
-  Standard: 1497_00,
-  Advanced: 2497_00,
+  Starter: 497_00,
+  Complete: 797_00,
+  Premium: 997_00,
 };
 
-const ONLINE_STORE_CENTS = 997_00;
-const BUILD_CREDIT_CENTS = 500_00;
-
-/** Monthly plan subscription amounts in cents. Keys = 0. Pro is not sold here. */
-const PLAN_MONTHLY_CENTS: Record<CheckoutPlanId, number> = {
-  keys: 0,
-  hosted: 49_00,
-  growth: 297_00,
-};
-
-const PLAN_LABELS: Record<CheckoutPlanId, string> = {
-  keys: 'Keys',
-  hosted: 'Hosted',
-  growth: 'Growth',
-};
-
-function isCheckoutPlanId(v: unknown): v is CheckoutPlanId {
-  return v === 'keys' || v === 'hosted' || v === 'growth';
-}
+const SHOPPABLE_STORE_CENTS = SHOPPABLE_STORE_PRICE * 100;
+const MANAGED_MONTHLY_CENTS = MANAGED_MONTHLY * 100;
 
 function oneTimeLineItem(
   name: string,
@@ -63,13 +46,12 @@ function monthlyLineItem(
 
 /**
  * Body:
- *   package: "Essential" | "Standard" | "Advanced"
- *   plan: "keys" | "hosted" | "growth"  (Pro is consultation-only — rejected)
- *   addOns?: string[]  // e.g. ["Online Store"]
+ *   package: "Starter" | "Complete" | "Premium"  (required — always charged)
+ *   aftercare?: "own" | "managed"  (default "own")
+ *   addOns?: string[]  // e.g. ["Shoppable Store"] and/or ["Monthly Website Care"]
  *
- * Growth: $500 off the one-time build.
- * Hosted / Growth: recurring monthly (Checkout mode = subscription).
- * Keys: one-time payment only.
+ * Own it: payment mode — one-time build (+ optional store).
+ * Managed: subscription mode — one-time build (+ optional store) + $97/mo recurring.
  */
 export async function POST(request: Request) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -78,59 +60,39 @@ export async function POST(request: Request) {
     const pkg: string | undefined = body.package;
     const addOnList: string[] = Array.isArray(body.addOns) ? body.addOns : [];
 
-    if (body.plan === 'pro') {
+    if (!pkg || PACKAGE_AMOUNTS[pkg] == null) {
       return Response.json(
-        {
-          error:
-            'Pro is available by consultation only. Call (304) 591-3835.',
-        },
+        { error: 'Invalid or missing package. Choose Starter, Complete, or Premium.' },
         { status: 400 }
       );
     }
 
-    const plan: CheckoutPlanId = isCheckoutPlanId(body.plan)
-      ? body.plan
-      : 'keys';
-
-    if (!pkg || PACKAGE_AMOUNTS[pkg] == null) {
-      return Response.json({ error: 'Invalid or missing package' }, { status: 400 });
-    }
-    const packageName = pkg;
-    const packageCents = PACKAGE_AMOUNTS[packageName];
+    const aftercare: 'own' | 'managed' =
+      body.aftercare === 'managed' || addOnList.includes('Monthly Website Care')
+        ? 'managed'
+        : 'own';
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-    const credit = plan === 'growth' ? BUILD_CREDIT_CENTS : 0;
-    const buildCents = Math.max(0, packageCents - credit);
-    const creditNote =
-      credit > 0
-        ? `Includes $${credit / 100} ${PLAN_LABELS[plan]} plan credit`
-        : undefined;
-
-    lineItems.push(
-      oneTimeLineItem(
-        `${packageName} Website — ${PLAN_LABELS[plan]} plan`,
-        buildCents,
-        creditNote
-      )
-    );
+    lineItems.push(oneTimeLineItem(`${pkg} Website`, PACKAGE_AMOUNTS[pkg]));
 
     if (
-      addOnList.includes('Online Store') ||
-      addOnList.includes('Shoppable Store')
+      addOnList.includes('Shoppable Store') ||
+      addOnList.includes('Online Store')
     ) {
-      lineItems.push(oneTimeLineItem('Online Store add-on', ONLINE_STORE_CENTS));
+      lineItems.push(
+        oneTimeLineItem('Shoppable Store add-on', SHOPPABLE_STORE_CENTS)
+      );
     }
 
-    const monthly = PLAN_MONTHLY_CENTS[plan];
-    if (monthly > 0) {
+    if (aftercare === 'managed') {
       lineItems.push(
-        monthlyLineItem(`${PLAN_LABELS[plan]} plan — monthly`, monthly)
+        monthlyLineItem('Managed plan — monthly', MANAGED_MONTHLY_CENTS)
       );
     }
 
     const mode: Stripe.Checkout.SessionCreateParams.Mode =
-      monthly > 0 ? 'subscription' : 'payment';
+      aftercare === 'managed' ? 'subscription' : 'payment';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -139,14 +101,13 @@ export async function POST(request: Request) {
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}?payment_success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}?payment_cancel=true`,
       metadata: {
-        package: packageName,
-        plan,
-        build_cents: String(buildCents),
-        monthly_cents: String(monthly),
+        package: pkg,
+        aftercare,
         store: String(
-          addOnList.includes('Online Store') ||
-            addOnList.includes('Shoppable Store')
+          addOnList.includes('Shoppable Store') ||
+            addOnList.includes('Online Store')
         ),
+        managed: String(aftercare === 'managed'),
       },
     });
 

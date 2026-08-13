@@ -1,5 +1,10 @@
 import type { ReactNode } from 'react';
-import { PHONE, PHONE_HREF, MAILING_ADDRESS } from '@/lib/contact';
+import {
+  BUSINESS_LEGAL_NAME,
+  CONTACT_EMAIL,
+  CONTACT_EMAIL_HREF,
+  MAILING_ADDRESS,
+} from '@/lib/contact';
 
 const styles = `
 .legal{position:relative;flex:1;color:#eef4f8;background:#06090f;padding:clamp(96px,12vw,140px) clamp(20px,6vw,72px) clamp(48px,7vw,88px)}
@@ -40,8 +45,13 @@ export default function LegalShell({ title, eyebrow = 'Legal', updated, children
         <p className="legal__updated">Last updated: {updated}</p>
         <div className="legal__panel">{children}</div>
         <p className="legal__draft">
-          Draft for review — not final legal advice. Contact:{' '}
-          <a href={PHONE_HREF}>{PHONE}</a> · {MAILING_ADDRESS}
+          Draft for review — not final legal advice.
+          <br />
+          {BUSINESS_LEGAL_NAME}
+          <br />
+          {MAILING_ADDRESS}
+          <br />
+          <a href={CONTACT_EMAIL_HREF}>{CONTACT_EMAIL}</a>
         </p>
       </div>
     </main>

@@ -1,7 +1,5 @@
 'use client';
 
-import { PHONE, PHONE_HREF } from '@/lib/contact';
-
 const styles = `
 .vets{position:relative;color:#eef4f8;padding:clamp(40px,6vw,80px) clamp(20px,6vw,72px)}
 .vets__panel{position:relative;overflow:hidden;max-width:760px;margin:0 auto;border:1px solid rgba(227,178,60,.32);border-radius:24px;background:rgba(12,16,22,.72);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);padding:clamp(30px,5vw,52px);text-align:center;box-shadow:0 30px 70px rgba(0,0,0,.5)}
@@ -9,12 +7,13 @@ const styles = `
 .vets__mark{width:56px;height:64px;margin:0 auto 18px;display:block}
 .vets__eyebrow{font-family:var(--font-sans);font-size:12.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#e3b23c;margin:0 0 14px}
 .vets__title{font-family:var(--font-sans);font-size:clamp(24px,3.2vw,38px);font-weight:700;letter-spacing:-.02em;line-height:1.08;color:#fff;margin:0}
-.vets__body{margin:18px auto 0;max-width:54ch;font-size:clamp(14.5px,1.2vw,17px);line-height:1.65;color:rgba(233,240,246,.88)}
-.vets__fine{margin:20px auto 0;max-width:50ch;font-size:13px;line-height:1.55;color:rgba(233,240,246,.62)}
-.vets__cert{margin:18px auto 0;max-width:50ch;font-size:14px;line-height:1.55;color:rgba(233,240,246,.78);padding:14px 16px;border-radius:12px;border:1px solid rgba(227,178,60,.22);background:rgba(227,178,60,.06)}
-.vets__cta{margin-top:26px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 18px}
-.vets__phone{font-family:var(--font-sans);font-size:15px;font-weight:600;color:#f6e3bd;text-decoration:none;border-bottom:1px solid rgba(246,227,189,.4);padding:2px 0;transition:border-color .2s,color .2s}
-.vets__phone:hover{color:#fff;border-bottom-color:#fff}
+.vets__sub{margin:14px auto 0;max-width:52ch;font-size:clamp(14px,1.15vw,16.5px);line-height:1.6;color:rgba(233,240,246,.82)}
+.vets__list{list-style:none;margin:26px auto 0;padding:0;max-width:440px;display:flex;flex-direction:column;gap:13px;text-align:left}
+.vets__list li{display:flex;align-items:flex-start;gap:12px;font-size:15.5px;line-height:1.45;color:#f2f6fa}
+.vets__list li b{color:#fff;font-weight:700}
+.vets__check{flex:0 0 auto;display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:rgba(227,178,60,.16);color:#e3b23c;font-size:14px;font-weight:800;margin-top:1px}
+.vets__fine{margin:20px auto 0;max-width:48ch;font-size:13px;line-height:1.5;color:rgba(233,240,246,.72)}
+.vets__cta{margin-top:26px}
 .vets__btn{position:relative;isolation:isolate;overflow:hidden;display:inline-flex;align-items:center;gap:10px;font-family:var(--font-sans);font-size:16px;font-weight:700;padding:16px 30px;border-radius:999px;cursor:pointer;text-decoration:none;border:1px solid rgba(227,178,60,.7);background:rgba(227,178,60,.14);color:#f6e3bd;transition:color .25s,border-color .25s,transform .25s,box-shadow .25s}
 .vets__btn::after{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:linear-gradient(135deg,#f0c862,#e3b23c);opacity:0;transform:scale(.92);transition:opacity .28s,transform .28s}
 .vets__btn:hover{color:#1a1206;border-color:transparent;transform:translateY(-2px);box-shadow:0 16px 38px rgba(0,0,0,.5)}
@@ -24,9 +23,6 @@ const styles = `
 .vets__note{margin:18px auto 0;font-size:13.5px;font-style:italic;color:rgba(233,240,246,.66)}
 `;
 
-/**
- * Phase 7 — veteran offer: free Essential + 3 months Growth, uncapped, clearly scoped.
- */
 export default function Veterans() {
   return (
     <section id="veterans" className="vets">
@@ -38,29 +34,43 @@ export default function Veterans() {
           <path d="M24 70 L60 52 L96 70 L96 81 L60 63 L24 81 Z" />
           <path d="M24 88 Q60 100 96 88 L96 99 Q60 111 24 99 Z" />
         </svg>
-        <p className="vets__eyebrow">Veterans</p>
-        <h2 className="vets__title">For those who served</h2>
-        <p className="vets__body">
-          If you are a veteran-owned business in West Virginia, I will build your Essential site
-          free — a $997 value — and give you three months of the Growth plan on me. You own
-          everything from day one. After three months, Growth continues at $297/month, or take the
-          keys and walk. No catch, no contract, no cap on how many I do.
+        <p className="vets__eyebrow">For those who served</p>
+        <h2 className="vets__title">A thank-you to my fellow veterans.</h2>
+        <p className="vets__sub">
+          I built this company after my own time in service, and I want to give back to the people
+          who served alongside me. If you’re a veteran starting or growing a business, this one’s for you —
+          just mention that you served in the form below, and I’ll get started building your site right away.
         </p>
+        <ul className="vets__list">
+          <li>
+            <span className="vets__check">✓</span>
+            <span>
+              Your website <b>designed &amp; built completely free</b> — a real, professional site.
+            </span>
+          </li>
+          <li>
+            <span className="vets__check">✓</span>
+            <span>
+              <b>3 months of the $97/mo Managed plan, on me</b> — hosting, updates, and changes
+              handled.
+            </span>
+          </li>
+          <li>
+            <span className="vets__check">✓</span>
+            <span>
+              You keep <b>100% ownership</b> of your site, always.
+            </span>
+          </li>
+        </ul>
         <p className="vets__fine">
-          Free build covers the Essential package. Standard and Advanced builds are discounted 50%
-          for veteran-owned businesses. Store add-on quoted separately.
-        </p>
-        <p className="vets__cert">
-          Not certified yet? West Virginia launched its Certified Veteran-Owned Business program in
-          July 2026 — it is free and it takes about ten minutes. Call me and I will walk you through
-          it.
+          After your 3 free months, the Managed plan simply continues at $97/mo — cancel anytime, no
+          contract.
         </p>
         <div className="vets__cta">
           <a href="#contact" className="vets__btn">
-            Claim your veteran offer <span className="arw" aria-hidden="true">→</span>
-          </a>
-          <a href={PHONE_HREF} className="vets__phone">
-            {PHONE}
+            Claim your veteran offer <span className="arw" aria-hidden="true">
+              →
+            </span>
           </a>
         </div>
         <p className="vets__note">From one veteran to another — thank you for your service.</p>

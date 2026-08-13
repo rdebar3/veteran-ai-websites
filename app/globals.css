@@ -1491,63 +1491,6 @@ body::after {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32);
 }
 
-/* Contact bar — always visible; phone never behind hamburger */
-.nav__contact {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.75rem;
-  min-height: 2rem;
-  padding: 0.35rem 1rem;
-  background: rgba(6, 9, 15, 0.72);
-  border-bottom: 1px solid rgba(233, 240, 246, 0.08);
-  position: relative;
-  z-index: 2;
-}
-
-.nav__contact-phone {
-  font-family: var(--font-sans);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #fff;
-  text-decoration: none;
-  letter-spacing: 0.01em;
-  padding: 0.2rem 0.15rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
-  transition: border-color 0.2s ease, color 0.2s ease;
-}
-
-.nav__contact-phone:hover {
-  border-bottom-color: #fff;
-}
-
-.nav__contact-label {
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: rgba(233, 240, 246, 0.72);
-  letter-spacing: 0.01em;
-}
-
-@media (max-width: 480px) {
-  .nav__contact {
-    gap: 0.25rem 0.5rem;
-    padding: 0.4rem 0.75rem;
-  }
-  .nav__contact-phone {
-    font-size: 1rem;
-    padding: 0.35rem 0.25rem;
-    /* Larger hit target on mobile */
-    min-height: 2.5rem;
-    display: inline-flex;
-    align-items: center;
-  }
-  .nav__contact-label {
-    font-size: 0.6875rem;
-  }
-}
-
 .nav__inner {
   max-width: 72rem;
   margin: 0 auto;
@@ -1647,65 +1590,6 @@ body::after {
   box-shadow: 0 0 10px rgba(227, 178, 60, 0.55);
   z-index: 3;
   pointer-events: none;
-}
-
-.nav__cta {
-  padding: 0.6875rem 1.35rem;
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-  color: #0a0e14;
-  background: #f4f7fa;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  text-decoration: none;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
-  transition: transform 0.25s ease, background 0.25s ease;
-}
-
-.nav__cta:hover {
-  transform: translate3d(0, -2px, 0);
-  background: #fff;
-}
-
-.nav__cta-phone {
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #f4f7fa;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(244, 247, 250, 0.35);
-  padding: 0.15rem 0;
-  white-space: nowrap;
-  transition: border-color 0.2s ease, color 0.2s ease;
-}
-
-.nav__cta-phone:hover {
-  color: #fff;
-  border-bottom-color: #fff;
-}
-
-.nav__cta--glow {
-  position: relative;
-}
-
-.nav__cta--glow::after {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
-  z-index: -1;
-  opacity: 0;
-  filter: blur(10px);
-  transition: opacity 0.3s ease;
-}
-
-.nav__cta--glow:hover::after {
-  opacity: 0.45;
 }
 
 .nav__mobile {
@@ -6696,6 +6580,6 @@ html.is-scrolling .h-showcase__img {
 
 /* ── Audit fixes: focus visibility, sr-only, review labels ── */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible,.dm__link:focus-visible,.pk__buy:focus-visible,.pk__pick:focus-visible,.pk__plan:focus-visible,.pk__plan-select:focus-visible,.pk__store:focus-visible,.pk__toggle-inner button:focus-visible,.vets__btn:focus-visible,.vets__phone:focus-visible,.iq__submit:focus-visible,.iq__phone:focus-visible,.rv__submit:focus-visible,.rv__phone:focus-visible,.nav__cta:focus-visible,.nav__link:focus-visible,.nav__logo:focus-visible,.nav__contact-phone:focus-visible,.nav__menu-btn:focus-visible,.footer__legal a:focus-visible,.footer__phone a:focus-visible,.skip-link:focus-visible,.vh-cta-phone:focus-visible,.legal__back:focus-visible,.legal__panel a:focus-visible{outline:2px solid #e3b23c;outline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible,.dm__link:focus-visible,.pk__buy:focus-visible,.pk__pick:focus-visible,.pk__plan:focus-visible,.pk__plan-select:focus-visible,.pk__store:focus-visible,.pk__toggle-inner button:focus-visible,.vets__btn:focus-visible,.vets__phone:focus-visible,.iq__submit:focus-visible,.iq__phone:focus-visible,.rv__submit:focus-visible,.rv__phone:focus-visible,.nav__link:focus-visible,.nav__logo:focus-visible,.nav__menu-btn:focus-visible,.footer__legal a:focus-visible,.footer__phone a:focus-visible,.skip-link:focus-visible,.vh-cta-phone:focus-visible,.legal__back:focus-visible,.legal__panel a:focus-visible{outline:2px solid #e3b23c;outline-offset:3px}
 .rv__group{display:flex;flex-direction:column;gap:6px;flex:1}
 .rv__label{font-size:13px;font-weight:500;color:rgba(233,240,246,.78)}

@@ -1,7 +1,7 @@
 import FacebookIcon from '@/components/FacebookIcon';
 import { FACEBOOK_URL } from '@/lib/data';
 import { landmarkCredits } from '@/lib/landmarks';
-import { MAILING_ADDRESS, PHONE, PHONE_HREF } from '@/lib/contact';
+import { MAILING_ADDRESS, PHONE_HREF } from '@/lib/contact';
 
 /** Server Component — no "use client". Safe for crawlable contact + service area. */
 export default function Footer() {
@@ -14,8 +14,8 @@ export default function Footer() {
           </div>
           <p className="footer__tagline">West Virginia · U.S. Veteran Owned</p>
           <p className="footer__phone">
-            <a href={PHONE_HREF}>{PHONE}</a>
-            <span className="footer__phone-note"> — call or text</span>
+            <a href={PHONE_HREF}>Call</a>
+            <span className="footer__phone-note"> — or text, reaches me directly</span>
           </p>
           <p className="footer__address">{MAILING_ADDRESS}</p>
           <p className="footer__service-area">
@@ -40,6 +40,8 @@ export default function Footer() {
           © {new Date().getFullYear()} Veteran AI Websites
           <br />
           One-day professional websites.
+          <br />
+          Built by Rich Debar · Horner, West Virginia
         </div>
         <div className="text-xs text-[var(--text-dim)] max-w-[220px] md:text-right leading-relaxed">
           Fast. Fair. Full ownership.

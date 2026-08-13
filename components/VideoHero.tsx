@@ -10,7 +10,6 @@ import {
   type MotionValue,
 } from 'framer-motion';
 import MagneticButton from '@/components/MagneticButton';
-import { PHONE, PHONE_HREF } from '@/lib/contact';
 
 const VIDEO = '/hero/hero-gorge-loop.mp4';
 const MOBILE_VIDEO = '/hero/hero-gorge-mobile.mp4';
@@ -128,9 +127,6 @@ function CtaBlock({
 
   return (
     <motion.div className="vh-cta" style={{ opacity, pointerEvents, visibility }}>
-      <a href={PHONE_HREF} className="vh-cta-phone">
-        Call {PHONE}
-      </a>
       <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--ghost btn--lg">
         Get started
       </MagneticButton>
@@ -212,9 +208,6 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
           <h2 className="vh-title">More calls for your business. Built in a day.</h2>
           <p className="vh-sub">West Virginia veteran-owned. You own your site — always.</p>
           <div className="vh-cta">
-            <a href={PHONE_HREF} className="vh-cta-phone">
-              Call {PHONE}
-            </a>
             <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--ghost btn--lg">
               Get started
             </MagneticButton>

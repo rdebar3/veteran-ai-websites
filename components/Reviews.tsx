@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { PHONE, PHONE_HREF } from '@/lib/contact';
+
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -258,9 +258,6 @@ export default function Reviews() {
             <button className="rv__submit" type="submit" disabled={submitting} style={{ marginTop: 0 }}>
               {submitting ? 'Submitting…' : 'Submit review'}
             </button>
-            <a href={PHONE_HREF} className="rv__phone">
-              {PHONE}
-            </a>
           </div>
           {error && <p className="rv__msg err">{error}</p>}
         </form>
