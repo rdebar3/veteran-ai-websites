@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { DEMO_NOINDEX_HEADERS } from "./lib/demo/headers";
 
 const nextConfig: NextConfig = {
   images: {
@@ -8,6 +9,13 @@ const nextConfig: NextConfig = {
     localPatterns: [
       { pathname: "/**" },
     ],
+  },
+  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
+  outputFileTracingIncludes: {
+    "/api/demo-shot": ["./node_modules/@sparticuz/chromium/**"],
+  },
+  async headers() {
+    return DEMO_NOINDEX_HEADERS;
   },
 };
 

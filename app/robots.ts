@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/monti', '/monti/'],
+      disallow: ['/monti', '/monti/', '/d/'],
     },
     sitemap: 'https://veteranaiwebsites.com/sitemap.xml',
     host: 'https://veteranaiwebsites.com',
