@@ -5,7 +5,7 @@ import { isPreviewFlag, resolveDemoView } from '@/lib/demo/decision';
 import { ExpiredDemo } from '@/lib/demo/expired';
 import { parseDemoFacts } from '@/lib/demo/facts';
 import { getDemoSiteBySlug } from '@/lib/demo/supabase';
-import { V0Template } from '@/lib/demo/v0-template';
+import { DemoSiteView } from '@/lib/demo/render';
 
 const loadDemoSite = cache(getDemoSiteBySlug);
 
@@ -71,5 +71,5 @@ export default async function DemoPage({ params, searchParams }: PageProps) {
     return <ExpiredDemo />;
   }
 
-  return <V0Template site={site} />;
+  return <DemoSiteView site={site} />;
 }

@@ -10,6 +10,10 @@ export type DemoFacts = {
   services?: Provenanced<string>[];
   hours_text?: Provenanced<string>;
   town_hits?: Provenanced<string>[];
+  /** Optional until the outreach compiler lands them. Absent-safe. */
+  maps_url?: Provenanced<string>;
+  address?: Provenanced<string>;
+  badges?: Provenanced<string>[];
 };
 
 export type DemoStatus = 'draft' | 'live' | 'expired' | 'killed';

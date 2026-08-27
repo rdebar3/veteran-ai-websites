@@ -76,6 +76,15 @@ export function parseDemoFacts(raw: unknown): DemoFacts {
   const townHits = provenancedStringList(rec?.town_hits);
   if (townHits) facts.town_hits = townHits;
 
+  const mapsUrl = provenancedString(rec?.maps_url);
+  if (mapsUrl) facts.maps_url = mapsUrl;
+
+  const address = provenancedString(rec?.address);
+  if (address) facts.address = address;
+
+  const badges = provenancedStringList(rec?.badges);
+  if (badges) facts.badges = badges;
+
   return facts;
 }
 
