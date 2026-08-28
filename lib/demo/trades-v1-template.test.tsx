@@ -5,9 +5,20 @@ import {
   HONEST_STRIP_LINK_TEXT,
   layoutVariantFor,
 } from './copy';
-import { eclipseRow, minimalRow, demoRow, ECLIPSE_FACTS } from './fixtures';
+import {
+  eclipseRow,
+  minimalRow,
+  demoRow,
+  ECLIPSE_FACTS,
+  MINIMAL_FACTS,
+} from './fixtures';
 import { DemoSiteView } from './render';
-import { closerSub, TradesV1Template } from './trades-v1-template';
+import {
+  closerSub,
+  formatHoursLine,
+  reviewAttribution,
+  TradesV1Template,
+} from './trades-v1-template';
 
 const ECLIPSE_TEL = 'tel:+13042443334';
 const ECLIPSE_SMS = 'sms:+13042443334';
@@ -220,6 +231,269 @@ describe('trades_v1 template', () => {
     expect(spot).not.toMatch(/<script\b/i);
     expect(full.replace(/<[^>]+>/g, '')).toContain(HONEST_STRIP);
     expect(spot.replace(/<[^>]+>/g, '')).toContain(HONEST_STRIP);
+  });
+});
+
+const SPOTLIGHT_BLURBS = [
+  'Roof repair and full replacements — free estimates.',
+  'Storm damage, handled locally.',
+  'Call the number on the listing.',
+];
+
+const VERBATIM_BODY = 'Showed up on time & fixed the <leak> "fast".';
+
+const WEEKDAY_HOURS = [
+  'Monday: 8:00 AM – 5:00 PM',
+  'Tuesday: 8:00 AM – 5:00 PM',
+  'Wednesday: 8:00 AM – 5:00 PM',
+  'Thursday: 8:00 AM – 5:00 PM',
+  'Friday: 8:00 AM – 5:00 PM',
+  'Saturday: Closed',
+  'Sunday: Closed',
+];
+
+function decodeEntities(html: string): string {
+  return html
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
+function spotlightFacts() {
+  const facts = { ...ECLIPSE_FACTS };
+  delete (facts as { services?: unknown }).services;
+  return facts;
+}
+
+describe('trades_v1 spotlight blurbs + customer voice', () => {
+  it('spotlight renders gated blurbs as a detail block; full layout does not', () => {
+    const spot = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: spotlightFacts(),
+          blurbs: SPOTLIGHT_BLURBS,
+        })}
+      />,
+    );
+    expect(spot).toContain('is-spotlight');
+    expect(spot).toContain('class="spot-detail"');
+    expect(spot).toContain(
+      '<div class="spot-detail"><p>Roof repair and full replacements — free estimates.</p><p>Storm damage, handled locally.</p><p>Call the number on the listing.</p></div>',
+    );
+    for (const line of SPOTLIGHT_BLURBS) expect(spot).toContain(line);
+
+    const full = renderToStaticMarkup(
+      <TradesV1Template site={eclipseRow({ blurbs: SPOTLIGHT_BLURBS })} />,
+    );
+    expect(full).not.toContain('is-spotlight');
+    expect(full).not.toContain('class="spot-detail"');
+    expect(full).toContain(SPOTLIGHT_BLURBS[0]);
+    expect(full).toContain('class="sub"');
+    expect(full).not.toContain(SPOTLIGHT_BLURBS[1]);
+    expect(full).not.toContain(SPOTLIGHT_BLURBS[2]);
+  });
+
+  it('review bodies pass through byte-identical and escaped', () => {
+    const html = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            reviews: [
+              {
+                value: {
+                  author: 'Pat K.',
+                  rating: 5,
+                  body: VERBATIM_BODY,
+                },
+                source: 'places.reviews',
+              },
+            ],
+          },
+        })}
+      />,
+    );
+    const quoted = html.match(
+      /<blockquote class="quote"><p>&quot;([\s\S]*)&quot;<\/p>/,
+    );
+    expect(quoted).toBeTruthy();
+    expect(decodeEntities(quoted![1])).toBe(VERBATIM_BODY);
+    expect(html).toContain('&amp;');
+    expect(html).toContain('&lt;leak&gt;');
+    expect(html).toContain('&quot;fast&quot;');
+    expect(html).not.toContain('fixed the <leak>');
+  });
+
+  it('review attribution is — author · rating★ Google review', () => {
+    const html = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            reviews: [
+              {
+                value: { author: 'Pat K.', rating: 5, body: 'Solid work.' },
+                source: 'places.reviews',
+              },
+            ],
+          },
+        })}
+      />,
+    );
+    expect(reviewAttribution('Pat K.', 5)).toBe(
+      '— Pat K. · 5★ Google review',
+    );
+    expect(html).toContain('— Pat K. · 5★ Google review');
+    expect(html).toContain('What customers say');
+    expect(html).toContain('Read all their reviews →');
+    expect(html).toContain(`href="${ECLIPSE_MAPS}"`);
+    expect(html.indexOf('What customers say')).toBeLessThan(
+      html.indexOf('class="close"'),
+    );
+  });
+
+  it('absent reviews and hours omit those sections entirely', () => {
+    const html = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(html).not.toContain('What customers say');
+    expect(html).not.toContain('class="voice"');
+    expect(html).not.toContain('class="quote"');
+    expect(html).not.toContain('Read all their reviews');
+    expect(html).not.toContain('class="hours"');
+    expect(html).not.toContain('Mon–Fri');
+    expect(html).not.toContain('class="spot-detail"');
+  });
+
+  it('spotlight caps reviews at 2 and still omits the section when the fact is absent', () => {
+    const withThree = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...spotlightFacts(),
+            reviews: [
+              {
+                value: { author: 'A', rating: 5, body: 'First quote body.' },
+                source: 'places.reviews',
+              },
+              {
+                value: { author: 'B', rating: 4, body: 'Second quote body.' },
+                source: 'places.reviews',
+              },
+              {
+                value: { author: 'C', rating: 5, body: 'Third quote body.' },
+                source: 'places.reviews',
+              },
+            ],
+          },
+        })}
+      />,
+    );
+    expect(withThree).toContain('First quote body.');
+    expect(withThree).toContain('Second quote body.');
+    expect(withThree).not.toContain('Third quote body.');
+    expect(withThree).toContain('class="voice"');
+    expect(withThree).not.toContain('class="close"');
+
+    const none = renderToStaticMarkup(
+      <TradesV1Template site={eclipseRow({ facts: spotlightFacts() })} />,
+    );
+    expect(none).not.toContain('What customers say');
+    expect(none).not.toContain('class="voice"');
+
+    const noMaps = { ...spotlightFacts() };
+    delete (noMaps as { maps_url?: unknown }).maps_url;
+    const withoutMaps = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...noMaps,
+            reviews: [
+              {
+                value: { author: 'A', rating: 5, body: 'First quote body.' },
+                source: 'places.reviews',
+              },
+            ],
+          },
+        })}
+      />,
+    );
+    expect(withoutMaps).toContain('What customers say');
+    expect(withoutMaps).not.toContain('Read all their reviews');
+  });
+
+  it('hours collapse identical weekday spans and stay out of the info band when absent', () => {
+    expect(formatHoursLine(WEEKDAY_HOURS)).toBe(
+      'Mon–Fri 8:00 AM – 5:00 PM · Sat–Sun Closed',
+    );
+    const withHours = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            hours: {
+              value: WEEKDAY_HOURS,
+              source: 'places.regularOpeningHours.weekdayDescriptions',
+            },
+          },
+        })}
+      />,
+    );
+    expect(withHours).toContain('class="hours"');
+    expect(withHours).toContain('Mon–Fri 8:00 AM – 5:00 PM · Sat–Sun Closed');
+    expect(withHours).toContain('class="info"');
+
+    const listed = [
+      'Monday: 8:00 AM – 5:00 PM',
+      'Tuesday: 9:00 AM – 5:00 PM',
+      'Wednesday: 10:00 AM – 5:00 PM',
+      'Thursday: 11:00 AM – 5:00 PM',
+      'Friday: 12:00 PM – 5:00 PM',
+      'Saturday: 9:00 AM – 1:00 PM',
+      'Sunday: Closed',
+    ];
+    expect(formatHoursLine(listed)).toBe(listed.join(' · '));
+
+    const noHours = renderToStaticMarkup(
+      <TradesV1Template site={eclipseRow()} />,
+    );
+    expect(noHours).not.toContain('class="hours"');
+    expect(noHours).not.toContain('Mon–Fri 8:00 AM – 5:00 PM');
+
+    const hoursOnly = renderToStaticMarkup(
+      <TradesV1Template
+        site={minimalRow({
+          facts: {
+            ...MINIMAL_FACTS,
+            hours: {
+              value: WEEKDAY_HOURS,
+              source: 'places.regularOpeningHours.weekdayDescriptions',
+            },
+          },
+        })}
+      />,
+    );
+    expect(hoursOnly).toContain('class="info"');
+    expect(hoursOnly).toContain('class="hours"');
+    expect(hoursOnly).toContain('Mon–Fri 8:00 AM – 5:00 PM · Sat–Sun Closed');
+  });
+
+  it('malformed reviews are dropped so the section stays absent', () => {
+    const html = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            reviews: [
+              { value: 'not an object', source: 'places.reviews' },
+              { value: { author: 'A', rating: 5 }, source: 'places.reviews' },
+            ],
+          },
+        })}
+      />,
+    );
+    expect(html).not.toContain('What customers say');
+    expect(html).not.toContain('class="voice"');
   });
 });
 

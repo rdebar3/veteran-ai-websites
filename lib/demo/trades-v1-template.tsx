@@ -10,7 +10,7 @@ import {
   slugSeed,
 } from './copy';
 import { parseBlurbs, parseDemoFacts, parseHeroLine } from './facts';
-import type { DemoFacts, DemoSiteRow } from './types';
+import type { DemoFacts, DemoReviewValue, DemoSiteRow } from './types';
 
 export { DEMO_TEMPLATE_TRADES_V1 };
 
@@ -158,6 +158,21 @@ const SERVICE_COPY: Record<string, ServiceCopy> = {
 const DEFAULT_SERVICE_BODY = SERVICE_COPY.default.body;
 const MAX_SERVICES = 5;
 const MAX_TOWNS = 9;
+const MAX_SPOTLIGHT_REVIEWS = 2;
+const MAX_FULL_REVIEWS = 2;
+const VOICE_HEADING = 'What customers say';
+const VOICE_MORE = 'Read all their reviews →';
+const REVIEW_SOURCE_LABEL = 'Google review';
+
+const DAY_ABBR: Record<string, string> = {
+  monday: 'Mon',
+  tuesday: 'Tue',
+  wednesday: 'Wed',
+  thursday: 'Thu',
+  friday: 'Fri',
+  saturday: 'Sat',
+  sunday: 'Sun',
+};
 
 function telHref(tel: string): string {
   return /^tel:/i.test(tel) ? tel : `tel:${tel}`;
@@ -254,6 +269,46 @@ function badgeHasFreeEstimate(facts: DemoFacts): boolean {
   );
 }
 
+function parseHourLine(line: string): { day: string; hours: string } | null {
+  const idx = line.indexOf(':');
+  if (idx <= 0) return null;
+  const day = line.slice(0, idx).trim();
+  const hours = line.slice(idx + 1).trim();
+  if (!day || !hours) return null;
+  return { day, hours };
+}
+
+function abbreviateDay(day: string): string {
+  return DAY_ABBR[day.toLowerCase()] || day;
+}
+
+/** Collapse consecutive identical weekday spans when the result is short; else list. */
+export function formatHoursLine(lines: string[]): string {
+  if (lines.length === 0) return '';
+  const parsed = lines.map(parseHourLine);
+  if (parsed.some((p) => !p)) return lines.join(' · ');
+  const spans: { start: string; end: string; hours: string }[] = [];
+  for (const p of parsed as { day: string; hours: string }[]) {
+    const last = spans[spans.length - 1];
+    if (last && last.hours === p.hours) last.end = p.day;
+    else spans.push({ start: p.day, end: p.day, hours: p.hours });
+  }
+  if (spans.length > 3) return lines.join(' · ');
+  return spans
+    .map((s) => {
+      const days =
+        s.start === s.end
+          ? abbreviateDay(s.start)
+          : `${abbreviateDay(s.start)}–${abbreviateDay(s.end)}`;
+      return `${days} ${s.hours}`;
+    })
+    .join(' · ');
+}
+
+export function reviewAttribution(author: string, rating: number): string {
+  return `— ${author} · ${rating}★ ${REVIEW_SOURCE_LABEL}`;
+}
+
 export function closerSub(facts: DemoFacts): string {
   const free = badgeHasFreeEstimate(facts);
   const rating = facts.rating?.value;
@@ -284,6 +339,41 @@ function Icon({ d }: { d: string }) {
     <svg viewBox="0 0 24 24">
       <path d={d} />
     </svg>
+  );
+}
+
+function VoiceSection({
+  reviews,
+  mapsUrl,
+}: {
+  reviews: DemoReviewValue[];
+  mapsUrl?: string;
+}) {
+  if (reviews.length === 0) return null;
+  return (
+    <section className="voice">
+      <div className="wrap">
+        <h2>{VOICE_HEADING}</h2>
+        <div className="quotes">
+          {reviews.map((review, i) => (
+            <blockquote className="quote" key={`${review.author}:${i}`}>
+              <p>{`"${review.body}"`}</p>
+              <cite>{reviewAttribution(review.author, review.rating)}</cite>
+            </blockquote>
+          ))}
+        </div>
+        {mapsUrl ? (
+          <a
+            className="voice-more"
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener"
+          >
+            {VOICE_MORE}
+          </a>
+        ) : null}
+      </div>
+    </section>
   );
 }
 
@@ -335,6 +425,15 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
   const address = facts.address?.value;
   const sub = blurbs[0] || null;
   const closeLine = closerSub(facts);
+  const showSpotBlurbs = spotlight && blurbs.length > 0;
+  const voiceReviews = (facts.reviews || []).map((item) => item.value);
+  const shownReviews = spotlight
+    ? voiceReviews.slice(0, MAX_SPOTLIGHT_REVIEWS)
+    : voiceReviews.slice(0, MAX_FULL_REVIEWS);
+  const hoursLine = facts.hours
+    ? formatHoursLine(facts.hours.value)
+    : '';
+  const showInfo = Boolean(address || hoursLine);
 
   const proofInner = facts.rating ? (
     <>
@@ -440,6 +539,16 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         </div>
       ) : null}
 
+      {showSpotBlurbs ? (
+        <div className="wrap">
+          <div className="spot-detail">
+            {blurbs.map((blurb) => (
+              <p key={blurb}>{blurb}</p>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       {showServices ? (
         <section className="sect">
           <div className="wrap">
@@ -499,6 +608,8 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         </section>
       ) : null}
 
+      <VoiceSection reviews={shownReviews} mapsUrl={mapsUrl} />
+
       {!spotlight ? (
         <section className="close">
           <h2>{trade.closerHeading}</h2>
@@ -518,11 +629,11 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         </section>
       ) : null}
 
-      {address ? (
+      {showInfo ? (
         <div className="info">
           <div className="wrap">
-            <span>{address}</span>
-            {mapsUrl ? (
+            {address ? <span>{address}</span> : null}
+            {address && mapsUrl ? (
               <>
                 <span className="dot">•</span>
                 <a href={mapsUrl} target="_blank" rel="noopener">
@@ -532,8 +643,16 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
             ) : null}
             {spotlight && phone ? (
               <>
-                <span className="dot">•</span>
+                {address ? <span className="dot">•</span> : null}
                 {tel ? <a href={tel}>{phone.value}</a> : <span>{phone.value}</span>}
+              </>
+            ) : null}
+            {hoursLine ? (
+              <>
+                {address || (spotlight && phone) ? (
+                  <span className="dot">•</span>
+                ) : null}
+                <span className="hours">{hoursLine}</span>
               </>
             ) : null}
           </div>
@@ -634,6 +753,12 @@ const TRADES_V1_CSS = `
   .proof-card .src{color:var(--muted);font-size:14.5px;font-weight:600}
   .proof-card .src em{font-style:normal;font-weight:700;color:var(--ink)}
   .proof-card .go{color:var(--a2);font-weight:700;font-size:14px;white-space:nowrap}
+  .spot-detail{margin:28px auto 8px;max-width:720px;padding:22px 26px;border-radius:16px;
+    background:color-mix(in srgb, var(--a1) 12%, var(--card));
+    border:1px solid color-mix(in srgb, var(--a1) 28%, var(--line));
+    box-shadow:0 10px 28px rgba(10,15,25,.08)}
+  .spot-detail p{margin:0;font-size:16.5px;line-height:1.55;font-weight:500;color:var(--ink)}
+  .spot-detail p + p{margin-top:12px}
   .sect{padding:58px 0 8px}
   .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--a2)}
   .sect h2,.area h2{font-family:'Sora';font-weight:800;font-size:clamp(24px,6vw,34px);letter-spacing:-.015em;margin:8px 0 26px}
@@ -659,6 +784,16 @@ const TRADES_V1_CSS = `
   .town:hover{transform:translateY(-2px)}
   .town.home{background:linear-gradient(120deg,var(--a1),var(--a2));border:none;color:#fff;box-shadow:0 6px 16px var(--glow)}
   .more{align-self:center;color:var(--muted);font-size:13.5px;font-weight:500}
+  .voice{padding:46px 0 14px}
+  .voice h2{font-family:'Sora';font-weight:800;font-size:clamp(24px,6vw,34px);letter-spacing:-.015em;margin:0 0 22px}
+  .quotes{display:grid;gap:16px;grid-template-columns:1fr}
+  @media(min-width:720px){.quotes{grid-template-columns:repeat(2,1fr)}}
+  .quote{margin:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px;
+    border-left:3px solid var(--a2)}
+  .quote p{color:var(--ink);font-size:16px;line-height:1.55;font-weight:500}
+  .quote cite{display:block;margin-top:14px;font-style:normal;color:var(--muted);font-size:13.5px;font-weight:600}
+  .voice-more{display:inline-block;margin-top:18px;color:var(--a2);font-weight:700;font-size:14px;text-decoration:none}
+  .voice-more:hover{text-decoration:underline}
   .close{margin:64px 0 0;background:
       radial-gradient(80% 130% at 90% -20%, color-mix(in srgb, var(--a1) 30%, transparent) 0%, transparent 55%),
       linear-gradient(150deg,var(--base) 10%,var(--base2) 100%);
@@ -671,6 +806,7 @@ const TRADES_V1_CSS = `
   .info .wrap{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:14px;font-weight:500;text-align:center}
   .info a{color:var(--a1);font-weight:700;text-decoration:none;white-space:nowrap}
   .info a:hover{text-decoration:underline}
+  .info .hours{white-space:normal}
   .dot{opacity:.4}
   .strip{background:var(--base);padding:0 22px 18px;text-align:center;font-size:12.5px;color:rgba(255,255,255,.4)}
   .strip a{color:rgba(255,255,255,.7);font-weight:600}

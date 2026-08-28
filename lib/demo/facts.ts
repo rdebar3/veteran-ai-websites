@@ -1,4 +1,4 @@
-import type { DemoFacts, Provenanced } from './types';
+import type { DemoFacts, DemoReviewValue, Provenanced } from './types';
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
@@ -35,6 +35,49 @@ function provenancedStringList(value: unknown): Provenanced<string>[] | undefine
   for (const item of value) {
     const parsed = provenancedString(item);
     if (parsed) out.push(parsed);
+  }
+  return out.length ? out : undefined;
+}
+
+function provenancedHours(value: unknown): Provenanced<string[]> | undefined {
+  const rec = asRecord(value);
+  if (!rec || !Array.isArray(rec.value)) return undefined;
+  const out: string[] = [];
+  for (const item of rec.value) {
+    if (typeof item !== 'string') continue;
+    const text = item.trim();
+    if (text) out.push(text);
+  }
+  if (!out.length) return undefined;
+  return {
+    value: out,
+    source: typeof rec.source === 'string' ? rec.source : '',
+  };
+}
+
+function provenancedReviews(
+  value: unknown,
+): Provenanced<DemoReviewValue>[] | undefined {
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+  const out: Provenanced<DemoReviewValue>[] = [];
+  for (const item of value) {
+    const rec = asRecord(item);
+    if (!rec) continue;
+    const inner = asRecord(rec.value);
+    if (!inner) continue;
+    if (typeof inner.author !== 'string' || typeof inner.body !== 'string') {
+      continue;
+    }
+    const author = inner.author.trim();
+    const body = inner.body;
+    if (!author || !body.trim()) continue;
+    if (typeof inner.rating !== 'number' || !Number.isFinite(inner.rating)) {
+      continue;
+    }
+    out.push({
+      value: { author, rating: inner.rating, body },
+      source: typeof rec.source === 'string' ? rec.source : '',
+    });
   }
   return out.length ? out : undefined;
 }
@@ -84,6 +127,12 @@ export function parseDemoFacts(raw: unknown): DemoFacts {
 
   const badges = provenancedStringList(rec?.badges);
   if (badges) facts.badges = badges;
+
+  const reviews = provenancedReviews(rec?.reviews);
+  if (reviews) facts.reviews = reviews;
+
+  const weekdayHours = provenancedHours(rec?.hours);
+  if (weekdayHours) facts.hours = weekdayHours;
 
   return facts;
 }
