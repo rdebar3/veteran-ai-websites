@@ -158,11 +158,13 @@ const SERVICE_COPY: Record<string, ServiceCopy> = {
 const DEFAULT_SERVICE_BODY = SERVICE_COPY.default.body;
 const MAX_SERVICES = 5;
 const MAX_TOWNS = 9;
-const MAX_SPOTLIGHT_REVIEWS = 2;
-const MAX_FULL_REVIEWS = 2;
+const MAX_REVIEWS = 2;
 const VOICE_HEADING = 'What customers say';
 const VOICE_MORE = 'Read all their reviews →';
 const REVIEW_SOURCE_LABEL = 'Google review';
+const NAV_SERVICES = 'Services';
+const NAV_REVIEWS = 'Reviews';
+const NAV_CONTACT = 'Contact';
 
 const DAY_ABBR: Record<string, string> = {
   monday: 'Mon',
@@ -309,6 +311,14 @@ export function reviewAttribution(author: string, rating: number): string {
   return `— ${author} · ${rating}★ ${REVIEW_SOURCE_LABEL}`;
 }
 
+export function servingAreaLine(town: string): string {
+  return `Serving ${town} and the surrounding area.`;
+}
+
+export function aboutHeading(name: string): string {
+  return `About ${name}`;
+}
+
 export function closerSub(facts: DemoFacts): string {
   const free = badgeHasFreeEstimate(facts);
   const rating = facts.rating?.value;
@@ -351,7 +361,7 @@ function VoiceSection({
 }) {
   if (reviews.length === 0) return null;
   return (
-    <section className="voice">
+    <section className="voice" id="reviews">
       <div className="wrap">
         <h2>{VOICE_HEADING}</h2>
         <div className="quotes">
@@ -414,26 +424,30 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
   const skin = skinFor(category);
   const kicker = pickKicker({ category, town, seed });
   const cards = serviceCards(facts);
-  const spotlight = !(facts.services && facts.services.length > 0);
+  const voiceReviews = (facts.reviews || []).map((item) => item.value);
+  const shownReviews = voiceReviews.slice(0, MAX_REVIEWS);
+  const spotlight =
+    !(facts.services && facts.services.length > 0) &&
+    shownReviews.length === 0 &&
+    blurbs.length === 0;
   const showServices = !spotlight && cards.length > 0;
+  const showAbout = !spotlight && blurbs.length > 0;
   const towns = (facts.town_hits || []).slice(0, MAX_TOWNS);
-  const showArea = !spotlight && towns.length > 0;
+  const showAreaChips = !spotlight && towns.length > 0;
+  const showAreaFallback = !spotlight && towns.length === 0 && Boolean(town);
   const showTownChips = spotlight && towns.length > 0;
   const showProof = proofCardVisible(facts.rating?.value);
   const mapsUrl = facts.maps_url?.value;
   const badges = facts.badges || [];
   const address = facts.address?.value;
-  const sub = blurbs[0] || null;
   const closeLine = closerSub(facts);
-  const showSpotBlurbs = spotlight && blurbs.length > 0;
-  const voiceReviews = (facts.reviews || []).map((item) => item.value);
-  const shownReviews = spotlight
-    ? voiceReviews.slice(0, MAX_SPOTLIGHT_REVIEWS)
-    : voiceReviews.slice(0, MAX_FULL_REVIEWS);
   const hoursLine = facts.hours
     ? formatHoursLine(facts.hours.value)
     : '';
-  const showInfo = Boolean(address || hoursLine);
+  const showInfo = spotlight && Boolean(address || hoursLine);
+  const showNavServices = showServices;
+  const showNavReviews = shownReviews.length > 0;
+  const showNavContact = !spotlight;
 
   const proofInner = facts.rating ? (
     <>
@@ -471,6 +485,17 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
             {name ? <b>{name}</b> : null}
             {town ? <span>{town}, West Virginia</span> : null}
           </div>
+          {showNavContact ? (
+            <nav className="top-nav">
+              {showNavServices ? (
+                <a href="#services">{NAV_SERVICES}</a>
+              ) : null}
+              {showNavReviews ? (
+                <a href="#reviews">{NAV_REVIEWS}</a>
+              ) : null}
+              <a href="#contact">{NAV_CONTACT}</a>
+            </nav>
+          ) : null}
           {tel ? (
             <a className="btn btn-primary" href={tel}>
               <Icon d={PHONE_ICON_PATH} />
@@ -495,7 +520,6 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
             <div className="biz">{name}</div>
           ) : null}
           {hero ? <h1>{hero}</h1> : null}
-          {!spotlight && sub ? <p className="sub">{sub}</p> : null}
           {spotlight && tel && phone ? (
             <div className="hero-cta">
               <a className="btn btn-primary" href={tel}>
@@ -546,18 +570,19 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         </div>
       ) : null}
 
-      {showSpotBlurbs ? (
-        <div className="wrap">
-          <div className="spot-detail">
+      {showAbout ? (
+        <section className="about" id="about">
+          <div className="wrap">
+            <h2>{aboutHeading(name)}</h2>
             {blurbs.map((blurb) => (
               <p key={blurb}>{blurb}</p>
             ))}
           </div>
-        </div>
+        </section>
       ) : null}
 
       {showServices ? (
-        <section className="sect">
+        <section className="sect" id="services">
           <div className="wrap">
             <div className="eyebrow">{trade.servicesEyebrow}</div>
             <h2>{trade.servicesHeading}</h2>
@@ -576,6 +601,8 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         </section>
       ) : null}
 
+      <VoiceSection reviews={shownReviews} mapsUrl={mapsUrl} />
+
       {showTownChips ? (
         <div className="wrap chips-row">
           <div className="towns">
@@ -593,8 +620,8 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         </div>
       ) : null}
 
-      {showArea ? (
-        <section className="area">
+      {showAreaChips ? (
+        <section className="area" id="area">
           <div className="wrap">
             <div className="eyebrow">{trade.areaEyebrow}</div>
             <h2>{trade.areaHeading}</h2>
@@ -615,12 +642,31 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         </section>
       ) : null}
 
-      <VoiceSection reviews={shownReviews} mapsUrl={mapsUrl} />
+      {showAreaFallback && town ? (
+        <section className="area" id="area">
+          <div className="wrap">
+            <p className="area-fallback">{servingAreaLine(town)}</p>
+          </div>
+        </section>
+      ) : null}
 
       {!spotlight ? (
-        <section className="close">
+        <section className="close" id="contact">
           <h2>{trade.closerHeading}</h2>
           {closeLine ? <p>{closeLine}</p> : null}
+          {address ? (
+            <div className="contact-bits">
+              <span>{address}</span>
+              {mapsUrl ? (
+                <>
+                  <span className="dot">•</span>
+                  <a href={mapsUrl} target="_blank" rel="noopener">
+                    Get directions →
+                  </a>
+                </>
+              ) : null}
+            </div>
+          ) : null}
           {tel && sms && phone ? (
             <div className="cta-row">
               <a className="btn btn-primary" href={tel}>
@@ -632,7 +678,15 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
                 Text Us
               </a>
             </div>
+          ) : tel && phone ? (
+            <div className="cta-row">
+              <a className="btn btn-primary" href={tel}>
+                <Icon d={PHONE_ICON_PATH} />
+                {phone.value}
+              </a>
+            </div>
           ) : null}
+          {hoursLine ? <p className="hours">{hoursLine}</p> : null}
         </section>
       ) : null}
 
@@ -648,7 +702,7 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
                 </a>
               </>
             ) : null}
-            {spotlight && phone ? (
+            {phone ? (
               <>
                 {address ? <span className="dot">•</span> : null}
                 {tel ? <a href={tel}>{phone.value}</a> : <span>{phone.value}</span>}
@@ -656,9 +710,7 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
             ) : null}
             {hoursLine ? (
               <>
-                {address || (spotlight && phone) ? (
-                  <span className="dot">•</span>
-                ) : null}
+                {address || phone ? <span className="dot">•</span> : null}
                 <span className="hours">{hoursLine}</span>
               </>
             ) : null}
@@ -701,7 +753,8 @@ const TRADES_V1_CSS = `
   html{scroll-behavior:smooth}
   body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
   .wrap{max-width:1000px;margin:0 auto;padding:0 22px}
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  #about,#services,#reviews,#area,#contact{scroll-margin-top:76px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
   @media (max-width:719px){body{padding-bottom:74px}}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;font-weight:700;
     border-radius:999px;transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;will-change:transform}
@@ -715,8 +768,11 @@ const TRADES_V1_CSS = `
   .btn svg{width:18px;height:18px;fill:currentColor;flex:none}
   .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb, var(--base) 88%, transparent);
     backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.07)}
-  .top .wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 22px}
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 22px;flex-wrap:wrap}
   .brand{color:#fff;line-height:1.1}
+  .top-nav{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-left:auto}
+  .top-nav a{color:rgba(255,255,255,.72);text-decoration:none;font-size:13.5px;font-weight:600;letter-spacing:.02em}
+  .top-nav a:hover{color:#fff}
   .brand b{font-family:'Sora';font-weight:800;font-size:clamp(17px,4.2vw,21px);letter-spacing:-.01em}
   .brand span{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:600;margin-top:2px}
   .top .btn-primary{padding:11px 20px;font-size:15px}
@@ -760,12 +816,10 @@ const TRADES_V1_CSS = `
   .proof-card .src{color:var(--muted);font-size:14.5px;font-weight:600}
   .proof-card .src em{font-style:normal;font-weight:700;color:var(--ink)}
   .proof-card .go{color:var(--a2);font-weight:700;font-size:14px;white-space:nowrap}
-  .spot-detail{margin:28px auto 8px;max-width:720px;padding:22px 26px;border-radius:16px;
-    background:color-mix(in srgb, var(--a1) 12%, var(--card));
-    border:1px solid color-mix(in srgb, var(--a1) 28%, var(--line));
-    box-shadow:0 10px 28px rgba(10,15,25,.08)}
-  .spot-detail p{margin:0;font-size:16.5px;line-height:1.55;font-weight:500;color:var(--ink)}
-  .spot-detail p + p{margin-top:12px}
+  .about{padding:58px 0 8px}
+  .about h2{font-family:'Sora';font-weight:800;font-size:clamp(24px,6vw,34px);letter-spacing:-.015em;margin:0 0 18px}
+  .about p{margin:0;color:var(--muted);font-size:16.5px;line-height:1.6;max-width:62ch;font-weight:500}
+  .about p + p{margin-top:12px}
   .sect{padding:58px 0 8px}
   .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--a2)}
   .sect h2,.area h2{font-family:'Sora';font-weight:800;font-size:clamp(24px,6vw,34px);letter-spacing:-.015em;margin:8px 0 26px}
@@ -785,6 +839,7 @@ const TRADES_V1_CSS = `
   .card h3{font-family:'Sora';font-weight:700;font-size:18.5px;margin-bottom:6px}
   .card p{color:var(--muted);font-size:15px;line-height:1.55}
   .area{padding:46px 0 14px}
+  .area-fallback{margin:0;color:var(--muted);font-size:16.5px;line-height:1.55;font-weight:500}
   .towns{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
   .town{font-size:14.5px;font-weight:600;padding:9px 16px;border-radius:999px;
     background:var(--card);border:1px solid var(--line);color:var(--ink);transition:transform .15s ease}
@@ -809,6 +864,10 @@ const TRADES_V1_CSS = `
   .close p{margin-top:12px;font-weight:600;font-size:16.5px;color:rgba(255,255,255,.72)}
   .close .cta-row{margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
   .close .btn-primary{font-size:clamp(17px,4.6vw,20px);padding:17px 34px}
+  .close .contact-bits{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:14.5px;font-weight:500;color:rgba(255,255,255,.65)}
+  .close .contact-bits a{color:var(--a1);font-weight:700;text-decoration:none}
+  .close .contact-bits a:hover{text-decoration:underline}
+  .close .hours{margin-top:14px}
   .info{background:var(--base);color:rgba(255,255,255,.65);padding:22px;border-top:1px solid rgba(255,255,255,.08)}
   .info .wrap{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:14px;font-weight:500;text-align:center}
   .info a{color:var(--a1);font-weight:700;text-decoration:none;white-space:nowrap}

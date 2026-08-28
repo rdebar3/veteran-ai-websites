@@ -14,9 +14,11 @@ import {
 } from './fixtures';
 import { DemoSiteView } from './render';
 import {
+  aboutHeading,
   closerSub,
   formatHoursLine,
   reviewAttribution,
+  servingAreaLine,
   TradesV1Template,
 } from './trades-v1-template';
 
@@ -147,7 +149,11 @@ describe('trades_v1 template', () => {
     delete (spotFacts as { services?: unknown }).services;
     const spot = renderToStaticMarkup(
       <TradesV1Template
-        site={eclipseRow({ facts: spotFacts, slug: 'eclipse-construction' })}
+        site={eclipseRow({
+          facts: spotFacts,
+          slug: 'eclipse-construction',
+          blurbs: null,
+        })}
       />,
     );
     expect(spot).toContain('is-spotlight');
@@ -169,30 +175,25 @@ describe('trades_v1 template', () => {
   });
 
   it('omits the hero brand line when hero_line starts with the business name', () => {
-    const spotFacts = { ...ECLIPSE_FACTS };
-    delete (spotFacts as { services?: unknown }).services;
-
     const dup = renderToStaticMarkup(
       <TradesV1Template
-        site={eclipseRow({
-          facts: spotFacts,
-          hero_line: '  ECLIPSE CONSTRUCTION — roofs done right  ',
+        site={minimalRow({
+          hero_line: '  BARE SHOP — we show up  ',
         })}
       />,
     );
     expect(dup).toContain('is-spotlight');
     expect(dup).not.toContain('class="biz"');
-    expect(dup).toContain('ECLIPSE CONSTRUCTION — roofs done right');
+    expect(dup).toContain('BARE SHOP — we show up');
 
     const distinct = renderToStaticMarkup(
       <TradesV1Template
-        site={eclipseRow({
-          facts: spotFacts,
+        site={minimalRow({
           hero_line: 'Expert Roofing Services in West Virginia',
         })}
       />,
     );
-    expect(distinct).toContain('<div class="biz">Eclipse Construction</div>');
+    expect(distinct).toContain('<div class="biz">Bare Shop</div>');
   });
 
   it('seeded layout flags are stable and appear on the root', () => {
@@ -252,7 +253,7 @@ describe('trades_v1 template', () => {
     const spotFacts = { ...ECLIPSE_FACTS };
     delete (spotFacts as { services?: unknown }).services;
     const spot = renderToStaticMarkup(
-      <TradesV1Template site={eclipseRow({ facts: spotFacts })} />,
+      <TradesV1Template site={eclipseRow({ facts: spotFacts, blurbs: null })} />,
     );
     expect(full).not.toMatch(/<script\b/i);
     expect(spot).not.toMatch(/<script\b/i);
@@ -295,31 +296,18 @@ function spotlightFacts() {
 }
 
 describe('trades_v1 spotlight blurbs + customer voice', () => {
-  it('spotlight renders gated blurbs as a detail block; full layout does not', () => {
-    const spot = renderToStaticMarkup(
-      <TradesV1Template
-        site={eclipseRow({
-          facts: spotlightFacts(),
-          blurbs: SPOTLIGHT_BLURBS,
-        })}
-      />,
-    );
-    expect(spot).toContain('is-spotlight');
-    expect(spot).toContain('class="spot-detail"');
-    expect(spot).toContain(
-      '<div class="spot-detail"><p>Roof repair and full replacements — free estimates.</p><p>Storm damage, handled locally.</p><p>Call the number on the listing.</p></div>',
-    );
-    for (const line of SPOTLIGHT_BLURBS) expect(spot).toContain(line);
-
-    const full = renderToStaticMarkup(
+  it('about wraps gated blurbs on full pages; the floating card is gone', () => {
+    const html = renderToStaticMarkup(
       <TradesV1Template site={eclipseRow({ blurbs: SPOTLIGHT_BLURBS })} />,
     );
-    expect(full).not.toContain('is-spotlight');
-    expect(full).not.toContain('class="spot-detail"');
-    expect(full).toContain(SPOTLIGHT_BLURBS[0]);
-    expect(full).toContain('class="sub"');
-    expect(full).not.toContain(SPOTLIGHT_BLURBS[1]);
-    expect(full).not.toContain(SPOTLIGHT_BLURBS[2]);
+    expect(html).not.toContain('is-spotlight');
+    expect(html).not.toContain('class="spot-detail"');
+    expect(html).toContain(aboutHeading('Eclipse Construction'));
+    expect(html).toContain('id="about"');
+    expect(html).toContain(
+      `<h2>About Eclipse Construction</h2><p>${SPOTLIGHT_BLURBS[0]}</p><p>${SPOTLIGHT_BLURBS[1]}</p><p>${SPOTLIGHT_BLURBS[2]}</p>`,
+    );
+    for (const line of SPOTLIGHT_BLURBS) expect(html).toContain(line);
   });
 
   it('review bodies pass through byte-identical and escaped', () => {
@@ -420,7 +408,8 @@ describe('trades_v1 spotlight blurbs + customer voice', () => {
     expect(withThree).toContain('Second quote body.');
     expect(withThree).not.toContain('Third quote body.');
     expect(withThree).toContain('class="voice"');
-    expect(withThree).not.toContain('class="close"');
+    expect(withThree).not.toContain('is-spotlight');
+    expect(withThree).toContain('id="contact"');
 
     const none = renderToStaticMarkup(
       <TradesV1Template site={eclipseRow({ facts: spotlightFacts() })} />,
@@ -468,7 +457,7 @@ describe('trades_v1 spotlight blurbs + customer voice', () => {
     );
     expect(withHours).toContain('class="hours"');
     expect(withHours).toContain('Mon–Fri 8:00 AM – 5:00 PM · Sat–Sun Closed');
-    expect(withHours).toContain('class="info"');
+    expect(withHours).toContain('id="contact"');
 
     const listed = [
       'Monday: 8:00 AM – 5:00 PM',
@@ -521,6 +510,128 @@ describe('trades_v1 spotlight blurbs + customer voice', () => {
     );
     expect(html).not.toContain('What customers say');
     expect(html).not.toContain('class="voice"');
+  });
+});
+
+describe('trades_v1 full-site structure', () => {
+  it('nav links render only for sections that exist; phone CTA stays', () => {
+    const servicesOnly = renderToStaticMarkup(
+      <TradesV1Template site={eclipseRow()} />,
+    );
+    expect(servicesOnly).toContain('class="top-nav"');
+    expect(servicesOnly).toContain('href="#services"');
+    expect(servicesOnly).toContain('href="#contact"');
+    expect(servicesOnly).not.toContain('href="#reviews"');
+    expect(servicesOnly).toContain(`href="${ECLIPSE_TEL}"`);
+    expect(servicesOnly).toMatch(/class="btn btn-primary"[^>]*>[\s\S]*Call/);
+
+    const withReviews = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            reviews: [
+              {
+                value: { author: 'A', rating: 5, body: 'Solid work.' },
+                source: 'places.reviews',
+              },
+            ],
+          },
+        })}
+      />,
+    );
+    expect(withReviews).toContain('href="#services"');
+    expect(withReviews).toContain('href="#reviews"');
+    expect(withReviews).toContain('href="#contact"');
+
+    const blurbsOnlyFacts = { ...ECLIPSE_FACTS };
+    delete (blurbsOnlyFacts as { services?: unknown }).services;
+    const blurbsOnly = renderToStaticMarkup(
+      <TradesV1Template site={eclipseRow({ facts: blurbsOnlyFacts })} />,
+    );
+    expect(blurbsOnly).not.toContain('is-spotlight');
+    expect(blurbsOnly).not.toContain('href="#services"');
+    expect(blurbsOnly).not.toContain('href="#reviews"');
+    expect(blurbsOnly).toContain('href="#contact"');
+
+    const bare = renderToStaticMarkup(<TradesV1Template site={minimalRow()} />);
+    expect(bare).toContain('is-spotlight');
+    expect(bare).not.toContain('class="top-nav"');
+    expect(bare).not.toContain('href="#contact"');
+  });
+
+  it('area fallback line renders only when town exists and town_hits do not', () => {
+    const chips = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(chips).toContain('class="town home"');
+    expect(chips).not.toContain('class="area-fallback"');
+    expect(chips).not.toContain(servingAreaLine('Morgantown'));
+
+    const noHits = { ...ECLIPSE_FACTS };
+    delete (noHits as { town_hits?: unknown }).town_hits;
+    const fallback = renderToStaticMarkup(
+      <TradesV1Template site={eclipseRow({ facts: noHits })} />,
+    );
+    expect(fallback).toContain('class="area-fallback"');
+    expect(fallback).toContain(servingAreaLine('Morgantown'));
+    expect(fallback).not.toContain('class="towns"');
+
+    const neither = { ...noHits };
+    delete (neither as { town?: unknown }).town;
+    const absent = renderToStaticMarkup(
+      <TradesV1Template site={eclipseRow({ facts: neither })} />,
+    );
+    expect(absent).not.toContain('class="area"');
+    expect(absent).not.toContain('class="area-fallback"');
+    expect(absent).not.toContain('Serving ');
+  });
+
+  it('contact band is the closer with an anchor target', () => {
+    const html = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(html).toContain('id="contact"');
+    expect(html).toContain('<section class="close" id="contact">');
+    expect(html).toContain('Ready when your roof is.');
+    expect(html).toContain('355 Brockway Ave, Morgantown, WV 26501');
+    expect(html).toContain('Get directions →');
+    expect(html.indexOf('id="about"')).toBeLessThan(html.indexOf('id="services"'));
+    expect(html.indexOf('id="services"')).toBeLessThan(html.indexOf('id="area"'));
+    expect(html.indexOf('id="area"')).toBeLessThan(html.indexOf('id="contact"'));
+  });
+
+  it('spotlight remains only when services, reviews, and blurbs are all absent', () => {
+    const bare = renderToStaticMarkup(<TradesV1Template site={minimalRow()} />);
+    expect(bare).toContain('is-spotlight');
+
+    const withBlurbs = renderToStaticMarkup(
+      <TradesV1Template
+        site={minimalRow({ blurbs: ['We handle the small jobs.'] })}
+      />,
+    );
+    expect(withBlurbs).not.toContain('is-spotlight');
+    expect(withBlurbs).toContain(aboutHeading('Bare Shop'));
+
+    const withReviews = renderToStaticMarkup(
+      <TradesV1Template
+        site={minimalRow({
+          facts: {
+            ...MINIMAL_FACTS,
+            reviews: [
+              {
+                value: { author: 'A', rating: 5, body: 'Showed up.' },
+                source: 'places.reviews',
+              },
+            ],
+          },
+        })}
+      />,
+    );
+    expect(withReviews).not.toContain('is-spotlight');
+    expect(withReviews).toContain('What customers say');
+
+    const withServices = renderToStaticMarkup(
+      <TradesV1Template site={eclipseRow({ blurbs: null })} />,
+    );
+    expect(withServices).not.toContain('is-spotlight');
+    expect(withServices).toContain('id="services"');
   });
 });
 
