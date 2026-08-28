@@ -1,11 +1,14 @@
 import type { Metadata } from 'next';
 import { cache } from 'react';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
+import { after } from 'next/server';
 import { isPreviewFlag, resolveDemoView } from '@/lib/demo/decision';
 import { ExpiredDemo } from '@/lib/demo/expired';
 import { parseDemoFacts } from '@/lib/demo/facts';
-import { getDemoSiteBySlug } from '@/lib/demo/supabase';
 import { DemoSiteView } from '@/lib/demo/render';
+import { getDemoSiteBySlug } from '@/lib/demo/supabase';
+import { recordDemoView, shouldRecordDemoView } from '@/lib/demo/views';
 
 const loadDemoSite = cache(getDemoSiteBySlug);
 
@@ -57,9 +60,10 @@ export async function generateMetadata({
 export default async function DemoPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
   const query = await searchParams;
+  const isPreview = isPreviewFlag(query.preview);
   const site = await loadDemoSite(slug);
   const kind = resolveDemoView(site, {
-    preview: isPreviewFlag(query.preview),
+    preview: isPreview,
     now: new Date(),
   });
 
@@ -69,6 +73,17 @@ export default async function DemoPage({ params, searchParams }: PageProps) {
 
   if (kind === 'expired') {
     return <ExpiredDemo />;
+  }
+
+  if (shouldRecordDemoView(kind)) {
+    const userAgent = (await headers()).get('user-agent');
+    after(() => {
+      void recordDemoView({
+        slug: site.slug,
+        isPreview,
+        userAgent,
+      });
+    });
   }
 
   return <DemoSiteView site={site} />;
