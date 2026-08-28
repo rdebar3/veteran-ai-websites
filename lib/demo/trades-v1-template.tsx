@@ -618,14 +618,24 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
           <div className="wrap">
             <div className="eyebrow">{trade.servicesEyebrow}</div>
             <h2>{trade.servicesHeading}</h2>
-            <div className={`cards ${variant.gridStyle}`}>
+            <div
+              className={`cards ${
+                cards.length === 1
+                  ? 'cards-1'
+                  : cards.length === 2
+                    ? 'cards-2'
+                    : variant.gridStyle
+              }`}
+            >
               {cards.map((card) => (
                 <div className="card" key={card.key}>
                   <div className="ico">
                     <Icon d={card.icon} />
                   </div>
-                  <h3>{card.title}</h3>
-                  <p>{card.body}</p>
+                  <div className="card-copy">
+                    <h3>{card.title}</h3>
+                    <p>{card.body}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -857,10 +867,18 @@ const TRADES_V1_CSS = `
   .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--a2)}
   .sect h2,.area h2{font-family:'Sora';font-weight:800;font-size:clamp(24px,6vw,34px);letter-spacing:-.015em;margin:8px 0 26px}
   .cards{display:grid;gap:16px;grid-template-columns:1fr}
+  .cards.cards-1{grid-template-columns:1fr}
+  .cards.cards-1 .card{display:flex;align-items:flex-start;gap:20px}
+  .cards.cards-1 .card .ico{margin-bottom:0;flex:none}
+  .cards.cards-1 .card-copy{flex:1;min-width:0}
   @media(min-width:720px){
     .cards{grid-template-columns:repeat(3,1fr)}
     .cards.feature-first .card:first-child{grid-column:span 2}
     .cards.uniform{grid-template-columns:repeat(3,1fr)}
+    .cards.cards-1{grid-template-columns:1fr}
+    .cards.cards-1 .card:first-child{grid-column:auto}
+    .cards.cards-2{grid-template-columns:1fr 1fr}
+    .cards.cards-2 .card:first-child{grid-column:auto}
   }
   .chips-row{padding:12px 0 8px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px;

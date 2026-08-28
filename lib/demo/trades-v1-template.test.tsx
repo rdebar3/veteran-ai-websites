@@ -665,6 +665,59 @@ describe('trades_v1 full-site structure', () => {
     );
   });
 
+  it('services grid is full-width at 1, halves at 2, and the seeded variant at 3+', () => {
+    const asServices = (labels: string[]) =>
+      labels.map((value) => ({
+        value,
+        source: 'page_facts.service_vocab_hits',
+      }));
+
+    const one = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: { ...ECLIPSE_FACTS, services: asServices(['repair']) },
+        })}
+      />,
+    );
+    expect(one).toContain('class="cards cards-1"');
+    expect(one).not.toContain('class="cards feature-first"');
+    expect(one).not.toContain('class="cards uniform"');
+    expect(one.match(/class="card"/g)?.length).toBe(1);
+    expect(one).toContain('class="card-copy"');
+    expect(one.indexOf('class="ico"')).toBeLessThan(one.indexOf('class="card-copy"'));
+
+    const two = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            services: asServices(['repair', 'construction']),
+          },
+        })}
+      />,
+    );
+    expect(two).toContain('class="cards cards-2"');
+    expect(two).not.toContain('class="cards feature-first"');
+    expect(two).not.toContain('class="cards uniform"');
+    expect(two.match(/class="card"/g)?.length).toBe(2);
+
+    const flags = layoutVariantFor('eclipse-construction');
+    const three = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            services: asServices(['repair', 'construction', 'appointment']),
+          },
+        })}
+      />,
+    );
+    expect(three).toContain(`class="cards ${flags.gridStyle}"`);
+    expect(three).not.toContain('class="cards cards-1"');
+    expect(three).not.toContain('class="cards cards-2"');
+    expect(three.match(/class="card"/g)?.length).toBe(3);
+  });
+
   it('area chips and the town fallback share the Service area eyebrow', () => {
     const chips = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
     expect(chips).toMatch(
