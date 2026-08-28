@@ -7,7 +7,7 @@ import {
 } from './copy';
 import { eclipseRow, minimalRow, demoRow, ECLIPSE_FACTS } from './fixtures';
 import { DemoSiteView } from './render';
-import { TradesV1Template } from './trades-v1-template';
+import { closerSub, TradesV1Template } from './trades-v1-template';
 
 const ECLIPSE_TEL = 'tel:+13042443334';
 const ECLIPSE_SMS = 'sms:+13042443334';
@@ -166,6 +166,47 @@ describe('trades_v1 template', () => {
     expect(html).toContain(`data-watermark="${flags.watermark}"`);
     expect(html).toContain(`data-grid="${flags.gridStyle}"`);
     expect(html).toContain(`data-skin="ember"`);
+  });
+
+  it('closer says Free estimates only when a badge names it', () => {
+    const withBadge = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(withBadge).toContain('Five stars across 83 reviews · Free estimates');
+
+    const facts = { ...ECLIPSE_FACTS };
+    delete (facts as { badges?: unknown }).badges;
+    const noBadge = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts,
+          blurbs: ['Roof repair and full replacements.'],
+        })}
+      />,
+    );
+    expect(noBadge.toLowerCase()).not.toContain('free estimate');
+    expect(noBadge).toContain('Five stars across 83 reviews');
+    expect(noBadge).not.toContain(' · ');
+  });
+
+  it('empty closer sub omits the paragraph and leaves no separator', () => {
+    const facts = { ...ECLIPSE_FACTS };
+    delete (facts as { rating?: unknown }).rating;
+    delete (facts as { ratings_count?: unknown }).ratings_count;
+    delete (facts as { badges?: unknown }).badges;
+    expect(closerSub(facts)).toBe('');
+    const html = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts,
+          blurbs: ['Roof repair and full replacements.'],
+        })}
+      />,
+    );
+    expect(html).toContain('class="close"');
+    expect(html).toContain('Ready when your roof is.');
+    expect(html).not.toContain('<p></p>');
+    expect(html).not.toMatch(/class="close"[^]*<p>\s*<\/p>/);
+    expect(html).not.toContain(' · ');
+    expect(html.toLowerCase()).not.toContain('free estimate');
   });
 
   it('emits no client JS and keeps the honest strip in both modes', () => {

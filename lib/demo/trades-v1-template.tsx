@@ -248,7 +248,14 @@ function serviceCards(facts: DemoFacts): { key: string; title: string; body: str
   return out;
 }
 
-function closerSub(facts: DemoFacts): string {
+function badgeHasFreeEstimate(facts: DemoFacts): boolean {
+  return (facts.badges || []).some((b) =>
+    (b.value || '').toLowerCase().includes('free estimate'),
+  );
+}
+
+export function closerSub(facts: DemoFacts): string {
+  const free = badgeHasFreeEstimate(facts);
   const rating = facts.rating?.value;
   const count = facts.ratings_count?.value;
   if (proofCardVisible(rating) && count != null) {
@@ -256,12 +263,14 @@ function closerSub(facts: DemoFacts): string {
       formatRating(rating as number) === '5.0'
         ? 'Five stars'
         : `${formatRating(rating as number)} stars`;
-    return `${stars} across ${formatReviewCount(count)} · Free estimates`;
+    const line = `${stars} across ${formatReviewCount(count)}`;
+    return free ? `${line} · Free estimates` : line;
   }
   if (proofCardVisible(rating)) {
-    return `Rated ${formatRating(rating as number)} · Free estimates`;
+    const line = `Rated ${formatRating(rating as number)}`;
+    return free ? `${line} · Free estimates` : line;
   }
-  return 'Free estimates';
+  return free ? 'Free estimates' : '';
 }
 
 
@@ -325,6 +334,7 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
   const badges = facts.badges || [];
   const address = facts.address?.value;
   const sub = blurbs[0] || null;
+  const closeLine = closerSub(facts);
 
   const proofInner = facts.rating ? (
     <>
@@ -492,7 +502,7 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
       {!spotlight ? (
         <section className="close">
           <h2>{trade.closerHeading}</h2>
-          <p>{closerSub(facts)}</p>
+          {closeLine ? <p>{closeLine}</p> : null}
           {tel && sms && phone ? (
             <div className="cta-row">
               <a className="btn btn-primary" href={tel}>
