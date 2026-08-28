@@ -150,12 +150,18 @@ const SERVICE_COPY: Record<string, ServiceCopy> = {
   },
   default: {
     title: '',
-    body: 'Professional work, done right the first time.',
+    body: '',
     icon: 'M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z',
   },
 };
 
-const DEFAULT_SERVICE_BODY = SERVICE_COPY.default.body;
+export const SERVICE_FALLBACK_BODIES = [
+  'Professional work, done right the first time.',
+  'Straight answers and quality workmanship.',
+  'The job done properly, start to finish.',
+  'Skilled hands and clean job sites.',
+  'Quality work from people who show up.',
+] as const;
 const MAX_SERVICES = 5;
 const MAX_TOWNS = 9;
 const MAX_REVIEWS = 2;
@@ -244,20 +250,46 @@ function serviceKey(raw: string): string {
   return 'default';
 }
 
-function serviceCards(facts: DemoFacts): { key: string; title: string; body: string; icon: string }[] {
+export function pickFallbackBody(
+  slug: string,
+  label: string,
+  used: Set<string>,
+): string {
+  const pool = SERVICE_FALLBACK_BODIES;
+  const start =
+    ((slugSeed(slug + label) % pool.length) + pool.length) % pool.length;
+  for (let i = 0; i < pool.length; i++) {
+    const line = pool[(start + i) % pool.length];
+    if (!used.has(line)) {
+      used.add(line);
+      return line;
+    }
+  }
+  return pool[start];
+}
+
+function serviceCards(
+  facts: DemoFacts,
+  slug: string,
+): { key: string; title: string; body: string; icon: string }[] {
   const list = facts.services || [];
   const out: { key: string; title: string; body: string; icon: string }[] = [];
   const seen = new Set<string>();
+  const usedFallback = new Set<string>();
   for (const item of list) {
     const key = serviceKey(item.value);
     const unique = key === 'default' ? `default:${item.value.toLowerCase()}` : key;
     if (seen.has(unique)) continue;
     seen.add(unique);
     const copy = SERVICE_COPY[key] || SERVICE_COPY.default;
+    const body =
+      key === 'default'
+        ? pickFallbackBody(slug, item.value, usedFallback)
+        : copy.body;
     out.push({
       key: unique,
       title: copy.title || titleCase(item.value),
-      body: copy.body || DEFAULT_SERVICE_BODY,
+      body,
       icon: copy.icon,
     });
     if (out.length >= MAX_SERVICES) break;
@@ -423,7 +455,7 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
   const variant = layoutVariantFor(site.slug);
   const skin = skinFor(category);
   const kicker = pickKicker({ category, town, seed });
-  const cards = serviceCards(facts);
+  const cards = serviceCards(facts, site.slug);
   const voiceReviews = (facts.reviews || []).map((item) => item.value);
   const shownReviews = voiceReviews.slice(0, MAX_REVIEWS);
   const spotlight =
@@ -645,7 +677,8 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
       {showAreaFallback && town ? (
         <section className="area" id="area">
           <div className="wrap">
-            <p className="area-fallback">{servingAreaLine(town)}</p>
+            <div className="eyebrow">{trade.areaEyebrow}</div>
+            <h2 className="area-fallback">{servingAreaLine(town)}</h2>
           </div>
         </section>
       ) : null}
@@ -839,7 +872,6 @@ const TRADES_V1_CSS = `
   .card h3{font-family:'Sora';font-weight:700;font-size:18.5px;margin-bottom:6px}
   .card p{color:var(--muted);font-size:15px;line-height:1.55}
   .area{padding:46px 0 14px}
-  .area-fallback{margin:0;color:var(--muted);font-size:16.5px;line-height:1.55;font-weight:500}
   .towns{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
   .town{font-size:14.5px;font-weight:600;padding:9px 16px;border-radius:999px;
     background:var(--card);border:1px solid var(--line);color:var(--ink);transition:transform .15s ease}

@@ -18,6 +18,7 @@ import {
   closerSub,
   formatHoursLine,
   reviewAttribution,
+  SERVICE_FALLBACK_BODIES,
   servingAreaLine,
   TradesV1Template,
 } from './trades-v1-template';
@@ -632,6 +633,55 @@ describe('trades_v1 full-site structure', () => {
     );
     expect(withServices).not.toContain('is-spotlight');
     expect(withServices).toContain('id="services"');
+  });
+
+  it('fallback service descriptions are unique, from the locked pool, and stable per slug', () => {
+    const extracted = [
+      'repair',
+      'construction',
+      'appointment',
+      'warranty',
+    ].map((value) => ({
+      value,
+      source: 'page_facts.service_vocab_hits',
+    }));
+    const site = eclipseRow({
+      facts: { ...ECLIPSE_FACTS, services: extracted },
+    });
+    const html = renderToStaticMarkup(<TradesV1Template site={site} />);
+    const html2 = renderToStaticMarkup(<TradesV1Template site={site} />);
+    expect(html).toBe(html2);
+
+    const bodies = [...html.matchAll(/<div class="card">[\s\S]*?<p>([^<]*)<\/p>/g)].map(
+      (m) => m[1],
+    );
+    expect(bodies.length).toBe(4);
+    expect(new Set(bodies).size).toBe(4);
+    for (const body of bodies) {
+      expect(SERVICE_FALLBACK_BODIES).toContain(body);
+    }
+    expect(html).not.toMatch(
+      /Professional work, done right the first time\.[\s\S]*Professional work, done right the first time\./,
+    );
+  });
+
+  it('area chips and the town fallback share the Service area eyebrow', () => {
+    const chips = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(chips).toMatch(
+      /<section class="area" id="area">[\s\S]*<div class="eyebrow">Service area<\/div>/,
+    );
+
+    const noHits = { ...ECLIPSE_FACTS };
+    delete (noHits as { town_hits?: unknown }).town_hits;
+    const fallback = renderToStaticMarkup(
+      <TradesV1Template site={eclipseRow({ facts: noHits })} />,
+    );
+    expect(fallback).toMatch(
+      /<section class="area" id="area">[\s\S]*<div class="eyebrow">Service area<\/div>[\s\S]*class="area-fallback"/,
+    );
+    expect(fallback).toContain(
+      `<h2 class="area-fallback">${servingAreaLine('Morgantown')}</h2>`,
+    );
   });
 });
 
