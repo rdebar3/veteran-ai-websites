@@ -486,7 +486,14 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         {variant.watermark === 'shown' ? <div className="ghost">WV</div> : null}
         <div className="wrap">
           <div className="kicker">{kicker}</div>
-          {spotlight && name ? <div className="biz">{name}</div> : null}
+          {spotlight &&
+          name &&
+          !(
+            hero &&
+            hero.toLowerCase().startsWith(name.trim().toLowerCase())
+          ) ? (
+            <div className="biz">{name}</div>
+          ) : null}
           {hero ? <h1>{hero}</h1> : null}
           {!spotlight && sub ? <p className="sub">{sub}</p> : null}
           {spotlight && tel && phone ? (

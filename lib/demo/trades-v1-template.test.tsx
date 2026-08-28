@@ -168,6 +168,33 @@ describe('trades_v1 template', () => {
     expect(full).toContain('class="area"');
   });
 
+  it('omits the hero brand line when hero_line starts with the business name', () => {
+    const spotFacts = { ...ECLIPSE_FACTS };
+    delete (spotFacts as { services?: unknown }).services;
+
+    const dup = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: spotFacts,
+          hero_line: '  ECLIPSE CONSTRUCTION — roofs done right  ',
+        })}
+      />,
+    );
+    expect(dup).toContain('is-spotlight');
+    expect(dup).not.toContain('class="biz"');
+    expect(dup).toContain('ECLIPSE CONSTRUCTION — roofs done right');
+
+    const distinct = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: spotFacts,
+          hero_line: 'Expert Roofing Services in West Virginia',
+        })}
+      />,
+    );
+    expect(distinct).toContain('<div class="biz">Eclipse Construction</div>');
+  });
+
   it('seeded layout flags are stable and appear on the root', () => {
     const flags = layoutVariantFor('eclipse-construction');
     const html = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
