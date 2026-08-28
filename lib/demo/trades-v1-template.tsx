@@ -3,6 +3,11 @@ import {
   DEMO_TEMPLATE_TRADES_V1,
   HONEST_STRIP,
   HONEST_STRIP_LINK_TEXT,
+  layoutVariantFor,
+  pickKicker,
+  proofCardVisible,
+  skinFor,
+  slugSeed,
 } from './copy';
 import { parseBlurbs, parseDemoFacts, parseHeroLine } from './facts';
 import type { DemoFacts, DemoSiteRow } from './types';
@@ -246,14 +251,20 @@ function serviceCards(facts: DemoFacts): { key: string; title: string; body: str
 function closerSub(facts: DemoFacts): string {
   const rating = facts.rating?.value;
   const count = facts.ratings_count?.value;
-  if (rating != null && count != null) {
+  if (proofCardVisible(rating) && count != null) {
     const stars =
-      formatRating(rating) === '5.0' ? 'Five stars' : `${formatRating(rating)} stars`;
+      formatRating(rating as number) === '5.0'
+        ? 'Five stars'
+        : `${formatRating(rating as number)} stars`;
     return `${stars} across ${formatReviewCount(count)} · Free estimates`;
   }
-  if (rating != null) return `Rated ${formatRating(rating)} · Free estimates`;
+  if (proofCardVisible(rating)) {
+    return `Rated ${formatRating(rating as number)} · Free estimates`;
+  }
   return 'Free estimates';
 }
+
+
 
 function sameTown(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
@@ -297,12 +308,19 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
   const phone = facts.phone;
   const tel = phone ? telHref(phone.tel) : null;
   const sms = phone ? smsHref(phone.tel) : null;
-  const trade = tradeCopyFor(facts.category?.value);
+  const category = facts.category?.value;
+  const trade = tradeCopyFor(category);
+  const seed = slugSeed(site.slug);
+  const variant = layoutVariantFor(site.slug);
+  const skin = skinFor(category);
+  const kicker = pickKicker({ category, town, seed });
   const cards = serviceCards(facts);
-  const showServices = cards.length >= 2;
+  const spotlight = !(facts.services && facts.services.length > 0);
+  const showServices = !spotlight && cards.length > 0;
   const towns = (facts.town_hits || []).slice(0, MAX_TOWNS);
-  const showArea = towns.length > 0;
-  const showProof = Boolean(facts.rating);
+  const showArea = !spotlight && towns.length > 0;
+  const showTownChips = spotlight && towns.length > 0;
+  const showProof = proofCardVisible(facts.rating?.value);
   const mapsUrl = facts.maps_url?.value;
   const badges = facts.badges || [];
   const address = facts.address?.value;
@@ -330,7 +348,13 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
       <link rel="preconnect" href={GOOGLE_FONTS_PRECONNECT} />
       <link href={GOOGLE_FONTS_HREF} rel="stylesheet" />
       <style>{TRADES_V1_CSS}</style>
-      <div className="demo-trades-v1">
+      <div
+        className={`demo-trades-v1 skin-${skin}${spotlight ? ' is-spotlight' : ''}`}
+        data-skin={skin}
+        data-hero-align={variant.heroAlign}
+        data-watermark={variant.watermark}
+        data-grid={variant.gridStyle}
+      >
 
       <header className="top">
         <div className="wrap">
@@ -347,13 +371,24 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         </div>
       </header>
 
-      <section className="hero">
-        <div className="ghost">WV</div>
+      <section
+        className={`hero ${variant.heroAlign}${spotlight ? ' spotlight' : ''}`}
+      >
+        {variant.watermark === 'shown' ? <div className="ghost">WV</div> : null}
         <div className="wrap">
-          <div className="kicker">{trade.kicker}</div>
+          <div className="kicker">{kicker}</div>
+          {spotlight && name ? <div className="biz">{name}</div> : null}
           {hero ? <h1>{hero}</h1> : null}
-          {sub ? <p className="sub">{sub}</p> : null}
-          {tel && sms && phone ? (
+          {!spotlight && sub ? <p className="sub">{sub}</p> : null}
+          {spotlight && tel && phone ? (
+            <div className="hero-cta">
+              <a className="btn btn-primary" href={tel}>
+                <Icon d={PHONE_ICON_PATH} />
+                {phone.value}
+              </a>
+            </div>
+          ) : null}
+          {!spotlight && tel && sms && phone ? (
             <div className="hero-cta">
               <a className="btn btn-primary" href={tel}>
                 <Icon d={PHONE_ICON_PATH} />
@@ -400,7 +435,7 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
           <div className="wrap">
             <div className="eyebrow">{trade.servicesEyebrow}</div>
             <h2>{trade.servicesHeading}</h2>
-            <div className="cards">
+            <div className={`cards ${variant.gridStyle}`}>
               {cards.map((card) => (
                 <div className="card" key={card.key}>
                   <div className="ico">
@@ -413,6 +448,23 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
             </div>
           </div>
         </section>
+      ) : null}
+
+      {showTownChips ? (
+        <div className="wrap chips-row">
+          <div className="towns">
+            {towns.map((hit) => (
+              <span
+                className={
+                  town && sameTown(hit.value, town) ? 'town home' : 'town'
+                }
+                key={hit.value}
+              >
+                {hit.value}
+              </span>
+            ))}
+          </div>
+        </div>
       ) : null}
 
       {showArea ? (
@@ -437,22 +489,24 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         </section>
       ) : null}
 
-      <section className="close">
-        <h2>{trade.closerHeading}</h2>
-        <p>{closerSub(facts)}</p>
-        {tel && sms && phone ? (
-          <div className="cta-row">
-            <a className="btn btn-primary" href={tel}>
-              <Icon d={PHONE_ICON_PATH} />
-              {phone.value}
-            </a>
-            <a className="btn btn-quiet" href={sms}>
-              <Icon d={SMS_ICON_PATH} />
-              Text Us
-            </a>
-          </div>
-        ) : null}
-      </section>
+      {!spotlight ? (
+        <section className="close">
+          <h2>{trade.closerHeading}</h2>
+          <p>{closerSub(facts)}</p>
+          {tel && sms && phone ? (
+            <div className="cta-row">
+              <a className="btn btn-primary" href={tel}>
+                <Icon d={PHONE_ICON_PATH} />
+                {phone.value}
+              </a>
+              <a className="btn btn-quiet" href={sms}>
+                <Icon d={SMS_ICON_PATH} />
+                Text Us
+              </a>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       {address ? (
         <div className="info">
@@ -464,6 +518,12 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
                 <a href={mapsUrl} target="_blank" rel="noopener">
                   Get directions →
                 </a>
+              </>
+            ) : null}
+            {spotlight && phone ? (
+              <>
+                <span className="dot">•</span>
+                {tel ? <a href={tel}>{phone.value}</a> : <span>{phone.value}</span>}
               </>
             ) : null}
           </div>
@@ -495,8 +555,12 @@ const TRADES_V1_CSS = `
   :root{
     --base:#10151d; --base2:#1a222e; --paper:#faf7f2; --card:#ffffff;
     --ink:#131a23; --muted:#5b6572; --line:#e7e1d7;
-    --a1:#ff9a3d; --a2:#f0641e; --glow:rgba(240,100,30,.35);
+    --a1:#ff9a3d; --a2:#f0641e; --glow:rgba(240,100,30,.45);
+    --btn-ink:#fff; --on-dark:#e8edf4; --dim:#93a1b5;
   }
+  .demo-trades-v1.skin-ember{--base:#10151d;--base2:#1a222e;--a1:#ff9a3d;--a2:#f0641e;--glow:rgba(240,100,30,.45);--btn-ink:#fff}
+  .demo-trades-v1.skin-summit{--base:#0b131e;--base2:#13202e;--a1:#4db5ff;--a2:#1273e6;--glow:rgba(18,115,230,.45);--btn-ink:#fff}
+  .demo-trades-v1.skin-storm{--base:#0f1216;--base2:#181d24;--a1:#ffd23d;--a2:#f0a500;--glow:rgba(240,165,0,.45);--btn-ink:#10151d}
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
@@ -505,7 +569,7 @@ const TRADES_V1_CSS = `
   @media (max-width:719px){body{padding-bottom:74px}}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;font-weight:700;
     border-radius:999px;transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;will-change:transform}
-  .btn-primary{background:linear-gradient(120deg,var(--a1),var(--a2));color:#fff;
+  .btn-primary{background:linear-gradient(120deg,var(--a1),var(--a2));color:var(--btn-ink);
     padding:15px 28px;font-size:17px;letter-spacing:.01em;
     box-shadow:0 8px 24px var(--glow), inset 0 1px 0 rgba(255,255,255,.25)}
   .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--glow), inset 0 1px 0 rgba(255,255,255,.25);filter:saturate(1.06)}
@@ -527,8 +591,16 @@ const TRADES_V1_CSS = `
     color:#fff;overflow:hidden}
   .hero .ghost{position:absolute;right:-3%;top:8%;font-family:'Sora';font-weight:800;
     font-size:clamp(120px,30vw,300px);line-height:.8;color:transparent;
-    -webkit-text-stroke:1px rgba(255,255,255,.07);user-select:none;pointer-events:none;letter-spacing:-.03em}
+    -webkit-text-stroke:1px color-mix(in srgb, var(--base) 55%, rgba(255,255,255,.18));
+    user-select:none;pointer-events:none;letter-spacing:-.03em}
   .hero .wrap{position:relative;z-index:2;padding:64px 22px 96px}
+  .hero.spotlight{min-height:70vh;display:flex;align-items:center}
+  .hero.spotlight .wrap{padding:72px 22px 80px;width:100%}
+  .hero.center .wrap{text-align:center}
+  .hero.center h1,.hero.center .sub{margin-left:auto;margin-right:auto}
+  .hero.center .kicker{justify-content:center}
+  .hero.center .hero-cta,.hero.center .badges{justify-content:center}
+  .hero .biz{font-family:'Sora';font-weight:800;font-size:clamp(22px,5.2vw,34px);letter-spacing:-.02em;color:var(--on-dark);margin-bottom:10px}
   .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.18em;
     text-transform:uppercase;color:var(--a1);margin-bottom:18px}
   .kicker::before{content:"";width:26px;height:2px;background:linear-gradient(90deg,var(--a1),var(--a2));border-radius:2px}
@@ -556,7 +628,12 @@ const TRADES_V1_CSS = `
   .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--a2)}
   .sect h2,.area h2{font-family:'Sora';font-weight:800;font-size:clamp(24px,6vw,34px);letter-spacing:-.015em;margin:8px 0 26px}
   .cards{display:grid;gap:16px;grid-template-columns:1fr}
-  @media(min-width:720px){.cards{grid-template-columns:repeat(3,1fr)}.card:first-child{grid-column:span 2}}
+  @media(min-width:720px){
+    .cards{grid-template-columns:repeat(3,1fr)}
+    .cards.feature-first .card:first-child{grid-column:span 2}
+    .cards.uniform{grid-template-columns:repeat(3,1fr)}
+  }
+  .chips-row{padding:12px 0 8px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px;
     transition:transform .2s ease, box-shadow .2s ease}
   .card:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(10,15,25,.10)}
@@ -594,7 +671,7 @@ const TRADES_V1_CSS = `
     .stickybar a{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
       padding:16px 10px;font-weight:800;font-size:16px;text-decoration:none;letter-spacing:.01em}
     .stickybar a svg{width:19px;height:19px;fill:currentColor}
-    .stickybar .s-call{background:linear-gradient(120deg,var(--a1),var(--a2));color:#fff}
+    .stickybar .s-call{background:linear-gradient(120deg,var(--a1),var(--a2));color:var(--btn-ink)}
     .stickybar .s-text{background:var(--base);color:#fff}
   }
   body{display:block!important;background:var(--paper)!important;color:var(--ink)!important;font-family:'Inter',system-ui,sans-serif!important}

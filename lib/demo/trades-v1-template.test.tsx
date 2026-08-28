@@ -1,7 +1,11 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { HONEST_STRIP, HONEST_STRIP_LINK_TEXT } from './copy';
-import { eclipseRow, minimalRow, demoRow } from './fixtures';
+import {
+  HONEST_STRIP,
+  HONEST_STRIP_LINK_TEXT,
+  layoutVariantFor,
+} from './copy';
+import { eclipseRow, minimalRow, demoRow, ECLIPSE_FACTS } from './fixtures';
 import { DemoSiteView } from './render';
 import { TradesV1Template } from './trades-v1-template';
 
@@ -14,7 +18,7 @@ describe('trades_v1 template', () => {
     const html = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
     expect(html).toContain('Eclipse Construction');
     expect(html).toContain('Morgantown, West Virginia');
-    expect(html).toContain('Your roof, handled right');
+    expect(html).toContain('Over your head. Under control.');
     expect(html).toContain('Expert Roofing Services in West Virginia');
     expect(html).toContain('Roof repair and full replacements — free estimates.');
     expect(html).toContain('Licensed &amp; Insured');
@@ -51,7 +55,7 @@ describe('trades_v1 template', () => {
   it('minimal fixture (name+phone only) renders header/hero/CTAs/strip and omits proof/services/area/info', () => {
     const html = renderToStaticMarkup(<TradesV1Template site={minimalRow()} />);
     expect(html).toContain('Bare Shop');
-    expect(html).toContain('class="hero"');
+    expect(html).toMatch(/class="hero[\s"]/);
     expect(html).toContain('class="hero-cta"');
     expect(html).toContain('class="stickybar"');
     expect(html).toContain(HONEST_STRIP_LINK_TEXT);
@@ -103,6 +107,78 @@ describe('trades_v1 template', () => {
       />,
     );
     expect(noRating).not.toMatch(/<(a|div) class="proof-card"/);
+  });
+
+  it('proof card renders at 4.0 and is absent at 3.9', () => {
+    const atFour = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: { ...ECLIPSE_FACTS, rating: { value: 4.0, source: 'businesses.rating' } },
+        })}
+      />,
+    );
+    expect(atFour).toContain('class="proof-card"');
+    expect(atFour).toContain('4.0');
+
+    const below = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: { ...ECLIPSE_FACTS, rating: { value: 3.9, source: 'businesses.rating' } },
+        })}
+      />,
+    );
+    expect(below).not.toContain('class="proof-card"');
+    expect(below).not.toContain('3.9');
+  });
+
+  it('spotlight (no services) skips the services grid and closer; full layout when services exist', () => {
+    const spotFacts = { ...ECLIPSE_FACTS };
+    delete (spotFacts as { services?: unknown }).services;
+    const spot = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({ facts: spotFacts, slug: 'eclipse-construction' })}
+      />,
+    );
+    expect(spot).toContain('is-spotlight');
+    expect(spot).toContain('class="hero left spotlight"');
+    expect(spot).toContain('Eclipse Construction');
+    expect(spot).not.toContain('What we do');
+    expect(spot).not.toContain('class="sect"');
+    expect(spot).not.toContain('class="close"');
+    expect(spot).not.toContain('class="area"');
+    expect(spot).toContain('class="towns"');
+    expect(spot).toContain(HONEST_STRIP_LINK_TEXT);
+
+    const full = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(full).not.toContain('is-spotlight');
+    expect(full).toContain('What we do');
+    expect(full).toContain('class="sect"');
+    expect(full).toContain('class="close"');
+    expect(full).toContain('class="area"');
+  });
+
+  it('seeded layout flags are stable and appear on the root', () => {
+    const flags = layoutVariantFor('eclipse-construction');
+    const html = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    const html2 = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(html).toBe(html2);
+    expect(html).toContain(`data-hero-align="${flags.heroAlign}"`);
+    expect(html).toContain(`data-watermark="${flags.watermark}"`);
+    expect(html).toContain(`data-grid="${flags.gridStyle}"`);
+    expect(html).toContain(`data-skin="ember"`);
+  });
+
+  it('emits no client JS and keeps the honest strip in both modes', () => {
+    const full = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    const spotFacts = { ...ECLIPSE_FACTS };
+    delete (spotFacts as { services?: unknown }).services;
+    const spot = renderToStaticMarkup(
+      <TradesV1Template site={eclipseRow({ facts: spotFacts })} />,
+    );
+    expect(full).not.toMatch(/<script\b/i);
+    expect(spot).not.toMatch(/<script\b/i);
+    expect(full.replace(/<[^>]+>/g, '')).toContain(HONEST_STRIP);
+    expect(spot.replace(/<[^>]+>/g, '')).toContain(HONEST_STRIP);
   });
 });
 
