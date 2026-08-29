@@ -806,6 +806,16 @@ describe('trades_v1 hero motifs', () => {
     expect(storm).toContain('data-motif="electric"');
   });
 
+  it('two-column hero type fits the text column', () => {
+    const html = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(html).toContain('class="hero-line"');
+    expect(html).toContain(
+      '.hero-line{font-size:clamp(2.1rem, 3.6vw, 3.2rem);line-height:1.1;text-wrap:balance;max-width:none}',
+    );
+    expect(html).toContain('.hero-cta{flex-wrap:nowrap;flex-direction:row}');
+    expect(html).toContain('.hero{max-height:90vh}');
+  });
+
   it('hero motifs are inline SVGs with no images, external refs, or text', () => {
     const html = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
     const block = html.match(
