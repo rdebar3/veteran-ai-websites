@@ -812,8 +812,61 @@ describe('trades_v1 hero motifs', () => {
     expect(html).toContain(
       '.hero-line{font-size:clamp(2.1rem, 3.6vw, 3.2rem);line-height:1.1;text-wrap:balance;max-width:none}',
     );
-    expect(html).toContain('.hero-cta{flex-wrap:nowrap;flex-direction:row}');
-    expect(html).toContain('.hero{max-height:90vh}');
+    expect(html).toContain(
+      '.hero-cta,.hero.center .hero-cta,.hero.left .hero-cta{flex-wrap:nowrap;flex-direction:row}',
+    );
+    expect(html).toContain('.hero,.hero.spotlight{min-height:min(86vh, 880px);max-height:none}');
+    expect(html).not.toContain('max-height:90vh');
+  });
+
+  it('long centered headlines keep both CTAs above the proof card', () => {
+    let slug = 'powell-incorporated';
+    for (let i = 0; i < 40 && layoutVariantFor(slug).heroAlign !== 'center'; i++) {
+      slug = `powell-incorporated-${i}`;
+    }
+    expect(layoutVariantFor(slug).heroAlign).toBe('center');
+    const longLine =
+      'Professional excavation, grading, and site work for homes and businesses in the valley.';
+    expect(longLine.length).toBeGreaterThanOrEqual(60);
+
+    const html = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          slug,
+          hero_line: longLine,
+        })}
+      />,
+    );
+    expect(html).toContain('data-hero-align="center"');
+    expect(html).toContain('class="hero-line hero-line-long"');
+    expect(html).toContain(
+      '.hero-line-long{font-size:clamp(1.9rem, 3.2vw, 2.8rem)}',
+    );
+    expect(html).toContain('padding:64px 22px 96px');
+    expect(html).toContain(
+      '.hero-cta,.hero.center .hero-cta,.hero.left .hero-cta{flex-wrap:nowrap;flex-direction:row}',
+    );
+
+    const heroStart = html.indexOf('class="hero ');
+    const proofStart = html.indexOf('class="proof-card"');
+    expect(heroStart).toBeGreaterThan(-1);
+    expect(proofStart).toBeGreaterThan(heroStart);
+    const heroChunk = html.slice(heroStart, proofStart);
+    expect(heroChunk).toContain('Text Us');
+    expect(heroChunk).toContain('class="hero-cta"');
+    expect(heroChunk).toContain(`href="${ECLIPSE_TEL}"`);
+    expect(heroChunk).toContain(`href="${ECLIPSE_SMS}"`);
+    expect(html.indexOf('Text Us')).toBeLessThan(proofStart);
+  });
+
+  it('short hero lines keep the standard two-column type scale', () => {
+    const html = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(html).toContain('class="hero-line"');
+    expect(html).not.toContain('class="hero-line hero-line-long"');
+    expect(html).toContain(
+      '.hero-line{font-size:clamp(2.1rem, 3.6vw, 3.2rem);line-height:1.1;text-wrap:balance;max-width:none}',
+    );
+    expect((eclipseRow().hero_line || '').length).toBeLessThan(60);
   });
 
   it('hero motifs are inline SVGs with no images, external refs, or text', () => {

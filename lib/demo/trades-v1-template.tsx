@@ -554,7 +554,15 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
           ) ? (
             <div className="biz">{name}</div>
           ) : null}
-          {hero ? <h1 className="hero-line">{hero}</h1> : null}
+          {hero ? (
+            <h1
+              className={
+                hero.length >= 60 ? 'hero-line hero-line-long' : 'hero-line'
+              }
+            >
+              {hero}
+            </h1>
+          ) : null}
           {spotlight && tel && phone ? (
             <div className="hero-cta">
               <a className="btn btn-primary" href={tel}>
@@ -838,15 +846,16 @@ const TRADES_V1_CSS = `
   .hero .wrap{position:relative;z-index:2;padding:64px 22px 96px}
   .hero-copy{width:100%;max-width:38rem}
   @media(min-width:720px){
-    .hero{max-height:90vh}
+    .hero,.hero.spotlight{min-height:min(86vh, 880px);max-height:none}
     .hero-copy{width:55%}
     .hero-line{font-size:clamp(2.1rem, 3.6vw, 3.2rem);line-height:1.1;text-wrap:balance;max-width:none}
-    .hero-cta{flex-wrap:nowrap;flex-direction:row}
+    .hero-line-long{font-size:clamp(1.9rem, 3.2vw, 2.8rem)}
+    .hero-cta,.hero.center .hero-cta,.hero.left .hero-cta{flex-wrap:nowrap;flex-direction:row}
   }
   @media(max-width:719px){.hero-motif{right:-20%;width:96%;height:88%;opacity:.5}}
   @media(max-width:419px){.hero-cta{flex-wrap:wrap}}
   .hero.spotlight{min-height:70vh;display:flex;align-items:center}
-  .hero.spotlight .wrap{padding:72px 22px 80px;width:100%}
+  .hero.spotlight .wrap{padding:72px 22px 96px;width:100%}
   .hero.center .hero-copy{text-align:center}
   .hero.center h1,.hero.center .sub{margin-left:auto;margin-right:auto}
   .hero.center .kicker{justify-content:center}
