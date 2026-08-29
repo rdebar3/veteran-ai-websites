@@ -10,6 +10,7 @@ import {
   slugSeed,
 } from './copy';
 import { parseBlurbs, parseDemoFacts, parseHeroLine } from './facts';
+import { HeroMotif } from './hero-motifs';
 import type { DemoFacts, DemoReviewValue, DemoSiteRow } from './types';
 
 export { DEMO_TEMPLATE_TRADES_V1 };
@@ -541,7 +542,9 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
         className={`hero ${variant.heroAlign}${spotlight ? ' spotlight' : ''}`}
       >
         {variant.watermark === 'shown' ? <div className="ghost">WV</div> : null}
+        <HeroMotif category={category} />
         <div className="wrap">
+          <div className="hero-copy">
           <div className="kicker">{kicker}</div>
           {spotlight &&
           name &&
@@ -582,6 +585,7 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
               ))}
             </div>
           ) : null}
+          </div>
         </div>
       </section>
 
@@ -824,14 +828,20 @@ const TRADES_V1_CSS = `
       radial-gradient(70% 90% at -10% 110%, color-mix(in srgb, var(--a1) 14%, transparent) 0%, transparent 50%),
       linear-gradient(160deg,var(--base) 20%,var(--base2) 100%);
     color:#fff;overflow:hidden}
-  .hero .ghost{position:absolute;right:-3%;top:8%;font-family:'Sora';font-weight:800;
+  .hero .ghost{position:absolute;right:-3%;top:8%;z-index:0;font-family:'Sora';font-weight:800;
     font-size:clamp(120px,30vw,300px);line-height:.8;color:transparent;
     -webkit-text-stroke:1px color-mix(in srgb, var(--base) 55%, rgba(255,255,255,.18));
     user-select:none;pointer-events:none;letter-spacing:-.03em}
+  .hero-motif{position:absolute;right:-12%;top:50%;transform:translateY(-50%);z-index:1;
+    width:58%;height:84%;pointer-events:none;color:var(--a1)}
+  .hero-motif svg{width:100%;height:100%;display:block;overflow:visible}
   .hero .wrap{position:relative;z-index:2;padding:64px 22px 96px}
+  .hero-copy{width:100%;max-width:38rem}
+  @media(min-width:720px){.hero-copy{width:55%}}
+  @media(max-width:719px){.hero-motif{right:-20%;width:96%;height:88%;opacity:.5}}
   .hero.spotlight{min-height:70vh;display:flex;align-items:center}
   .hero.spotlight .wrap{padding:72px 22px 80px;width:100%}
-  .hero.center .wrap{text-align:center}
+  .hero.center .hero-copy{text-align:center}
   .hero.center h1,.hero.center .sub{margin-left:auto;margin-right:auto}
   .hero.center .kicker{justify-content:center}
   .hero.center .hero-cta,.hero.center .badges{justify-content:center}

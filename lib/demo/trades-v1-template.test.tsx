@@ -12,6 +12,7 @@ import {
   ECLIPSE_FACTS,
   MINIMAL_FACTS,
 } from './fixtures';
+import { motifFamilyFor } from './hero-motifs';
 import { DemoSiteView } from './render';
 import {
   aboutHeading,
@@ -735,6 +736,88 @@ describe('trades_v1 full-site structure', () => {
     expect(fallback).toContain(
       `<h2 class="area-fallback">${servingAreaLine('Morgantown')}</h2>`,
     );
+  });
+});
+
+describe('trades_v1 hero motifs', () => {
+  const MOTIF_CASES: [string, ReturnType<typeof motifFamilyFor>][] = [
+    ['roofing', 'roofing'],
+    ['general_contractor', 'gc'],
+    ['excavation', 'gc'],
+    ['hvac', 'hvac'],
+    ['plumber', 'plumbing'],
+    ['electrician', 'electric'],
+    ['auto_repair', 'auto'],
+    ['towing_service', 'towing'],
+  ];
+
+  it('renders the correct motif per trade key', () => {
+    for (const [category, family] of MOTIF_CASES) {
+      expect(motifFamilyFor(category)).toBe(family);
+      const html = renderToStaticMarkup(
+        <TradesV1Template
+          site={eclipseRow({
+            facts: { ...ECLIPSE_FACTS, category: { value: category, source: 'x' } },
+          })}
+        />,
+      );
+      expect(html).toContain(`data-motif="${family}"`);
+    }
+    const spotFacts = { ...ECLIPSE_FACTS };
+    delete (spotFacts as { services?: unknown }).services;
+    const spot = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({ facts: spotFacts, blurbs: null })}
+      />,
+    );
+    expect(spot).toContain('is-spotlight');
+    expect(spot).toContain('data-motif="roofing"');
+  });
+
+  it('renders the motif in ember, summit, and storm skins', () => {
+    const ember = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(ember).toContain('data-skin="ember"');
+    expect(ember).toContain('data-motif="roofing"');
+
+    const summit = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            category: { value: 'hvac', source: 'x' },
+          },
+        })}
+      />,
+    );
+    expect(summit).toContain('data-skin="summit"');
+    expect(summit).toContain('data-motif="hvac"');
+
+    const storm = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            category: { value: 'electrician', source: 'x' },
+          },
+        })}
+      />,
+    );
+    expect(storm).toContain('data-skin="storm"');
+    expect(storm).toContain('data-motif="electric"');
+  });
+
+  it('hero motifs are inline SVGs with no images, external refs, or text', () => {
+    const html = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    const block = html.match(
+      /<div class="hero-motif"[^>]*>([\s\S]*?)<\/div>/,
+    );
+    expect(block).toBeTruthy();
+    const svg = block![1];
+    expect(svg).toMatch(/^<svg\b/);
+    expect(svg).not.toMatch(/<img\b|<image\b|<use\b|<text\b|<title\b|<desc\b/i);
+    expect(svg).not.toMatch(/href=|xlink:|url\(/i);
+    expect(svg.replace(/<[^>]+>/g, '').trim()).toBe('');
+    expect(html).not.toMatch(/<img\b/i);
   });
 });
 
