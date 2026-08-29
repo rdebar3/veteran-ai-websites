@@ -831,7 +831,7 @@ const TRADES_V1_CSS = `
   .brand b{font-family:'Sora';font-weight:800;font-size:clamp(17px,4.2vw,21px);letter-spacing:-.01em}
   .brand span{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:600;margin-top:2px}
   .top .btn-primary{padding:11px 20px;font-size:15px}
-  .hero{position:relative;background:
+  .hero{position:relative;display:block;align-items:normal;padding:0;min-height:min(86vh, 880px);height:auto;max-height:none;background:
       radial-gradient(90% 120% at 85% -10%, color-mix(in srgb, var(--a2) 26%, transparent) 0%, transparent 55%),
       radial-gradient(70% 90% at -10% 110%, color-mix(in srgb, var(--a1) 14%, transparent) 0%, transparent 50%),
       linear-gradient(160deg,var(--base) 20%,var(--base2) 100%);
@@ -854,9 +854,9 @@ const TRADES_V1_CSS = `
   }
   @media(max-width:719px){.hero-motif{right:-20%;width:96%;height:88%;opacity:.5}}
   @media(max-width:419px){.hero-cta{flex-wrap:wrap}}
-  .hero.spotlight{min-height:70vh;display:flex;align-items:center}
+  .hero.spotlight{display:flex;align-items:center;min-height:min(86vh, 880px);height:auto;max-height:none}
   .hero.spotlight .wrap{padding:72px 22px 96px;width:100%}
-  .hero.center .hero-copy{text-align:center}
+  .hero.center .hero-copy{text-align:center;width:100%;margin-left:auto;margin-right:auto}
   .hero.center h1,.hero.center .sub{margin-left:auto;margin-right:auto}
   .hero.center .kicker{justify-content:center}
   .hero.center .hero-cta,.hero.center .badges{justify-content:center}
@@ -868,7 +868,7 @@ const TRADES_V1_CSS = `
     animation:rise .6s ease both}
   .hero p.sub{margin-top:18px;font-size:clamp(16px,4.2vw,19px);color:rgba(255,255,255,.72);max-width:38ch;font-weight:500;
     animation:rise .6s .08s ease both}
-  .hero-cta{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;animation:rise .6s .16s ease both}
+  .hero-cta{margin-top:28px;display:flex;gap:12px;flex-wrap:nowrap;flex-direction:row;align-items:center;animation:rise .6s .16s ease both}
   .badges{margin-top:22px;display:flex;gap:18px;flex-wrap:wrap;animation:rise .6s .22s ease both}
   .badge{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:rgba(255,255,255,.75)}
   .badge svg{width:16px;height:16px;fill:var(--a1)}

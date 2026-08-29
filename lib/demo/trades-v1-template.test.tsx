@@ -816,7 +816,11 @@ describe('trades_v1 hero motifs', () => {
       '.hero-cta,.hero.center .hero-cta,.hero.left .hero-cta{flex-wrap:nowrap;flex-direction:row}',
     );
     expect(html).toContain('.hero,.hero.spotlight{min-height:min(86vh, 880px);max-height:none}');
+    expect(html).toContain(
+      'display:block;align-items:normal;padding:0;min-height:min(86vh, 880px);height:auto;max-height:none',
+    );
     expect(html).not.toContain('max-height:90vh');
+    expect(html).not.toContain('min-height:70vh');
   });
 
   it('long centered headlines keep both CTAs above the proof card', () => {
@@ -843,6 +847,9 @@ describe('trades_v1 hero motifs', () => {
       '.hero-line-long{font-size:clamp(1.9rem, 3.2vw, 2.8rem)}',
     );
     expect(html).toContain('padding:64px 22px 96px');
+    expect(html).toContain(
+      '.hero.center .hero-copy{text-align:center;width:100%;margin-left:auto;margin-right:auto}',
+    );
     expect(html).toContain(
       '.hero-cta,.hero.center .hero-cta,.hero.left .hero-cta{flex-wrap:nowrap;flex-direction:row}',
     );
