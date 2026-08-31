@@ -37,6 +37,7 @@ export type DemoSiteRow = {
   blurbs: unknown;
   status: string;
   expires_at: string | null;
+  screenshot_path: string | null;
 };
 
 /** Four-state render matrix plus killed (treated as missing). */

@@ -39,6 +39,7 @@ describe('demo lookup is GET-only', () => {
             blurbs: null,
             status: 'live',
             expires_at: null,
+            screenshot_path: 'demo-screenshots/acme-hvac.png',
           },
         ]),
       );

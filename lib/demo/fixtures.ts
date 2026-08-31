@@ -85,6 +85,7 @@ export function demoRow(
     ],
     status: 'live',
     expires_at: '2026-09-23T12:00:00.000Z',
+    screenshot_path: 'demo-screenshots/acme-hvac.png',
     ...overrides,
   };
 }
