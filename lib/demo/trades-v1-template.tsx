@@ -200,9 +200,36 @@ function formatReviewCount(value: number): string {
   return n === 1 ? '1 review' : `${n} reviews`;
 }
 
-function starString(rating: number): string {
-  const filled = Math.max(0, Math.min(5, Math.round(rating)));
-  return `${'★'.repeat(filled)}${'☆'.repeat(5 - filled)}`;
+const STAR_PATH =
+  'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z';
+
+/** Whole-row fill: rating 4.7 → 94% (4 full stars + 70% of the fifth). */
+function starFillWidth(rating: number): string {
+  const clamped = Math.min(5, Math.max(0, rating));
+  return `${Math.round((clamped / 5) * 100)}%`;
+}
+
+function StarsSvg() {
+  return (
+    <svg viewBox="0 0 120 24" aria-hidden="true">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <path key={i} d={STAR_PATH} transform={`translate(${i * 24} 0)`} />
+      ))}
+    </svg>
+  );
+}
+
+function StarRow({ rating }: { rating: number }) {
+  return (
+    <span className="star-row">
+      <span className="star-row-base">
+        <StarsSvg />
+      </span>
+      <span className="star-row-fill" style={{ width: starFillWidth(rating) }}>
+        <StarsSvg />
+      </span>
+    </span>
+  );
 }
 
 function titleCase(value: string): string {
@@ -481,10 +508,12 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
   const showNavServices = showServices;
   const showNavReviews = shownReviews.length > 0;
   const showNavContact = !spotlight;
+  const showDock = Boolean(tel);
+  const numberCards = showServices && cards.length >= 3;
 
   const proofInner = facts.rating ? (
     <>
-      <span className="stars">{starString(facts.rating.value)}</span>
+      <StarRow rating={facts.rating.value} />
       <b>{formatRating(facts.rating.value)}</b>
       <span className="src">
         {facts.ratings_count ? (
@@ -505,7 +534,7 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
       <link href={GOOGLE_FONTS_HREF} rel="stylesheet" />
       <style>{TRADES_V1_CSS}</style>
       <div
-        className={`demo-trades-v1 skin-${skin}${spotlight ? ' is-spotlight' : ''}`}
+        className={`demo-trades-v1 skin-${skin}${spotlight ? ' is-spotlight' : ''}${showDock ? ' has-dock' : ''}`}
         data-skin={skin}
         data-hero-align={variant.heroAlign}
         data-watermark={variant.watermark}
@@ -639,8 +668,11 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
                     : variant.gridStyle
               }`}
             >
-              {cards.map((card) => (
+              {cards.map((card, i) => (
                 <div className="card" key={card.key}>
+                  {numberCards ? (
+                    <div className="svc-num">{String(i + 1).padStart(2, '0')}</div>
+                  ) : null}
                   <div className="ico">
                     <Icon d={card.icon} />
                   </div>
@@ -775,6 +807,21 @@ export function TradesV1Template({ site }: { site: DemoSiteRow }) {
 
       <HonestStrip />
 
+      {showDock && tel ? (
+        <div className="sticky-dock">
+          <a className="btn btn-primary" href={tel}>
+            <Icon d={PHONE_ICON_PATH} />
+            Call
+          </a>
+          {sms ? (
+            <a className="btn btn-quiet" href={sms}>
+              <Icon d={SMS_ICON_PATH} />
+              Text Us
+            </a>
+          ) : null}
+        </div>
+      ) : null}
+
       {tel && sms ? (
         <div className="stickybar">
           <a className="s-call" href={tel}>
@@ -879,7 +926,11 @@ const TRADES_V1_CSS = `
     box-shadow:0 18px 45px rgba(10,15,25,.16), 0 2px 8px rgba(10,15,25,.08);
     transition:transform .2s ease, box-shadow .2s ease}
   a.proof-card:hover{transform:translateY(-3px);box-shadow:0 24px 55px rgba(10,15,25,.20), 0 2px 8px rgba(10,15,25,.08)}
-  .stars{color:#f5a623;font-size:19px;letter-spacing:2.5px}
+  .star-row{position:relative;display:inline-block;color:var(--a1);line-height:0;flex:none}
+  .star-row-base svg,.star-row-fill svg{display:block;width:110px;height:22px}
+  .star-row-base svg{fill:none;stroke:currentColor;stroke-width:1.4}
+  .star-row-fill{position:absolute;left:0;top:0;bottom:0;overflow:hidden;height:100%}
+  .star-row-fill svg{fill:currentColor;stroke:currentColor;stroke-width:1.4;max-width:none}
   .proof-card b{font-family:'Sora';font-weight:800;font-size:22px}
   .proof-card .src{color:var(--muted);font-size:14.5px;font-weight:600}
   .proof-card .src em{font-style:normal;font-weight:700;color:var(--ink)}
@@ -912,6 +963,8 @@ const TRADES_V1_CSS = `
   .card .ico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
     background:linear-gradient(130deg,var(--a1),var(--a2));margin-bottom:14px;box-shadow:0 6px 16px var(--glow)}
   .card .ico svg{width:22px;height:22px;fill:#fff}
+  .svc-num{font-family:'Sora';font-weight:800;font-size:12px;letter-spacing:.08em;line-height:1;
+    color:color-mix(in srgb, #fff 45%, var(--ink));margin:0 0 10px}
   .card h3{font-family:'Sora';font-weight:700;font-size:18.5px;margin-bottom:6px}
   .card p{color:var(--muted);font-size:15px;line-height:1.55}
   .area{padding:46px 0 14px}
@@ -952,6 +1005,7 @@ const TRADES_V1_CSS = `
   .strip{background:var(--base);padding:0 22px 18px;text-align:center;font-size:12.5px;color:rgba(255,255,255,.4)}
   .strip a{color:rgba(255,255,255,.7);font-weight:600}
   .stickybar{display:none}
+  .sticky-dock{display:none}
   @media (max-width:719px){
     .stickybar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;gap:1px;
       box-shadow:0 -8px 24px rgba(10,15,25,.18)}
@@ -960,6 +1014,15 @@ const TRADES_V1_CSS = `
     .stickybar a svg{width:19px;height:19px;fill:currentColor}
     .stickybar .s-call{background:linear-gradient(120deg,var(--a1),var(--a2));color:var(--btn-ink)}
     .stickybar .s-text{background:var(--base);color:#fff}
+    .has-dock .stickybar{display:none}
+    .sticky-dock{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;gap:8px;align-items:stretch;
+      padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+      background:color-mix(in srgb, var(--base) 85%, var(--base2));
+      border-top:1px solid rgba(255,255,255,.12)}
+    .sticky-dock .btn{flex:1 1 0;width:100%;min-width:0}
+    .demo-trades-v1.has-dock .strip{padding-bottom:calc(18px + 76px + env(safe-area-inset-bottom, 0px))}
+    .demo-trades-v1.has-dock .close{padding-bottom:calc(58px + 76px + env(safe-area-inset-bottom, 0px))}
+    .demo-trades-v1.has-dock .info{padding-bottom:calc(22px + 76px + env(safe-area-inset-bottom, 0px))}
   }
   body{display:block!important;background:var(--paper)!important;color:var(--ink)!important;font-family:'Inter',system-ui,sans-serif!important}
   body::before, body::after { content: none !important; display: none !important; background: none !important; }

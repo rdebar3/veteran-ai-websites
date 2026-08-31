@@ -921,3 +921,143 @@ describe('template_key routing', () => {
     expect(trades).not.toMatch(/<img\b/i);
   });
 });
+
+const NAME_ONLY_FACTS = {
+  name: { value: 'Bare Shop', source: 'businesses.name' },
+};
+
+describe('trades_v1 port pack: dock, svc-num, star-row', () => {
+  it('dock renders when tel exists, with both buttons when sms also exists', () => {
+    const html = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(html).toContain('class="sticky-dock"');
+    const dock = html.match(/<div class="sticky-dock">([\s\S]*?)<\/div>/);
+    expect(dock).toBeTruthy();
+    const inner = dock![1];
+    expect(inner).toContain(`href="${ECLIPSE_TEL}"`);
+    expect(inner).toContain(`href="${ECLIPSE_SMS}"`);
+    expect(inner).toMatch(/class="btn btn-primary"[^>]*>[\s\S]*Call/);
+    expect(inner).toMatch(/class="btn btn-quiet"[^>]*>[\s\S]*Text Us/);
+    expect(html).toContain('.sticky-dock{display:none}');
+    expect(html).toContain('@media (max-width:719px)');
+  });
+
+  it('dock is absent when no tel and markup carries no sticky-dock class', () => {
+    const html = renderToStaticMarkup(
+      <TradesV1Template site={minimalRow({ facts: NAME_ONLY_FACTS })} />,
+    );
+    expect(html).not.toContain('class="sticky-dock"');
+    expect(html).not.toMatch(/class="[^"]*\bsticky-dock\b/);
+  });
+
+  it('svc-num present at 3+ services, absent for 1- and 2-card layouts', () => {
+    const asServices = (labels: string[]) =>
+      labels.map((value) => ({
+        value,
+        source: 'page_facts.service_vocab_hits',
+      }));
+
+    const one = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: { ...ECLIPSE_FACTS, services: asServices(['repair']) },
+        })}
+      />,
+    );
+    expect(one).toContain('class="cards cards-1"');
+    expect(one).not.toContain('class="svc-num"');
+
+    const two = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            services: asServices(['repair', 'construction']),
+          },
+        })}
+      />,
+    );
+    expect(two).toContain('class="cards cards-2"');
+    expect(two).not.toContain('class="svc-num"');
+
+    const three = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            services: asServices(['repair', 'construction', 'appointment']),
+          },
+        })}
+      />,
+    );
+    expect(three).toContain(`class="cards ${layoutVariantFor('eclipse-construction').gridStyle}"`);
+    expect(three).toContain('class="svc-num">01</div>');
+    expect(three).toContain('class="svc-num">02</div>');
+    expect(three).toContain('class="svc-num">03</div>');
+    expect(three).not.toContain('class="svc-num">04</div>');
+
+    const four = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(four).toContain('class="svc-num">01</div>');
+    expect(four).toContain('class="svc-num">04</div>');
+  });
+
+  it('star-row fill width matches rating math (4.7 → 94%)', () => {
+    const html = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            ...ECLIPSE_FACTS,
+            rating: { value: 4.7, source: 'businesses.rating' },
+          },
+        })}
+      />,
+    );
+    expect(html).toContain('class="star-row"');
+    expect(html).toContain('class="star-row-fill"');
+    expect(html).toMatch(
+      /star-row-fill[^>]*width:\s*94%|width:\s*94%[^>]*star-row-fill/,
+    );
+    expect(html).toContain('4.7');
+    expect(html).toContain('<svg');
+
+    const five = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(five).toMatch(
+      /star-row-fill[^>]*width:\s*100%|width:\s*100%[^>]*star-row-fill/,
+    );
+
+    const noRating = renderToStaticMarkup(
+      <TradesV1Template
+        site={eclipseRow({
+          facts: {
+            name: { value: 'Eclipse Construction', source: 'businesses.name' },
+            ratings_count: { value: 83, source: 'businesses.ratings_count' },
+          },
+        })}
+      />,
+    );
+    expect(noRating).not.toMatch(/<(a|div) class="proof-card"/);
+    expect(noRating).not.toContain('class="star-row"');
+  });
+
+  it('honest strip still renders and root gains has-dock only when the dock does', () => {
+    const withTel = renderToStaticMarkup(<TradesV1Template site={eclipseRow()} />);
+    expect(withTel.replace(/<[^>]+>/g, '')).toContain(HONEST_STRIP);
+    expect(withTel).toMatch(/class="demo-trades-v1[^"]*\bhas-dock\b/);
+    expect(withTel).toContain('class="sticky-dock"');
+    expect(withTel).toContain(
+      '.demo-trades-v1.has-dock .strip{padding-bottom:calc(18px + 76px + env(safe-area-inset-bottom, 0px))}',
+    );
+    expect(withTel).toContain(
+      '.demo-trades-v1.has-dock .close{padding-bottom:calc(58px + 76px + env(safe-area-inset-bottom, 0px))}',
+    );
+    expect(withTel).toContain(
+      '@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}',
+    );
+
+    const noTel = renderToStaticMarkup(
+      <TradesV1Template site={minimalRow({ facts: NAME_ONLY_FACTS })} />,
+    );
+    expect(noTel.replace(/<[^>]+>/g, '')).toContain(HONEST_STRIP);
+    expect(noTel).not.toMatch(/class="demo-trades-v1[^"]*\bhas-dock\b/);
+    expect(noTel).not.toContain('class="sticky-dock"');
+  });
+});
