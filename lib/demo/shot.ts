@@ -3,6 +3,10 @@ import { isDemoSlug } from './supabase';
 
 export const DEMO_SHOT_VIEWPORT_WIDTH = 1024;
 
+export const DEMO_SHOT_SETTLE_SCRIPT =
+  "(async()=>{document.querySelectorAll('.rv').forEach(function(el){el.classList.add('in')});" +
+  "if(document.fonts&&document.fonts.ready){await document.fonts.ready}})()";
+
 export function demoPublicOrigin(): string {
   const explicit = process.env.DEMO_PUBLIC_ORIGIN?.trim();
   if (explicit) return explicit.replace(/\/$/, '');

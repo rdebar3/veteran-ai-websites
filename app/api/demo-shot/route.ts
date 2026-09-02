@@ -4,6 +4,7 @@ import puppeteer from 'puppeteer-core';
 import { screenshotStoragePath } from '@/lib/demo/copy';
 import { cronAuthorized } from '@/lib/demo/cron-auth';
 import {
+  DEMO_SHOT_SETTLE_SCRIPT,
   DEMO_SHOT_VIEWPORT_WIDTH,
   demoShotPageUrl,
   demoShotRowPatch,
@@ -181,6 +182,9 @@ async function renderDemoPng(url: string): Promise<Uint8Array> {
       height: 768,
       deviceScaleFactor: 1,
     });
+    await page.emulateMediaFeatures([
+      { name: 'prefers-reduced-motion', value: 'reduce' },
+    ]);
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 20000 });
     await page.evaluate(async () => {
       const images = Array.from(document.images);
@@ -194,6 +198,8 @@ async function renderDemoPng(url: string): Promise<Uint8Array> {
         }),
       );
     });
+    await page.evaluate(DEMO_SHOT_SETTLE_SCRIPT);
+    await new Promise((r) => setTimeout(r, 250));
     const buf = await page.screenshot({ type: 'png', fullPage: true });
     return buf;
   } finally {
