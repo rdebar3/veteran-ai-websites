@@ -70,8 +70,12 @@ export function emptyRecord(): MontiRecord {
 /**
  * Ensure layout + nested theme are always present on lead payloads
  * (monti_draft) so Rich sees exactly what the owner saw.
+ * website_confirm is an empty-string honeypot — the server drops
+ * payloads that fill it in.
  */
-export function recordForLead(r: MontiRecord): MontiRecord {
+export function recordForLead(
+  r: MontiRecord,
+): MontiRecord & { website_confirm: string } {
   const palette = r.palette || 'ember';
   const mood = r.theme_mood || 'clean';
   return {
@@ -82,5 +86,6 @@ export function recordForLead(r: MontiRecord): MontiRecord {
     theme: r.theme?.palette
       ? r.theme
       : { palette, mood },
+    website_confirm: '',
   };
 }

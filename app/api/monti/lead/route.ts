@@ -1,7 +1,10 @@
-import type { MontiRecord } from '@/lib/monti/types';
+import { clientIp, rateLimit, sameOriginOk } from '@/lib/monti/guard';
 import { tradeLabel } from '@/lib/monti/trade-labels';
+import type { MontiRecord } from '@/lib/monti/types';
 
 export const runtime = 'nodejs';
+
+const RATE = { limit: 5, windowMs: 10 * 60 * 1000 } as const;
 
 interface LeadBody {
   record?: MontiRecord;
@@ -16,13 +19,33 @@ function supabaseBaseUrl(): string | null {
   return raw.replace(/\/$/, '').replace(/\/rest\/v1\/?$/, '');
 }
 
+function honeypotFilled(record: object): boolean {
+  const value = (record as { website_confirm?: unknown }).website_confirm;
+  return typeof value === 'string' && value !== '';
+}
+
 export async function POST(request: Request) {
+  const ip = clientIp(request);
+  if (!sameOriginOk(request)) {
+    console.warn('[monti] origin reject', 'lead', ip);
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  if (!rateLimit('lead', ip, RATE)) {
+    console.warn('[monti] rate limit', 'lead', ip);
+    return Response.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const body = (await request.json()) as LeadBody;
     const record = body.record;
 
     if (!record || typeof record !== 'object') {
       return Response.json({ error: 'record is required' }, { status: 400 });
+    }
+
+    // Present, non-empty website_confirm → bot. 200 + no write; never tip it.
+    if (honeypotFilled(record)) {
+      return Response.json({ ok: true });
     }
 
     const name = (record.business?.name || '').trim();

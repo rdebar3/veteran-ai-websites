@@ -1,7 +1,10 @@
 import { randomBytes } from 'crypto';
 import { AccessToken, type VideoGrant } from 'livekit-server-sdk';
+import { clientIp, rateLimit, sameOriginOk } from '@/lib/monti/guard';
 
 export const runtime = 'nodejs';
+
+const RATE = { limit: 5, windowMs: 10 * 60 * 1000 } as const;
 
 function uniqueId(prefix: string): string {
   return `${prefix}-${randomBytes(6).toString('hex')}`;
@@ -13,7 +16,17 @@ function uniqueId(prefix: string): string {
  * (worker has no agent_name) joins every room in the project.
  * Server-side only — never exposes LIVEKIT_API_SECRET or XAI_API_KEY.
  */
-export async function POST() {
+export async function POST(request: Request) {
+  const ip = clientIp(request);
+  if (!sameOriginOk(request)) {
+    console.warn('[monti] origin reject', 'livekit-token', ip);
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  if (!rateLimit('livekit-token', ip, RATE)) {
+    console.warn('[monti] rate limit', 'livekit-token', ip);
+    return Response.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const apiKey = process.env.LIVEKIT_API_KEY;
     const apiSecret = process.env.LIVEKIT_API_SECRET;
