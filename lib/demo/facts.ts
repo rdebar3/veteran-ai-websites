@@ -143,14 +143,22 @@ export function parseHeroLine(raw: string | null | undefined): string | null {
   return text || null;
 }
 
-export function parseBlurbs(raw: unknown): string[] {
+export function parseBlurbItems(raw: unknown): Provenanced<string>[] {
   if (!Array.isArray(raw)) return [];
-  const out: string[] = [];
+  const out: Provenanced<string>[] = [];
   for (const item of raw) {
-    if (typeof item !== 'string') continue;
-    const text = item.trim();
-    if (text) out.push(text);
+    if (typeof item === 'string') {
+      const text = item.trim();
+      if (text) out.push({ value: text, source: '' });
+    } else {
+      const parsed = provenancedString(item);
+      if (parsed) out.push(parsed);
+    }
     if (out.length >= 3) break;
   }
   return out;
+}
+
+export function parseBlurbs(raw: unknown): string[] {
+  return parseBlurbItems(raw).map((item) => item.value);
 }

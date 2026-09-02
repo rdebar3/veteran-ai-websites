@@ -3,10 +3,12 @@ import { cache } from 'react';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { after } from 'next/server';
+import { artTradeFor, loadArtPool } from '@/lib/demo/art';
+import { DEMO_TEMPLATE_TRADES_V2 } from '@/lib/demo/copy';
 import { isPreviewFlag, resolveDemoView } from '@/lib/demo/decision';
 import { ExpiredDemo } from '@/lib/demo/expired';
 import { parseDemoFacts } from '@/lib/demo/facts';
-import { DemoSiteView } from '@/lib/demo/render';
+import { DemoSiteView, resolveDemoTemplateKey } from '@/lib/demo/render';
 import { getDemoSiteBySlug } from '@/lib/demo/supabase';
 import { recordDemoView, shouldRecordDemoView } from '@/lib/demo/views';
 
@@ -86,5 +88,10 @@ export default async function DemoPage({ params, searchParams }: PageProps) {
     });
   }
 
-  return <DemoSiteView site={site} />;
+  const artPool =
+    resolveDemoTemplateKey(site.template_key) === DEMO_TEMPLATE_TRADES_V2
+      ? await loadArtPool(artTradeFor(parseDemoFacts(site.facts).category?.value))
+      : [];
+
+  return <DemoSiteView site={site} artPool={artPool} />;
 }

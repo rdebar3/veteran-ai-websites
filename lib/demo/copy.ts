@@ -14,6 +14,7 @@ export const DEMO_ROBOTS_DISALLOW = '/d/';
 export const DEMO_STORAGE_BUCKET = 'demo-screenshots';
 export const DEMO_TEMPLATE_V0 = 'v0';
 export const DEMO_TEMPLATE_TRADES_V1 = 'trades_v1';
+export const DEMO_TEMPLATE_TRADES_V2 = 'trades_v2';
 export const DEMO_SITE_PUBLIC_ORIGIN = 'https://veteranaiwebsites.com';
 
 export function screenshotStoragePath(slug: string): string {

@@ -182,6 +182,18 @@ async function renderDemoPng(url: string): Promise<Uint8Array> {
       deviceScaleFactor: 1,
     });
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 20000 });
+    await page.evaluate(async () => {
+      const images = Array.from(document.images);
+      await Promise.all(
+        images.map((img) => {
+          if (img.complete) return Promise.resolve();
+          return new Promise<void>((resolve) => {
+            img.addEventListener('load', () => resolve(), { once: true });
+            img.addEventListener('error', () => resolve(), { once: true });
+          });
+        }),
+      );
+    });
     const buf = await page.screenshot({ type: 'png', fullPage: true });
     return buf;
   } finally {

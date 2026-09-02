@@ -1,0 +1,17 @@
+{
+  "trade": "auto",
+  "locked_by": "Rich Debar",
+  "locked_on": "2026-09-02",
+  "doctrine": "Images come only from this approved pool. Never generated per demo, never external, never anything that could pass as the business's own building or signage. Portrait originals are the source of truth; the template composes them for desktop and phone.",
+  "shots": [
+    { "key": "01-lift",           "file": "01-lift-portrait.jpg",           "role": "hero", "approved": true },
+    { "key": "06-bay-at-closing", "file": "06-bay-at-closing-portrait.jpg", "role": "hero", "approved": true },
+    { "key": "08-lowered-car",    "file": "08-lowered-car-portrait.jpg",    "role": "hero", "approved": true },
+    { "key": "09-blue-hour",      "file": "09-blue-hour-portrait.jpg",      "role": "hero", "approved": true },
+    { "key": "02-alignment-rack", "file": "02-alignment-rack-portrait.jpg", "role": "band", "approved": true },
+    { "key": "03-drawer",         "file": "03-drawer-portrait.jpg",         "role": "band", "approved": true },
+    { "key": "05-engine-bay",     "file": "05-engine-bay-portrait.jpg",     "role": "band", "approved": true },
+    { "key": "07-workbench",      "file": "07-workbench-portrait.jpg",      "role": "band", "approved": true },
+    { "key": "10-tire-stack",     "file": "10-tire-stack-portrait.jpg",     "role": "band", "approved": true }
+  ]
+}
