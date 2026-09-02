@@ -64,17 +64,70 @@ export function authorInitials(name: string): string {
   ).toUpperCase();
 }
 
+const STOP = new Set([
+  'and',
+  'or',
+  '&',
+  'in',
+  'of',
+  'for',
+  'with',
+  'to',
+  'the',
+  'a',
+  'an',
+  'on',
+  'at',
+  'by',
+  'from',
+  'near',
+]);
+
 export function accentHeadline(line: string): ReactNode {
   const words = line.trim().split(/\s+/).filter(Boolean);
   if (words.length < 6) return line;
   const n = words.length === 6 ? 2 : 3;
-  const head = words.slice(0, -n).join(' ');
-  const tail = words.slice(-n).join(' ');
+  let s = words.length - n;
+  while (s > 1 && STOP.has(words[s].toLowerCase())) s -= 1;
+  if (words.length - s > 5) s = words.length - n;
+  const head = words.slice(0, s).join(' ');
+  const tail = words.slice(s).join(' ');
   return (
     <>
       {head} <em>{tail}</em>
     </>
   );
+}
+
+const REPUTATION =
+  /\b(customers?|clients?|reviewers?|known for|praise[sd]?|report|recommend(ed)?|trusted)\b/i;
+const SPECIALTY =
+  /\b(specializ\w*|focus\w*|custom\w*|expert\w*|dedicated|precis\w*|everything from)\b/i;
+
+export function pickBlurbs(
+  blurbs: Provenanced<string>[],
+  heroLine: string | null,
+): {
+  heroSub?: Provenanced<string>;
+  bandQuote?: Provenanced<string>;
+} {
+  const heroSub =
+    blurbs.find((b) => REPUTATION.test(b.value)) ?? blurbs[0];
+  const rest = heroSub
+    ? blurbs.filter((b) => b.value !== heroSub.value)
+    : blurbs;
+  const specialty = rest.find((b) => SPECIALTY.test(b.value));
+  let bandQuote: Provenanced<string> | undefined =
+    specialty ??
+    rest[0] ??
+    (heroLine ? { value: heroLine, source: '' } : undefined);
+  if (heroSub && bandQuote && heroSub.value === bandQuote.value) {
+    bandQuote =
+      heroLine && heroLine !== heroSub.value
+        ? { value: heroLine, source: '' }
+        : undefined;
+  }
+  return { heroSub, bandQuote };
 }
 
 export function starFillWidth(rating: number): string {
@@ -214,14 +267,6 @@ function PinIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
       <path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" />
       <circle cx="12" cy="10" r="2.5" />
-    </svg>
-  );
-}
-
-function PulseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M3 12h3l2-6 4 12 3-8 2 2h4" />
     </svg>
   );
 }
@@ -375,11 +420,7 @@ export function TradesV2Template({
 
   const showTrust =
     facts.rating != null && facts.ratings_count != null;
-  const heroSub: Provenanced<string> | undefined = blurbs[0];
-  const quoteBlurb: Provenanced<string> | undefined =
-    blurbs[1] ??
-    (heroLine ? { value: heroLine, source: '' } : undefined);
-  const proofBlurb = blurbs[2];
+  const { heroSub, bandQuote: quoteBlurb } = pickBlurbs(blurbs, heroLine);
   const kickerParts = [town, categoryLabel(category)].filter(Boolean);
   const showServices = services.length > 0;
   const showReviews = reviews.length > 0;
@@ -411,12 +452,14 @@ export function TradesV2Template({
       </div>,
     );
   }
-  if (proofBlurb) {
+  if (tel && phone) {
     proofCells.push(
-      <div key="blurb">
-        <PulseIcon />
+      <div key="phone">
+        <PhoneIcon />
         <span>
-          <b>{proofBlurb.value}</b>
+          <a href={tel}>
+            <b>{phone.value}</b>
+          </a>
         </span>
       </div>,
     );
@@ -547,7 +590,13 @@ export function TradesV2Template({
         >
           <div className="noise" />
           {quoteBlurb ? (
-            <q>
+            <q
+              data-len={
+                quoteBlurb.value.trim().split(/\s+/).filter(Boolean).length <= 12
+                  ? 'short'
+                  : 'long'
+              }
+            >
               {quoteBlurb.value}
               <small>{bandCaption(quoteBlurb.source)}</small>
             </q>
@@ -663,7 +712,6 @@ export function TradesV2Template({
               © {name}
               {footerPlace ? ` · ${footerPlace}` : ''}
             </span>
-            <span>Sample homepage · built from the shop&apos;s public listing</span>
           </div>
         </footer>
 
@@ -730,7 +778,7 @@ const TRADES_V2_CSS = `
   @keyframes trades-v2-drift{from{transform:scale(1) translate(0,0)}to{transform:scale(1.07) translate(-1.5%,1%)}}
   .demo-trades-v2 .strip{background:var(--panel);border-bottom:1px solid var(--line)}
   .demo-trades-v2 .strip .wrap{display:grid;gap:0}
-  .demo-trades-v2 .strip div{padding:18px 22px;border-right:1px solid var(--line);display:flex;gap:12px;align-items:center;font-size:14px;color:var(--muted)}
+  .demo-trades-v2 .strip .wrap > div{padding:18px 22px;border-right:1px solid var(--line);display:flex;gap:12px;align-items:center;font-size:14px;color:var(--muted)}
   .demo-trades-v2 .strip .wrap > div:first-child{padding-left:0}
   .demo-trades-v2 .strip .wrap > div:last-child{border-right:0}
   .demo-trades-v2 .strip svg{width:20px;height:20px;color:var(--amber);flex:none}
@@ -755,6 +803,7 @@ const TRADES_V2_CSS = `
   .demo-trades-v2 .band.has-photo{background:linear-gradient(90deg, rgba(15,18,22,.15) 0%, rgba(15,18,22,.55) 55%, rgba(15,18,22,.85) 100%), var(--band-url) center 40%/cover no-repeat}
   .demo-trades-v2 .band.no-photo{background:radial-gradient(50% 80% at 25% 50%, rgba(245,165,36,.18), transparent 60%),radial-gradient(40% 70% at 80% 60%, rgba(143,163,184,.14), transparent 60%),linear-gradient(180deg,#0c0f13,#191d24 60%,#0c0f13)}
   .demo-trades-v2 .band q{position:absolute;right:6%;bottom:34px;max-width:38ch;font:700 clamp(22px,3vw,34px)/1.1 var(--display);text-transform:uppercase;color:var(--ink);quotes:none;z-index:2}
+  .demo-trades-v2 .band q[data-len="long"]{font-size:clamp(20px,2.4vw,27px)}
   .demo-trades-v2 .band q small{display:block;font:600 12px var(--body);letter-spacing:.2em;color:var(--amber);text-transform:uppercase;margin-top:10px}
   .demo-trades-v2 .reviews{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .demo-trades-v2 .rev{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px 26px 22px;position:relative}

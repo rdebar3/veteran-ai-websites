@@ -5,8 +5,10 @@ import { HONEST_STRIP } from './copy';
 import { eclipseRow, MINIMAL_FACTS, minimalRow } from './fixtures';
 import { DemoSiteView } from './render';
 import {
+  accentHeadline,
   authorInitials,
   bandCaption,
+  pickBlurbs,
   TradesV2Template,
 } from './trades-v2-template';
 import type { DemoFacts } from './types';
@@ -89,12 +91,14 @@ function coveRow(overrides: Record<string, unknown> = {}) {
     facts: COVE_FACTS,
     hero_line: 'Auto repair shop in Clarksburg serving custom and standard vehicles',
     blurbs: [
-      'First blurb from the listing.',
       {
-        value: 'Time taken on lowered cars and aftermarket wheels',
+        value: 'Customers report honest, reasonably priced work.',
         source: 'places.reviews',
       },
-      { value: 'Quick turnaround on brake service', source: 'compiler' },
+      {
+        value: 'Specializes in lowered cars and aftermarket wheels.',
+        source: 'places.reviews',
+      },
     ],
     ...overrides,
   });
@@ -170,6 +174,19 @@ describe('trades_v2 art URLs', () => {
   });
 });
 
+describe('trades_v2 strip phone', () => {
+  it('shows a phone cell when tel exists and keeps blurbs out of the strip', () => {
+    const html = renderToStaticMarkup(
+      <TradesV2Template site={coveRow()} pool={[]} />,
+    );
+    const strip = html.match(/<div class="strip">[\s\S]*?<\/div><\/div>/)?.[0] ?? '';
+    expect(strip).toContain('href="tel:+13045667482"');
+    expect(strip).toContain('(304) 566-7482');
+    expect(strip).not.toContain('Customers report');
+    expect(strip).not.toContain('Specializes in');
+  });
+});
+
 describe('trades_v2 hero and proof', () => {
   it('shows the trust badge only when rating and count exist', () => {
     const withTrust = renderToStaticMarkup(
@@ -197,7 +214,7 @@ describe('trades_v2 hero and proof', () => {
     expect(stripCells(full)).toBe(3);
     expect(full).toContain('Open Mon–Fri');
     expect(full).toContain('3003 Philippi Pike');
-    expect(full).toContain('Quick turnaround on brake service');
+    expect(full).toContain('(304) 566-7482');
 
     const facts: DemoFacts = {
       name: COVE_FACTS.name,
@@ -257,38 +274,103 @@ describe('trades_v2 camera polish', () => {
     expect(html).toMatch(/class="trust"[^>]*>[\s\S]*?<svg\b/);
   });
 
-  it('puts blurbs[0] in the hero and blurbs[1] in the band, never the same sentence', () => {
+  it('puts reputation in the hero and specialty in the band, never the same sentence', () => {
     const html = decode(
       renderToStaticMarkup(<TradesV2Template site={coveRow()} pool={[]} />),
     );
     const sub = html.match(/<p class="sub">([^<]*)<\/p>/)?.[1];
-    const quote = html.match(/<q>([^<]*)<small>/)?.[1];
-    expect(sub).toBe('First blurb from the listing.');
-    expect(quote).toBe('Time taken on lowered cars and aftermarket wheels');
+    const quote = html.match(/<q[^>]*>([^<]*)<small>/)?.[1];
+    expect(sub).toBe('Customers report honest, reasonably priced work.');
+    expect(quote).toBe(
+      'Specializes in lowered cars and aftermarket wheels.',
+    );
     expect(sub).not.toBe(quote);
   });
 
-  it('shows the hero line in the band when only one blurb exists', () => {
+  it('shows the hero line in the band when blurbs are absent', () => {
     const html = decode(
       renderToStaticMarkup(
         <TradesV2Template
           site={coveRow({
-            blurbs: ['Only one blurb from the listing.'],
+            blurbs: null,
           })}
           pool={[]}
         />,
       ),
     );
-    expect(html).toContain('Only one blurb from the listing.');
-    const quote = html.match(/<q>([^<]*)<small>/)?.[1];
+    const quote = html.match(/<q[^>]*>([^<]*)<small>/)?.[1];
     expect(quote).toBe(
       'Auto repair shop in Clarksburg serving custom and standard vehicles',
     );
   });
 });
 
+describe('accentHeadline', () => {
+  it('does not start the accent on a stop word', () => {
+    const serving = renderToStaticMarkup(
+      <>
+        {accentHeadline(
+          'Auto repair shop in Clarksburg serving custom and standard vehicles',
+        )}
+      </>,
+    );
+    expect(serving).toContain('<em>custom and standard vehicles</em>');
+
+    const moto = renderToStaticMarkup(
+      <>{accentHeadline('Motorcycle and auto repair in Clarksburg')}</>,
+    );
+    expect(moto).toContain('<em>repair in Clarksburg</em>');
+  });
+
+  it('leaves a five-word line plain and falls back to last-n when the walk exceeds 5', () => {
+    expect(accentHeadline('Five word line stays plain')).toBe(
+      'Five word line stays plain',
+    );
+    const fallback = renderToStaticMarkup(
+      <>{accentHeadline('Quality of the and or for with great work')}</>,
+    );
+    expect(fallback).toContain('<em>with great work</em>');
+  });
+});
+
+describe('pickBlurbs', () => {
+  it('picks reputation for the hero and specialty for the band', () => {
+    const picked = pickBlurbs(
+      [
+        {
+          value: 'Customers report honest, reasonably priced work.',
+          source: 'places.reviews',
+        },
+        {
+          value: 'Specializes in lowered cars and aftermarket wheels.',
+          source: 'places.reviews',
+        },
+      ],
+      'Auto repair shop in Clarksburg serving custom and standard vehicles',
+    );
+    expect(picked.heroSub?.value).toBe(
+      'Customers report honest, reasonably priced work.',
+    );
+    expect(picked.bandQuote?.value).toBe(
+      'Specializes in lowered cars and aftermarket wheels.',
+    );
+    expect(picked.heroSub?.value).not.toBe(picked.bandQuote?.value);
+  });
+
+  it('uses the hero line for the band when blurbs are empty', () => {
+    const picked = pickBlurbs(
+      [],
+      'Auto repair shop in Clarksburg serving custom and standard vehicles',
+    );
+    expect(picked.heroSub).toBeUndefined();
+    expect(picked.bandQuote?.value).toBe(
+      'Auto repair shop in Clarksburg serving custom and standard vehicles',
+    );
+  });
+});
+
 describe('trades_v2 honest strip and captions', () => {
-  it('keeps the honest strip wording', () => {
+  it('keeps the honest strip wording and drops the footer disclaimer', () => {
     const html = renderToStaticMarkup(
       <TradesV2Template site={coveRow()} pool={[]} />,
     );
@@ -299,6 +381,8 @@ describe('trades_v2 honest strip and captions', () => {
     );
     expect(html).toContain('class="honest"');
     expect(HONEST_STRIP).toContain('Veteran AI Websites');
+    const footer = html.match(/<footer>[\s\S]*?<\/footer>/)?.[0] ?? '';
+    expect(footer).not.toContain('Sample homepage');
   });
 
   it('captions the band quote from reviews vs the public listing', () => {
@@ -341,6 +425,8 @@ describe('trades_v2 minimal', () => {
     expect(html).toContain('demo-trades-v2');
     expect(html).toContain('Bare Shop');
     expect(html).not.toContain('class="trust"');
-    expect(html).not.toContain('class="strip"');
+    expect(html).toContain('class="strip"');
+    expect(stripCells(html)).toBe(1);
+    expect(html).toContain('(304) 269-1234');
   });
 });
