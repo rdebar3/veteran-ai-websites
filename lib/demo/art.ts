@@ -110,7 +110,7 @@ async function loadArtPoolUncached(trade: string): Promise<ArtRow[]> {
 
   const url =
     `${base}/rest/v1/demo_art?trade=eq.${encodeURIComponent(trade)}` +
-    `&approved=eq.true&select=${ART_SELECT}`;
+    `&approved=eq.true&select=${ART_SELECT}&order=shot_key.asc`;
 
   const res = await fetch(url, {
     method: 'GET',

@@ -226,12 +226,64 @@ function PulseIcon() {
   );
 }
 
-function Stars({ rating }: { rating: number }) {
+const STAR_PATH =
+  'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z';
+
+function StarGlyphs({ size }: { size: 18 | 14 }) {
+  const width = size === 14 ? 70 : 90;
+  return (
+    <svg
+      viewBox="0 0 120 24"
+      width={width}
+      height={size}
+      aria-hidden="true"
+    >
+      {[0, 1, 2, 3, 4].map((i) => (
+        <path
+          key={i}
+          d={STAR_PATH}
+          transform={`translate(${i * 24} 0)`}
+        />
+      ))}
+    </svg>
+  );
+}
+
+function Stars({
+  rating,
+  size = 18,
+}: {
+  rating: number;
+  size?: 18 | 14;
+}) {
   return (
     <span className="stars">
-      ★★★★★
-      <b style={{ width: starFillWidth(rating) }}>★★★★★</b>
+      <StarGlyphs size={size} />
+      <b style={{ width: starFillWidth(rating) }}>
+        <StarGlyphs size={size} />
+      </b>
     </span>
+  );
+}
+
+function MapsArrow() {
+  return (
+    <svg
+      className="maps-arrow"
+      viewBox="0 0 12 12"
+      width="12"
+      height="12"
+      aria-hidden="true"
+    >
+      <path
+        d="M3 9L9 3M4.5 3H9v4.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -323,14 +375,10 @@ export function TradesV2Template({
 
   const showTrust =
     facts.rating != null && facts.ratings_count != null;
-  const heroSub: Provenanced<string> | undefined =
-    blurbs.length >= 2 ? blurbs[1] : blurbs[0];
+  const heroSub: Provenanced<string> | undefined = blurbs[0];
   const quoteBlurb: Provenanced<string> | undefined =
-    blurbs.length >= 2
-      ? blurbs[1]
-      : heroLine
-        ? { value: heroLine, source: '' }
-        : blurbs[0];
+    blurbs[1] ??
+    (heroLine ? { value: heroLine, source: '' } : undefined);
   const proofBlurb = blurbs[2];
   const kickerParts = [town, categoryLabel(category)].filter(Boolean);
   const showServices = services.length > 0;
@@ -476,7 +524,7 @@ export function TradesV2Template({
                   <h2>{thingsHeading(services.length)}</h2>
                 </div>
               </div>
-              <div className="services">
+              <div className="services" data-n={services.length}>
                 {services.map((svc, i) => (
                   <div className="svc rv" key={`${svc.value}:${i}`}>
                     <i>{String(i + 1).padStart(2, '0')}</i>
@@ -537,7 +585,7 @@ export function TradesV2Template({
                       </div>
                     </div>
                     <p>{review.body}</p>
-                    <Stars rating={review.rating} />
+                    <Stars rating={review.rating} size={14} />
                   </div>
                 ))}
               </div>
@@ -585,8 +633,8 @@ export function TradesV2Template({
                     {address ? <p>{address}</p> : null}
                     {mapsUrl ? (
                       <p>
-                        <a href={mapsUrl} style={{ color: 'var(--steel)' }}>
-                          Directions on Google Maps ↗
+                        <a className="maps-link" href={mapsUrl}>
+                          Directions on Google Maps <MapsArrow />
                         </a>
                       </p>
                     ) : null}
@@ -671,8 +719,9 @@ const TRADES_V2_CSS = `
   .demo-trades-v2 .hero h1 em{font-style:normal;color:var(--amber)}
   .demo-trades-v2 .sub{font-size:19px;color:var(--muted);max-width:56ch;margin:18px 0 26px}
   .demo-trades-v2 .trust{display:inline-flex;align-items:center;gap:12px;background:rgba(23,27,33,.82);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0 0 26px}
-  .demo-trades-v2 .stars{position:relative;display:inline-block;font-size:18px;line-height:1;letter-spacing:2px;color:#3a414c}
-  .demo-trades-v2 .stars b{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:var(--amber)}
+  .demo-trades-v2 .stars{position:relative;display:inline-block;line-height:0;color:#3a414c}
+  .demo-trades-v2 .stars svg{display:block;fill:currentColor}
+  .demo-trades-v2 .stars b{position:absolute;left:0;top:0;overflow:hidden;color:var(--amber)}
   .demo-trades-v2 .trust strong{font:800 22px/1 var(--display);color:var(--ink)}
   .demo-trades-v2 .trust span{font-size:13px;color:var(--muted)}
   .demo-trades-v2 .ctas{display:flex;gap:12px;flex-wrap:wrap}
@@ -690,7 +739,13 @@ const TRADES_V2_CSS = `
   .demo-trades-v2 .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:34px}
   .demo-trades-v2 h2{font-size:clamp(34px,4.6vw,52px);font-weight:800;text-transform:uppercase;margin-top:10px}
   .demo-trades-v2 .sec-head p{color:var(--muted);max-width:44ch;margin:0}
-  .demo-trades-v2 .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+  .demo-trades-v2 .services{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .demo-trades-v2 .services[data-n="2"]{grid-template-columns:repeat(2,1fr)}
+  .demo-trades-v2 .services[data-n="3"]{grid-template-columns:repeat(3,1fr)}
+  .demo-trades-v2 .services[data-n="5"]{grid-template-columns:repeat(5,1fr)}
+  .demo-trades-v2 .services[data-n="5"] .svc{padding:20px 16px 18px}
+  .demo-trades-v2 .services[data-n="5"] .svc h3{font-size:19px}
+  .demo-trades-v2 .services[data-n="6"]{grid-template-columns:repeat(3,1fr)}
   .demo-trades-v2 .svc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 20px 20px;position:relative;overflow:hidden;transition:transform .25s,border-color .25s}
   .demo-trades-v2 .svc:hover{transform:translateY(-3px);border-color:#3d4550}
   .demo-trades-v2 .svc i{position:absolute;right:14px;top:10px;font:800 44px/1 var(--display);color:rgba(245,165,36,.12)}
@@ -709,7 +764,7 @@ const TRADES_V2_CSS = `
   .demo-trades-v2 .rev .who b{display:block;font-weight:600}
   .demo-trades-v2 .rev .who span{font-size:12px;color:var(--dim)}
   .demo-trades-v2 .rev p{margin:0;color:#dcd7cd;font-size:16px}
-  .demo-trades-v2 .rev .stars{font-size:14px;margin-top:14px}
+  .demo-trades-v2 .rev .stars{margin-top:14px}
   .demo-trades-v2 .split{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
   .demo-trades-v2 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px}
   .demo-trades-v2 .hours{list-style:none;margin:14px 0 0;padding:0}
@@ -720,6 +775,8 @@ const TRADES_V2_CSS = `
   .demo-trades-v2 .contact .big{font:800 clamp(30px,4vw,44px)/1 var(--display);color:var(--amber);text-decoration:none;display:block;margin:10px 0 6px}
   .demo-trades-v2 .contact p{color:var(--muted);margin:6px 0}
   .demo-trades-v2 .contact .ctas{margin-top:18px}
+  .demo-trades-v2 .maps-link{display:inline-flex;align-items:center;gap:6px;color:var(--steel);text-decoration:none}
+  .demo-trades-v2 .maps-arrow{flex:none}
   .demo-trades-v2 footer{border-top:1px solid var(--line);padding:26px 0 120px;color:var(--dim);font-size:13px}
   .demo-trades-v2 footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
   .demo-trades-v2 .honest{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#0b0d10;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;padding:9px 16px;text-align:center}
@@ -735,6 +792,12 @@ const TRADES_V2_CSS = `
     .demo-trades-v2 .strip .wrap{grid-template-columns:1fr !important}
     .demo-trades-v2 .strip .wrap > div{border-right:0;border-bottom:1px solid var(--line);padding:14px 0}
     .demo-trades-v2 .reviews,.demo-trades-v2 .split{grid-template-columns:1fr}
+    .demo-trades-v2 .services,
+    .demo-trades-v2 .services[data-n="2"],
+    .demo-trades-v2 .services[data-n="3"],
+    .demo-trades-v2 .services[data-n="5"],
+    .demo-trades-v2 .services[data-n="6"]{grid-template-columns:repeat(2,1fr)}
+    .demo-trades-v2 .services .svc:last-child:nth-child(odd){grid-column:1/-1}
     .demo-trades-v2 .band{height:220px}
     .demo-trades-v2 .band q{right:20px;left:20px;max-width:none}
     .demo-trades-v2.has-dock .honest{bottom:64px;font-size:11.5px;padding:7px 12px}
@@ -751,4 +814,6 @@ const TRADES_V2_CSS = `
     .demo-trades-v2 .hero .photo{animation:none}
     .demo-trades-v2 .rv{opacity:1;transform:none;transition:none}
   }
+  .demo-shot .demo-trades-v2 .honest{position:static}
+  .demo-shot .demo-trades-v2 footer{padding-bottom:26px}
 `;

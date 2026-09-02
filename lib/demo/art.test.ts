@@ -1,12 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   artStorageOrigin,
+  loadArtPool,
   pickArt,
   publicArtUrl,
   type ArtRow,
 } from './art';
 
+const originalFetch = globalThis.fetch;
+
 afterEach(() => {
+  globalThis.fetch = originalFetch;
   vi.unstubAllEnvs();
 });
 
@@ -72,5 +76,19 @@ describe('publicArtUrl', () => {
     expect(publicArtUrl('https://evil.example/x.jpg')).toBeNull();
     expect(publicArtUrl('http://other.host/auto/01-lift-portrait.jpg')).toBeNull();
     expect(publicArtUrl('//cdn.example/x.jpg')).toBeNull();
+  });
+});
+
+describe('loadArtPool', () => {
+  it('requests approved rows ordered by shot_key.asc', async () => {
+    vi.stubEnv('SUPABASE_URL', 'https://example.supabase.co');
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'service-role');
+    let url = '';
+    globalThis.fetch = (async (input) => {
+      url = String(input);
+      return new Response('[]', { status: 200 });
+    }) as typeof fetch;
+    await loadArtPool('auto');
+    expect(url).toContain('order=shot_key.asc');
   });
 });

@@ -63,6 +63,8 @@ const COVE_FACTS: DemoFacts = {
     { value: 'Engine Service', source: 'page_facts.service_vocab_hits' },
     { value: 'Tire Service', source: 'page_facts.service_vocab_hits' },
     { value: 'Wheel Alignment', source: 'page_facts.service_vocab_hits' },
+    { value: 'Brake Service', source: 'page_facts.service_vocab_hits' },
+    { value: 'Vehicle Inspection', source: 'page_facts.service_vocab_hits' },
   ],
   hours: {
     value: WEEKDAY_HOURS,
@@ -241,6 +243,47 @@ describe('authorInitials', () => {
     expect(authorInitials('Kathy Bailey')).toBe('KB');
     expect(authorInitials('Doug')).toBe('D');
     expect(authorInitials('K Stanton')).toBe('KS');
+  });
+});
+
+describe('trades_v2 camera polish', () => {
+  it('uses SVG stars and no glyph stars or arrows; five services set data-n', () => {
+    const html = renderToStaticMarkup(
+      <TradesV2Template site={coveRow()} pool={[]} />,
+    );
+    expect(html).toContain('data-n="5"');
+    expect(html).not.toContain('★');
+    expect(html).not.toContain('↗');
+    expect(html).toMatch(/class="trust"[^>]*>[\s\S]*?<svg\b/);
+  });
+
+  it('puts blurbs[0] in the hero and blurbs[1] in the band, never the same sentence', () => {
+    const html = decode(
+      renderToStaticMarkup(<TradesV2Template site={coveRow()} pool={[]} />),
+    );
+    const sub = html.match(/<p class="sub">([^<]*)<\/p>/)?.[1];
+    const quote = html.match(/<q>([^<]*)<small>/)?.[1];
+    expect(sub).toBe('First blurb from the listing.');
+    expect(quote).toBe('Time taken on lowered cars and aftermarket wheels');
+    expect(sub).not.toBe(quote);
+  });
+
+  it('shows the hero line in the band when only one blurb exists', () => {
+    const html = decode(
+      renderToStaticMarkup(
+        <TradesV2Template
+          site={coveRow({
+            blurbs: ['Only one blurb from the listing.'],
+          })}
+          pool={[]}
+        />,
+      ),
+    );
+    expect(html).toContain('Only one blurb from the listing.');
+    const quote = html.match(/<q>([^<]*)<small>/)?.[1];
+    expect(quote).toBe(
+      'Auto repair shop in Clarksburg serving custom and standard vehicles',
+    );
   });
 });
 

@@ -12,6 +12,12 @@ describe('DEMO_SHOT_SETTLE_SCRIPT', () => {
     expect(DEMO_SHOT_SETTLE_SCRIPT).toContain('document.fonts.ready');
     expect(DEMO_SHOT_SETTLE_SCRIPT).toContain('await document.fonts.ready');
   });
+
+  it("adds 'demo-shot' to the documentElement", () => {
+    expect(DEMO_SHOT_SETTLE_SCRIPT).toContain(
+      "document.documentElement.classList.add('demo-shot')",
+    );
+  });
 });
 
 describe('demoShotPageUrl', () => {
