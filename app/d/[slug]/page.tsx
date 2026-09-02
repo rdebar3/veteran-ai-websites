@@ -88,9 +88,10 @@ export default async function DemoPage({ params, searchParams }: PageProps) {
     });
   }
 
+  const facts = parseDemoFacts(site.facts);
   const artPool =
     resolveDemoTemplateKey(site.template_key) === DEMO_TEMPLATE_TRADES_V2
-      ? await loadArtPool(artTradeFor(parseDemoFacts(site.facts).category?.value))
+      ? await loadArtPool(artTradeFor(facts.category?.value, facts.name.value))
       : [];
 
   return <DemoSiteView site={site} artPool={artPool} />;

@@ -7,7 +7,7 @@ import {
 } from './copy';
 import { parseBlurbItems, parseDemoFacts, parseHeroLine } from './facts';
 import { hoursRows, isOpenNow, summarizeOpenHours } from './hours';
-import { kitFor } from './kits';
+import { buttonInkFor, kitFor } from './kits';
 import type { DemoSiteRow, Provenanced } from './types';
 
 const GOOGLE_FONTS_PRECONNECT = 'https://fonts.googleapis.com';
@@ -370,8 +370,10 @@ function kitVars(kit: ReturnType<typeof kitFor>): CSSProperties {
     '--ink': kit.ink,
     '--muted': kit.muted,
     '--dim': kit.dim,
+    '--accent': kit.accent,
     '--amber': kit.accent,
     '--amber2': kit.accent2,
+    '--btn-ink': buttonInkFor(kit.accent),
     '--steel': kit.steel,
     '--display': kit.displayFont,
     '--body': kit.bodyFont,
@@ -393,7 +395,7 @@ export function TradesV2Template({
   const name = facts.name.value;
   const town = facts.town?.value;
   const category = facts.category?.value;
-  const trade = artTradeFor(category);
+  const trade = artTradeFor(category, name);
   const kit = kitFor(trade);
   const picked = pickArt(trade, site.slug, pool);
   const heroUrl = picked.hero ? publicArtUrl(picked.hero.path) : null;
@@ -752,7 +754,7 @@ const TRADES_V2_CSS = `
   .demo-trades-v2 nav{margin-left:auto;display:flex;gap:22px;font:600 13px var(--body);color:var(--muted)}
   .demo-trades-v2 nav a{text-decoration:none}
   .demo-trades-v2 nav a:hover{color:var(--ink)}
-  .demo-trades-v2 .call{display:inline-flex;align-items:center;gap:8px;background:var(--amber);color:#1a1200;border-radius:999px;padding:11px 18px;font:700 14px var(--body);letter-spacing:.02em;text-decoration:none;box-shadow:0 8px 24px rgba(245,165,36,.25)}
+  .demo-trades-v2 .call{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--btn-ink);border-radius:999px;padding:11px 18px;font:700 14px var(--body);letter-spacing:.02em;text-decoration:none;box-shadow:0 8px 24px color-mix(in srgb, var(--accent) 25%, transparent)}
   .demo-trades-v2 .call svg{width:15px;height:15px}
   .demo-trades-v2 .ghost{display:inline-flex;align-items:center;gap:8px;border:1px solid #3a414c;color:var(--ink);border-radius:999px;padding:11px 18px;font:600 14px var(--body);text-decoration:none;background:rgba(255,255,255,.03)}
   .demo-trades-v2 .hero{position:relative;overflow:hidden;min-height:82vh;display:grid;grid-template-columns:1.02fr .98fr;align-items:center;border-bottom:1px solid var(--line);background:var(--ground)}
@@ -796,20 +798,20 @@ const TRADES_V2_CSS = `
   .demo-trades-v2 .services[data-n="6"]{grid-template-columns:repeat(3,1fr)}
   .demo-trades-v2 .svc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 20px 20px;position:relative;overflow:hidden;transition:transform .25s,border-color .25s}
   .demo-trades-v2 .svc:hover{transform:translateY(-3px);border-color:#3d4550}
-  .demo-trades-v2 .svc i{position:absolute;right:14px;top:10px;font:800 44px/1 var(--display);color:rgba(245,165,36,.12)}
+  .demo-trades-v2 .svc i{position:absolute;right:14px;top:10px;font:800 44px/1 var(--display);color:color-mix(in srgb, var(--accent) 12%, transparent)}
   .demo-trades-v2 .svc svg{width:30px;height:30px;color:var(--amber);margin-bottom:14px}
   .demo-trades-v2 .svc h3{font-size:22px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
   .demo-trades-v2 .band{position:relative;height:360px;overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
   .demo-trades-v2 .band.has-photo{background:linear-gradient(90deg, rgba(15,18,22,.15) 0%, rgba(15,18,22,.55) 55%, rgba(15,18,22,.85) 100%), var(--band-url) center 40%/cover no-repeat}
-  .demo-trades-v2 .band.no-photo{background:radial-gradient(50% 80% at 25% 50%, rgba(245,165,36,.18), transparent 60%),radial-gradient(40% 70% at 80% 60%, rgba(143,163,184,.14), transparent 60%),linear-gradient(180deg,#0c0f13,#191d24 60%,#0c0f13)}
+  .demo-trades-v2 .band.no-photo{background:radial-gradient(50% 80% at 25% 50%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 60%),radial-gradient(40% 70% at 80% 60%, color-mix(in srgb, var(--steel) 14%, transparent), transparent 60%),linear-gradient(180deg,var(--ground),var(--panel2) 60%,var(--ground))}
   .demo-trades-v2 .band q{position:absolute;right:6%;bottom:34px;max-width:38ch;font:700 clamp(22px,3vw,34px)/1.1 var(--display);text-transform:uppercase;color:var(--ink);quotes:none;z-index:2}
   .demo-trades-v2 .band q[data-len="long"]{font-size:clamp(20px,2.4vw,27px)}
   .demo-trades-v2 .band q small{display:block;font:600 12px var(--body);letter-spacing:.2em;color:var(--amber);text-transform:uppercase;margin-top:10px}
   .demo-trades-v2 .reviews{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .demo-trades-v2 .rev{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px 26px 22px;position:relative}
-  .demo-trades-v2 .rev:before{content:"“";position:absolute;right:22px;top:6px;font:800 90px/1 var(--display);color:rgba(245,165,36,.14)}
+  .demo-trades-v2 .rev:before{content:"“";position:absolute;right:22px;top:6px;font:800 90px/1 var(--display);color:color-mix(in srgb, var(--accent) 14%, transparent)}
   .demo-trades-v2 .rev .who{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .demo-trades-v2 .ava{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--amber2));color:#1a1200;display:grid;place-items:center;font:800 15px var(--display);letter-spacing:.05em}
+  .demo-trades-v2 .ava{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--amber2));color:var(--btn-ink);display:grid;place-items:center;font:800 15px var(--display);letter-spacing:.05em}
   .demo-trades-v2 .rev .who b{display:block;font-weight:600}
   .demo-trades-v2 .rev .who span{font-size:12px;color:var(--dim)}
   .demo-trades-v2 .rev p{margin:0;color:#dcd7cd;font-size:16px}
@@ -854,7 +856,7 @@ const TRADES_V2_CSS = `
     .demo-trades-v2 .hero .art{background:linear-gradient(180deg, rgba(15,18,22,.55) 0%, rgba(15,18,22,.35) 35%, rgba(15,18,22,.7) 70%, rgba(15,18,22,.95) 100%)}
     .demo-trades-v2 .dock{display:grid;grid-template-columns:1fr 1fr 1fr;position:fixed;left:0;right:0;bottom:0;z-index:50;background:#0b0d10;border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
     .demo-trades-v2 .dock a{display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;font:700 13px var(--body);padding:12px 6px;border-radius:10px;color:var(--ink)}
-    .demo-trades-v2 .dock a.primary{background:var(--amber);color:#1a1200}
+    .demo-trades-v2 .dock a.primary{background:var(--accent);color:var(--btn-ink)}
     .demo-trades-v2.has-dock footer{padding-bottom:150px}
   }
   .demo-trades-v2 .rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}

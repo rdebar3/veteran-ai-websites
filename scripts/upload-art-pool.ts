@@ -7,18 +7,7 @@
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
-
-type ManifestShot = {
-  key: string;
-  file: string;
-  role: 'hero' | 'band';
-  approved: boolean;
-};
-
-type Manifest = {
-  trade: string;
-  shots: ManifestShot[];
-};
+import { imageSize, validateManifest } from '../lib/demo/art-manifest';
 
 function env(name: string): string {
   const value = process.env[name]?.trim() || '';
@@ -33,41 +22,6 @@ function supabaseBase(): string {
     process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   if (!raw) throw new Error('Missing SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL');
   return raw.replace(/\/$/, '').replace(/\/rest\/v1\/?$/, '');
-}
-
-function jpegSize(buf: Buffer): { width: number; height: number } | null {
-  if (buf.length < 4 || buf[0] !== 0xff || buf[1] !== 0xd8) return null;
-  let i = 2;
-  while (i < buf.length - 8) {
-    if (buf[i] !== 0xff) {
-      i += 1;
-      continue;
-    }
-    const marker = buf[i + 1];
-    if (marker === 0xc0 || marker === 0xc1 || marker === 0xc2) {
-      return {
-        height: buf.readUInt16BE(i + 5),
-        width: buf.readUInt16BE(i + 7),
-      };
-    }
-    const size = buf.readUInt16BE(i + 2);
-    if (size < 2) break;
-    i += 2 + size;
-  }
-  return null;
-}
-
-function pngSize(buf: Buffer): { width: number; height: number } | null {
-  if (buf.length < 24) return null;
-  if (buf.toString('ascii', 1, 4) !== 'PNG') return null;
-  return {
-    width: buf.readUInt32BE(16),
-    height: buf.readUInt32BE(20),
-  };
-}
-
-function imageSize(buf: Buffer): { width: number; height: number } {
-  return jpegSize(buf) || pngSize(buf) || { width: 0, height: 0 };
 }
 
 function pad(value: string, width: number): string {
@@ -87,13 +41,12 @@ async function main(): Promise<void> {
   const folder = path.resolve(process.cwd(), 'docs', 'art-pool', trade);
   const manifestPath = path.join(folder, 'manifest.json');
   const raw = await readFile(manifestPath, 'utf8');
-  const manifest = JSON.parse(raw) as Manifest;
-  if (manifest.trade !== trade) {
-    throw new Error(
-      `manifest trade "${manifest.trade}" does not match folder "${trade}"`,
-    );
+  const parsed = validateManifest(JSON.parse(raw) as unknown, trade);
+  if (!parsed.ok) {
+    throw new Error(parsed.error);
   }
-  if (!Array.isArray(manifest.shots) || manifest.shots.length === 0) {
+  const manifest = parsed.manifest;
+  if (manifest.shots.length === 0) {
     throw new Error('manifest.json has no shots');
   }
 
@@ -113,7 +66,8 @@ async function main(): Promise<void> {
     const filePath = path.join(folder, shot.file);
     await stat(filePath);
     const buf = await readFile(filePath);
-    const { width, height } = imageSize(buf);
+    const size = imageSize(buf) ?? { width: 0, height: 0 };
+    const { width, height } = size;
     const objectPath = `${trade}/${shot.file}`;
     const contentType = shot.file.toLowerCase().endsWith('.png')
       ? 'image/png'

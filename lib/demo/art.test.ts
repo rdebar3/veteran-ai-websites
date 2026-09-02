@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   artStorageOrigin,
+  artTradeFor,
   loadArtPool,
   pickArt,
   publicArtUrl,
@@ -76,6 +77,15 @@ describe('publicArtUrl', () => {
     expect(publicArtUrl('https://evil.example/x.jpg')).toBeNull();
     expect(publicArtUrl('http://other.host/auto/01-lift-portrait.jpg')).toBeNull();
     expect(publicArtUrl('//cdn.example/x.jpg')).toBeNull();
+  });
+});
+
+describe('artTradeFor', () => {
+  it('lets a heating name win on a generic contractor, not on auto_repair', () => {
+    expect(artTradeFor('general_contractor', 'B & G Heating & Cooling')).toBe(
+      'hvac',
+    );
+    expect(artTradeFor('auto_repair', "Rick's Towing")).toBe('auto');
   });
 });
 

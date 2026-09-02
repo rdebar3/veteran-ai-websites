@@ -35,18 +35,42 @@ function isArtRole(value: unknown): value is ArtRole {
   return value === 'hero' || value === 'band';
 }
 
-export function artTradeFor(category?: string): string {
+function tradeFromName(name: string): string | null {
+  const nm = name.toLowerCase();
+  if (/heat|cool|hvac|furnace|air condition/.test(nm)) return 'hvac';
+  if (/tow|recovery|wrecker/.test(nm)) return 'towing';
+  if (/roof/.test(nm)) return 'roofing';
+  if (/plumb|drain|sewer/.test(nm)) return 'plumbing';
+  if (/electric/.test(nm)) return 'electrical';
+  return null;
+}
+
+export function artTradeFor(category?: string, name?: string): string {
   const n = (category || '').toLowerCase().trim();
-  if (!n) return 'auto';
-  if (n.includes('auto')) return 'auto';
-  if (n.includes('roof')) return 'roofing';
-  if (n.includes('plumb')) return 'plumbing';
-  if (n.includes('hvac') || n.includes('heat') || n.includes('cool')) {
-    return 'hvac';
+  let trade = '';
+  if (n.includes('auto')) trade = 'auto';
+  else if (n.includes('roof')) trade = 'roofing';
+  else if (n.includes('plumb')) trade = 'plumbing';
+  else if (n.includes('hvac') || n.includes('heat') || n.includes('cool')) {
+    trade = 'hvac';
+  } else if (n.includes('electric')) trade = 'electrical';
+  else if (n.includes('tow')) trade = 'towing';
+  else if (
+    n.includes('general_contractor') ||
+    n === 'contractor' ||
+    n.includes('construction')
+  ) {
+    trade = 'general_contractor';
+  } else if (n) {
+    trade = n.replace(/[\s-]+/g, '_');
   }
-  if (n.includes('electric')) return 'electrical';
-  if (n.includes('tow')) return 'towing';
-  return n.replace(/[\s-]+/g, '_');
+
+  const generic = !n || trade === 'general_contractor';
+  if (generic && name) {
+    const fromName = tradeFromName(name);
+    if (fromName) return fromName;
+  }
+  return trade || 'auto';
 }
 
 /** Public URL for a pool path. Rejects anything that is not a relative storage key. */
