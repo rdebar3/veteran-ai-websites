@@ -5,6 +5,7 @@ import {
   layoutVariantFor,
   pickKicker,
   proofCardVisible,
+  screenshotTopStoragePath,
   skinFor,
   slugSeed,
 } from './copy';
@@ -74,5 +75,13 @@ describe('proof card threshold', () => {
     expect(proofCardVisible(4.0)).toBe(true);
     expect(proofCardVisible(undefined)).toBe(false);
     expect(proofCardVisible(null)).toBe(false);
+  });
+});
+
+describe('screenshotTopStoragePath', () => {
+  it("stores the first-screen clip next to the full PNG", () => {
+    expect(screenshotTopStoragePath('cove-run-customs')).toBe(
+      'demo-screenshots/cove-run-customs-top.png',
+    );
   });
 });

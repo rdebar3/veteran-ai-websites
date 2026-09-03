@@ -17,6 +17,7 @@ export async function GET(
   return handleDemoShotRequest({
     slug,
     preview,
+    variant: request.nextUrl.searchParams.get('variant'),
     userAgent: request.headers.get('user-agent'),
     defer: (work) => {
       after(() => {

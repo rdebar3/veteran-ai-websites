@@ -37,3 +37,17 @@ export function parseShotSlug(input: {
 export function demoShotRowPatch(slug: string): { screenshot_path: string } {
   return { screenshot_path: screenshotStoragePath(slug) };
 }
+
+export function demoShotTopClip(stripBottom: number): {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+} {
+  return {
+    x: 0,
+    y: 0,
+    width: DEMO_SHOT_VIEWPORT_WIDTH,
+    height: stripBottom > 400 ? stripBottom : 820,
+  };
+}

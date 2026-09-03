@@ -1,4 +1,4 @@
-import { DEMO_STORAGE_BUCKET } from './copy';
+import { DEMO_STORAGE_BUCKET, screenshotTopStoragePath } from './copy';
 import { recordDemoShotLoad } from './shot-loads';
 import {
   getDemoSiteBySlug,
@@ -11,6 +11,13 @@ export const DEMO_SHOT_CACHE_CONTROL = 'public, max-age=600';
 export const DEMO_SHOT_CONTENT_TYPE = 'image/png';
 
 export type DemoShotKind = 'serve' | 'gone';
+export type DemoShotVariant = 'full' | 'top';
+
+export function parseShotVariant(
+  value: string | null | undefined,
+): DemoShotVariant {
+  return value === 'top' ? 'top' : 'full';
+}
 
 export function resolveDemoShot(
   site: Pick<DemoSiteRow, 'status' | 'screenshot_path'> | null,
@@ -58,6 +65,7 @@ export function demoShotPng(body: ArrayBuffer): Response {
 
 async function fetchDemoShotPng(
   screenshotPath: string,
+  opts?: { optional?: boolean },
 ): Promise<ArrayBuffer | null> {
   const base = supabaseBaseUrl();
   const key = supabaseServiceKey();
@@ -79,7 +87,9 @@ async function fetchDemoShotPng(
     cache: 'no-store',
   });
   if (!res.ok) {
-    console.error('[demo] screenshot download failed', res.status);
+    if (!(opts?.optional && res.status === 404)) {
+      console.error('[demo] screenshot download failed', res.status);
+    }
     return null;
   }
   return res.arrayBuffer();
@@ -92,6 +102,7 @@ async function fetchDemoShotPng(
 export async function handleDemoShotRequest(input: {
   slug: string;
   preview: boolean;
+  variant?: string | null;
   userAgent?: string | null;
   defer?: (work: () => Promise<void>) => void;
 }): Promise<Response> {
@@ -103,7 +114,16 @@ export async function handleDemoShotRequest(input: {
   const screenshotPath = site.screenshot_path;
   if (!isSafeScreenshotPath(screenshotPath)) return demoShotGone();
 
-  const png = await fetchDemoShotPng(screenshotPath);
+  const variant = parseShotVariant(input.variant);
+  let png: ArrayBuffer | null = null;
+  if (variant === 'top') {
+    png = await fetchDemoShotPng(screenshotTopStoragePath(site.slug), {
+      optional: true,
+    });
+  }
+  if (!png) {
+    png = await fetchDemoShotPng(screenshotPath);
+  }
   if (!png) return demoShotGone();
 
   const defer =

@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
-import { screenshotStoragePath } from '@/lib/demo/copy';
+import {
+  screenshotStoragePath,
+  screenshotTopStoragePath,
+} from '@/lib/demo/copy';
 import { cronAuthorized } from '@/lib/demo/cron-auth';
 import {
   DEMO_SHOT_SETTLE_SCRIPT,
   DEMO_SHOT_VIEWPORT_WIDTH,
   demoShotPageUrl,
   demoShotRowPatch,
+  demoShotTopClip,
   parseShotSlug,
 } from '@/lib/demo/shot';
 import {
@@ -65,7 +69,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  let png: Uint8Array;
+  let png: { full: Uint8Array; top: Uint8Array };
   try {
     png = await renderDemoPng(demoShotPageUrl(slug));
   } catch (err) {
@@ -90,22 +94,24 @@ async function handle(req: NextRequest): Promise<NextResponse> {
   }
 
   const objectPath = screenshotStoragePath(slug);
-  const upload = await fetch(`${base}/storage/v1/object/${objectPath}`, {
-    method: 'POST',
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      'Content-Type': 'image/png',
-      'x-upsert': 'true',
-    },
-    body: Buffer.from(png),
-  });
+  const topPath = screenshotTopStoragePath(slug);
+  const upload = await uploadDemoPng(base, key, objectPath, png.full);
 
   if (!upload.ok) {
     const errText = await upload.text().catch(() => '');
     console.error('[demo-shot] storage upload failed:', upload.status, errText);
     return NextResponse.json(
       { ok: false, error: 'storage_upload_failed', status: upload.status },
+      { status: 502 },
+    );
+  }
+
+  const topUpload = await uploadDemoPng(base, key, topPath, png.top);
+  if (!topUpload.ok) {
+    const errText = await topUpload.text().catch(() => '');
+    console.error('[demo-shot] top storage upload failed:', topUpload.status, errText);
+    return NextResponse.json(
+      { ok: false, error: 'storage_upload_failed', status: topUpload.status },
       { status: 502 },
     );
   }
@@ -152,7 +158,27 @@ function isChromiumBundleError(message: string): boolean {
   );
 }
 
-async function renderDemoPng(url: string): Promise<Uint8Array> {
+async function uploadDemoPng(
+  base: string,
+  key: string,
+  objectPath: string,
+  png: Uint8Array,
+): Promise<Response> {
+  return fetch(`${base}/storage/v1/object/${objectPath}`, {
+    method: 'POST',
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'image/png',
+      'x-upsert': 'true',
+    },
+    body: Buffer.from(png),
+  });
+}
+
+async function renderDemoPng(
+  url: string,
+): Promise<{ full: Uint8Array; top: Uint8Array }> {
   chromium.setGraphicsMode = false;
   const executablePath = await chromium.executablePath();
   if (!executablePath) {
@@ -200,8 +226,16 @@ async function renderDemoPng(url: string): Promise<Uint8Array> {
     });
     await page.evaluate(DEMO_SHOT_SETTLE_SCRIPT);
     await new Promise((r) => setTimeout(r, 250));
-    const buf = await page.screenshot({ type: 'png', fullPage: true });
-    return buf;
+    const bottom = await page.evaluate(() => {
+      const s = document.querySelector('.demo-trades-v2 .strip');
+      return s ? Math.ceil(s.getBoundingClientRect().bottom) : 0;
+    });
+    const top = await page.screenshot({
+      type: 'png',
+      clip: demoShotTopClip(bottom),
+    });
+    const full = await page.screenshot({ type: 'png', fullPage: true });
+    return { full, top };
   } finally {
     await browser.close().catch(() => undefined);
   }

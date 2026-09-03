@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DEMO_SHOT_SETTLE_SCRIPT,
   demoShotPageUrl,
+  demoShotTopClip,
   parseShotSlug,
 } from './shot';
 
@@ -25,6 +26,24 @@ describe('demoShotPageUrl', () => {
     expect(demoShotPageUrl('cove-run-customs').endsWith('/d/cove-run-customs?preview=1')).toBe(
       true,
     );
+  });
+});
+
+describe('demoShotTopClip', () => {
+  it('clips from the top to the strip bottom, else 820', () => {
+    expect(demoShotTopClip(0)).toEqual({ x: 0, y: 0, width: 1024, height: 820 });
+    expect(demoShotTopClip(400)).toEqual({
+      x: 0,
+      y: 0,
+      width: 1024,
+      height: 820,
+    });
+    expect(demoShotTopClip(512)).toEqual({
+      x: 0,
+      y: 0,
+      width: 1024,
+      height: 512,
+    });
   });
 });
 

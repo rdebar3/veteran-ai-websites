@@ -21,6 +21,10 @@ export function screenshotStoragePath(slug: string): string {
   return `${DEMO_STORAGE_BUCKET}/${slug}.png`;
 }
 
+export function screenshotTopStoragePath(slug: string): string {
+  return `${DEMO_STORAGE_BUCKET}/${slug}-top.png`;
+}
+
 export type DemoSkin = 'ember' | 'summit' | 'storm';
 
 export type SkinTokens = {
