@@ -37,11 +37,11 @@ function isArtRole(value: unknown): value is ArtRole {
 
 function tradeFromName(name: string): string | null {
   const nm = name.toLowerCase();
-  if (/heat|cool|hvac|furnace|air condition/.test(nm)) return 'hvac';
-  if (/tow|recovery|wrecker/.test(nm)) return 'towing';
-  if (/roof/.test(nm)) return 'roofing';
-  if (/plumb|drain|sewer/.test(nm)) return 'plumbing';
-  if (/electric/.test(nm)) return 'electrical';
+  if (/\b(heat\w*|cool\w*|hvac|furnace|air)\b/.test(nm)) return 'hvac';
+  if (/\b(tow|towing|recovery|wrecker)\b/.test(nm)) return 'towing';
+  if (/\broof\w*/.test(nm)) return 'roofing';
+  if (/\b(plumb\w*|drain\w*|sewer)\b/.test(nm)) return 'plumbing';
+  if (/\belectric\w*/.test(nm)) return 'electrical';
   return null;
 }
 

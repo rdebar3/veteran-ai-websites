@@ -87,6 +87,18 @@ describe('artTradeFor', () => {
     );
     expect(artTradeFor('auto_repair', "Rick's Towing")).toBe('auto');
   });
+
+  it('matches name hints on word boundaries, not substrings', () => {
+    expect(
+      artTradeFor('general_contractor', 'Morgantown Handyman WV Professionals'),
+    ).toBe('general_contractor');
+    expect(artTradeFor('general_contractor', 'Appalachian Air LLC')).toBe(
+      'hvac',
+    );
+    expect(
+      artTradeFor('general_contractor', "Pifer's Towing and Recovery"),
+    ).toBe('towing');
+  });
 });
 
 describe('loadArtPool', () => {
