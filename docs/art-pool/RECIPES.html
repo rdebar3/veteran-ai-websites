@@ -1,0 +1,703 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Art Pool Recipes · six trades</title>
+<style>
+:root{--ground:#07090d;--panel:#10151f;--panel2:#0c1017;--line:#1c232f;--ink:#eae7e0;--muted:#8b93a1;--dim:#525b68;--a1:#f5a524;--good:#5fd68a;--steel:#8fa3b8}
+*{box-sizing:border-box} body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.55 "Segoe UI",system-ui,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:36px 22px 90px}
+.kicker{font-size:11px;letter-spacing:.28em;color:var(--dim);text-transform:uppercase;margin:0 0 6px}
+h1{font-size:34px;margin:0 0 8px} h1 b{color:var(--a1)}
+.lede{color:var(--muted);max-width:760px;margin:0 0 16px}
+.rules{border:1px solid #2a3a2c;background:var(--panel2);border-radius:14px;padding:14px 18px;margin:0 0 22px;color:var(--muted)} .rules b{color:var(--ink)} .rules li{margin:4px 0}
+.nav{margin:0 0 30px;color:var(--dim)} .nav a{color:var(--a1);text-decoration:none;font-weight:600}
+.trade{margin:0 0 44px} .trade-head h2{font-size:26px;margin:0 0 6px} .why{color:var(--muted);max-width:760px;margin:0 0 14px}
+.shot{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px 12px;margin:0 0 10px}
+.head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 6px}
+.key{font-weight:700;letter-spacing:.06em} .role{font-size:10px;letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted)} .role.hero{border-color:var(--a1);color:var(--a1)} .role.band{border-color:var(--steel);color:var(--steel)}
+.file{font-size:12px;color:var(--dim);font-family:ui-monospace,Consolas,monospace}
+.copy{margin-left:auto;background:var(--a1);color:#1a1200;border:0;border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer} .copy.done{background:var(--good)}
+.prompt{margin:0;color:var(--ink);font-size:14px}
+.tip{margin:8px 0 0;color:var(--good);font-size:13px}
+.manifest{margin:8px 0 0;color:var(--muted)} .manifest pre{background:#060809;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;overflow:auto;color:#c9d1d9}
+summary{cursor:pointer}
+</style></head><body><div class="wrap">
+<p class="kicker">Veteran AI Websites · art pool · Grok Imagine 2 recipes</p>
+<h1>SIX TRADES, <b>SIXTY SHOTS</b></h1>
+<p class="lede">Same method that locked auto. For each trade: make shot 01 first with the full style paragraph, keep generating until it's right, then feed 01 as the reference image for shots 02–10 so the whole trade matches. Four heroes and six bands per trade; nine keepers is plenty, seven is fine. Save each keeper as the filename on its card, drop them in the folder named on the trade, drop the manifest beside them, and tell me the trade is in — I curate, then one call puts it in the pool.</p>
+<div class="rules"><b>The four laws for every shot</b><ul>
+<li><b>No words anywhere.</b> No signs, plates, labels, screens with text, brand marks. If Grok sneaks lettering in, regenerate — don't crop.</li>
+<li><b>No people.</b> No hands, no faces, no silhouettes. Tools and light do the talking.</li>
+<li><b>Nothing that could be mistaken for the shop's own place.</b> Unmarked trucks, plain vans, generic buildings, no house numbers.</li>
+<li><b>Portrait 9:16, every time, edge to edge.</b> The split hero uses portraits as-is for desktop and phone; nothing needs resizing. If a shot comes back with blurry bars top and bottom, it is not a portrait — toss it and regenerate. (Lesson from the contractor set: the words "wide banner crop" and "top and bottom can be plain" in the old band prompts made Grok paint the bars itself. The band prompts now say the opposite.)</li></ul>
+<p>Check heroes for the auto-shot lesson: wheels and geometry have to be physically possible. If a perspective looks wrong to you, it is wrong.</p></div>
+<p class="nav"><a href="#electrical">Electrical</a> · <a href="#towing">Towing &amp; recovery</a> · <a href="#roofing">Roofing</a> · <a href="#plumbing">Plumbing</a> · <a href="#hvac">Heating &amp; cooling</a> · <a href="#general_contractor">General contractor</a></p>
+<section class="trade" id="electrical">
+  <div class="trade-head"><p class="kicker">docs/art-pool/electrical/</p><h2>Electrical</h2><p class="why">Electricians sell trust and tidiness. The shots are neat wiring, good tools, and light itself — a fixture glowing in a room that didn&#x27;t have one this morning. Kit: safety yellow on near-black.</p></div>
+  <article class="shot" data-role="hero">
+  <div class="head"><span class="key">01-panel</span><span class="role hero">hero</span><span class="file">01-panel-portrait.jpg</span><button type="button" class="copy" data-copy="An open residential breaker panel with the cover off, tidy copper and color-coded wires bent in clean parallel runs, a clip-on work light above it, unfinished drywall around it. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">An open residential breaker panel with the cover off, tidy copper and color-coded wires bent in clean parallel runs, a clip-on work light above it, unfinished drywall around it. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  <p class="tip">First shot of the trade: no reference image. Generate until one is right, then every other shot in this trade uses it as the reference.</p>
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">02-fixture</span><span class="role hero">hero</span><span class="file">02-fixture-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A freshly installed pendant light glowing warm in an otherwise dark, newly wired room at dusk, a folded step ladder resting against the wall, blue evening light in the window. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A freshly installed pendant light glowing warm in an otherwise dark, newly wired room at dusk, a folded step ladder resting against the wall, blue evening light in the window. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">03-van-shelf</span><span class="role hero">hero</span><span class="file">03-van-shelf-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. The open side door of a plain white work van at dusk, interior shelves of neatly organized bins and coils of wire and conduit, a headlamp lying on the floor. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. The open side door of a plain white work van at dusk, interior shelves of neatly organized bins and coils of wire and conduit, a headlamp lying on the floor. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">04-conduit</span><span class="role hero">hero</span><span class="file">04-conduit-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Bent metal conduit running along a block wall into a junction box, a conduit bender leaning beside it, a single work light throwing long shadows. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Bent metal conduit running along a block wall into a junction box, a conduit bender leaning beside it, a single work light throwing long shadows. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">05-wire-spools</span><span class="role band">band</span><span class="file">05-wire-spools-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Large spools of black, white, and red wire stacked on a concrete floor, a coil of yellow cable in the foreground, dark shop behind. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Large spools of black, white, and red wire stacked on a concrete floor, a coil of yellow cable in the foreground, dark shop behind. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">06-tool-roll</span><span class="role band">band</span><span class="file">06-tool-roll-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A canvas tool roll unrolled on a workbench with lineman pliers, wire strippers, screwdrivers, and a voltage tester laid in a row, warm light from one side. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A canvas tool roll unrolled on a workbench with lineman pliers, wire strippers, screwdrivers, and a voltage tester laid in a row, warm light from one side. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">07-junction</span><span class="role band">band</span><span class="file">07-junction-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A close view of a junction box with wire nuts and neatly folded conductors, mounted on a stud, sawdust on the plate below. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A close view of a junction box with wire nuts and neatly folded conductors, mounted on a stud, sawdust on the plate below. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">08-transformer</span><span class="role band">band</span><span class="file">08-transformer-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A pole-mounted transformer and lines against a blue-hour sky at the edge of a small town, seen from below, no signs or poles with text. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A pole-mounted transformer and lines against a blue-hour sky at the edge of a small town, seen from below, no signs or poles with text. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">09-generator</span><span class="role band">band</span><span class="file">09-generator-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A standby generator on a concrete pad beside a house at dusk, conduit running to the wall, wet grass, porch light on. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A standby generator on a concrete pad beside a house at dusk, conduit running to the wall, wet grass, porch light on. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">10-ceiling</span><span class="role band">band</span><span class="file">10-ceiling-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Recessed lights being installed in an unfinished ceiling, insulation and joists, a work light hanging from a rafter, dust in the beam. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Recessed lights being installed in an unfinished ceiling, insulation and joists, a work light hanging from a rafter, dust in the beam. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article>
+  <details class="manifest"><summary>manifest.json to drop beside the files (edit approved: false for any shot you cut)</summary><pre>{
+  &quot;trade&quot;: &quot;electrical&quot;,
+  &quot;locked_by&quot;: &quot;Rich Debar&quot;,
+  &quot;locked_on&quot;: &quot;&quot;,
+  &quot;doctrine&quot;: &quot;Images come only from this approved pool. Never generated per demo, never external, never anything that could pass as the business&#x27;s own building or signage.&quot;,
+  &quot;shots&quot;: [
+    {
+      &quot;key&quot;: &quot;01-panel&quot;,
+      &quot;file&quot;: &quot;01-panel-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;02-fixture&quot;,
+      &quot;file&quot;: &quot;02-fixture-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;03-van-shelf&quot;,
+      &quot;file&quot;: &quot;03-van-shelf-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;04-conduit&quot;,
+      &quot;file&quot;: &quot;04-conduit-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;05-wire-spools&quot;,
+      &quot;file&quot;: &quot;05-wire-spools-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;06-tool-roll&quot;,
+      &quot;file&quot;: &quot;06-tool-roll-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;07-junction&quot;,
+      &quot;file&quot;: &quot;07-junction-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;08-transformer&quot;,
+      &quot;file&quot;: &quot;08-transformer-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;09-generator&quot;,
+      &quot;file&quot;: &quot;09-generator-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;10-ceiling&quot;,
+      &quot;file&quot;: &quot;10-ceiling-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    }
+  ]
+}</pre></details>
+</section><section class="trade" id="towing">
+  <div class="trade-head"><p class="kicker">docs/art-pool/towing/</p><h2>Towing &amp; recovery</h2><p class="why">Towing is night, weather, and a truck that showed up. Keep the trucks unmarked and plain so nothing reads as somebody&#x27;s real fleet. Kit: emergency red on warm black.</p></div>
+  <article class="shot" data-role="hero">
+  <div class="head"><span class="key">01-flatbed-night</span><span class="role hero">hero</span><span class="file">01-flatbed-night-portrait.jpg</span><button type="button" class="copy" data-copy="A plain, unmarked flatbed tow truck parked on a wet two-lane road at night, amber light bar glowing, rain on the windshield, the deck tilted and empty, headlights raking the pavement. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">A plain, unmarked flatbed tow truck parked on a wet two-lane road at night, amber light bar glowing, rain on the windshield, the deck tilted and empty, headlights raking the pavement. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  <p class="tip">First shot of the trade: no reference image. Generate until one is right, then every other shot in this trade uses it as the reference.</p>
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">02-wheel-lift</span><span class="role hero">hero</span><span class="file">02-wheel-lift-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. The wheel-lift of an unmarked tow truck cradling the front tires of a dark sedan on a road shoulder at dusk, amber lights reflecting in the wet asphalt. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. The wheel-lift of an unmarked tow truck cradling the front tires of a dark sedan on a road shoulder at dusk, amber lights reflecting in the wet asphalt. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">03-winch</span><span class="role hero">hero</span><span class="file">03-winch-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A heavy winch drum with steel cable and a hook on the deck of a tow truck, close and low, cold blue dusk light and one amber marker light. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A heavy winch drum with steel cable and a hook on the deck of a tow truck, close and low, cold blue dusk light and one amber marker light. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">04-highway-dawn</span><span class="role hero">hero</span><span class="file">04-highway-dawn-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. An unmarked flatbed tow truck on a highway shoulder at first light, fog in the valley behind, the bed lowered and ready, no other vehicles. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. An unmarked flatbed tow truck on a highway shoulder at first light, fog in the valley behind, the bed lowered and ready, no other vehicles. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">05-chains</span><span class="role band">band</span><span class="file">05-chains-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Heavy tow chains and grab hooks laid across a steel deck, wet with rain, amber light catching the links. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Heavy tow chains and grab hooks laid across a steel deck, wet with rain, amber light catching the links. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">06-straps</span><span class="role band">band</span><span class="file">06-straps-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Ratchet straps and a wheel dolly stowed in a truck-side toolbox, the lid open, rain on the paint. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Ratchet straps and a wheel dolly stowed in a truck-side toolbox, the lid open, rain on the paint. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">07-controls</span><span class="role band">band</span><span class="file">07-controls-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. The hydraulic control levers on the side of a flatbed truck, worn handles, no labels visible, lit by a single amber light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. The hydraulic control levers on the side of a flatbed truck, worn handles, no labels visible, lit by a single amber light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">08-lot-dawn</span><span class="role band">band</span><span class="file">08-lot-dawn-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A gravel lot with two plain unmarked tow trucks parked at dawn, mist on the ground, hills behind, no buildings or signs. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A gravel lot with two plain unmarked tow trucks parked at dawn, mist on the ground, hills behind, no buildings or signs. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">09-cable</span><span class="role band">band</span><span class="file">09-cable-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A close view of braided steel winch cable wound on a drum, drops of rain on the strands, dark background. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A close view of braided steel winch cable wound on a drum, drops of rain on the strands, dark background. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">10-rain-road</span><span class="role band">band</span><span class="file">10-rain-road-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A wet mountain road at night seen from truck height, amber light spilling across the pavement from off-frame, trees black against a deep blue sky. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A wet mountain road at night seen from truck height, amber light spilling across the pavement from off-frame, trees black against a deep blue sky. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article>
+  <details class="manifest"><summary>manifest.json to drop beside the files (edit approved: false for any shot you cut)</summary><pre>{
+  &quot;trade&quot;: &quot;towing&quot;,
+  &quot;locked_by&quot;: &quot;Rich Debar&quot;,
+  &quot;locked_on&quot;: &quot;&quot;,
+  &quot;doctrine&quot;: &quot;Images come only from this approved pool. Never generated per demo, never external, never anything that could pass as the business&#x27;s own building or signage.&quot;,
+  &quot;shots&quot;: [
+    {
+      &quot;key&quot;: &quot;01-flatbed-night&quot;,
+      &quot;file&quot;: &quot;01-flatbed-night-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;02-wheel-lift&quot;,
+      &quot;file&quot;: &quot;02-wheel-lift-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;03-winch&quot;,
+      &quot;file&quot;: &quot;03-winch-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;04-highway-dawn&quot;,
+      &quot;file&quot;: &quot;04-highway-dawn-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;05-chains&quot;,
+      &quot;file&quot;: &quot;05-chains-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;06-straps&quot;,
+      &quot;file&quot;: &quot;06-straps-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;07-controls&quot;,
+      &quot;file&quot;: &quot;07-controls-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;08-lot-dawn&quot;,
+      &quot;file&quot;: &quot;08-lot-dawn-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;09-cable&quot;,
+      &quot;file&quot;: &quot;09-cable-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;10-rain-road&quot;,
+      &quot;file&quot;: &quot;10-rain-road-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    }
+  ]
+}</pre></details>
+</section><section class="trade" id="roofing">
+  <div class="trade-head"><p class="kicker">docs/art-pool/roofing/</p><h2>Roofing</h2><p class="why">Roofing sells at eye level with the shingles — texture, edges, and weather held off. Golden hour and storm light both work. Kit: copper on warm black.</p></div>
+  <article class="shot" data-role="hero">
+  <div class="head"><span class="key">01-shingles-golden</span><span class="role hero">hero</span><span class="file">01-shingles-golden-portrait.jpg</span><button type="button" class="copy" data-copy="A view along freshly laid dark architectural shingles at golden hour, a roofing nail gun resting on the slope, the valley and ridge running into the distance, hills beyond. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">A view along freshly laid dark architectural shingles at golden hour, a roofing nail gun resting on the slope, the valley and ridge running into the distance, hills beyond. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  <p class="tip">First shot of the trade: no reference image. Generate until one is right, then every other shot in this trade uses it as the reference.</p>
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">02-bundles</span><span class="role hero">hero</span><span class="file">02-bundles-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Stacked bundles of shingles wrapped in plain paper on a roof edge at dawn, a hammer and chalk line beside them, treetops below. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Stacked bundles of shingles wrapped in plain paper on a roof edge at dawn, a hammer and chalk line beside them, treetops below. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">03-standing-seam</span><span class="role hero">hero</span><span class="file">03-standing-seam-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A dark standing-seam metal roof in light rain at dusk, water beading on the panels, a ladder hooked over the eave, cool blue light. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A dark standing-seam metal roof in light rain at dusk, water beading on the panels, a ladder hooked over the eave, cool blue light. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">04-ridge-ladder</span><span class="role hero">hero</span><span class="file">04-ridge-ladder-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. An extension ladder leaning against the eave of a house at blue hour, a work light on the roof deck, the ridge line against a deep blue sky. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. An extension ladder leaning against the eave of a house at blue hour, a work light on the roof deck, the ridge line against a deep blue sky. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">05-nails-felt</span><span class="role band">band</span><span class="file">05-nails-felt-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Coil roofing nails, a hammer, and a utility knife on black felt underlayment, warm low sun raking across the texture. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Coil roofing nails, a hammer, and a utility knife on black felt underlayment, warm low sun raking across the texture. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">06-flashing</span><span class="role band">band</span><span class="file">06-flashing-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. New drip edge and step flashing along a roof edge, close, metal catching golden light against dark shingles. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. New drip edge and step flashing along a roof edge, close, metal catching golden light against dark shingles. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">07-tear-off</span><span class="role band">band</span><span class="file">07-tear-off-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A pile of torn-off old shingles on a tarp beside a house, a plain dumpster edge, late afternoon light, no logos. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A pile of torn-off old shingles on a tarp beside a house, a plain dumpster edge, late afternoon light, no logos. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">08-chalk-line</span><span class="role band">band</span><span class="file">08-chalk-line-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A blue chalk line snapped across underlayment on a roof deck, the reel resting on the line, sharp light and long shadows. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A blue chalk line snapped across underlayment on a roof deck, the reel resting on the line, sharp light and long shadows. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">09-gutter</span><span class="role band">band</span><span class="file">09-gutter-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A new seamless gutter run along an eave in evening light, rain drops hanging from the edge, dark siding behind. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A new seamless gutter run along an eave in evening light, rain drops hanging from the edge, dark siding behind. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">10-storm-sky</span><span class="role band">band</span><span class="file">10-storm-sky-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A roof line and chimney against a dramatic storm sky clearing at sunset, wet shingles shining, no signs. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A roof line and chimney against a dramatic storm sky clearing at sunset, wet shingles shining, no signs. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article>
+  <details class="manifest"><summary>manifest.json to drop beside the files (edit approved: false for any shot you cut)</summary><pre>{
+  &quot;trade&quot;: &quot;roofing&quot;,
+  &quot;locked_by&quot;: &quot;Rich Debar&quot;,
+  &quot;locked_on&quot;: &quot;&quot;,
+  &quot;doctrine&quot;: &quot;Images come only from this approved pool. Never generated per demo, never external, never anything that could pass as the business&#x27;s own building or signage.&quot;,
+  &quot;shots&quot;: [
+    {
+      &quot;key&quot;: &quot;01-shingles-golden&quot;,
+      &quot;file&quot;: &quot;01-shingles-golden-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;02-bundles&quot;,
+      &quot;file&quot;: &quot;02-bundles-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;03-standing-seam&quot;,
+      &quot;file&quot;: &quot;03-standing-seam-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;04-ridge-ladder&quot;,
+      &quot;file&quot;: &quot;04-ridge-ladder-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;05-nails-felt&quot;,
+      &quot;file&quot;: &quot;05-nails-felt-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;06-flashing&quot;,
+      &quot;file&quot;: &quot;06-flashing-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;07-tear-off&quot;,
+      &quot;file&quot;: &quot;07-tear-off-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;08-chalk-line&quot;,
+      &quot;file&quot;: &quot;08-chalk-line-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;09-gutter&quot;,
+      &quot;file&quot;: &quot;09-gutter-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;10-storm-sky&quot;,
+      &quot;file&quot;: &quot;10-storm-sky-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    }
+  ]
+}</pre></details>
+</section><section class="trade" id="plumbing">
+  <div class="trade-head"><p class="kicker">docs/art-pool/plumbing/</p><h2>Plumbing</h2><p class="why">Plumbing photographs as copper, brass, blue flame, and clean installs. Avoid anything gross; show the fix, not the problem. Kit: water aqua on cool black.</p></div>
+  <article class="shot" data-role="hero">
+  <div class="head"><span class="key">01-torch-copper</span><span class="role hero">hero</span><span class="file">01-torch-copper-portrait.jpg</span><button type="button" class="copy" data-copy="Copper pipe and fittings on a workbench with a propane torch burning a small blue flame, solder and flux beside them, warm light on the copper, dark shop behind. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Copper pipe and fittings on a workbench with a propane torch burning a small blue flame, solder and flux beside them, warm light on the copper, dark shop behind. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  <p class="tip">First shot of the trade: no reference image. Generate until one is right, then every other shot in this trade uses it as the reference.</p>
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">02-water-heater</span><span class="role hero">hero</span><span class="file">02-water-heater-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A new water heater installed in a clean basement corner, tidy copper lines and a shutoff valve, a work light on the floor, cool light from a small window. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A new water heater installed in a clean basement corner, tidy copper lines and a shutoff valve, a work light on the floor, cool light from a small window. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">03-pex-manifold</span><span class="role hero">hero</span><span class="file">03-pex-manifold-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A PEX manifold with red and blue lines running neatly along a basement joist, labeled with nothing, one warm light. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A PEX manifold with red and blue lines running neatly along a basement joist, labeled with nothing, one warm light. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">04-under-sink</span><span class="role hero">hero</span><span class="file">04-under-sink-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Under a kitchen sink with the cabinet doors open, a new chrome P-trap and supply lines, a pipe wrench resting on the cabinet floor, warm light from the kitchen. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Under a kitchen sink with the cabinet doors open, a new chrome P-trap and supply lines, a pipe wrench resting on the cabinet floor, warm light from the kitchen. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">05-wrenches</span><span class="role band">band</span><span class="file">05-wrenches-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A row of pipe wrenches from small to large on a workbench, worn red handles, warm side light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A row of pipe wrenches from small to large on a workbench, worn red handles, warm side light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">06-brass</span><span class="role band">band</span><span class="file">06-brass-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A pile of brass fittings, elbows, and valves on a dark bench, close, catching warm light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A pile of brass fittings, elbows, and valves on a dark bench, close, catching warm light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">07-drain-machine</span><span class="role band">band</span><span class="file">07-drain-machine-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A drain cleaning machine with its coiled cable on a garage floor, a bucket beside it, cool light from an open door. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A drain cleaning machine with its coiled cable on a garage floor, a bucket beside it, cool light from an open door. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">08-sump</span><span class="role band">band</span><span class="file">08-sump-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A new sump pump in a clean pit with a check valve and PVC discharge line, work light overhead. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A new sump pump in a clean pit with a check valve and PVC discharge line, work light overhead. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">09-valves</span><span class="role band">band</span><span class="file">09-valves-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Copper lines and shutoff valves running along a basement wall, neatly strapped, cool blue window light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Copper lines and shutoff valves running along a basement wall, neatly strapped, cool blue window light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">10-bathroom</span><span class="role band">band</span><span class="file">10-bathroom-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A newly installed bathroom faucet and supply lines, chrome and tile, soft window light, no people. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A newly installed bathroom faucet and supply lines, chrome and tile, soft window light, no people. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article>
+  <details class="manifest"><summary>manifest.json to drop beside the files (edit approved: false for any shot you cut)</summary><pre>{
+  &quot;trade&quot;: &quot;plumbing&quot;,
+  &quot;locked_by&quot;: &quot;Rich Debar&quot;,
+  &quot;locked_on&quot;: &quot;&quot;,
+  &quot;doctrine&quot;: &quot;Images come only from this approved pool. Never generated per demo, never external, never anything that could pass as the business&#x27;s own building or signage.&quot;,
+  &quot;shots&quot;: [
+    {
+      &quot;key&quot;: &quot;01-torch-copper&quot;,
+      &quot;file&quot;: &quot;01-torch-copper-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;02-water-heater&quot;,
+      &quot;file&quot;: &quot;02-water-heater-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;03-pex-manifold&quot;,
+      &quot;file&quot;: &quot;03-pex-manifold-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;04-under-sink&quot;,
+      &quot;file&quot;: &quot;04-under-sink-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;05-wrenches&quot;,
+      &quot;file&quot;: &quot;05-wrenches-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;06-brass&quot;,
+      &quot;file&quot;: &quot;06-brass-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;07-drain-machine&quot;,
+      &quot;file&quot;: &quot;07-drain-machine-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;08-sump&quot;,
+      &quot;file&quot;: &quot;08-sump-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;09-valves&quot;,
+      &quot;file&quot;: &quot;09-valves-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;10-bathroom&quot;,
+      &quot;file&quot;: &quot;10-bathroom-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    }
+  ]
+}</pre></details>
+</section><section class="trade" id="hvac">
+  <div class="trade-head"><p class="kicker">docs/art-pool/hvac/</p><h2>Heating &amp; cooling</h2><p class="why">HVAC is comfort you can see: a furnace flame, a condenser at dusk, ductwork done right. Warm and cool light in the same frame is the trade&#x27;s whole story. Kit: heat orange with a cool steel blue.</p></div>
+  <article class="shot" data-role="hero">
+  <div class="head"><span class="key">01-condenser-dusk</span><span class="role hero">hero</span><span class="file">01-condenser-dusk-portrait.jpg</span><button type="button" class="copy" data-copy="An outdoor AC condenser unit on a pad beside a house at dusk, a manifold gauge set resting on top, copper line set running to the wall, porch light warm, sky cool blue. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">An outdoor AC condenser unit on a pad beside a house at dusk, a manifold gauge set resting on top, copper line set running to the wall, porch light warm, sky cool blue. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  <p class="tip">First shot of the trade: no reference image. Generate until one is right, then every other shot in this trade uses it as the reference.</p>
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">02-furnace-flame</span><span class="role hero">hero</span><span class="file">02-furnace-flame-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A gas furnace with the panel off, a row of blue burner flames glowing, a flashlight beam across the metal, dark basement. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A gas furnace with the panel off, a row of blue burner flames glowing, a flashlight beam across the metal, dark basement. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">03-attic-duct</span><span class="role hero">hero</span><span class="file">03-attic-duct-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Insulated flexible ductwork running through an attic between rafters, a hanging work light, dust in the beam. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Insulated flexible ductwork running through an attic between rafters, a hanging work light, dust in the beam. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">04-van-tools</span><span class="role hero">hero</span><span class="file">04-van-tools-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. The open rear of a plain white service van at dusk, a vacuum pump, unlabeled refrigerant tanks, and a tool bag inside, amber interior light. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. The open rear of a plain white service van at dusk, a vacuum pump, unlabeled refrigerant tanks, and a tool bag inside, amber interior light. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">05-gauges</span><span class="role band">band</span><span class="file">05-gauges-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A manifold gauge set with red and blue hoses lying on a condenser unit, close, faces unreadable, warm evening light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A manifold gauge set with red and blue hoses lying on a condenser unit, close, faces unreadable, warm evening light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">06-line-set</span><span class="role band">band</span><span class="file">06-line-set-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A copper refrigerant line set with black insulation running along a house wall, brazed joint visible, warm light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A copper refrigerant line set with black insulation running along a house wall, brazed joint visible, warm light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">07-filters</span><span class="role band">band</span><span class="file">07-filters-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A stack of new furnace filters leaning against a utility room wall beside a furnace, cool light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A stack of new furnace filters leaning against a utility room wall beside a furnace, cool light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">08-blower</span><span class="role band">band</span><span class="file">08-blower-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A blower wheel inside an open air handler, clean metal fins, a flashlight beam, dark surroundings. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A blower wheel inside an open air handler, clean metal fins, a flashlight beam, dark surroundings. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">09-duct-seal</span><span class="role band">band</span><span class="file">09-duct-seal-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Sheet metal ductwork joints sealed with foil tape in a basement ceiling, a roll of tape hanging from a joist, warm light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Sheet metal ductwork joints sealed with foil tape in a basement ceiling, a roll of tape hanging from a joist, warm light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">10-thermostat-wall</span><span class="role band">band</span><span class="file">10-thermostat-wall-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A blank, dark thermostat on a hallway wall in warm evening light, nothing on its display, wood trim and a doorway beyond. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A blank, dark thermostat on a hallway wall in warm evening light, nothing on its display, wood trim and a doorway beyond. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article>
+  <details class="manifest"><summary>manifest.json to drop beside the files (edit approved: false for any shot you cut)</summary><pre>{
+  &quot;trade&quot;: &quot;hvac&quot;,
+  &quot;locked_by&quot;: &quot;Rich Debar&quot;,
+  &quot;locked_on&quot;: &quot;&quot;,
+  &quot;doctrine&quot;: &quot;Images come only from this approved pool. Never generated per demo, never external, never anything that could pass as the business&#x27;s own building or signage.&quot;,
+  &quot;shots&quot;: [
+    {
+      &quot;key&quot;: &quot;01-condenser-dusk&quot;,
+      &quot;file&quot;: &quot;01-condenser-dusk-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;02-furnace-flame&quot;,
+      &quot;file&quot;: &quot;02-furnace-flame-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;03-attic-duct&quot;,
+      &quot;file&quot;: &quot;03-attic-duct-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;04-van-tools&quot;,
+      &quot;file&quot;: &quot;04-van-tools-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;05-gauges&quot;,
+      &quot;file&quot;: &quot;05-gauges-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;06-line-set&quot;,
+      &quot;file&quot;: &quot;06-line-set-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;07-filters&quot;,
+      &quot;file&quot;: &quot;07-filters-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;08-blower&quot;,
+      &quot;file&quot;: &quot;08-blower-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;09-duct-seal&quot;,
+      &quot;file&quot;: &quot;09-duct-seal-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;10-thermostat-wall&quot;,
+      &quot;file&quot;: &quot;10-thermostat-wall-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    }
+  ]
+}</pre></details>
+</section><section class="trade" id="general_contractor">
+  <div class="trade-head"><p class="kicker">docs/art-pool/general_contractor/</p><h2>General contractor</h2><p class="why">Contractors sell the middle of the job: framing, sawdust, a level on a cabinet. Show work in progress that looks under control. Kit: blueprint blue on charcoal.</p></div>
+  <article class="shot" data-role="hero">
+  <div class="head"><span class="key">01-framing-golden</span><span class="role hero">hero</span><span class="file">01-framing-golden-portrait.jpg</span><button type="button" class="copy" data-copy="Freshly framed interior walls of a new house at golden hour, sawdust hanging in the sunbeams, a miter saw on a stand, subfloor swept. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Freshly framed interior walls of a new house at golden hour, sawdust hanging in the sunbeams, a miter saw on a stand, subfloor swept. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Photographic, shot on a full-frame camera with a 35mm lens, shallow depth of field, fine film grain. Dark, moody industrial mood: deep charcoal shadows, one warm tungsten work light as the key, cool blue window or dusk light as the fill. Muted palette, no neon. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  <p class="tip">First shot of the trade: no reference image. Generate until one is right, then every other shot in this trade uses it as the reference.</p>
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">02-deck</span><span class="role hero">hero</span><span class="file">02-deck-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A backyard deck under construction at dusk, joists and a few boards laid, a drill and a box of screws on the deck, house lights warm behind. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A backyard deck under construction at dusk, joists and a few boards laid, a drill and a box of screws on the deck, house lights warm behind. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">03-kitchen-remodel</span><span class="role hero">hero</span><span class="file">03-kitchen-remodel-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A kitchen remodel with new cabinets half installed, a four-foot level resting across them, a work light on the floor, plastic sheeting over a doorway. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A kitchen remodel with new cabinets half installed, a four-foot level resting across them, a work light on the floor, plastic sheeting over a doorway. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="hero">
+  <div class="head"><span class="key">04-siding-scaffold</span><span class="role hero">hero</span><span class="file">04-siding-scaffold-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A house with new siding going up and scaffold along one wall at blue hour, a work light on the scaffold, no signs anywhere. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A house with new siding going up and scaffold along one wall at blue hour, a work light on the scaffold, no signs anywhere. Composition for a website hero: the subject sits in the right two-thirds of the frame, the left third falls into soft shadow so a headline can sit over it. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">05-tool-belt</span><span class="role band">band</span><span class="file">05-tool-belt-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A worn leather tool belt hanging on a sawhorse in a framed room, hammer and tape measure in the loops, warm evening light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A worn leather tool belt hanging on a sawhorse in a framed room, hammer and tape measure in the loops, warm evening light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">06-lumber</span><span class="role band">band</span><span class="file">06-lumber-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A stack of fresh lumber on a job site, ends catching low sun, sawdust and a circular saw beside it. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A stack of fresh lumber on a job site, ends catching low sun, sawdust and a circular saw beside it. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">07-tape-2x4</span><span class="role band">band</span><span class="file">07-tape-2x4-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A tape measure pulled across a 2x4 with a pencil mark, close, sawdust on the wood, warm light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A tape measure pulled across a 2x4 with a pencil mark, close, sawdust on the wood, warm light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">08-tile</span><span class="role band">band</span><span class="file">08-tile-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Large floor tiles being laid with spacers on a mortar bed, a trowel resting on a bucket, cool window light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. Large floor tiles being laid with spacers on a mortar bed, a trowel resting on a bucket, cool window light. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">09-drywall</span><span class="role band">band</span><span class="file">09-drywall-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A drywall corner with fresh joint compound and a taping knife resting on a mud pan, soft light from a bare bulb. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A drywall corner with fresh joint compound and a taping knife resting on a mud pan, soft light from a bare bulb. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article><article class="shot" data-role="band">
+  <div class="head"><span class="key">10-porch-dusk</span><span class="role band">band</span><span class="file">10-porch-dusk-portrait.jpg</span><button type="button" class="copy" data-copy="Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A newly built front porch with fresh railings at dusk, the porch light on, street dark, no signs or house numbers. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.">Copy prompt</button></div>
+  <p class="prompt">Use the attached reference image as the style reference: match its palette, grain, contrast, and lighting exactly. A newly built front porch with fresh railings at dusk, the porch light on, street dark, no signs or house numbers. Composition for the photo strip: the subject sits in the vertical middle of the frame, with more of the same scene continuing above and below it all the way to the top and bottom edges. The picture fills the whole tall frame edge to edge: no bars, no borders, no blurred margins, no frame within the frame. Portrait orientation, 9:16. Without any text, lettering, numbers, logos, brand names, signs, license plates, or screens showing words. No people, no hands, no faces. Not an illustration, not a 3D render, not cartoon, not HDR. No labels, stickers, or logos on any tool or box.</p>
+  
+</article>
+  <details class="manifest"><summary>manifest.json to drop beside the files (edit approved: false for any shot you cut)</summary><pre>{
+  &quot;trade&quot;: &quot;general_contractor&quot;,
+  &quot;locked_by&quot;: &quot;Rich Debar&quot;,
+  &quot;locked_on&quot;: &quot;&quot;,
+  &quot;doctrine&quot;: &quot;Images come only from this approved pool. Never generated per demo, never external, never anything that could pass as the business&#x27;s own building or signage.&quot;,
+  &quot;shots&quot;: [
+    {
+      &quot;key&quot;: &quot;01-framing-golden&quot;,
+      &quot;file&quot;: &quot;01-framing-golden-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;02-deck&quot;,
+      &quot;file&quot;: &quot;02-deck-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;03-kitchen-remodel&quot;,
+      &quot;file&quot;: &quot;03-kitchen-remodel-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;04-siding-scaffold&quot;,
+      &quot;file&quot;: &quot;04-siding-scaffold-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;hero&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;05-tool-belt&quot;,
+      &quot;file&quot;: &quot;05-tool-belt-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;06-lumber&quot;,
+      &quot;file&quot;: &quot;06-lumber-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;07-tape-2x4&quot;,
+      &quot;file&quot;: &quot;07-tape-2x4-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;08-tile&quot;,
+      &quot;file&quot;: &quot;08-tile-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;09-drywall&quot;,
+      &quot;file&quot;: &quot;09-drywall-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    },
+    {
+      &quot;key&quot;: &quot;10-porch-dusk&quot;,
+      &quot;file&quot;: &quot;10-porch-dusk-portrait.jpg&quot;,
+      &quot;role&quot;: &quot;band&quot;,
+      &quot;approved&quot;: true
+    }
+  ]
+}</pre></details>
+</section>
+</div>
+<script>
+document.querySelectorAll('.copy').forEach(function(b){b.addEventListener('click',function(){navigator.clipboard.writeText(b.dataset.copy).then(function(){b.textContent='Copied';b.classList.add('done');setTimeout(function(){b.textContent='Copy prompt';b.classList.remove('done')},1600)})})});
+</script></body></html>

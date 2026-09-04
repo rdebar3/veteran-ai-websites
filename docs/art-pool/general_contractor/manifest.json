@@ -1,0 +1,68 @@
+{
+  "trade": "general_contractor",
+  "locked_by": "Rich Debar",
+  "locked_on": "2026-09-03",
+  "doctrine": "Images come only from this approved pool. Never generated per demo, never external, never anything that could pass as the business's own building or signage. Heroes are 9:16 portraits; band shots are the real content of Grok's letterboxed outputs with the padded bars cropped off (the band is a cover-fit strip, so aspect is free).",
+  "shots": [
+    {
+      "key": "01-framing-golden",
+      "file": "01-framing-golden-portrait.jpg",
+      "role": "hero",
+      "approved": true
+    },
+    {
+      "key": "02-deck",
+      "file": "02-deck-portrait.jpg",
+      "role": "hero",
+      "approved": true
+    },
+    {
+      "key": "03-kitchen-remodel",
+      "file": "03-kitchen-remodel-portrait.jpg",
+      "role": "hero",
+      "approved": true
+    },
+    {
+      "key": "04-siding-scaffold",
+      "file": "04-siding-scaffold-portrait.jpg",
+      "role": "hero",
+      "approved": true
+    },
+    {
+      "key": "05-tool-belt",
+      "file": "05-tool-belt.jpg",
+      "role": "band",
+      "approved": true
+    },
+    {
+      "key": "06-lumber",
+      "file": "06-lumber.jpg",
+      "role": "band",
+      "approved": true
+    },
+    {
+      "key": "07-tape-2x4",
+      "file": "07-tape-2x4.jpg",
+      "role": "band",
+      "approved": true
+    },
+    {
+      "key": "08-tile",
+      "file": "08-tile.jpg",
+      "role": "band",
+      "approved": true
+    },
+    {
+      "key": "09-drywall",
+      "file": "09-drywall.jpg",
+      "role": "band",
+      "approved": true
+    },
+    {
+      "key": "10-porch-dusk",
+      "file": "10-porch-dusk.jpg",
+      "role": "band",
+      "approved": true
+    }
+  ]
+}
