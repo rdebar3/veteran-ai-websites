@@ -1,0 +1,68 @@
+{
+  "trade": "towing",
+  "locked_by": "Rich Debar",
+  "locked_on": "2026-09-03",
+  "doctrine": "Images come only from this approved pool. Never generated per demo, never external, never anything that could pass as the business's own building or signage. Every truck is plain and unmarked by design. Heroes are 9:16 portraits; 06 is the real content of a letterboxed output with the padded bars cropped off (the band is a cover-fit strip, so aspect is free).",
+  "shots": [
+    {
+      "key": "01-flatbed-night",
+      "file": "01-flatbed-night-portrait.jpg",
+      "role": "hero",
+      "approved": true
+    },
+    {
+      "key": "02-wheel-lift",
+      "file": "02-wheel-lift-portrait.jpg",
+      "role": "hero",
+      "approved": true
+    },
+    {
+      "key": "03-winch",
+      "file": "03-winch-portrait.jpg",
+      "role": "hero",
+      "approved": true
+    },
+    {
+      "key": "04-highway-dawn",
+      "file": "04-highway-dawn-portrait.jpg",
+      "role": "hero",
+      "approved": true
+    },
+    {
+      "key": "05-chains",
+      "file": "05-chains-portrait.jpg",
+      "role": "band",
+      "approved": true
+    },
+    {
+      "key": "06-straps",
+      "file": "06-straps.jpg",
+      "role": "band",
+      "approved": true
+    },
+    {
+      "key": "07-controls",
+      "file": "07-controls-portrait.jpg",
+      "role": "band",
+      "approved": true
+    },
+    {
+      "key": "08-lot-dawn",
+      "file": "08-lot-dawn-portrait.jpg",
+      "role": "band",
+      "approved": true
+    },
+    {
+      "key": "09-cable",
+      "file": "09-cable-portrait.jpg",
+      "role": "band",
+      "approved": true
+    },
+    {
+      "key": "10-rain-road",
+      "file": "10-rain-road-portrait.jpg",
+      "role": "band",
+      "approved": true
+    }
+  ]
+}
