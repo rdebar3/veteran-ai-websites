@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { cache } from 'react';
 import { headers } from 'next/headers';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { after } from 'next/server';
 import { artTradeFor, loadArtPool } from '@/lib/demo/art';
 import { DEMO_TEMPLATE_TRADES_V2 } from '@/lib/demo/copy';
@@ -68,6 +68,10 @@ export default async function DemoPage({ params, searchParams }: PageProps) {
     preview: isPreview,
     now: new Date(),
   });
+
+  if (kind === 'render' && site?.model_status === 'ready') {
+    redirect(`/s/${slug}` + (isPreview ? '?preview=1' : ''));
+  }
 
   if (kind === 'not_found' || !site) {
     notFound();

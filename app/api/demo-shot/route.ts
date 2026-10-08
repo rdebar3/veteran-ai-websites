@@ -7,6 +7,10 @@ import {
 } from '@/lib/demo/copy';
 import { cronAuthorized } from '@/lib/demo/cron-auth';
 import {
+  isModelPagePath,
+  MODEL_PAGE_SHOT_STYLE,
+} from '@/lib/demo/model-page';
+import {
   DEMO_SHOT_SETTLE_SCRIPT,
   DEMO_SHOT_VIEWPORT_WIDTH,
   demoShotPageUrl,
@@ -21,7 +25,7 @@ import {
 } from '@/lib/demo/supabase';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 function unauthorized(): NextResponse {
   return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
@@ -211,7 +215,7 @@ async function renderDemoPng(
     await page.emulateMediaFeatures([
       { name: 'prefers-reduced-motion', value: 'reduce' },
     ]);
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 20000 });
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: 45000 });
     await page.evaluate(async () => {
       const images = Array.from(document.images);
       await Promise.all(
@@ -230,6 +234,10 @@ async function renderDemoPng(
       const s = document.querySelector('.demo-trades-v2 .strip');
       return s ? Math.ceil(s.getBoundingClientRect().bottom) : 0;
     });
+    if (isModelPagePath(new URL(page.url()).pathname)) {
+      await page.addStyleTag({ content: MODEL_PAGE_SHOT_STYLE });
+      await new Promise((r) => setTimeout(r, 300));
+    }
     const top = await page.screenshot({
       type: 'png',
       clip: demoShotTopClip(bottom),

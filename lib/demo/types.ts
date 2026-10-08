@@ -38,6 +38,8 @@ export type DemoSiteRow = {
   status: string;
   expires_at: string | null;
   screenshot_path: string | null;
+  /** null | queued | building | ready | failed | off */
+  model_status: string | null;
 };
 
 /** Four-state render matrix plus killed (treated as missing). */
