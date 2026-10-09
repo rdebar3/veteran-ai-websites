@@ -78,10 +78,10 @@ function Stars({ value }: { value: number }) {
 }
 
 /**
- * Leave-a-review section (lives below the contact form).
- * Empty / “no reviews yet” UI intentionally removed — do not reintroduce.
+ * Homepage reviews. The section stays hidden until at least one approved
+ * review exists, then it shows on its own. The form is always at /review.
  */
-export default function Reviews() {
+export default function Reviews({ formOnly = false }: { formOnly?: boolean }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [name, setName] = useState('');
   const [business, setBusiness] = useState('');
@@ -136,6 +136,8 @@ export default function Reviews() {
       setSubmitting(false);
     }
   }
+
+  if (!formOnly && reviews.length === 0) return null;
 
   return (
     <section id="reviews" className="rv">

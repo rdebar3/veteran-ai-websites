@@ -1,5 +1,7 @@
 'use client';
 
+import { KEEP_RUNNING_MONTHLY } from '@/lib/data';
+
 const styles = `
 .vets{position:relative;color:#eef4f8;padding:clamp(40px,6vw,80px) clamp(20px,6vw,72px)}
 .vets__panel{position:relative;overflow:hidden;max-width:760px;margin:0 auto;border:1px solid rgba(227,178,60,.32);border-radius:24px;background:rgba(12,16,22,.72);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);padding:clamp(30px,5vw,52px);text-align:center;box-shadow:0 30px 70px rgba(0,0,0,.5)}
@@ -35,36 +37,36 @@ export default function Veterans() {
           <path d="M24 88 Q60 100 96 88 L96 99 Q60 111 24 99 Z" />
         </svg>
         <p className="vets__eyebrow">For those who served</p>
-        <h2 className="vets__title">A thank-you to my fellow veterans.</h2>
+        <h2 className="vets__title">Fellow veterans: your first 3 months are on me.</h2>
         <p className="vets__sub">
-          I built this company after my own time in service, and I want to give back to the people
-          who served alongside me. If you’re a veteran starting or growing a business, this one’s for you —
-          just mention that you served in the form below, and I’ll get started building your site right away.
+          Same plan, same rules. I waive your first three payments. Mention that you served in the
+          form below, and I’ll get started.
         </p>
         <ul className="vets__list">
           <li>
             <span className="vets__check">✓</span>
             <span>
-              Your website <b>designed &amp; built completely free</b> — a real, professional site.
+              <b>Your first 3 months are on me.</b> Nothing down, and those three payments are waived.
             </span>
           </li>
           <li>
             <span className="vets__check">✓</span>
             <span>
-              <b>3 months of the $97/mo Managed plan, on me</b> — hosting, updates, and changes
-              handled.
+              <b>No contract. Cancel anytime.</b> If you cancel before 12 payments, the site comes
+              down, or you can pay off the remaining months and keep it.
             </span>
           </li>
           <li>
             <span className="vets__check">✓</span>
             <span>
-              You keep <b>100% ownership</b> of your site, always.
+              <b>After 12 payments the site is yours</b> — the files and the domain. Stay on after
+              that for ${KEEP_RUNNING_MONTHLY}/month if you want hosting and small fixes.
             </span>
           </li>
         </ul>
         <p className="vets__fine">
-          After your 3 free months, the Managed plan simply continues at $97/mo — cancel anytime, no
-          contract.
+          Same plan as everyone else. The first three payments are waived. No contract. Cancel
+          anytime. After 12 payments the site is yours.
         </p>
         <div className="vets__cta">
           <a href="#contact" className="vets__btn">

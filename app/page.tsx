@@ -8,12 +8,13 @@ import Packages from '@/components/Packages';
 import Reviews from '@/components/Reviews';
 import Intake from '@/components/Intake';
 import LowerBackdrop from '@/components/LowerBackdrop';
+import Ownership from '@/components/Ownership';
 import Veterans from '@/components/Veterans';
 import { scrollToY, resizeScroll } from '@/lib/scroll-driver';
 
 /**
  * Clean homepage:
- * Video hero → demos → packages → veterans → contact → review.
+ * Video hero → demos → packages → ownership → veterans → contact → reviews.
  */
 export default function Home() {
   // Return visitors to the exact spot they left from when they open a demo.
@@ -47,6 +48,7 @@ export default function Home() {
         <VeteranBand />
         <Demos />
         <Packages />
+        <Ownership />
         <Veterans />
         <Intake />
         <Reviews />

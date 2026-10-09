@@ -1,4 +1,5 @@
 import FacebookIcon from '@/components/FacebookIcon';
+import ScheduleCall from '@/components/ScheduleCall';
 import { FACEBOOK_URL } from '@/lib/data';
 import { landmarkCredits } from '@/lib/landmarks';
 import { MAILING_ADDRESS, PHONE_HREF } from '@/lib/contact';
@@ -17,6 +18,7 @@ export default function Footer() {
             <a href={PHONE_HREF}>Call</a>
             <span className="footer__phone-note"> — or text, reaches me directly</span>
           </p>
+          <ScheduleCall note className="footer__book" />
           <p className="footer__address">{MAILING_ADDRESS}</p>
           <p className="footer__service-area">
             Serving small businesses in all 55 West Virginia counties.
@@ -44,7 +46,9 @@ export default function Footer() {
           Built by Rich Debar · Horner, West Virginia
         </div>
         <div className="text-xs text-[var(--text-dim)] max-w-[220px] md:text-right leading-relaxed">
-          Fast. Fair. Full ownership.
+          No contract. Cancel anytime.
+          <br />
+          After 12 payments the site is yours.
           <br />
           Built in West Virginia.
         </div>

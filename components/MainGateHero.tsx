@@ -87,18 +87,18 @@ export default function MainGateHero({ onClaimOffer }: MainGateHeroProps) {
           </motion.p>
 
           <motion.div className="cinematic-hero__offer" {...motionProps(0.58)}>
-            <div className="cinematic-hero__offer-label">Limited Time Offer</div>
-            <p className="cinematic-hero__offer-title">First Starter 1-Page Website</p>
+            <div className="cinematic-hero__offer-label">Nothing down</div>
+            <p className="cinematic-hero__offer-title">Starter</p>
             <p className="cinematic-hero__offer-price">
-              <span className="cinematic-hero__price-strike">$497</span>
-              <span className="cinematic-hero__price-now">$397</span>
+              <span className="cinematic-hero__price-now">$49</span>
+              <span>/month</span>
             </p>
-            <p className="cinematic-hero__offer-urgency">Resets every Sunday 11:59 PM — Single-page Starter only</p>
+            <p className="cinematic-hero__offer-urgency">No contract. Cancel anytime. After 12 payments the site is yours.</p>
           </motion.div>
 
           <motion.div className="cinematic-hero__cta-group" {...motionProps(0.72)}>
             <a href="#build" onClick={onClaimOffer} className="btn-premium">
-              Enter the Base — Claim $397
+              Start Starter — $49/mo
             </a>
             <a href="#pricing" className="btn-premium btn-premium--outline">
               Tour Command Center
@@ -106,7 +106,7 @@ export default function MainGateHero({ onClaimOffer }: MainGateHeroProps) {
           </motion.div>
 
           <motion.p className="cinematic-hero__footnote" {...motionProps(0.85)}>
-            Same-day delivery · 100% ownership · Pay only after you approve the design
+            Same-day delivery · Nothing down · No contract. Yours after 12 payments.
           </motion.p>
         </motion.div>
 

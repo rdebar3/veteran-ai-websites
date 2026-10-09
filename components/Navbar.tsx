@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
 import { navLinks } from '@/lib/navigation';
 import { registerScrollTask } from '@/lib/scroll-driver';
+import PhoneLink from '@/components/PhoneLink';
+import ScheduleCall from '@/components/ScheduleCall';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -85,6 +87,7 @@ export default function Navbar() {
           </span>
         </a>
 
+        <div className="nav__cluster">
         <div className="nav__links" ref={linksRef}>
           <span
             className="nav__indicator"
@@ -110,6 +113,11 @@ export default function Navbar() {
             );
           })}
         </div>
+        <div className="nav__actions">
+          <PhoneLink className="nav__link">Call</PhoneLink>
+          <ScheduleCall variant="compact" />
+        </div>
+        </div>
 
         <button
           type="button"
@@ -134,6 +142,10 @@ export default function Navbar() {
               {link.label}
             </a>
           ))}
+          <PhoneLink className="nav__link text-sm py-1" onClick={() => setIsOpen(false)}>
+            Call
+          </PhoneLink>
+          <ScheduleCall variant="block" onClick={() => setIsOpen(false)} />
         </div>
       )}
     </nav>

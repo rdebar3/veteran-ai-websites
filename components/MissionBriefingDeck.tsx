@@ -41,7 +41,6 @@ import CircuitOverlay from '@/components/CircuitOverlay';
 import NeuralOverlay from '@/components/NeuralOverlay';
 import PatrioticOverlay from '@/components/PatrioticOverlay';
 import MagneticButton from '@/components/MagneticButton';
-import OfferCountdown from '@/components/OfferCountdown';
 import FAQAccordion, { type FAQ } from '@/components/FAQAccordion';
 import PricingCard from '@/components/PricingCard';
 
@@ -56,17 +55,17 @@ const faqs: FAQ[] = [
   {
     question: 'Do I own the website and files?',
     answer:
-      'Yes — 100% ownership. You receive all files and logins. No lock-in, no hidden fees.',
+      'No contract. Cancel anytime. After 12 payments the site is yours — the files and the domain.',
   },
   {
     question: 'What if I need changes after launch?',
     answer:
-      'Starter and Complete include 1 revision round. Premium includes 2 rounds plus 30 days of support. Monthly Website Care is available after that.',
+      'Starter and Complete include 1 round of revisions. Premium includes 2. Hosting, updates, and small changes are included on the monthly plan.',
   },
   {
     question: 'Do I pay before I see the site?',
     answer:
-      'No. Submit your order request free. Pay only after you review and approve the final design — then Stripe checkout is available.',
+      'Nothing down. Your first payment is month one, starting today. Cancel anytime.',
   },
 ];
 
@@ -289,14 +288,7 @@ export default function MissionBriefingDeck() {
 
   const estimatedTotal = (() => {
     const tier = pricingTiers.find((p) => p.name === selectedPackage);
-    const base = tier ? getDisplayPrice(tier) : 0;
-    return (
-      base +
-      selectedAddOnIds.reduce((sum, id) => {
-        const a = addOnsList.find((x) => x.id === id);
-        return sum + (a ? a.price : 0);
-      }, 0)
-    );
+    return tier ? getDisplayPrice(tier) : 0;
   })();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -317,7 +309,7 @@ export default function MissionBriefingDeck() {
           ? selectedAddOnsDetails.map((a) => `${a.name} (+$${a.price})`).join(', ')
           : 'None'
       );
-      formData.append('estimatedTotal', `$${estimatedTotal} (one-time + any recurring)`);
+      formData.append('estimatedTotal', `$${estimatedTotal} a month`);
       const response = await fetch('https://formspree.io/f/mwvjoklj', {
         method: 'POST',
         body: formData,
@@ -349,7 +341,11 @@ export default function MissionBriefingDeck() {
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ package: selectedPackage, addOns: selectedAddOnNames }),
+        body: JSON.stringify({
+          package: selectedPackage,
+          billing: 'monthly',
+          addOns: selectedAddOnNames,
+        }),
       });
       const { url } = await response.json();
       if (url) window.location.href = url;
@@ -458,7 +454,7 @@ export default function MissionBriefingDeck() {
                       <ul className="mb-bullets">
                         <li>Veteran-owned · West Virginia roots</li>
                         <li>Same-day craft for focused scopes</li>
-                        <li>100% ownership — no lock-in</li>
+                        <li>No contract. Yours after 12 payments</li>
                       </ul>
                     )}
 
@@ -639,16 +635,12 @@ export default function MissionBriefingDeck() {
                                       onClick={() => setSelectedPackage(tier.name)}
                                     >
                                       <span>{tier.name}</span>
-                                      <strong>${price}</strong>
+                                      <strong>${price}/mo</strong>
                                     </button>
                                   );
                                 })}
                               </div>
-                              {selectedPackage === 'Starter' && (
-                                <div className="mb-form__promo">
-                                  <OfferCountdown compact />
-                                </div>
-                              )}
+
                             </div>
 
                             <div className="mb-form__fields">
@@ -727,10 +719,10 @@ export default function MissionBriefingDeck() {
 
                             <div className="mb-form__total">
                               <span>Estimated total</span>
-                              <strong>${estimatedTotal}</strong>
+                              <strong>${estimatedTotal}/mo</strong>
                             </div>
                             <p className="mb-form__trust">
-                              No payment today. Pay after you approve the design.
+                              ${estimatedTotal} a month, starting today. Cancel anytime.
                             </p>
 
                             <MagneticButton

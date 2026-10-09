@@ -27,10 +27,11 @@ export default function PricingCard({ tier, onSelect }: PricingCardProps) {
 
         <div className="pricing-card">
           <div className="pricing-card__name">{tier.name}</div>
+          <p className="pricing-card__down">Nothing down</p>
           <div className="pricing-card__price">
             {hasPromo && <span className="pricing-card__strike">${tier.price}</span>}
-            ${displayPrice}
-            <span className="pricing-card__period">one-time</span>
+            <span className="pricing-card__amount">${displayPrice}</span>
+            <span className="pricing-card__period">/month</span>
           </div>
           {hasPromo && (
             <div className="pricing-card__promo">
@@ -55,7 +56,7 @@ export default function PricingCard({ tier, onSelect }: PricingCardProps) {
               onClick={() => onSelect(tier.name)}
               className="btn btn--lg btn--primary btn--glow w-full"
             >
-              {hasPromo ? `Claim $${tier.promoPrice}` : `Choose ${tier.name}`}
+              {`Start ${tier.name} — $${displayPrice}/mo`}
             </MagneticButton>
           ) : (
             <button
@@ -63,7 +64,7 @@ export default function PricingCard({ tier, onSelect }: PricingCardProps) {
               onClick={() => onSelect(tier.name)}
               className="btn btn--lg btn--ghost w-full"
             >
-              Choose {tier.name}
+              Start {tier.name} — ${displayPrice}/mo
             </button>
           )}
           <p className="text-center text-xs text-[var(--text-dim)] mt-4">{tier.revisions}</p>

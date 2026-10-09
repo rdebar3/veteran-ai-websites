@@ -28,8 +28,8 @@ const scenes: Scene[] = [
   },
   {
     image: '/landmarks/new-river-gorge-bridge.jpg',
-    eyebrow: 'No lock-in · No contracts',
-    title: 'You own it. 100%.',
+    eyebrow: 'No contract',
+    title: 'Yours after 12 payments.',
   },
   {
     image: '/briefing/launch-summit.jpg',
@@ -130,7 +130,7 @@ function ZoomTextLayer({
       {scene.cta && (
         <div className="zoom-cta">
           <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
-            Claim my $397 site
+            Get started
           </MagneticButton>
           <a href="#pricing" className="btn btn--ghost btn--lg">
             View packages
@@ -176,7 +176,7 @@ export default function ZoomIntro({ onClaimOffer }: ZoomIntroProps) {
               {scene.cta && (
                 <div className="zoom-cta">
                   <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg">
-                    Claim my $397 site
+                    Get started
                   </MagneticButton>
                   <a href="#pricing" className="btn btn--ghost btn--lg">
                     View packages

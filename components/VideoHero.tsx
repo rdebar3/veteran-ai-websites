@@ -10,22 +10,16 @@ import {
   type MotionValue,
 } from 'framer-motion';
 import MagneticButton from '@/components/MagneticButton';
+import ScheduleCall from '@/components/ScheduleCall';
+import { heroScenes, type HeroScene } from '@/lib/hero-scenes';
 
 const VIDEO = '/hero/hero-gorge-loop.mp4';
 const MOBILE_VIDEO = '/hero/hero-gorge-mobile.mp4';
 const POSTER = '/hero/hero-gorge-poster.jpg';
 
-type Scene = { eyebrow?: string; title: string; sub?: string; cta?: boolean };
+type Scene = HeroScene;
 
-const scenes: Scene[] = [
-  {
-    title: 'More calls for your business. Built in a day.',
-    sub: 'West Virginia veteran-owned. You own your site — always.',
-  },
-  { title: "By someone who's been in your shoes." },
-  { title: 'You own it. Always.' },
-  { title: 'Let’s build yours.', cta: true },
-];
+const scenes: Scene[] = heroScenes;
 
 const N = scenes.length;
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
@@ -47,7 +41,7 @@ function sceneOpacityAt(s: number, i: number): number {
 }
 
 const styles = `
-.vh-root{position:relative;height:340vh;background:#06090f}
+.vh-root{position:relative;height:200vh;background:#06090f}
 .vh-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#06090f;isolation:isolate}
 .vh-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
 .vh-veil{position:absolute;inset:0;z-index:1;pointer-events:none;background:
@@ -78,9 +72,9 @@ const styles = `
 .vh-simple video,.vh-simple img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .vh-simple .vh-veil{z-index:1}
 .vh-simple .vh-stack{position:relative;z-index:2;padding:0 24px}
-@media(max-width:640px){.vh-cta{flex-direction:column;align-items:stretch}.vh-cta .btn--primary,.vh-cta .btn--ghost{min-width:0;width:100%;justify-content:center}.vh-cta-phone{text-align:center;width:100%}}
-/* mobile: shorter scroll region so the hero text advances quicker */
-@media(max-width:768px){.vh-root{height:260vh}}
+@media(max-width:640px){.vh-cta{flex-direction:column;align-items:stretch}.vh-cta .sched{align-items:stretch;width:100%}.vh-cta .btn--primary,.vh-cta .btn--ghost{min-width:0;width:100%;justify-content:center}.vh-cta-phone{text-align:center;width:100%}}
+/* mobile: shorter scroll region so the two scenes play over less scroll */
+@media(max-width:768px){.vh-root{height:160vh}}
 `;
 
 function SceneText({
@@ -102,7 +96,6 @@ function SceneText({
 
   return (
     <motion.div className="vh-scene" style={{ opacity, visibility }} aria-hidden={false}>
-      {scene.eyebrow && <p className="vh-eyebrow">{scene.eyebrow}</p>}
       <h2 className="vh-title">{scene.title}</h2>
       {scene.sub && <p className="vh-sub">{scene.sub}</p>}
     </motion.div>
@@ -127,10 +120,10 @@ function CtaBlock({
 
   return (
     <motion.div className="vh-cta" style={{ opacity, pointerEvents, visibility }}>
+      <ScheduleCall note buttonClassName="vh-cta-phone" />
       <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--ghost btn--lg">
         Get started
       </MagneticButton>
-      <a href="#pricing" className="btn btn--ghost btn--lg">View pricing</a>
     </motion.div>
   );
 }
@@ -205,13 +198,14 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
         />
         <div className="vh-veil" aria-hidden="true" />
         <div className="vh-stack">
-          <h2 className="vh-title">More calls for your business. Built in a day.</h2>
-          <p className="vh-sub">West Virginia veteran-owned. You own your site — always.</p>
+          <h2 className="vh-title">{scenes[0].title}</h2>
+          <p className="vh-sub">{scenes[0].sub}</p>
+          <p className="vh-sub">{scenes[1].title}</p>
           <div className="vh-cta">
+            <ScheduleCall note buttonClassName="vh-cta-phone" />
             <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--ghost btn--lg">
               Get started
             </MagneticButton>
-            <a href="#pricing" className="btn btn--ghost btn--lg">View pricing</a>
           </div>
         </div>
       </div>

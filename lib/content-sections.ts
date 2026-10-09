@@ -1,7 +1,7 @@
 import { landmarks } from '@/lib/landmarks';
 
 export const whyChooseLead =
-  'Veteran AI Websites is a veteran-owned studio built for West Virginia small businesses that need a professional online presence without agency delays, hidden fees, or confusing contracts. We combine mountain-state pride with modern AI-assisted craftsmanship to deliver mobile-first websites you fully own — often within a single business day. Every project starts with a clear scope, honest pricing, and direct communication from the person doing the work.';
+  'Veteran AI Websites is a veteran-owned studio built for West Virginia small businesses that need a professional online presence without agency delays, hidden fees, or confusing contracts. We combine mountain-state pride with modern AI-assisted craftsmanship to deliver mobile-first websites with nothing down — often within a single business day. Every project starts with a clear scope, honest pricing, and direct communication from the person doing the work.';
 
 export const whyChoosePillars = [
   {
@@ -23,9 +23,9 @@ export const whyChoosePillars = [
       'Seneca Rocks — where precision climbing meets rugged Allegheny beauty, much like our fast-but-careful build process.',
   },
   {
-    title: 'Full Ownership — No Lock-In Ever',
+    title: 'No contract. Yours after a year.',
     body:
-      'You receive every file, login, and asset when your site launches. There is no proprietary platform holding your business hostage, no surprise renewal traps, and no middleman between you and your own domain. If you ever want to move hosting or hire another developer, you can — because the site is yours. We believe trust starts with handing you the keys on day one.',
+      'Nothing down — your first payment is month one. Cancel anytime. If you cancel before 12 payments, the site comes down, or you can pay off the remaining months and keep it. After 12 payments you own the site, the files, and the domain. You can take it anywhere, or stay on for $29 a month.',
     image: landmarks.wvCapitol.image,
     imageAlt: landmarks.wvCapitol.imageAlt,
     imageCaption:
@@ -43,11 +43,11 @@ export const whyChoosePillars = [
 ] as const;
 
 export const promoInterlude = {
-  eyebrow: 'Limited Time Offer',
-  title: '$397 Starter Website',
+  eyebrow: 'Nothing down',
+  title: '$49 a month',
   subtitle: 'Professional one-page site — delivered in one day.',
   body:
-    'Our Starter package gives West Virginia businesses a polished single-page website with hero, services, testimonials, and contact form — everything you need to start taking online inquiries seriously. This $397 promotional rate (regularly $497) resets every Sunday at 11:59 PM for new Starter orders only. You pay after you approve the final design, and you keep 100% ownership of every file we deliver. No retainers, no lock-in, no surprises.',
+    'Starter is $49 a month: a polished single-page website with hero, services, and a contact form. Nothing down. Your first payment is month one. No contract. Cancel anytime. After 12 payments the site is yours.',
   imageCaption:
     'Appalachian foothills at dusk — the rolling landscape where thousands of WV family businesses serve their neighbors every day.',
 };

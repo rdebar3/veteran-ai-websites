@@ -4,7 +4,6 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import MagneticButton from '@/components/MagneticButton';
-import OfferCountdown from '@/components/OfferCountdown';
 
 interface HeroCinematicProps {
   onClaimOffer?: () => void;
@@ -94,12 +93,11 @@ export default function HeroCinematic({ onClaimOffer }: HeroCinematicProps) {
 
         <motion.p className="hero-cine__lead" {...rise(0.3)}>
           Premium, mobile-first websites for West Virginia businesses — designed and built in a
-          single day. You own everything, 100%.
+          single day. Nothing down, $49 a month.
         </motion.p>
 
         <motion.div className="hero-cine__offer" {...rise(0.42)}>
-          <span className="hero-cine__offer-label">Limited-time · $397 Starter</span>
-          <OfferCountdown compact />
+          <span className="hero-cine__offer-label">Nothing down · $49 a month</span>
         </motion.div>
 
         <motion.div className="hero-cine__cta" {...rise(0.54)}>
@@ -108,7 +106,7 @@ export default function HeroCinematic({ onClaimOffer }: HeroCinematicProps) {
             onClick={onClaimOffer}
             className="btn btn--primary btn--lg"
           >
-            Claim my $397 site
+            Start Starter — $49/mo
           </MagneticButton>
           <a href="#pricing" className="btn btn--ghost btn--lg">
             View packages
@@ -117,8 +115,8 @@ export default function HeroCinematic({ onClaimOffer }: HeroCinematicProps) {
 
         <motion.p className="hero-cine__trust" {...rise(0.66)}>
           <span>Same-day delivery</span>
-          <span>100% ownership</span>
-          <span>Pay after approval</span>
+          <span>No contract. Yours after 12 payments</span>
+          <span>Cancel anytime</span>
           <span>Veteran built</span>
         </motion.p>
       </motion.div>

@@ -9,7 +9,6 @@ import HeroSystemsHud from '@/components/HeroSystemsHud';
 import CircuitOverlay from '@/components/CircuitOverlay';
 import PatrioticOverlay from '@/components/PatrioticOverlay';
 import NeuralOverlay from '@/components/NeuralOverlay';
-import OfferCountdown from '@/components/OfferCountdown';
 import MagneticButton from '@/components/MagneticButton';
 import { baseRooms } from '@/lib/base-rooms';
 import { heroFadeUp } from '@/lib/hero-motion';
@@ -67,28 +66,26 @@ export default function Hero({ onClaimOffer }: HeroProps) {
 
           <motion.p className="hero__lead" {...heroFadeUp(0.82)}>
             Premium one-day sites for West Virginia businesses — veteran discipline,
-            modern AI craft, and 100% ownership. No agency runaround.
+            modern AI craft, and nothing down. No contract.
           </motion.p>
 
           <motion.div className="hero__offer" {...heroFadeUp(0.95)}>
             <div className="hero__offer-shimmer" aria-hidden="true" />
             <div className="hero__offer-glow" aria-hidden="true" />
             <div className="hero__offer-header">
-              <span className="hero__offer-label">Limited Time Offer</span>
+              <span className="hero__offer-label">Nothing down</span>
             </div>
-            <OfferCountdown className="hero__offer-countdown" />
-            <p className="hero__offer-headline">First Starter 1-Page Website</p>
+            <p className="hero__offer-headline">Starter</p>
             <div className="hero__offer-price-row">
-              <span className="hero__price-was">$497</span>
-              <span className="hero__price-now">$397</span>
-              <span className="hero__price-save">Save $100</span>
+              <span className="hero__price-now">$49</span>
+              <span className="hero__price-save">/month</span>
             </div>
-            <p className="hero__offer-note">Single-page Starter package only</p>
+            <p className="hero__offer-note">No contract. Cancel anytime. After 12 payments the site is yours.</p>
           </motion.div>
 
           <motion.div className="hero__cta" {...heroFadeUp(1.1)}>
             <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--primary btn--lg btn--glow">
-              Claim My $397 Website
+              Start Starter — $49/mo
             </MagneticButton>
             <a href="#pricing" className="btn btn--ghost btn--lg">
               View All Packages
@@ -103,8 +100,8 @@ export default function Hero({ onClaimOffer }: HeroProps) {
 
         <motion.p className="hero__note" {...heroFadeUp(1.22)}>
           <span className="hero__note-item">Same-day delivery</span>
-          <span className="hero__note-item">100% ownership</span>
-          <span className="hero__note-item">Pay after approval</span>
+          <span className="hero__note-item">No contract</span>
+          <span className="hero__note-item">Yours after 12 payments</span>
         </motion.p>
       </div>
     </section>

@@ -65,7 +65,7 @@ export const baseRooms: Record<RoomId, BaseRoomConfig> = {
     sectionId: 'pricing',
     codename: 'Sector Charlie — Command Center',
     title: 'Command Center',
-    subtitle: 'Transparent pricing. Clear scopes. Full ownership.',
+    subtitle: 'Transparent pricing. Clear scopes. Nothing down.',
     image: '/rooms/command-center.jpg',
     vistaImage: landmarks.wvCapitol.image,
     vistaName: landmarks.wvCapitol.name,

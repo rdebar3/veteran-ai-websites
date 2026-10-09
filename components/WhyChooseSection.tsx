@@ -30,7 +30,7 @@ export default function WhyChooseSection() {
           </InViewItem>
           <InViewItem>
             <p className="why-choose__trust">
-              U.S. Veteran Owned · West Virginia Based · One-Day Delivery · 100% Ownership
+              U.S. Veteran Owned · West Virginia Based · One-Day Delivery · Nothing down
             </p>
           </InViewItem>
         </InViewStagger>

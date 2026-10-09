@@ -22,7 +22,7 @@ export default function UnsubscribePage() {
     <LegalShell title="Unsubscribe" eyebrow="Email preferences" updated={UPDATED}>
       <p>
         Enter the email address you want removed from {BUSINESS_LEGAL_NAME} marketing lists. This
-        does not cancel a paid Managed subscription — contact {BUSINESS_LEGAL_NAME} for billing
+        does not cancel a paid monthly plan — contact {BUSINESS_LEGAL_NAME} for billing
         changes.
       </p>
       <UnsubscribeForm />

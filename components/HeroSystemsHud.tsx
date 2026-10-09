@@ -19,7 +19,7 @@ interface StatConfig {
 const STATS: StatConfig[] = [
   { label: 'Sites Deployed', to: 48, suffix: '+' },
   { label: 'Avg Build Time', to: 1, suffix: ' Day' },
-  { label: 'Ownership', to: 100, suffix: '%' },
+  { label: 'Yours after', to: 12, suffix: ' mo' },
   { label: 'Response', to: 24, prefix: '< ', suffix: ' Hrs' },
 ];
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import ScheduleCall from '@/components/ScheduleCall';
 
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -214,7 +215,9 @@ export default function Intake() {
               </button>
             </div>
             {error && <p className="iq__msg err">{error}</p>}
-            <p className="iq__note">Prefer to talk? Use Call in the header or footer — it reaches me directly.</p>
+            <p className="iq__note">
+              Prefer to talk? <ScheduleCall variant="inline" /> and I’ll ring you.
+            </p>
           </form>
         )}
       </div>

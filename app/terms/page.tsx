@@ -11,21 +11,21 @@ import {
 export const metadata: Metadata = {
   title: 'Terms of Service | Veteran AI Websites',
   description:
-    'Plain-language terms for Veteran AI Websites LLC projects, ownership, revisions, and the Managed plan.',
+    'Plain-language terms for Veteran AI Websites LLC projects, monthly plans, ownership, and revisions.',
   robots: { index: true, follow: true },
 };
 
-const UPDATED = 'August 13, 2026';
+const UPDATED = 'October 9, 2026';
 
 export default function TermsPage() {
   return (
     <LegalShell title="Terms of Service" updated={UPDATED}>
       <h2>Agreement</h2>
       <p>
-        These terms apply when you hire {BUSINESS_LEGAL_NAME} for a website build or monthly Managed
-        plan. By paying an invoice or completing checkout, you agree to them. Project-specific
-        details in writing (email, proposal, or checkout line items) control if they differ from
-        this general page.
+        These terms apply when you hire {BUSINESS_LEGAL_NAME} for a website on a monthly plan, or
+        to pay once and own it today. By paying an invoice or completing checkout, you agree to
+        them. Project-specific details in writing (email, proposal, or checkout line items) control
+        if they differ from this general page.
       </p>
       <p>
         Contracting party:
@@ -39,18 +39,18 @@ export default function TermsPage() {
 
       <h2>Scope of work</h2>
       <p>
-        Scope is defined per project in writing: package tier (Starter, Complete, or Premium),
-        optional Shoppable Store add-on, and after-launch care (Own it at $0/mo, or Managed at
-        $97/mo). The package price always applies; Managed is an add-on after launch, not a
-        substitute for the build. Anything outside the agreed scope is a change request billed
-        separately.
+        Scope is defined per project in writing: package tier (Starter $49/month, Complete
+        $79/month, or Premium $99/month) and the optional Shoppable Store add-on at $497. Nothing
+        down — your first payment is month one. To own it today instead, the pay-once prices are
+        Starter $497, Complete $797, and Premium $997. Anything outside the agreed scope is a
+        change request billed separately.
       </p>
 
       <h2>Payment</h2>
       <p>
-        One-time build fees and add-ons are charged as stated at checkout or on your invoice. When
-        you choose Managed, checkout is a Stripe subscription that includes the one-time build today
-        plus $97/month recurring. Failed payments may pause monthly services until resolved.
+        A monthly plan is a Stripe subscription at that plan’s monthly price, plus the Shoppable
+        Store if you add it. Pay once is a single Stripe payment at the pay-once price, plus the
+        store if you add it. Failed payments may pause monthly services until resolved.
       </p>
 
       <h2>Revisions</h2>
@@ -62,16 +62,25 @@ export default function TermsPage() {
       </p>
 
       <h2>Ownership</h2>
+      <p>Nothing down. Your first payment is month one.</p>
       <p>
-        On every path, you own your site. When the site is delivered you get the files, and your
-        domain is in an account with your name on it. If you are on Managed and you cancel, you keep
-        the site. No license, no lock-in, no clause that takes it back.
+        No contract. Cancel anytime. If you cancel before 12 payments, the site comes down, or you
+        can pay off the remaining months and keep it.
+      </p>
+      <p>
+        After 12 payments you own the site, the files, and the domain. You can take it anywhere, or
+        stay on for $29 a month for hosting and small fixes.
       </p>
 
-      <h2>Managed plan</h2>
+      <h2>Monthly plan</h2>
+      <p>Nothing down. Your first payment is month one.</p>
       <p>
-        Managed is <strong>month-to-month</strong>. You may cancel anytime. On cancellation, a keys
-        handoff is included so you keep the site, files, and domain access.
+        No contract. Cancel anytime. If you cancel before 12 payments, the site comes down, or you
+        can pay off the remaining months and keep it.
+      </p>
+      <p>
+        After 12 payments you own the site, the files, and the domain. You can take it anywhere, or
+        stay on for $29 a month for hosting and small fixes. That month is optional.
       </p>
 
       <h2>Content changes and hourly rate</h2>

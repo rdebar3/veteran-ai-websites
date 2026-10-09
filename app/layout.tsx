@@ -25,7 +25,7 @@ const SITE = 'https://veteranaiwebsites.com';
 const META_TITLE =
   'Veteran AI Websites | Websites for West Virginia Small Businesses';
 
-const META_DESCRIPTION = `Veteran-owned web design in ${TOWN}, West Virginia. Professional websites built in a day for small businesses. You own your site — always.`;
+const META_DESCRIPTION = `Veteran-owned web design in ${TOWN}, West Virginia. Professional websites built in a day for small businesses. Nothing down, $49 a month. No contract. After 12 payments the site is yours.`;
 
 /**
  * LocalBusiness + ProfessionalService JSON-LD.

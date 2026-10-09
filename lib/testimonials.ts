@@ -22,7 +22,7 @@ export const testimonials: Testimonial[] = [
   },
   {
     quote:
-      'Veteran-owned means something. Clear scope, fair price, full ownership. I recommend this to every local business owner I know.',
+      'Veteran-owned means something. Clear scope, fair price, no contract. I recommend this to every local business owner I know.',
     author: 'James Carter',
     business: 'Carter HVAC Services',
     location: 'Charleston, WV',
