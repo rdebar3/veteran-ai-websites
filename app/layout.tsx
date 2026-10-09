@@ -6,7 +6,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SmoothScroll from '@/components/SmoothScroll';
 import { MAILING, TOWN } from '@/lib/contact';
-import { FACEBOOK_URL } from '@/lib/data';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -58,7 +57,6 @@ const localBusinessSchema = {
     '@type': 'State',
     name: 'West Virginia',
   },
-  sameAs: [FACEBOOK_URL],
   knowsAbout: [
     'Web design',
     'Small business websites',

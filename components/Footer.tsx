@@ -1,6 +1,4 @@
-import FacebookIcon from '@/components/FacebookIcon';
 import ScheduleCall from '@/components/ScheduleCall';
-import { FACEBOOK_URL } from '@/lib/data';
 import { landmarkCredits } from '@/lib/landmarks';
 import { MAILING_ADDRESS, PHONE_HREF } from '@/lib/contact';
 
@@ -23,15 +21,6 @@ export default function Footer() {
           <p className="footer__service-area">
             Serving small businesses in all 55 West Virginia counties.
           </p>
-          <a
-            href={FACEBOOK_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-4 text-sm text-[var(--text-dim)] hover:text-[var(--text)] transition-colors"
-          >
-            <FacebookIcon className="h-4 w-4" aria-hidden="true" />
-            Facebook
-          </a>
           <nav className="footer__legal" aria-label="Legal">
             <a href="/privacy">Privacy</a>
             <a href="/terms">Terms</a>

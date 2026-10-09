@@ -7,8 +7,6 @@ import {
   Globe,
 } from 'lucide-react';
 
-export const FACEBOOK_URL = 'https://www.facebook.com/profile.php?id=61590561850536';
-
 export interface PricingTier {
   name: string;
   /** Monthly price in dollars. Pay-once amounts live on `payOnce`. */
