@@ -56,13 +56,16 @@ const styles = `
 .vh-eyebrow{font-family:var(--font-sans);font-size:clamp(12px,1.45vw,16px);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#fff;margin:0 0 22px;text-shadow:0 2px 14px rgba(0,0,0,.8),0 1px 3px rgba(0,0,0,.7)}
 .vh-title{font-family:var(--font-sans);font-size:clamp(28px,5.2vw,72px);font-weight:600;letter-spacing:-.035em;line-height:1.05;color:#fff;margin:0;text-shadow:0 2px 3px rgba(0,0,0,.6),0 3px 14px rgba(0,0,0,.55),0 8px 40px rgba(0,0,0,.45);-webkit-text-stroke:0.5px rgba(0,0,0,.2)}
 .vh-sub{font-family:var(--font-sans);font-size:clamp(15px,1.8vw,22px);font-weight:500;letter-spacing:-.01em;line-height:1.45;color:rgba(255,255,255,.92);margin:18px 0 0;max-width:36ch;text-shadow:0 2px 12px rgba(0,0,0,.7),0 1px 3px rgba(0,0,0,.6)}
-.vh-cta{margin-top:38px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center}
-.vh-cta .btn--primary{min-width:min(100%,220px);background:#fff;color:#0a0e14;border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 34px rgba(0,0,0,.45);font-weight:700;transition:transform .25s,box-shadow .25s,background .25s}
-.vh-cta .btn--primary:hover{background:#fff;transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,0,0,.55)}
-.vh-cta .btn--ghost{min-width:min(100%,210px);background:#12161d;color:#fff;border:1px solid rgba(255,255,255,.38);font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.5);transition:transform .25s,box-shadow .25s,background .25s,color .25s,border-color .25s}
-.vh-cta .btn--ghost:hover{background:#fff;color:#0a0e14;border-color:#fff;transform:translateY(-2px);box-shadow:0 16px 38px rgba(0,0,0,.5)}
-.vh-cta-phone{min-width:min(100%,210px);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-sans);font-size:16px;font-weight:700;color:#0a0e14;text-decoration:none;background:#fff;border:1px solid rgba(255,255,255,.9);border-radius:999px;padding:14px 22px;box-shadow:0 12px 34px rgba(0,0,0,.45);transition:transform .25s,box-shadow .25s,background .25s}
-.vh-cta-phone:hover{background:#fff;transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,0,0,.55)}
+.vh-cta{margin-top:38px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.vh-cta__row{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
+.vh-cta__row .sched,.vh-cta__row .btn-magnetic{display:flex}
+.vh-cta__row .btn-magnetic>.vh-cta-btn,.vh-cta__row .btn__label{display:flex;align-items:center}
+.vh-cta-btn{box-sizing:border-box;height:52px;min-width:210px;padding:0 26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;font-family:var(--font-sans);font-size:16px;font-weight:700;letter-spacing:0;text-transform:none;line-height:1;text-decoration:none;white-space:nowrap;transition:transform .25s,box-shadow .25s,background .25s,color .25s,border-color .25s}
+.vh-cta-btn--solid{background:#fff;color:#0a0e14;border:1px solid #fff;box-shadow:0 12px 34px rgba(0,0,0,.45)}
+.vh-cta-btn--line{background:rgba(10,14,20,.55);color:#fff;border:1px solid rgba(255,255,255,.6);box-shadow:0 12px 30px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.vh-cta-btn:hover{transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,0,0,.55)}
+.vh-cta-btn--line:hover{background:#fff;color:#0a0e14;border-color:#fff}
+.vh-cta__note{margin:0;font-family:var(--font-sans);font-size:13px;line-height:1.35;color:rgba(233,240,246,.72);text-align:center}
 .vh-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--font-sans);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(233,240,246,.72);text-align:center}
 .vh-hint i{display:block;width:1px;height:28px;margin:10px auto 0;background:linear-gradient(rgba(233,240,246,.7),transparent)}
 .vh-dots{position:absolute;top:50%;right:clamp(14px,2vw,28px);transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:12px}
@@ -73,7 +76,7 @@ const styles = `
 .vh-simple video,.vh-simple img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .vh-simple .vh-veil{z-index:1}
 .vh-simple .vh-stack{position:relative;z-index:2;padding:0 24px}
-@media(max-width:640px){.vh-cta{flex-direction:column;align-items:stretch}.vh-cta .sched{align-items:stretch;width:100%}.vh-cta .btn--primary,.vh-cta .btn--ghost{min-width:0;width:100%;justify-content:center}.vh-cta-phone{text-align:center;width:100%}}
+@media(max-width:640px){.vh-cta__row{flex-direction:column;align-items:stretch;width:100%}.vh-cta__row .sched,.vh-cta__row .btn-magnetic{width:100%}.vh-cta-btn{width:100%;min-width:0}}
 /* mobile: shorter scroll region so the two scenes play over less scroll */
 @media(max-width:768px){.vh-root{height:160vh}}
 `;
@@ -123,10 +126,13 @@ function CtaBlock({
 
   return (
     <motion.div className="vh-cta" style={{ opacity, pointerEvents, visibility }}>
-      <ScheduleCall note buttonClassName="vh-cta-phone" />
-      <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--ghost btn--lg">
-        Get started
-      </MagneticButton>
+      <div className="vh-cta__row">
+        <ScheduleCall buttonClassName="vh-cta-btn vh-cta-btn--solid" />
+        <MagneticButton href="#build" onClick={onClaimOffer} className="vh-cta-btn vh-cta-btn--line">
+          See the plans
+        </MagneticButton>
+      </div>
+      <p className="vh-cta__note">20 minutes. I call you.</p>
     </motion.div>
   );
 }
@@ -205,10 +211,13 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
           <p className="vh-sub">{scenes[0].sub}</p>
           <p className="vh-sub">{scenes[1].title}</p>
           <div className="vh-cta">
-            <ScheduleCall note buttonClassName="vh-cta-phone" />
-            <MagneticButton href="#build" onClick={onClaimOffer} className="btn btn--ghost btn--lg">
-              Get started
-            </MagneticButton>
+            <div className="vh-cta__row">
+              <ScheduleCall buttonClassName="vh-cta-btn vh-cta-btn--solid" />
+              <MagneticButton href="#build" onClick={onClaimOffer} className="vh-cta-btn vh-cta-btn--line">
+                See the plans
+              </MagneticButton>
+            </div>
+            <p className="vh-cta__note">20 minutes. I call you.</p>
           </div>
         </div>
       </div>
