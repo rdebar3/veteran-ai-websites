@@ -102,6 +102,11 @@ export interface AddOn {
 
 export const SHOPPABLE_STORE_PRICE = 497;
 
+export const SOFTWARE_REVIEW_TOPIC = 'software-review';
+
+export const STORE_LINE =
+  'Want to sell online? Add a store, up to 20 products, $497 one-time, billed with your first payment. Just mention it on the call.';
+
 export const addOnsList: AddOn[] = [
   {
     id: 'shoppable-store',

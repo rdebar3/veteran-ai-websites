@@ -6,11 +6,9 @@ import {
   formatUsd,
   allPackagesInclude,
   PAY_ONCE_LINE,
-  type PlanName,
+  STORE_LINE,
 } from '@/lib/data';
-import { setChosenPlan } from '@/lib/plan-choice';
-import { scrollToElement } from '@/lib/scroll-driver';
-import ScheduleCall from '@/components/ScheduleCall';
+import ScheduleCall, { bookHref } from '@/components/ScheduleCall';
 
 const demoLinks: Record<string, string> = {
   Starter: '/examples/starter-plumbing',
@@ -20,7 +18,7 @@ const demoLinks: Record<string, string> = {
 
 const howSteps = [
   ['Pick a plan', 'or just tell me what you need.'],
-  ['Tell me about your business', 'the form below, or pick a time and I’ll call you.'],
+  ['Grab a time', 'or send me a note at the bottom of the page.'],
   ['I build it', 'usually in a day. You get a link.'],
   ['You approve it', 'then your first payment goes through and the site goes live.'],
 ] as const;
@@ -48,7 +46,7 @@ const styles = `
 .pk__feats li{position:relative;padding-left:24px;font-size:13.5px;line-height:1.45;color:rgba(233,240,246,.86)}
 .pk__feats li::before{content:'';position:absolute;left:0;top:3px;width:16px;height:16px;border-radius:50%;background:rgba(143,227,176,.16)}
 .pk__feats li::after{content:'';position:absolute;left:5px;top:7px;width:6px;height:3px;border-left:1.5px solid #8fe3b0;border-bottom:1.5px solid #8fe3b0;transform:rotate(-45deg)}
-.pk__pick{width:100%;position:relative;isolation:isolate;overflow:hidden;font-family:var(--font-sans);font-size:14px;font-weight:600;padding:13px;border-radius:12px;cursor:pointer;border:1px solid rgba(233,240,246,.28);background:rgba(255,255,255,.05);color:#eef4f8;transition:color .25s,border-color .25s,transform .25s,box-shadow .25s}
+.pk__pick{display:block;width:100%;text-align:center;text-decoration:none;position:relative;isolation:isolate;overflow:hidden;font-family:var(--font-sans);font-size:14px;font-weight:600;padding:13px;border-radius:12px;cursor:pointer;border:1px solid rgba(233,240,246,.28);background:rgba(255,255,255,.05);color:#eef4f8;transition:color .25s,border-color .25s,transform .25s,box-shadow .25s}
 .pk__pick::after{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:linear-gradient(135deg,#fff,#dbe4ee);opacity:0;transform:scale(.92);transition:opacity .28s,transform .28s}
 .pk__pick:hover{color:#0a0e14;border-color:transparent;transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.45)}
 .pk__pick:hover::after{opacity:1;transform:scale(1)}
@@ -64,11 +62,6 @@ const styles = `
 .pk__how b{color:#fff;font-weight:650}
 @media(max-width:860px){.pk__grid{grid-template-columns:1fr;max-width:420px}.pk__how{grid-template-columns:1fr;max-width:420px;margin-left:auto;margin-right:auto}}
 `;
-
-function startWith(name: PlanName) {
-  setChosenPlan(name);
-  scrollToElement('contact');
-}
 
 export default function Packages() {
   return (
@@ -87,7 +80,6 @@ export default function Packages() {
       <div className="pk__grid">
         {pricingTiers.map((t) => {
           const price = getDisplayPrice(t);
-          const name = t.name as PlanName;
           return (
             <div key={t.name} className="pk__card">
               {t.popular && <span className="pk__pop">Most popular</span>}
@@ -102,9 +94,9 @@ export default function Packages() {
                   <li key={f}>{f}</li>
                 ))}
               </ul>
-              <button type="button" className="pk__pick" onClick={() => startWith(name)}>
+              <a className="pk__pick" href={bookHref(`plan=${t.name}`)}>
                 Start with {t.name}
-              </button>
+              </a>
               {demoLinks[t.name] && (
                 <a
                   className="pk__demo"
@@ -124,6 +116,7 @@ export default function Packages() {
       </div>
 
       <p className="pk__once">{PAY_ONCE_LINE}</p>
+      <p className="pk__once">{STORE_LINE}</p>
 
       <ul className="pk__every">
         {allPackagesInclude.map((item) => (

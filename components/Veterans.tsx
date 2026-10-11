@@ -1,5 +1,6 @@
 'use client';
 
+import { bookHref } from '@/components/ScheduleCall';
 import { KEEP_RUNNING_MONTHLY } from '@/lib/data';
 
 const styles = `
@@ -39,8 +40,7 @@ export default function Veterans() {
         <p className="vets__eyebrow">For those who served</p>
         <h2 className="vets__title">Fellow veterans: your first 3 months are on me.</h2>
         <p className="vets__sub">
-          Same plan, same rules. I waive your first three payments. Tick &quot;I served&quot; in the
-          form below and I’ll take care of it.
+          Same plan, same rules. I waive your first three payments. Grab a time and I’ll take care of it.
         </p>
         <ul className="vets__list">
           <li>
@@ -70,7 +70,7 @@ export default function Veterans() {
           anytime. After 12 payments the site is yours.
         </p>
         <div className="vets__cta">
-          <a href="#contact" className="vets__btn">
+          <a href={bookHref('veteran=1')} className="vets__btn">
             Claim your veteran offer <span className="arw" aria-hidden="true">
               →
             </span>

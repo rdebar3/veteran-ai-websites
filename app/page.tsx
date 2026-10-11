@@ -6,7 +6,7 @@ import VeteranBand from '@/components/VeteranBand';
 import Demos from '@/components/Demos';
 import Packages from '@/components/Packages';
 import Reviews from '@/components/Reviews';
-import Intake from '@/components/Intake';
+import LetsTalk from '@/components/LetsTalk';
 import LowerBackdrop from '@/components/LowerBackdrop';
 import Ownership from '@/components/Ownership';
 import Veterans from '@/components/Veterans';
@@ -50,7 +50,7 @@ export default function Home() {
         <Packages />
         <Ownership />
         <Veterans />
-        <Intake />
+        <LetsTalk />
         <Reviews />
       </LowerBackdrop>
     </main>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEMO_NOINDEX_HEADERS } from './demo/headers';
-import { PAY_ONCE_LINE, allPackagesInclude } from './data';
+import { bookHref } from '../components/ScheduleCall';
+import { PAY_ONCE_LINE, SOFTWARE_REVIEW_TOPIC, STORE_LINE, allPackagesInclude } from './data';
 import { heroScenes } from './hero-scenes';
 
 describe('public copy', () => {
@@ -20,5 +21,17 @@ describe('public copy', () => {
 
   it('noindexes the example demos', () => {
     expect(DEMO_NOINDEX_HEADERS.some((entry) => entry.source === '/examples/:path*')).toBe(true);
+  });
+
+  it('names the software review and the store line', () => {
+    expect(SOFTWARE_REVIEW_TOPIC).toBe('software-review');
+    expect(STORE_LINE).toContain('$497');
+  });
+
+  it('puts the reason for the call in the booking link', () => {
+    expect(bookHref('plan=Complete').endsWith('/book?plan=Complete')).toBe(true);
+    const bare = bookHref();
+    expect(bare.endsWith('/book')).toBe(true);
+    expect(bare.includes('?')).toBe(false);
   });
 });

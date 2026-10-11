@@ -1,6 +1,14 @@
 export const BOOK_URL =
   process.env.NEXT_PUBLIC_BOOK_URL || 'https://app.veteranaiwebsites.com/book';
 
+/** Booking page, plus an optional query string such as "plan=Complete". */
+export function bookHref(query?: string): string {
+  const q = (query ?? '').trim().replace(/^\?/, '');
+  if (!q) return BOOK_URL;
+  const joiner = BOOK_URL.includes('?') ? '&' : '?';
+  return `${BOOK_URL}${joiner}${q}`;
+}
+
 type ScheduleCallProps = {
   /** Small line under the button. Use where the layout has room. */
   note?: boolean;
@@ -8,6 +16,10 @@ type ScheduleCallProps = {
   className?: string;
   buttonClassName?: string;
   onClick?: () => void;
+  /** Raw query string appended to the booking URL, e.g. "plan=Complete". */
+  query?: string;
+  /** Button text. Defaults to "Schedule a call". */
+  label?: string;
 };
 
 const styles = `
@@ -29,13 +41,17 @@ export default function ScheduleCall({
   className,
   buttonClassName,
   onClick,
+  query,
+  label = 'Schedule a call',
 }: ScheduleCallProps) {
+  const href = bookHref(query);
+
   if (variant === 'inline') {
     return (
       <>
         <style dangerouslySetInnerHTML={{ __html: styles }} />
-        <a className={className ? `sched__inline ${className}` : 'sched__inline'} href={BOOK_URL} onClick={onClick}>
-          Schedule a call
+        <a className={className ? `sched__inline ${className}` : 'sched__inline'} href={href} onClick={onClick}>
+          {label}
         </a>
       </>
     );
@@ -47,8 +63,8 @@ export default function ScheduleCall({
   return (
     <span className={`sched${variantClass}${className ? ` ${className}` : ''}`}>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
-      <a className={buttonClassName || 'sched__btn'} href={BOOK_URL} onClick={onClick}>
-        Schedule a call
+      <a className={buttonClassName || 'sched__btn'} href={href} onClick={onClick}>
+        {label}
       </a>
       {note ? <span className="sched__note">20 minutes. I call you.</span> : null}
     </span>
