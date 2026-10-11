@@ -23,13 +23,13 @@ describe('monthly offer', () => {
     expect(payOnce).toEqual({ Starter: 497, Complete: 797, Premium: 997 });
     expect(KEEP_RUNNING_MONTHLY).toBe(29);
     expect(PAY_ONCE_LINE).toBe(
-      'Rather pay once and own it today? Starter $497 · Complete $797 · Premium $997.'
+      'Rather pay once and own it outright? Starter $497 · Complete $797 · Premium $997. Your call when you approve the site.'
     );
   });
 
   it('lists what every plan includes and keeps only the store add-on', () => {
     expect(allPackagesInclude).toEqual([
-      'Nothing down — your first payment is month one',
+      'Nothing down — nothing is charged until you’ve approved your site',
       'Hosting, updates and small changes included',
       'No contract — cancel anytime',
       'After 12 payments the site is yours to keep',
@@ -55,7 +55,8 @@ describe('hero scenes', () => {
     expect(heroScenes).toEqual([
       {
         title: 'More calls for your business. Built in a day.',
-        sub: 'West Virginia veteran-owned. Nothing down, $49 a month.',
+        sub: 'West Virginia veteran-owned. Nothing down, nothing until you’ve seen it. From $49 a month.',
+        cta: true,
       },
       {
         title: 'Pick a time. I’ll call you.',

@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ScheduleCall from '@/components/ScheduleCall';
-
+import { formatUsd, pricingTiers, SHOPPABLE_STORE_PRICE, type PlanName } from '@/lib/data';
+import { validateInquiry } from '@/lib/inquiry';
+import { getChosenPlan, setChosenPlan, subscribeChosenPlan, type PlanChoice } from '@/lib/plan-choice';
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+const PLAN_NAMES: PlanName[] = ['Starter', 'Complete', 'Premium'];
 const projectTypes = ['New website', 'Redesign', 'Online store', 'Not sure yet'];
 
 const styles = `
@@ -29,6 +32,8 @@ select.iq__field{appearance:none;cursor:pointer;background-image:url("data:image
 .iq__field option{background:#10151f;color:#eef4f8}
 textarea.iq__field{resize:vertical;min-height:120px;line-height:1.5}
 .iq__block{margin-bottom:14px}
+.iq__check{display:flex;gap:12px;align-items:flex-start;margin:0 0 14px;font-size:14.5px;line-height:1.45;color:rgba(233,240,246,.88);cursor:pointer}
+.iq__check input{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:#8fe3b0}
 .iq__submit{width:100%;position:relative;isolation:isolate;overflow:hidden;font-family:var(--font-sans);font-size:16px;font-weight:600;padding:16px;border-radius:999px;border:1px solid rgba(233,240,246,.3);cursor:pointer;background:rgba(255,255,255,.06);color:#eef4f8;transition:color .25s,border-color .25s,transform .25s,box-shadow .25s;margin-top:6px}
 .iq__submit::after{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:linear-gradient(135deg,#fff,#dbe4ee);opacity:0;transform:scale(.92);transition:opacity .28s,transform .28s}
 .iq__submit:hover{color:#0a0e14;border-color:transparent;transform:translateY(-2px);box-shadow:0 14px 32px rgba(0,0,0,.5)}
@@ -37,12 +42,20 @@ textarea.iq__field{resize:vertical;min-height:120px;line-height:1.5}
 .iq__cta-row{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:6px}
 .iq__msg{text-align:center;font-size:14px;margin-top:14px}
 .iq__msg.err{color:#ff9b9b}
+.iq__fielderr{color:#ff9b9b;font-size:13px;line-height:1.4;margin:6px 0 0}
 .iq__note{text-align:center;font-size:13px;color:rgba(233,240,246,.82);margin:16px 0 0}
 .iq__thanks{border:1px solid rgba(143,227,176,.4);background:rgba(143,227,176,.08);border-radius:22px;padding:40px 28px;text-align:center;color:#d8f5e4}
 .iq__thanks h3{font-size:22px;color:#fff;margin:0 0 8px}
 .iq__thanks p{font-size:16px;color:rgba(216,245,228,.9);margin:0}
+.iq__thanks p+p{margin-top:14px}
 @media(max-width:560px){.iq__row{flex-direction:column;gap:14px}}
 `;
+
+function planFromQuery(raw: string | null): PlanName | null {
+  if (!raw) return null;
+  const needle = raw.trim().toLowerCase();
+  return PLAN_NAMES.find((name) => name.toLowerCase() === needle) ?? null;
+}
 
 export default function Intake() {
   const [name, setName] = useState('');
@@ -50,14 +63,53 @@ export default function Intake() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [projectType, setProjectType] = useState(projectTypes[0]);
+  const [plan, setPlan] = useState<PlanChoice>(getChosenPlan);
+  const [wantsStore, setWantsStore] = useState(false);
+  const [isVeteran, setIsVeteran] = useState(false);
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+  const [fieldError, setFieldError] = useState<{
+    field: 'name' | 'phone' | 'email';
+    message: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = subscribeChosenPlan(setPlan);
+    const fromUrl = planFromQuery(new URLSearchParams(window.location.search).get('plan'));
+    if (fromUrl) setChosenPlan(fromUrl);
+    return unsubscribe;
+  }, []);
+
+  function choosePlan(value: string) {
+    const next = planFromQuery(value);
+    setChosenPlan(next);
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !message.trim() || !SUPA_URL || !SUPA_KEY) return;
+    const result = validateInquiry({
+      name,
+      business,
+      email,
+      phone,
+      projectType,
+      plan,
+      wantsStore,
+      isVeteran,
+      message,
+    });
+    if (!result.ok) {
+      setFieldError({ field: result.field, message: result.message });
+      setError('');
+      return;
+    }
+    setFieldError(null);
+    if (!SUPA_URL || !SUPA_KEY) {
+      setError('The form isn’t connected right now — call or text me instead.');
+      return;
+    }
     setSubmitting(true);
     setError('');
     try {
@@ -69,14 +121,7 @@ export default function Intake() {
           'Content-Type': 'application/json',
           Prefer: 'return=minimal',
         },
-        body: JSON.stringify({
-          name: name.trim().slice(0, 100),
-          business: business.trim() ? business.trim().slice(0, 140) : null,
-          email: email.trim() ? email.trim().slice(0, 160) : null,
-          phone: phone.trim() ? phone.trim().slice(0, 40) : null,
-          project_type: projectType,
-          message: message.trim().slice(0, 3000),
-        }),
+        body: JSON.stringify(result.row),
       });
       if (res.ok) {
         setDone(true);
@@ -98,18 +143,21 @@ export default function Intake() {
           <p className="iq__eyebrow">Start your project</p>
           <h2 className="iq__title">Have a site in mind? Let’s talk.</h2>
           <p className="iq__sub">
-            Tell me a little about your business and what you’re after. I’ll get back to you
-            personally — no obligation, no pressure.
+            Tell me a little about your business. I build the site, you look it over, and nothing
+            is charged until you approve it.
           </p>
         </div>
 
         {done ? (
           <div className="iq__thanks">
-            <h3>Got it — thank you! 🎉</h3>
-            <p>Your inquiry came through. I’ll reach out personally, usually within a day.</p>
+            <h3>Got it — thank you.</h3>
+            <p>I’ll call you within a day, usually sooner. Want to pick the time instead?</p>
+            <p>
+              <ScheduleCall variant="inline" />
+            </p>
           </div>
         ) : (
-          <form className="iq__form" onSubmit={submit}>
+          <form className="iq__form" onSubmit={submit} noValidate>
             <p className="iq__direct">Your message comes straight to me — not a sales team.</p>
             <div className="iq__row">
               <div>
@@ -125,7 +173,9 @@ export default function Intake() {
                   placeholder="Jane Smith"
                   autoComplete="name"
                   required
+                  aria-invalid={fieldError?.field === 'name' || undefined}
                 />
+                {fieldError?.field === 'name' && <p className="iq__fielderr">{fieldError.message}</p>}
               </div>
               <div>
                 <label className="iq__label" htmlFor="iq-business">
@@ -143,6 +193,25 @@ export default function Intake() {
               </div>
             </div>
 
+            <div className="iq__block">
+              <label className="iq__label" htmlFor="iq-plan">
+                Which plan?
+              </label>
+              <select
+                id="iq-plan"
+                className="iq__field"
+                value={plan ?? ''}
+                onChange={(e) => choosePlan(e.target.value)}
+              >
+                {pricingTiers.map((tier) => (
+                  <option key={tier.name} value={tier.name}>
+                    {tier.name} — ${tier.price}/mo
+                  </option>
+                ))}
+                <option value="">Not sure yet</option>
+              </select>
+            </div>
+
             <div className="iq__row">
               <div>
                 <label className="iq__label" htmlFor="iq-email">
@@ -157,22 +226,32 @@ export default function Intake() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@email.com"
                   autoComplete="email"
+                  aria-invalid={fieldError?.field === 'email' || undefined}
                 />
+                {fieldError?.field === 'email' && (
+                  <p className="iq__fielderr">{fieldError.message}</p>
+                )}
               </div>
               <div>
                 <label className="iq__label" htmlFor="iq-phone">
-                  Phone
+                  Phone *
                 </label>
                 <input
                   id="iq-phone"
                   className="iq__field"
                   type="tel"
+                  inputMode="tel"
                   value={phone}
                   maxLength={40}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="(304) 555-0000"
                   autoComplete="tel"
+                  required
+                  aria-invalid={fieldError?.field === 'phone' || undefined}
                 />
+                {fieldError?.field === 'phone' && (
+                  <p className="iq__fielderr">{fieldError.message}</p>
+                )}
               </div>
             </div>
 
@@ -194,9 +273,30 @@ export default function Intake() {
               </select>
             </div>
 
+            <label className="iq__check">
+              <input
+                type="checkbox"
+                checked={wantsStore}
+                onChange={(e) => setWantsStore(e.target.checked)}
+              />
+              <span>
+                Add an online store — up to 20 products, {formatUsd(SHOPPABLE_STORE_PRICE)}{' '}
+                one-time, billed with your first payment
+              </span>
+            </label>
+
+            <label className="iq__check">
+              <input
+                type="checkbox"
+                checked={isVeteran}
+                onChange={(e) => setIsVeteran(e.target.checked)}
+              />
+              <span>I served — first 3 months on me</span>
+            </label>
+
             <div className="iq__block">
               <label className="iq__label" htmlFor="iq-message">
-                Tell me about your project *
+                Anything I should know?
               </label>
               <textarea
                 id="iq-message"
@@ -204,8 +304,7 @@ export default function Intake() {
                 value={message}
                 maxLength={3000}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="What kind of site are you looking for? Any examples you like, timeline, or goals?"
-                required
+                placeholder="Hours, what you want people to call about, a site you like — anything helps."
               />
             </div>
 

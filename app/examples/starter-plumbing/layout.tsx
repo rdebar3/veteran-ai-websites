@@ -1,28 +1,14 @@
-'use client';
-
-import { useEffect } from 'react';
+import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
+import DemoShell from '@/components/starter-plumbing/DemoShell';
 import './starter-plumbing.css';
 
-export default function StarterPlumbingLayout({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    const mainNav = document.querySelector('nav');
-    if (mainNav?.textContent?.includes('Veteran AI Websites')) {
-      (mainNav as HTMLElement).style.display = 'none';
-    }
-    const mainFooter = document.querySelector('footer');
-    if (mainFooter?.textContent?.includes('Veteran AI Websites')) {
-      (mainFooter as HTMLElement).style.display = 'none';
-    }
+export const metadata: Metadata = {
+  title: 'Summit Plumbing | Ridgeview, WV',
+  description: 'Sample one-page plumbing website for Summit Plumbing of Ridgeview, West Virginia.',
+  robots: { index: false, follow: false },
+};
 
-    document.title = 'Summit Plumbing LLC | Ridgeview, WV | (304) 555-0192';
-    document.body.classList.add('sp-demo-body');
-
-    return () => {
-      if (mainNav) (mainNav as HTMLElement).style.display = '';
-      if (mainFooter) (mainFooter as HTMLElement).style.display = '';
-      document.body.classList.remove('sp-demo-body');
-    };
-  }, []);
-
-  return <>{children}</>;
+export default function StarterPlumbingLayout({ children }: { children: ReactNode }) {
+  return <DemoShell>{children}</DemoShell>;
 }

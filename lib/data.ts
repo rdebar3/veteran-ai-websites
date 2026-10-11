@@ -1,12 +1,3 @@
-import {
-  Send,
-  Phone,
-  Zap,
-  Eye,
-  CreditCard,
-  Globe,
-} from 'lucide-react';
-
 export interface PricingTier {
   name: string;
   /** Monthly price in dollars. Pay-once amounts live on `payOnce`. */
@@ -29,7 +20,7 @@ export const payOnce = {
 export type PlanName = keyof typeof payOnce;
 
 export const PAY_ONCE_LINE =
-  'Rather pay once and own it today? Starter $497 · Complete $797 · Premium $997.';
+  'Rather pay once and own it outright? Starter $497 · Complete $797 · Premium $997. Your call when you approve the site.';
 
 /** Optional hosting and small fixes after month 12. Not charged at checkout. */
 export const KEEP_RUNNING_MONTHLY = 29;
@@ -93,7 +84,7 @@ export const pricingTiers: PricingTier[] = [
 ];
 
 export const allPackagesInclude = [
-  'Nothing down — your first payment is month one',
+  'Nothing down — nothing is charged until you’ve approved your site',
   'Hosting, updates and small changes included',
   'No contract — cancel anytime',
   'After 12 payments the site is yours to keep',
@@ -118,44 +109,5 @@ export const addOnsList: AddOn[] = [
     price: SHOPPABLE_STORE_PRICE,
     period: '',
     desc: 'Sell online with a secure product catalog and checkout — up to 20 products, built alongside your site. Charged once at checkout.',
-  },
-];
-
-export const howItWorksSteps = [
-  {
-    number: '1',
-    icon: Send,
-    title: 'Submit Your Order',
-    desc: 'Choose your package and add-ons on this website and submit your request with basic business info.',
-  },
-  {
-    number: '2',
-    icon: Phone,
-    title: 'Consultation Call',
-    desc: 'We’ll schedule a quick 15-minute call to discuss your goals and details.',
-  },
-  {
-    number: '3',
-    icon: Zap,
-    title: 'We Build Your Site',
-    desc: 'We deliver your premium, high-quality website the same day (or 1-2 days with priority for Premium), ensuring exceptional craftsmanship.',
-  },
-  {
-    number: '4',
-    icon: Eye,
-    title: 'Review & Feedback',
-    desc: 'You review the preview and request any included revisions.',
-  },
-  {
-    number: '5',
-    icon: CreditCard,
-    title: 'Approve & Pay',
-    desc: 'Once you’re happy, complete payment securely on our site.',
-  },
-  {
-    number: '6',
-    icon: Globe,
-    title: 'Launch & Handoff',
-    desc: 'We deploy your live site. After 12 payments the site is yours.',
   },
 ];

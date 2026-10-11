@@ -31,7 +31,10 @@ export default function Ownership() {
         </div>
 
         <div className="own__panel">
-          <p className="own__p">Nothing down. Your first payment is month one.</p>
+          <p className="own__p">
+            Nothing down, and nothing until you’ve seen it. You approve the site, then your first
+            payment is month one.
+          </p>
           <p className="own__p">
             Cancel anytime. If you cancel before 12 payments, the site comes down, or you can pay
             off the remaining months and keep it.

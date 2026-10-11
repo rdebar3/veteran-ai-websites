@@ -57,5 +57,3 @@ export const landmarks: Record<string, WVLandmark> = {
   },
 };
 
-export const landmarkCredits =
-  'Cinematic West Virginia landscapes — veteran-owned AI web studio.';

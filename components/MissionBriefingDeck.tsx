@@ -104,8 +104,6 @@ export default function MissionBriefingDeck() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [isPaying, setIsPaying] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   const goToChapter = useCallback(
     (index: number) => {
@@ -121,24 +119,6 @@ export default function MissionBriefingDeck() {
   const exitBriefing = useCallback(() => {
     scrollToElement('hero', { offset: 0 });
   }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('payment_success') === 'true') {
-      const saved = sessionStorage.getItem('pendingOrder');
-      if (saved) {
-        const details = JSON.parse(saved);
-        setSelectedPackage(details.selectedBuilderPackage);
-        setSelectedAddOnIds(details.selectedAddOnIds);
-        setBuilderForm(details.builderForm);
-        setIsSubmitted(true);
-        setPaymentSuccess(true);
-        sessionStorage.removeItem('pendingOrder');
-        window.history.replaceState({}, document.title, window.location.pathname);
-        setTimeout(() => goToChapter(6), 150);
-      }
-    }
-  }, [goToChapter]);
 
   /* Hash navigation: #pricing #build #demos etc. → chapter jump */
   useEffect(() => {
@@ -321,37 +301,6 @@ export default function MissionBriefingDeck() {
     } catch {
       setIsSubmitting(false);
       setSubmitError('Failed to send your order. Please try again or contact us directly.');
-    }
-  };
-
-  const handlePayNow = async () => {
-    setIsPaying(true);
-    try {
-      const selectedAddOnNames = selectedAddOnIds
-        .map((id) => addOnsList.find((a) => a.id === id)?.name)
-        .filter(Boolean) as string[];
-      sessionStorage.setItem(
-        'pendingOrder',
-        JSON.stringify({
-          selectedBuilderPackage: selectedPackage,
-          selectedAddOnIds,
-          builderForm,
-        })
-      );
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          package: selectedPackage,
-          billing: 'monthly',
-          addOns: selectedAddOnNames,
-        }),
-      });
-      const { url } = await response.json();
-      if (url) window.location.href = url;
-    } catch {
-      setIsPaying(false);
-      sessionStorage.removeItem('pendingOrder');
     }
   };
 
@@ -756,22 +705,11 @@ export default function MissionBriefingDeck() {
                               .
                             </p>
                             <div className="success-card__actions">
-                              {!paymentSuccess && (
-                                <button
-                                  type="button"
-                                  className="btn btn--primary btn--lg btn--glow"
-                                  disabled={isPaying}
-                                  onClick={handlePayNow}
-                                >
-                                  {isPaying ? 'Processing…' : 'Pay Now with Stripe'}
-                                </button>
-                              )}
                               <button
                                 type="button"
                                 className="btn btn--ghost btn--lg"
                                 onClick={() => {
                                   setIsSubmitted(false);
-                                  setPaymentSuccess(false);
                                   setBuilderForm({
                                     businessName: '',
                                     email: '',
@@ -783,11 +721,6 @@ export default function MissionBriefingDeck() {
                                 Start another
                               </button>
                             </div>
-                            {paymentSuccess && (
-                              <p className="mt-3 text-emerald-400 text-sm font-medium">
-                                Payment successful — thank you.
-                              </p>
-                            )}
                           </div>
                         )}
 

@@ -1,6 +1,6 @@
 import ScheduleCall from '@/components/ScheduleCall';
-import { landmarkCredits } from '@/lib/landmarks';
-import { MAILING_ADDRESS, PHONE_HREF } from '@/lib/contact';
+import PhoneLink from '@/components/PhoneLink';
+import { MAILING_ADDRESS, PHONE } from '@/lib/contact';
 
 /** Server Component — no "use client". Safe for crawlable contact + service area. */
 export default function Footer() {
@@ -13,8 +13,8 @@ export default function Footer() {
           </div>
           <p className="footer__tagline">West Virginia · U.S. Veteran Owned</p>
           <p className="footer__phone">
-            <a href={PHONE_HREF}>Call</a>
-            <span className="footer__phone-note"> — or text, reaches me directly</span>
+            <PhoneLink>Call or text {PHONE}</PhoneLink>
+            <span className="footer__phone-note"> — reaches me directly</span>
           </p>
           <ScheduleCall note className="footer__book" />
           <p className="footer__address">{MAILING_ADDRESS}</p>
@@ -45,7 +45,6 @@ export default function Footer() {
       <p className="footer__motto">
         WV Proud · America 250 · Veteran Built
       </p>
-      <p className="footer__credits">{landmarkCredits}</p>
     </footer>
   );
 }

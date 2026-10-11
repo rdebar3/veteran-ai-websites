@@ -22,6 +22,7 @@ type Scene = HeroScene;
 const scenes: Scene[] = heroScenes;
 
 const N = scenes.length;
+const showCtaFromStart = scenes.every((scene) => scene.cta === true);
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 const smooth = (x: number) => {
   const c = clamp(x, 0, 1);
@@ -112,7 +113,9 @@ function CtaBlock({
   mounted: boolean;
 }) {
   const last = N - 1;
-  const opacity = useTransform(progress, (p) => sceneOpacityAt(p * (N - 1), last));
+  const opacity = useTransform(progress, (p) =>
+    showCtaFromStart ? 1 : sceneOpacityAt(p * (N - 1), last)
+  );
   const pointerEvents = useTransform(opacity, (o) => (o > 0.35 ? 'auto' : 'none'));
   const visibility = useTransform(opacity, (o) => (o > 0.001 ? 'visible' : 'hidden'));
 
@@ -244,7 +247,7 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
             <CtaBlock
               progress={anim}
               onClaimOffer={onClaimOffer}
-              mounted={mounted.has(N - 1)}
+              mounted={showCtaFromStart || mounted.has(N - 1)}
             />
           </div>
         </div>

@@ -8,7 +8,8 @@ export type HeroScene = {
 export const heroScenes: HeroScene[] = [
   {
     title: 'More calls for your business. Built in a day.',
-    sub: 'West Virginia veteran-owned. Nothing down, $49 a month.',
+    sub: 'West Virginia veteran-owned. Nothing down, nothing until you’ve seen it. From $49 a month.',
+    cta: true,
   },
   {
     title: 'Pick a time. I’ll call you.',

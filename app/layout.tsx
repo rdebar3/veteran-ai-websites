@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SiteChrome from '@/components/SiteChrome';
 import SmoothScroll from '@/components/SmoothScroll';
 import { MAILING, TOWN } from '@/lib/contact';
 
@@ -130,9 +131,13 @@ export default function RootLayout({
           Skip to content
         </a>
         <SmoothScroll>
-          <Navbar />
+          <SiteChrome>
+            <Navbar />
+          </SiteChrome>
           {children}
-          <Footer />
+          <SiteChrome>
+            <Footer />
+          </SiteChrome>
         </SmoothScroll>
         <Analytics />
       </body>
