@@ -1,12 +1,7 @@
 /* DRAFT — review with counsel before treating as final terms of service. */
 import type { Metadata } from 'next';
-import LegalShell from '@/components/LegalShell';
-import {
-  BUSINESS_LEGAL_NAME,
-  CONTACT_EMAIL,
-  CONTACT_EMAIL_HREF,
-  MAILING_ADDRESS,
-} from '@/lib/contact';
+import LegalShell, { LegalContact } from '@/components/LegalShell';
+import { BUSINESS_LEGAL_NAME } from '@/lib/contact';
 
 export const metadata: Metadata = {
   title: 'Terms of Service | Veteran AI Websites',
@@ -30,11 +25,7 @@ export default function TermsPage() {
       <p>
         Contracting party:
         <br />
-        {BUSINESS_LEGAL_NAME}
-        <br />
-        {MAILING_ADDRESS}
-        <br />
-        <a href={CONTACT_EMAIL_HREF}>{CONTACT_EMAIL}</a>
+        <LegalContact />
       </p>
 
       <h2>Scope of work</h2>
@@ -116,11 +107,7 @@ export default function TermsPage() {
       <p>
         Questions about these terms:
         <br />
-        {BUSINESS_LEGAL_NAME}
-        <br />
-        {MAILING_ADDRESS}
-        <br />
-        <a href={CONTACT_EMAIL_HREF}>{CONTACT_EMAIL}</a>
+        <LegalContact />
       </p>
     </LegalShell>
   );

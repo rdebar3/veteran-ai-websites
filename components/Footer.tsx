@@ -1,6 +1,5 @@
 import ScheduleCall from '@/components/ScheduleCall';
-import PhoneLink from '@/components/PhoneLink';
-import { MAILING_ADDRESS, PHONE } from '@/lib/contact';
+import { BUSINESS_LEGAL_NAME, BUSINESS_REGION } from '@/lib/contact';
 
 /** Server Component — no "use client". Safe for crawlable contact + service area. */
 export default function Footer() {
@@ -12,12 +11,7 @@ export default function Footer() {
             Veteran <span className="footer__accent">AI</span> Websites
           </div>
           <p className="footer__tagline">West Virginia · U.S. Veteran Owned</p>
-          <p className="footer__phone">
-            <PhoneLink>Call or text {PHONE}</PhoneLink>
-            <span className="footer__phone-note"> — reaches me directly</span>
-          </p>
           <ScheduleCall note className="footer__book" />
-          <p className="footer__address">{MAILING_ADDRESS}</p>
           <p className="footer__service-area">
             Serving small businesses in all 55 West Virginia counties.
           </p>
@@ -28,11 +22,11 @@ export default function Footer() {
           </nav>
         </div>
         <div className="text-sm text-[var(--text-dim)]">
-          © {new Date().getFullYear()} Veteran AI Websites
+          © {new Date().getFullYear()} {BUSINESS_LEGAL_NAME}
           <br />
           One-day professional websites.
           <br />
-          Built by Rich Debar · Horner, West Virginia
+          Veteran-owned · {BUSINESS_REGION}
         </div>
         <div className="text-xs text-[var(--text-dim)] max-w-[220px] md:text-right leading-relaxed">
           No contract. Cancel anytime.

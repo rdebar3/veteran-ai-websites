@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEMO_NOINDEX_HEADERS } from './demo/headers';
 import { bookHref } from '../components/ScheduleCall';
+import { BUSINESS_LEGAL_NAME, CONTACT_EMAIL, CONTACT_EMAIL_HREF } from './contact';
 import { PAY_ONCE_LINE, SOFTWARE_REVIEW_TOPIC, STORE_LINE, allPackagesInclude } from './data';
 import { heroScenes } from './hero-scenes';
 
@@ -26,6 +27,12 @@ describe('public copy', () => {
   it('names the software review and the store line', () => {
     expect(SOFTWARE_REVIEW_TOPIC).toBe('software-review');
     expect(STORE_LINE).toContain('$497');
+  });
+
+  it('names the business and points contact at the note form until there is an email', () => {
+    expect(BUSINESS_LEGAL_NAME).toContain('LLC');
+    expect(CONTACT_EMAIL).toBe('');
+    expect(CONTACT_EMAIL_HREF).toBe('/#contact');
   });
 
   it('puts the reason for the call in the booking link', () => {

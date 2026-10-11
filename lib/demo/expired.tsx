@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { PHONE, PHONE_HREF } from '@/lib/contact';
 import {
   EXPIRED_BODY,
   EXPIRED_CTA_LABEL,
@@ -15,8 +14,6 @@ export function ExpiredDemo() {
         <p>{EXPIRED_BODY}</p>
         <p className="demo-expired__cta">
           <Link href="/#contact">{EXPIRED_CTA_LABEL}</Link>
-          <span aria-hidden="true"> · </span>
-          <a href={PHONE_HREF}>Call {PHONE}</a>
         </p>
       </main>
     </div>

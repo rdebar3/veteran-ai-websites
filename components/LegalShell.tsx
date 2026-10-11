@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import {
   BUSINESS_LEGAL_NAME,
+  BUSINESS_REGION,
   CONTACT_EMAIL,
   CONTACT_EMAIL_HREF,
-  MAILING_ADDRESS,
 } from '@/lib/contact';
 
 const styles = `
@@ -23,6 +23,25 @@ const styles = `
 .legal__back:hover{color:#fff;border-bottom-color:#fff}
 .legal__draft{font-size:12.5px;line-height:1.5;color:rgba(233,240,246,.55);margin:1.5rem 0 0;padding-top:1rem;border-top:1px solid rgba(233,240,246,.1)}
 `;
+
+/** Name, region, then a mailto or the home-page note until a business email exists. */
+export function LegalContact() {
+  return (
+    <>
+      {BUSINESS_LEGAL_NAME}
+      <br />
+      {BUSINESS_REGION}
+      <br />
+      {CONTACT_EMAIL ? (
+        <a href={CONTACT_EMAIL_HREF}>{CONTACT_EMAIL}</a>
+      ) : (
+        <a href={CONTACT_EMAIL_HREF}>
+          Questions? Send me a note from the home page and I’ll get back to you.
+        </a>
+      )}
+    </>
+  );
+}
 
 type LegalShellProps = {
   title: string;
@@ -47,11 +66,7 @@ export default function LegalShell({ title, eyebrow = 'Legal', updated, children
         <p className="legal__draft">
           Draft for review — not final legal advice.
           <br />
-          {BUSINESS_LEGAL_NAME}
-          <br />
-          {MAILING_ADDRESS}
-          <br />
-          <a href={CONTACT_EMAIL_HREF}>{CONTACT_EMAIL}</a>
+          <LegalContact />
         </p>
       </div>
     </main>

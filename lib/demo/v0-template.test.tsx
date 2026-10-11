@@ -45,6 +45,6 @@ describe('v0 template (plumbing)', () => {
     expect(html).toContain('This sample has expired');
     expect(html).toContain('href="/#contact"');
     expect(html).toContain('Get in touch');
-    expect(html).toContain('tel:');
+    expect(html).not.toContain('tel:');
   });
 });

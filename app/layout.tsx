@@ -6,7 +6,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SiteChrome from '@/components/SiteChrome';
 import SmoothScroll from '@/components/SmoothScroll';
-import { MAILING, TOWN } from '@/lib/contact';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -25,7 +24,8 @@ const SITE = 'https://veteranaiwebsites.com';
 const META_TITLE =
   'Veteran AI Websites | Websites for West Virginia Small Businesses';
 
-const META_DESCRIPTION = `Veteran-owned web design in ${TOWN}, West Virginia. Professional websites built in a day for small businesses. Nothing down, $49 a month. No contract. After 12 payments the site is yours.`;
+const META_DESCRIPTION =
+  'Veteran-owned web design in West Virginia. Professional websites built in a day for small businesses. Nothing down, nothing until you’ve seen it. No contract. After 12 payments the site is yours.';
 
 /**
  * LocalBusiness + ProfessionalService JSON-LD.
@@ -48,11 +48,8 @@ const localBusinessSchema = {
   priceRange: '$$',
   address: {
     '@type': 'PostalAddress',
-    streetAddress: MAILING.streetAddress,
-    addressLocality: MAILING.addressLocality,
-    addressRegion: MAILING.addressRegion,
-    postalCode: MAILING.postalCode,
-    addressCountry: MAILING.addressCountry,
+    addressRegion: 'WV',
+    addressCountry: 'US',
   },
   areaServed: {
     '@type': 'State',
@@ -74,7 +71,7 @@ export const metadata: Metadata = {
   keywords: [
     'West Virginia web design',
     'veteran owned web designer',
-    'Horner WV web design',
+    'West Virginia small business web design',
     'small business website West Virginia',
     'one day website',
     'Google listing management WV',

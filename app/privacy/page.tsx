@@ -1,12 +1,7 @@
 /* DRAFT — review with counsel before treating as final legal policy. */
 import type { Metadata } from 'next';
-import LegalShell from '@/components/LegalShell';
-import {
-  BUSINESS_LEGAL_NAME,
-  CONTACT_EMAIL,
-  CONTACT_EMAIL_HREF,
-  MAILING_ADDRESS,
-} from '@/lib/contact';
+import LegalShell, { LegalContact } from '@/components/LegalShell';
+import { BUSINESS_LEGAL_NAME } from '@/lib/contact';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | Veteran AI Websites',
@@ -15,16 +10,14 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-const UPDATED = 'August 13, 2026';
+const UPDATED = 'October 11, 2026';
 
 export default function PrivacyPage() {
   return (
     <LegalShell title="Privacy Policy" updated={UPDATED}>
       <h2>Who you are dealing with</h2>
       <p>
-        {BUSINESS_LEGAL_NAME} is a West Virginia limited liability company. Mailing address:{' '}
-        {MAILING_ADDRESS}. Email:{' '}
-        <a href={CONTACT_EMAIL_HREF}>{CONTACT_EMAIL}</a>. This page explains how{' '}
+        {BUSINESS_LEGAL_NAME} is a West Virginia limited liability company. This page explains how{' '}
         {BUSINESS_LEGAL_NAME} handles information you send through this website.
       </p>
 
@@ -69,17 +62,13 @@ export default function PrivacyPage() {
       <h2>Your choices</h2>
       <p>
         You can request a copy of what {BUSINESS_LEGAL_NAME} holds about you, ask for a correction,
-        or ask to delete your inquiry or review. Email using the contact details below. For
+        or ask to delete your inquiry or review. Use the contact details below. For
         marketing email opt-out, use the <a href="/unsubscribe">unsubscribe page</a>.
       </p>
 
       <h2>How to reach {BUSINESS_LEGAL_NAME}</h2>
       <p>
-        {BUSINESS_LEGAL_NAME}
-        <br />
-        {MAILING_ADDRESS}
-        <br />
-        <a href={CONTACT_EMAIL_HREF}>{CONTACT_EMAIL}</a>
+        <LegalContact />
       </p>
 
       <h2>Changes</h2>
