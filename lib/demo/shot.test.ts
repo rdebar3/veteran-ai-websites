@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DEMO_SHOT_EAGER_SCRIPT,
+  DEMO_SHOT_IMAGE_WAIT_MS,
   DEMO_SHOT_SETTLE_SCRIPT,
   demoShotPageUrl,
   demoShotTopClip,
@@ -18,6 +20,15 @@ describe('DEMO_SHOT_SETTLE_SCRIPT', () => {
     expect(DEMO_SHOT_SETTLE_SCRIPT).toContain(
       "document.documentElement.classList.add('demo-shot')",
     );
+  });
+});
+
+describe('DEMO_SHOT_EAGER_SCRIPT', () => {
+  it('sets loading to eager and bounds the image wait', () => {
+    expect(DEMO_SHOT_EAGER_SCRIPT).toContain('loading');
+    expect(DEMO_SHOT_EAGER_SCRIPT).toContain('eager');
+    expect(DEMO_SHOT_IMAGE_WAIT_MS).toBeGreaterThanOrEqual(5000);
+    expect(DEMO_SHOT_IMAGE_WAIT_MS).toBeLessThanOrEqual(30000);
   });
 });
 

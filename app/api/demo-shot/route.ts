@@ -11,6 +11,8 @@ import {
   MODEL_PAGE_SHOT_STYLE,
 } from '@/lib/demo/model-page';
 import {
+  DEMO_SHOT_EAGER_SCRIPT,
+  DEMO_SHOT_IMAGE_WAIT_MS,
   DEMO_SHOT_SETTLE_SCRIPT,
   DEMO_SHOT_VIEWPORT_WIDTH,
   demoShotPageUrl,
@@ -75,7 +77,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
 
   let png: { full: Uint8Array; top: Uint8Array };
   try {
-    png = await renderDemoPng(demoShotPageUrl(slug));
+    png = await renderDemoPng(demoShotPageUrl(slug), slug);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     if (isChromiumBundleError(message)) {
@@ -182,6 +184,7 @@ async function uploadDemoPng(
 
 async function renderDemoPng(
   url: string,
+  slug: string,
 ): Promise<{ full: Uint8Array; top: Uint8Array }> {
   chromium.setGraphicsMode = false;
   const executablePath = await chromium.executablePath();
@@ -216,18 +219,28 @@ async function renderDemoPng(
       { name: 'prefers-reduced-motion', value: 'reduce' },
     ]);
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 45000 });
-    await page.evaluate(async () => {
-      const images = Array.from(document.images);
-      await Promise.all(
-        images.map((img) => {
-          if (img.complete) return Promise.resolve();
-          return new Promise<void>((resolve) => {
-            img.addEventListener('load', () => resolve(), { once: true });
-            img.addEventListener('error', () => resolve(), { once: true });
-          });
+    await page.evaluate(DEMO_SHOT_EAGER_SCRIPT);
+    const stillLoading = await page.evaluate(async (waitMs: number) => {
+      const pending = Array.from(document.images).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise<void>((resolve) => {
+          img.addEventListener('load', () => resolve(), { once: true });
+          img.addEventListener('error', () => resolve(), { once: true });
+        });
+      });
+      await Promise.race([
+        Promise.all(pending),
+        new Promise<void>((resolve) => {
+          setTimeout(resolve, waitMs);
         }),
+      ]);
+      return Array.from(document.images).filter((img) => !img.complete).length;
+    }, DEMO_SHOT_IMAGE_WAIT_MS);
+    if (stillLoading > 0) {
+      console.log(
+        `[demo-shot] ${slug}: ${stillLoading} images still loading after 15 s`,
       );
-    });
+    }
     await page.evaluate(DEMO_SHOT_SETTLE_SCRIPT);
     await new Promise((r) => setTimeout(r, 250));
     const bottom = await page.evaluate(() => {

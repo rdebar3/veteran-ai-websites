@@ -8,6 +8,15 @@ export const DEMO_SHOT_SETTLE_SCRIPT =
   "document.querySelectorAll('.rv').forEach(function(el){el.classList.add('in')});" +
   "if(document.fonts&&document.fonts.ready){await document.fonts.ready}})()";
 
+/** How long the camera waits for images before shooting anyway. */
+export const DEMO_SHOT_IMAGE_WAIT_MS = 15000;
+
+/** Force lazy and data-src images to start loading inside the shot page. */
+export const DEMO_SHOT_EAGER_SCRIPT =
+  '(function(){document.querySelectorAll(\'img[loading="lazy"]\').forEach(function(img){img.loading="eager"});' +
+  'document.querySelectorAll("img").forEach(function(img){var dataSrc=img.getAttribute("data-src");' +
+  'if(dataSrc&&!img.getAttribute("src")){img.src=dataSrc}})})()';
+
 export function demoPublicOrigin(): string {
   const explicit = process.env.DEMO_PUBLIC_ORIGIN?.trim();
   if (explicit) return explicit.replace(/\/$/, '');
