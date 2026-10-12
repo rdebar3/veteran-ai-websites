@@ -1,65 +1,34 @@
-'use client';
-
-import { useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import BistroShell from '@/components/ridge-bistro/BistroShell';
-import { galleryImages } from '@/lib/ridge-bistro-data';
+import { gallery } from '@/lib/ridge-bistro-data';
+
+const wide = '/demos/ridge-bistro/private-dining.jpg';
 
 export default function GalleryPage() {
-  useEffect(() => {
-    document.title = 'Gallery | The Ridge Bistro | Ridgeview, WV';
-  }, []);
-
   return (
-    <BistroShell>
-      <section className="rb-hero rb-hero--page">
-        <div className="rb-hero__bg">
-          <Image
-            src="/demos/ridge-bistro/hero.jpg"
-            alt=""
-            fill
-            sizes="100vw"
-            quality={88}
-            className="rb-hero__img"
-          />
-          <div className="rb-hero__veil" />
-        </div>
-        <div className="rb-hero__content">
-          <p className="rb-hero__eyebrow">Gallery</p>
-          <h1 className="rb-hero__title">A visual journey</h1>
-          <p className="rb-hero__lead">
-            The room, the plate, and the details that define an evening at The Ridge.
-          </p>
-        </div>
-      </section>
-
-      <section className="rb-section">
-        <div className="rb-section__inner rb-reveal">
-          <div className="rb-gallery">
-            {galleryImages.map((img) => (
-              <div key={img.src} className="rb-gallery__item">
+    <section className="rb-sec">
+      <div className="rb-wrap">
+        <h1>Gallery</h1>
+        <p className="rb-deck">The room, and a few plates from the week.</p>
+        <div className="rb-masonry">
+          {gallery.map((shot, index) => {
+            const landscape = shot.src === wide;
+            return (
+              <figure key={shot.src}>
                 <Image
-                  src={img.src}
-                  alt={img.alt}
-                  width={600}
-                  height={600}
-                  className="rb-gallery__img"
+                  src={shot.src}
+                  alt={shot.alt}
+                  width={landscape ? 1280 : 864}
+                  height={landscape ? 720 : 1152}
+                  priority={index === 0}
+                  sizes="(max-width: 760px) 100vw, 50vw"
+                  style={{ width: '100%', height: 'auto' }}
                 />
-                <div className="rb-gallery__cap">
-                  <span>{img.alt}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/examples/premium-restaurant/reservations" className="rb-btn rb-btn--gold">
-              Reserve Your Table
-            </Link>
-          </div>
+                <figcaption>{shot.caption}</figcaption>
+              </figure>
+            );
+          })}
         </div>
-      </section>
-    </BistroShell>
+      </div>
+    </section>
   );
 }

@@ -1,17 +1,42 @@
-export const BISTRO_PHONE = '(304) 555-0381';
-export const BISTRO_PHONE_HREF = 'tel:3045550381';
-export const BISTRO_EMAIL = 'reservations@theridgebistro.com';
-export const BISTRO_ADDRESS = '214 Summit Ridge Road, Ridgeview, WV 26501';
+export const demoNote =
+  'Demo site by Veteran AI Websites. Business, reviews and photos are samples.';
 
-export const navLinks = [
+export const thanks = 'Got it — we’ll call you back within the hour.';
+
+export const name = 'The Ridge Bistro';
+export const phone = '(304) 555-0381';
+export const phoneHref = 'tel:+13045550381';
+export const addressLine = '214 Summit Ridge Road, Ridgeview, WV';
+export const parking = 'The lot is behind the building. Street parking on Summit Ridge Road after 5.';
+
+export const callLabel = 'Call';
+export const reserveLabel = 'Reserve';
+export const reserveHref = '/examples/premium-restaurant/reservations';
+
+export const nav = [
   { href: '/examples/premium-restaurant', label: 'Home' },
   { href: '/examples/premium-restaurant/menu', label: 'Menu' },
-  { href: '/examples/premium-restaurant/about', label: 'About' },
-  { href: '/examples/premium-restaurant/reservations', label: 'Reservations' },
-  { href: '/examples/premium-restaurant/private-dining', label: 'Private Dining' },
   { href: '/examples/premium-restaurant/gallery', label: 'Gallery' },
+  { href: '/examples/premium-restaurant/private-dining', label: 'Private Dining' },
+  { href: '/examples/premium-restaurant/reservations', label: 'Reservations' },
+  { href: '/examples/premium-restaurant/about', label: 'About' },
   { href: '/examples/premium-restaurant/contact', label: 'Contact' },
 ];
+
+export const hero = {
+  headline: 'Dinner, slowly.',
+  deck: 'A small room, a short menu, and the evening left unhurried.',
+  primary: 'Reserve a table',
+  primaryHref: '/examples/premium-restaurant/reservations',
+  secondary: 'View the menu',
+  secondaryHref: '/examples/premium-restaurant/menu',
+  photo: {
+    src: '/demos/ridge-bistro/hero.jpg',
+    alt: 'A plated fish supper with mushrooms and herbs',
+  },
+};
+
+export const tonight = 'Dinner from 5:00pm, Tuesday through Sunday. Closed Monday.';
 
 export const hours = [
   { days: 'Tuesday – Thursday', time: '5:00pm – 9:30pm' },
@@ -20,180 +45,150 @@ export const hours = [
   { days: 'Monday', time: 'Closed' },
 ];
 
-export interface MenuItem {
-  name: string;
-  desc: string;
-  price: string;
-  note?: string;
-}
+export const dishes = [
+  {
+    src: '/demos/ridge-bistro/dish-steak.jpg',
+    alt: 'A sliced ribeye on a plate',
+    name: 'Dry-aged ribeye',
+    text: 'Herb butter and the roots that are in this week.',
+  },
+  {
+    src: '/demos/ridge-bistro/dish-trout.jpg',
+    alt: 'Pan-seared trout with mushrooms',
+    name: 'Appalachian trout',
+    text: 'Brown butter, lemon, and what the stream gave up.',
+  },
+  {
+    src: '/demos/ridge-bistro/dish-duck.jpg',
+    alt: 'Seared duck breast with a dark sauce',
+    name: 'Duck breast',
+    text: 'Crisped skin, cherry, and roasted beets.',
+  },
+];
 
-export interface MenuSection {
-  id: string;
-  title: string;
-  subtitle: string;
-  items: MenuItem[];
-}
+export const menuNote =
+  'The menu moves with the season. Ask your server what came in this week. Tell us about allergies when you reserve.';
 
-export const menuSections: MenuSection[] = [
+export const menu = [
   {
-    id: 'amuse',
-    title: 'Amuse & Charcuterie',
-    subtitle: 'A quiet beginning',
+    id: 'starters',
+    title: 'Starters',
     items: [
-      { name: 'Chef\'s Amuse-Bouche', desc: 'Seasonal bite from the kitchen', price: 'Complimentary' },
-      { name: 'Ridge Charcuterie', desc: 'Aged cheeses, cured meats, local honeycomb, pickled vegetables', price: '28' },
-      { name: 'Oysters on the Half Shell', desc: 'Mignonette, horseradish, lemon', price: '24', note: 'half dozen' },
-      { name: 'Ramp & Potato Velouté', desc: 'Smoked trout roe, chive oil', price: '16' },
+      { name: 'Ridge charcuterie', desc: 'Aged cheese, cured meat, local honeycomb', price: '$28' },
+      { name: 'Ramp and potato velouté', desc: 'Smoked trout roe, chive oil', price: '$16' },
+      { name: 'Beet and goat cheese tart', desc: 'Walnut crust, aged balsamic', price: '$18', mark: 'vegetarian' },
+      { name: 'Seared scallops', desc: 'Cauliflower, brown butter, sage', price: '$22' },
     ],
   },
   {
-    id: 'hearth',
-    title: 'From the Hearth',
-    subtitle: 'Warm starters',
+    id: 'mains',
+    title: 'Mains',
     items: [
-      { name: 'Seared Scallops', desc: 'Cauliflower purée, brown butter, crispy sage', price: '22' },
-      { name: 'Beet & Goat Cheese Tart', desc: 'Walnut crust, aged balsamic, micro arugula', price: '18' },
-      { name: 'Crispy Duck Confit Croquette', desc: 'Cherry mostarda, herb salad', price: '19' },
-      { name: 'Wood-Fired Bone Marrow', desc: 'Parsley gremolata, grilled sourdough', price: '17' },
-    ],
-  },
-  {
-    id: 'mountain',
-    title: 'Mountain & Stream',
-    subtitle: 'Signature mains',
-    items: [
-      { name: 'Dry-Aged Ribeye', desc: 'Herb butter, roasted root vegetables, red wine jus', price: '58', note: '14 oz' },
-      { name: 'Pan-Seared Appalachian Trout', desc: 'Brown butter, foraged mushrooms, lemon', price: '42' },
-      { name: 'Duck Breast', desc: 'Cherry-port reduction, roasted beets, crispy skin', price: '46' },
-      { name: 'Braised Short Rib', desc: 'Parsnip purée, glazed carrots, natural jus', price: '44' },
-      { name: 'Wild Mushroom Risotto', desc: 'Parmesan, truffle oil, aged balsamic', price: '36', note: 'vegetarian' },
-    ],
-  },
-  {
-    id: 'field',
-    title: 'Field & Forest',
-    subtitle: 'Sides & accompaniments',
-    items: [
-      { name: 'Roasted Brussels Sprouts', desc: 'Bacon lardon, maple, sherry vinegar', price: '12' },
-      { name: 'Duck Fat Fingerlings', desc: 'Rosemary, sea salt', price: '11' },
-      { name: 'Seasonal Greens', desc: 'Local lettuces, stone fruit vinaigrette', price: '13' },
-      { name: 'Grilled Asparagus', desc: 'Hollandaise, lemon zest', price: '14' },
+      { name: 'Dry-aged ribeye', desc: 'Herb butter, roasted roots, red wine jus', price: '$58' },
+      { name: 'Appalachian trout', desc: 'Brown butter, foraged mushrooms, lemon', price: '$42' },
+      { name: 'Duck breast', desc: 'Cherry, roasted beets, crisped skin', price: '$46' },
+      {
+        name: 'Wild mushroom risotto',
+        desc: 'Parmesan, aged balsamic',
+        price: '$36',
+        mark: 'vegetarian',
+      },
     ],
   },
   {
     id: 'dessert',
-    title: 'Desserts',
-    subtitle: 'A graceful finish',
+    title: 'Dessert',
     items: [
-      { name: 'Dark Chocolate Tart', desc: 'Bourbon caramel, gold leaf, smoked sea salt', price: '14' },
-      { name: 'Apple Tarte Tatin', desc: 'Vanilla bean ice cream, calvados caramel', price: '13' },
-      { name: 'Lemon Posset', desc: 'Berry compote, oat crumble', price: '12' },
-      { name: 'Artisan Cheese Selection', desc: 'Local honey, seeded crackers, quince paste', price: '18' },
+      { name: 'Dark chocolate tart', desc: 'Bourbon caramel, smoked salt', price: '$14' },
+      { name: 'Apple tarte tatin', desc: 'Vanilla ice cream', price: '$13' },
+      { name: 'Lemon posset', desc: 'Berry compote, oat crumble', price: '$12', mark: 'vegetarian' },
     ],
   },
 ];
 
-export const featuredDishes = [
-  {
-    image: '/demos/ridge-bistro/dish-steak.jpg',
-    name: 'Dry-Aged Ribeye',
-    desc: 'Fourteen ounces of prime beef, finished with herb butter and seasonal roots.',
-  },
-  {
-    image: '/demos/ridge-bistro/dish-trout.jpg',
-    name: 'Appalachian Trout',
-    desc: 'Line-caught trout from nearby streams, pan-seared in brown butter.',
-  },
-  {
-    image: '/demos/ridge-bistro/dish-duck.jpg',
-    name: 'Duck Breast',
-    desc: 'Cherry-port reduction with roasted beets and perfectly crisped skin.',
-  },
-  {
-    image: '/demos/ridge-bistro/dish-dessert.jpg',
-    name: 'Dark Chocolate Tart',
-    desc: 'Bourbon caramel, gold leaf, and a whisper of smoked sea salt.',
-  },
+export const gallery = [
+  { src: '/demos/ridge-bistro/hero.jpg', alt: 'A plated fish supper', caption: 'Supper, plated.' },
+  { src: '/demos/ridge-bistro/interior.jpg', alt: 'The Ridge Bistro dining room', caption: 'The dining room.' },
+  { src: '/demos/ridge-bistro/private-dining.jpg', alt: 'The private dining room', caption: 'The private room.' },
+  { src: '/demos/ridge-bistro/dish-steak.jpg', alt: 'Dry-aged ribeye', caption: 'Dry-aged ribeye.' },
+  { src: '/demos/ridge-bistro/dish-trout.jpg', alt: 'Pan-seared trout', caption: 'Trout.' },
+  { src: '/demos/ridge-bistro/dish-charcuterie.jpg', alt: 'A charcuterie board', caption: 'To start.' },
+  { src: '/demos/ridge-bistro/dish-duck.jpg', alt: 'Duck breast', caption: 'Duck.' },
+  { src: '/demos/ridge-bistro/dish-dessert.jpg', alt: 'Dark chocolate tart', caption: 'Chocolate tart.' },
 ];
 
-export const galleryImages = [
-  { src: '/demos/ridge-bistro/hero.jpg', alt: 'The Ridge Bistro main dining room' },
-  { src: '/demos/ridge-bistro/interior.jpg', alt: 'Reclaimed wood bar and stone backdrop' },
-  { src: '/demos/ridge-bistro/private-dining.jpg', alt: 'Private dining room with fireplace' },
-  { src: '/demos/ridge-bistro/dish-steak.jpg', alt: 'Dry-aged ribeye' },
-  { src: '/demos/ridge-bistro/dish-trout.jpg', alt: 'Pan-seared trout' },
-  { src: '/demos/ridge-bistro/dish-charcuterie.jpg', alt: 'Artisan charcuterie board' },
-  { src: '/demos/ridge-bistro/dish-duck.jpg', alt: 'Seared duck breast' },
-  { src: '/demos/ridge-bistro/dish-dessert.jpg', alt: 'Dark chocolate tart' },
-];
-
-export const privateDiningFeatures = [
-  'Intimate room for 8–14 guests',
-  'Custom tasting menus from our executive chef',
-  'Dedicated service team for the evening',
-  'Reclaimed wood table with stone fireplace views',
-  'Wine pairings curated by our sommelier',
-  'Ideal for celebrations, proposals, and corporate gatherings',
-];
-export const accolades = [
-  'Wine Spectator · Award of Excellence',
-  'James Beard Foundation · Semifinalist 2025',
-  'Forbes Travel Guide · Recommended',
-  '4.9 ★ · 600+ Guest Reviews',
-];
-
-export interface TastingCourse {
-  name: string;
-  desc: string;
-}
-
-export const tastingMenu = {
-  title: "Chef's Tasting Menu",
-  courses: '7 courses',
-  price: '135',
-  pairingPrice: '195',
-  blurb:
-    'An evening in the hands of Executive Chef Elena Marsh — seven seasonal courses drawn from the mountains, streams, and farms around Ridgeview, composed the morning of your visit.',
-  highlights: [
-    'Amuse-bouche & fresh-baked sourdough',
-    'Ramp & potato velouté, smoked trout roe',
-    'Seared scallop, cauliflower, brown butter',
-    'Foraged mushroom risotto, aged parmesan',
-    'Dry-aged beef or Appalachian trout',
-    'Local cheese & honeycomb',
-    'Dark chocolate tart, bourbon caramel',
+export const privateDining = {
+  photo: {
+    src: '/demos/ridge-bistro/private-dining.jpg',
+    alt: 'A private dining table set for the evening',
+  },
+  title: 'The room down the hall.',
+  lead: 'One table, a fireplace, and the kitchen’s attention for the night. The room seats 8 to 14.',
+  menus: [
+    { name: 'Family table', detail: 'Four courses for the room, $78 a guest.' },
+    { name: 'Long dinner', detail: 'Seven courses, $135 a guest. Wine pairing $60.' },
   ],
 };
 
-export interface Testimonial {
-  quote: string;
-  name: string;
-  detail: string;
-}
+export const about = {
+  photo: {
+    src: '/demos/ridge-bistro/interior.jpg',
+    alt: 'Tables set in the Ridge Bistro dining room',
+  },
+  title: 'A room Elena Marsh cooks for.',
+  paragraphs: [
+    'The Ridge Bistro is a small dining room on Summit Ridge Road. Executive Chef Elena Marsh writes the menu in the morning from what the farms and the streams brought in.',
+    'There is no second seating rush and no loud room next door. Dinner is the whole point of the place.',
+  ],
+};
 
-export const testimonials: Testimonial[] = [
-  {
-    quote:
-      'The finest meal we have had in West Virginia — full stop. Every course felt like a love letter to these mountains.',
-    name: 'Margaret & Tom Whitfield',
-    detail: 'Anniversary dinner',
-  },
-  {
-    quote:
-      'Elegant without a trace of pretense. The tasting menu with pairings was worth the drive from Charleston and then some.',
-    name: 'David Reyes',
-    detail: 'Wine Spectator subscriber',
-  },
-  {
-    quote:
-      'From the reclaimed-oak room to the last bite of chocolate tart, the whole evening was flawless. Service you rarely find outside a major city.',
-    name: 'Katherine Boone',
-    detail: 'Private dining guest',
-  },
+export const navLinks = nav;
+export const BISTRO_PHONE = phone;
+export const BISTRO_PHONE_HREF = phoneHref;
+export const BISTRO_ADDRESS = addressLine;
+export const BISTRO_EMAIL = 'reservations@theridgebistro.example';
+export const galleryImages = gallery.map(({ src, alt }) => ({ src, alt }));
+export const featuredDishes = dishes.map((dish) => ({
+  image: dish.src,
+  name: dish.name,
+  desc: dish.text,
+}));
+export const menuSections = menu.map((group) => ({
+  id: group.id,
+  title: group.title,
+  subtitle: group.title,
+  items: group.items.map((item) => ({
+    name: item.name,
+    desc: item.desc,
+    price: item.price,
+    note: item.mark,
+  })),
+}));
+export const privateDiningFeatures = [
+  privateDining.lead,
+  ...privateDining.menus.map((item) => `${item.name}: ${item.detail}`),
 ];
 
-export const pressQuotes = [
-  { outlet: 'WV Living', line: '“A destination worth planning a weekend around.”' },
-  { outlet: 'Southern Kitchen', line: '“Appalachian fine dining, done with real restraint.”' },
-  { outlet: 'Gazette-Mail', line: '“Ridgeview’s quiet culinary landmark.”' },
+export const reviews = [
+  {
+    quote:
+      'The finest meal we have had in West Virginia. Every course felt like it belonged to these mountains.',
+    name: 'Margaret & Tom Whitfield',
+    town: 'Anniversary dinner',
+  },
+  {
+    quote: 'Elegant without a trace of pretense. The tasting menu was worth the drive from Charleston.',
+    name: 'David Reyes',
+    town: 'Charleston, WV',
+  },
+  {
+    quote: 'From the first pour to the last bite of chocolate tart, the evening stayed quiet and exact.',
+    name: 'Katherine Boone',
+    town: 'Private dining',
+  },
+  {
+    quote: 'We came for a weeknight supper and stayed through the whole list. Nothing was rushed.',
+    name: 'Helen Price',
+    town: 'Ridgeview, WV',
+  },
 ];

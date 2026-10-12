@@ -1,169 +1,137 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { Source_Sans_3, Zilla_Slab } from 'next/font/google';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Flame, Phone, Menu, X, Siren } from 'lucide-react';
+import { useLayoutEffect, useState, type ReactNode } from 'react';
 import {
-  navLinks,
-  HVAC_NAME,
-  HVAC_TAGLINE,
-  HVAC_PHONE,
-  HVAC_PHONE_HREF,
-  HVAC_ADDRESS1,
-  HVAC_ADDRESS2,
-  HVAC_HOURS,
-  HVAC_EMERGENCY,
-  HVAC_FOUNDED,
-  HVAC_OWNERSHIP,
-  HVAC_LICENSE,
+  callLabel,
+  demoNote,
+  hours,
+  name,
+  nav,
+  phone,
+  phoneHref,
+  requestHref,
+  requestLabel,
 } from '@/lib/complete-hvac-data';
 
-const HOME = '/examples/complete-hvac';
+const slab = Zilla_Slab({
+  subsets: ['latin'],
+  weight: ['500', '700'],
+  variable: '--hv-serif',
+  display: 'swap',
+});
+
+const sans = Source_Sans_3({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--hv-sans',
+  display: 'swap',
+});
+
+const home = '/examples/complete-hvac';
+
+function useReveal(pathname: string) {
+  useLayoutEffect(() => {
+    const root = document.querySelector('.hv');
+    if (!root) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    root.classList.add('is-ready');
+    const nodes = root.querySelectorAll('.hv-reveal');
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in');
+          io.unobserve(entry.target);
+        });
+      },
+      { threshold: 0 },
+    );
+    nodes.forEach((node) => {
+      const rect = node.getBoundingClientRect();
+      const seen = rect.top < window.innerHeight * 0.92 && rect.bottom > 0;
+      if (reduce || seen) node.classList.add('is-in');
+      else io.observe(node);
+    });
+    return () => io.disconnect();
+  }, [pathname]);
+}
 
 export default function DemoShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [navScrolled, setNavScrolled] = useState(false);
-  const [navProgress, setNavProgress] = useState(0);
-
-  useEffect(() => {
-    document.body.classList.add('hv-demo-body');
-    return () => {
-      document.body.classList.remove('hv-demo-body');
-    };
-  }, []);
-
-  useEffect(() => {
-    setMenuOpen(false);
+  const [open, setOpen] = useState(false);
+  useReveal(pathname);
+  useLayoutEffect(() => {
+    setOpen(false);
   }, [pathname]);
 
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY;
-      setNavScrolled(y > 12);
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      setNavProgress(max > 0 ? Math.min(1, y / max) : 0);
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
-  }, []);
-
-  const isActive = (href: string) => {
-    const cur = pathname || '';
-    if (href === HOME) return cur === HOME || cur === `${HOME}/`;
-    return cur.startsWith(href);
-  };
-
   return (
-    <div className="hv">
-      <a href={HVAC_PHONE_HREF} className="hv__emerg">
-        <Siren size={15} /> No heat? No AC? 24/7 emergency service — <b>call {HVAC_PHONE}</b>
-      </a>
-      <header className={`hv__hdr${navScrolled ? ' hv__hdr--scrolled' : ''}`}>
-        <div className="hv__wrap hv__hdr-in">
-          <Link href={HOME} className="hv__brand">
-            <span className="hv__brand-mark"><Flame size={18} /></span>
-            <span>
-              {HVAC_NAME}
-              <span className="hv__brand-sub">{HVAC_TAGLINE}</span>
-            </span>
+    <div className={`hv ${slab.variable} ${sans.variable}`}>
+      <header className="hv-header">
+        <div className="hv-wrap hv-header-in">
+          <Link className="hv-brand" href={home}>
+            {name}
           </Link>
-
-          <nav className="hv__nav">
-            {navLinks.map((l) => (
-              <Link key={l.href} href={l.href} className={isActive(l.href) ? 'is-active' : ''}>
-                {l.label}
+          <nav className="hv-nav" aria-label="Pages">
+            {nav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={pathname === item.href ? 'is-on' : undefined}
+              >
+                {item.label}
               </Link>
             ))}
           </nav>
-
-          <a href={HVAC_PHONE_HREF} className="hv__call"><Phone size={16} /> {HVAC_PHONE}</a>
-
+          <div className="hv-actions">
+            <a className="hv-btn hv-btn--solid" href={phoneHref}>
+              {callLabel}
+            </a>
+            <Link className="hv-btn" href={requestHref}>
+              {requestLabel}
+            </Link>
+          </div>
           <button
+            className="hv-burger"
             type="button"
-            className="hv__burger"
-            aria-label="Toggle menu"
-            onClick={() => setMenuOpen((o) => !o)}
+            aria-label="Menu"
+            aria-expanded={open}
+            onClick={() => setOpen(true)}
           >
-            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
           </button>
         </div>
-        <div
-          className="hv__hdr-progress"
-          aria-hidden="true"
-          style={{ transform: `scaleX(${navProgress})` }}
-        />
-
-        {menuOpen && (
-          <div className="hv__wrap">
-            <div className="hv__mnav">
-              {navLinks.map((l) => (
-                <Link key={l.href} href={l.href} className={isActive(l.href) ? 'is-active' : ''}>
-                  {l.label}
-                </Link>
-              ))}
-              <a href={HVAC_PHONE_HREF} className="hv__btn hv__btn--primary hv__call"><Phone size={16} /> {HVAC_PHONE}</a>
-            </div>
-          </div>
-        )}
       </header>
-
+      {open ? (
+        <div className="hv-menu">
+          <button type="button" aria-label="Close menu" onClick={() => setOpen(false)}>
+            Close
+          </button>
+          {nav.map((item) => (
+            <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      ) : null}
       <main>{children}</main>
-
-      <footer className="hv__ft">
-        <div className="hv__wrap">
-          <div className="hv__ft-grid">
-            <div>
-              <div className="hv__brand" style={{ color: '#fdf6ec', marginBottom: 12 }}>
-                <span className="hv__brand-mark"><Flame size={18} /></span>
-                {HVAC_NAME}
-              </div>
-              <p style={{ maxWidth: '32ch' }}>
-                {HVAC_OWNERSHIP} heating &amp; cooling, keeping West Virginia comfortable since {HVAC_FOUNDED}.
-              </p>
-            </div>
-            <div>
-              <h5>Contact</h5>
-              <p>
-                <a href={HVAC_PHONE_HREF}>{HVAC_PHONE}</a>
-                {HVAC_ADDRESS1}<br />{HVAC_ADDRESS2}<br />
-                {HVAC_HOURS}<br />{HVAC_EMERGENCY}
-              </p>
-            </div>
-            <div>
-              <h5>Explore</h5>
-              <p>
-                {navLinks.filter((l) => l.href !== HOME).map((l) => (
-                  <Link key={l.href} href={l.href}>{l.label}</Link>
-                ))}
-              </p>
-            </div>
-            <div>
-              <h5>Why us</h5>
-              <p>
-                {HVAC_OWNERSHIP}<br />
-                Upfront pricing<br />
-                Financing available<br />
-                Licensed &amp; insured
-              </p>
-            </div>
-          </div>
-          <div className="hv__ft-bottom">
-            <span>© {HVAC_FOUNDED}–present {HVAC_NAME} · {HVAC_LICENSE}</span>
-            <span>Demo site by Veteran AI Websites</span>
-          </div>
+      <footer className="hv-footer">
+        <div className="hv-wrap">
+          <p className="hv-brand">{name}</p>
+          <p>
+            <a href={phoneHref}>{phone}</a>
+          </p>
+          <p>{hours.map((row) => `${row.days} ${row.time}`).join(' · ')}</p>
+          <p className="hv-note">{demoNote}</p>
         </div>
       </footer>
-
-      <div className="hv__callbar">
-        <a href={HVAC_PHONE_HREF} className="hv__btn hv__btn--primary"><Phone size={17} /> Call now</a>
-        <Link href="/examples/complete-hvac/contact" className="hv__btn hv__btn--dark">Book service</Link>
+      <div className="hv-bar">
+        <a href={phoneHref}>{callLabel}</a>
+        <Link href={requestHref}>{requestLabel}</Link>
       </div>
     </div>
   );

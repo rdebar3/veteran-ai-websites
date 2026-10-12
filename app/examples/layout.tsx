@@ -8,7 +8,7 @@ const pillStyles = `
 .demo-home-pill .demo-home-pill__arrow{font-size:16px;line-height:1}
 .demo-home-pill__full{display:inline-flex;align-items:center;gap:8px}
 .demo-home-pill__short{display:none}
-@media(max-width:640px){.demo-home-pill{left:auto;right:12px;bottom:88px;padding:9px 13px;font-size:13px}.demo-home-pill__full{display:none}.demo-home-pill__short{display:inline}}
+@media(max-width:760px){.demo-home-pill{left:auto;right:12px;bottom:88px;padding:9px 13px;font-size:13px}.demo-home-pill__full{display:none}.demo-home-pill__short{display:inline}}
 `;
 
 /**
