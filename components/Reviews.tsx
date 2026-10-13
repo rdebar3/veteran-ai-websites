@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -20,6 +20,7 @@ const styles = `
 .rv__eyebrow{font-family:var(--font-sans);font-size:13px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:rgba(233,240,246,.72);margin:0 0 16px}
 .rv__title{font-family:var(--font-sans);font-size:clamp(26px,3.2vw,42px);font-weight:600;letter-spacing:-.03em;line-height:1.04;color:#fff;margin:0}
 .rv__sub{margin:14px auto 0;max-width:52ch;font-size:clamp(14px,1.1vw,16px);line-height:1.6;color:rgba(233,240,246,.82)}
+.rv__sub a{color:inherit;text-decoration:underline;text-underline-offset:3px}
 .rv__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;max-width:1080px;margin:0 auto clamp(36px,5vw,56px)}
 .rv__card{position:relative;overflow:hidden;border:1px solid rgba(233,240,246,.14);border-radius:16px;background:rgba(12,16,22,.62);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);padding:26px 24px;transition:border-color .25s,transform .3s,box-shadow .3s}
 .rv__card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc,#5b9bd5);z-index:3}
@@ -81,7 +82,13 @@ function Stars({ value }: { value: number }) {
  * Homepage reviews. The section stays hidden until at least one approved
  * review exists, then it shows on its own. The form is always at /review.
  */
-export default function Reviews({ formOnly = false }: { formOnly?: boolean }) {
+export default function Reviews({
+  formOnly = false,
+  afterHeading = null,
+}: {
+  formOnly?: boolean;
+  afterHeading?: ReactNode;
+}) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [name, setName] = useState('');
   const [business, setBusiness] = useState('');
@@ -146,6 +153,7 @@ export default function Reviews({ formOnly = false }: { formOnly?: boolean }) {
       <div className="rv__head">
         <p className="rv__eyebrow">Reviews</p>
         <h2 className="rv__title">Worked with me? Leave a review.</h2>
+        {afterHeading}
         <p className="rv__sub">
           If we’ve worked together, I’d be grateful for a few honest words. Your name and business
           help other local owners decide.

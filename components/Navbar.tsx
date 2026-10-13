@@ -2,13 +2,17 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
-import { navLinks } from '@/lib/navigation';
+import { navLinksFor } from '@/lib/navigation';
 import { registerScrollTask } from '@/lib/scroll-driver';
 import ScheduleCall from '@/components/ScheduleCall';
+
+const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [active, setActive] = useState('hero');
+  const [links, setLinks] = useState(() => navLinksFor(false));
   const navRef = useRef<HTMLElement>(null);
   const linksRef = useRef<HTMLDivElement>(null);
   const [ind, setInd] = useState({ left: 0, top: 0, width: 0, on: false });
@@ -34,7 +38,23 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const ids = ['hero', ...navLinks.map((l) => l.href.slice(1))];
+    if (!SUPA_URL || !SUPA_KEY) return;
+    let cancelled = false;
+    fetch(`${SUPA_URL}/rest/v1/reviews?approved=eq.true&select=id&limit=1`, {
+      headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled && Array.isArray(data) && data.length > 0) setLinks(navLinksFor(true));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const ids = ['hero', ...links.map((l) => l.href.slice(1))];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -48,7 +68,7 @@ export default function Navbar() {
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
-  }, []);
+  }, [links]);
 
   // Slide a glowing indicator to the active section link.
   useEffect(() => {
@@ -67,7 +87,7 @@ export default function Navbar() {
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, [active]);
+  }, [active, links]);
 
   return (
     <nav ref={navRef} className="nav">
@@ -98,7 +118,7 @@ export default function Navbar() {
               opacity: ind.on ? 1 : 0,
             }}
           />
-          {navLinks.map((link) => {
+          {links.map((link) => {
             const id = link.href.slice(1);
             return (
               <a
@@ -130,7 +150,7 @@ export default function Navbar() {
 
       {isOpen && (
         <div className="nav__mobile md:hidden border-t border-[var(--border)] px-6 py-5 flex flex-col gap-3">
-          {navLinks.map((link) => (
+          {links.map((link) => (
             <a
               key={link.href}
               href={link.href}
