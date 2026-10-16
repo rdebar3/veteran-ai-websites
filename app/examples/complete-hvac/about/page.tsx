@@ -19,7 +19,6 @@ export default function AboutPage() {
         <div>
           <h1 className="hv-rule">About</h1>
           <p className="hv-lead">{about.lead}</p>
-          <p className="hv-lead">License {about.license}.</p>
           <h2 className="hv-rule hv-space">
             Where we drive
           </h2>

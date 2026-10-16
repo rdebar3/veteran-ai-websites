@@ -4,6 +4,8 @@ export const demoNote =
 export const thanks = 'Got it — we’ll call you back within the hour.';
 
 export const name = 'The Ridge Bistro';
+export const town = 'Ridgeview, WV';
+export const dinnerLine = 'Dinner, Tuesday to Sunday from 5';
 export const phone = '(304) 555-0381';
 export const phoneHref = 'tel:+13045550381';
 export const addressLine = '214 Summit Ridge Road, Ridgeview, WV';
@@ -31,12 +33,10 @@ export const hero = {
   secondary: 'View the menu',
   secondaryHref: '/examples/premium-restaurant/menu',
   photo: {
-    src: '/demos/ridge-bistro/hero.jpg',
+    src: '/demos/ridge-bistro/hero.webp',
     alt: 'A plated fish supper with mushrooms and herbs',
   },
 };
-
-export const tonight = 'Dinner from 5:00pm, Tuesday through Sunday. Closed Monday.';
 
 export const hours = [
   { days: 'Tuesday – Thursday', time: '5:00pm – 9:30pm' },

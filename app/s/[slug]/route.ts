@@ -10,6 +10,7 @@ import {
   getDemoSiteBySlug,
   supabaseOrigin,
 } from '@/lib/demo/supabase';
+import { injectSampleBar } from '@/lib/demo/sample-bar';
 import { recordDemoView, shouldRecordDemoView } from '@/lib/demo/views';
 
 export const dynamic = 'force-dynamic';
@@ -61,7 +62,7 @@ export async function GET(
     });
   }
 
-  return new NextResponse(html ?? '', {
+  return new NextResponse(injectSampleBar(html ?? '', site?.business_id), {
     status: 200,
     headers: modelPageHeaders(demoModelCsp(supabaseOrigin())),
   });

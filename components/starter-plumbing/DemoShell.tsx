@@ -1,9 +1,7 @@
 'use client';
 
-import { Inter } from 'next/font/google';
 import { useLayoutEffect, type ReactNode } from 'react';
 import {
-  callLabel,
   demoNote,
   hours,
   name,
@@ -12,13 +10,6 @@ import {
   quoteHref,
   quoteLabel,
 } from '@/lib/starter-plumbing-data';
-
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  variable: '--sp-font',
-  display: 'swap',
-});
 
 function useReveal() {
   useLayoutEffect(() => {
@@ -50,7 +41,7 @@ function useReveal() {
 export default function DemoShell({ children }: { children: ReactNode }) {
   useReveal();
   return (
-    <div className={`sp ${inter.variable}`}>
+    <div className="sp">
       <header className="sp-header">
         <div className="sp-wrap sp-header-in">
           <a className="sp-brand" href="/examples/starter-plumbing">
@@ -62,7 +53,7 @@ export default function DemoShell({ children }: { children: ReactNode }) {
             </a>
             <div className="sp-actions">
               <a className="sp-btn sp-btn--solid" href={phoneHref}>
-                {callLabel}
+                {phone}
               </a>
               <a className="sp-btn sp-btn--line" href={quoteHref}>
                 {quoteLabel}
@@ -83,7 +74,7 @@ export default function DemoShell({ children }: { children: ReactNode }) {
         </div>
       </footer>
       <div className="sp-bar">
-        <a href={phoneHref}>{callLabel}</a>
+        <a href={phoneHref}>{phone}</a>
         <a href={quoteHref}>{quoteLabel}</a>
       </div>
     </div>

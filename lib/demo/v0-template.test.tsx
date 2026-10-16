@@ -40,11 +40,17 @@ describe('v0 template (plumbing)', () => {
     expect(html).toContain(HONEST_STRIP_LINK_TEXT);
   });
 
-  it('expired page has the heading and a contact CTA', () => {
-    const html = renderToStaticMarkup(<ExpiredDemo />);
-    expect(html).toContain('This sample has expired');
-    expect(html).toContain('href="/#contact"');
-    expect(html).toContain('Get in touch');
+  it('expired page has the fresh-look line and the booking button', () => {
+    const html = renderToStaticMarkup(
+      <ExpiredDemo businessId="11111111-2222-4333-8444-555555555555" />,
+    );
+    expect(html).toContain('This sample expired.');
+    expect(html).toContain('Want a fresh look or a quick call?');
+    expect(html).toContain('Book a 20-minute call');
+    expect(html).toContain(
+      'href="https://app.veteranaiwebsites.com/book/11111111-2222-4333-8444-555555555555?src=sample"',
+    );
     expect(html).not.toContain('tel:');
+    expect(html).not.toContain('This preview is no longer available');
   });
 });

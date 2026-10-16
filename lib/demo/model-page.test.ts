@@ -9,6 +9,7 @@ import {
   modelPageOutcome,
   shouldServeModelPage,
 } from './model-page';
+import { sampleBarScriptSource } from './sample-bar';
 import { getDemoModelHtml, getDemoSiteBySlug, supabaseOrigin } from './supabase';
 
 const APP = 'https://app.veteranaiwebsites.com';
@@ -21,6 +22,7 @@ const WITH_ORIGIN = [
   `img-src 'self' ${APP} ${SUPABASE} ${PEXELS}`,
   "style-src 'unsafe-inline' https://fonts.googleapis.com",
   'font-src https://fonts.gstatic.com',
+  `script-src ${sampleBarScriptSource()}`,
   "base-uri 'none'",
   "form-action 'none'",
   "frame-ancestors 'none'",
@@ -31,6 +33,7 @@ const WITHOUT_ORIGIN = [
   `img-src 'self' ${APP} ${PEXELS}`,
   "style-src 'unsafe-inline' https://fonts.googleapis.com",
   'font-src https://fonts.gstatic.com',
+  `script-src ${sampleBarScriptSource()}`,
   "base-uri 'none'",
   "form-action 'none'",
   "frame-ancestors 'none'",
@@ -229,7 +232,7 @@ describe('model html is a separate read', () => {
     const row = await getDemoSiteBySlug('acme-hvac');
     expect(row?.model_status).toBe('ready');
     expect(url).toContain(
-      'select=slug,template_key,facts,hero_line,blurbs,status,expires_at,screenshot_path,model_status',
+      'select=slug,template_key,facts,hero_line,blurbs,status,expires_at,screenshot_path,model_status,business_id',
     );
     expect(url).not.toContain('model_html');
   });

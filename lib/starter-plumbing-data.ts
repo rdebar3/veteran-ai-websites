@@ -4,8 +4,29 @@ export const demoNote =
 export const thanks = 'Got it — we’ll call you back within the hour.';
 
 export const name = 'Summit Plumbing';
+export const town = 'Ridgeview, WV';
+export const line = 'Leaks, water heaters, and drains.';
 export const phone = '(304) 555-0192';
 export const phoneHref = 'tel:+13045550192';
+export const ownerLine = 'Upfront pricing.';
+
+const HOURS_BY_DAY: Record<string, string> = {
+  Sunday: 'Emergency calls',
+  Monday: '7:00am – 6:00pm',
+  Tuesday: '7:00am – 6:00pm',
+  Wednesday: '7:00am – 6:00pm',
+  Thursday: '7:00am – 6:00pm',
+  Friday: '7:00am – 6:00pm',
+  Saturday: '8:00am – 2:00pm',
+};
+
+export function todayHoursLine(now = new Date()): string {
+  const day = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'long',
+  }).format(now);
+  return `${day} · ${HOURS_BY_DAY[day] ?? HOURS_BY_DAY.Monday}`;
+}
 
 export const nav = [{ href: '/examples/starter-plumbing', label: 'Home' }];
 
@@ -14,13 +35,8 @@ export const quoteLabel = 'Get a quote';
 export const quoteHref = '#quote';
 
 export const hero = {
-  eyebrow: 'Licensed & insured · Ridgeview, WV',
-  headline: 'Plumbing you can count on, right here in the mountains.',
-  sub: [
-    'Leaks, water heaters, drains, and the calls that come after dark.',
-    'You talk to a local pro, and you hear the price before any work starts.',
-  ],
-  chips: ['24/7 emergency', 'Upfront pricing', 'Satisfaction guaranteed'],
+  town,
+  line,
   photo: {
     src: '/demos/starter-plumbing/hero-tech.jpg',
     alt: 'A plumber repairing the lines under a kitchen sink, mountains outside the window',
@@ -55,8 +71,8 @@ export const services = [
   },
   {
     id: 'emergency',
-    title: '24/7 emergency',
-    text: 'A burst pipe does not wait for morning. The phone is answered.',
+    title: 'Emergency calls',
+    text: 'Sunday is for emergency calls. The phone is answered.',
   },
 ];
 
@@ -68,7 +84,6 @@ export const about = {
   },
   lead: 'Summit Plumbing is a one-crew shop in Ridgeview. The person who answers is the person who shows up.',
   bullets: [
-    'Licensed and insured on every job.',
     'A price you approve before the tools come out.',
     'The work area left as clean as we found it.',
   ],

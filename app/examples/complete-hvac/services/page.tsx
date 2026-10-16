@@ -6,7 +6,7 @@ export default function ServicesPage() {
     <section className="hv-sec">
       <div className="hv-wrap">
         <h1 className="hv-rule">Services</h1>
-        <p className="hv-lead">Heating, cooling, the air in the house, and the night it quits.</p>
+        <p className="hv-lead">Heating, cooling, the air in the house, and when it quits.</p>
         {services.map((service, index) => (
           <article className="hv-service hv-reveal" id={service.id} key={service.id}>
             <div className="hv-mount">

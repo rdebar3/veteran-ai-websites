@@ -1,4 +1,5 @@
 import { DEMO_X_ROBOTS_TAG } from './copy';
+import { sampleBarScriptSource } from './sample-bar';
 import type { DemoViewKind } from './types';
 
 /** True only when /s should return the stored Fable page. */
@@ -55,6 +56,7 @@ export function demoModelCsp(
     `img-src ${images.join(' ')}`,
     "style-src 'unsafe-inline' https://fonts.googleapis.com",
     'font-src https://fonts.gstatic.com',
+    `script-src ${sampleBarScriptSource()}`,
     "base-uri 'none'",
     "form-action 'none'",
     "frame-ancestors 'none'",

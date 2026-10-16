@@ -1,10 +1,15 @@
 import Image from 'next/image';
+import { FoldImage } from '@/components/examples/FoldImage';
+import { TodayHours } from '@/components/examples/TodayHours';
 import QuoteForm from '@/components/starter-plumbing/QuoteForm';
 import {
   about,
-  callLabel,
   hero,
   hours,
+  line,
+  name,
+  ownerLine,
+  phone,
   phoneHref,
   quote,
   quoteHref,
@@ -12,6 +17,7 @@ import {
   reviews,
   serviceArea,
   services,
+  town,
   work,
 } from '@/lib/starter-plumbing-data';
 
@@ -44,26 +50,18 @@ export default function StarterPlumbingPage() {
     <>
       <section className="sp-wrap sp-hero">
         <div>
-          <p className="sp-kicker">{hero.eyebrow}</p>
-          <h1>{hero.headline}</h1>
-          <div className="sp-hero-sub">
-            {hero.sub.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
-          </div>
+          <p className="sp-kicker">{town}</p>
+          <h1>{name}</h1>
+          <p className="sp-line">{line}</p>
           <div className="sp-hero-actions">
             <a className="sp-btn sp-btn--solid" href={phoneHref}>
-              {callLabel}
+              {phone}
             </a>
             <a className="sp-btn sp-btn--line" href={quoteHref}>
               {quoteLabel}
             </a>
           </div>
-          <ul className="sp-chips">
-            {hero.chips.map((chip) => (
-              <li key={chip}>{chip}</li>
-            ))}
-          </ul>
+          <TodayHours demo="plumbing" className="sp-today" />
         </div>
         <div className="sp-frame">
           <Image
@@ -96,7 +94,7 @@ export default function StarterPlumbingPage() {
       <section className="sp-sec sp-reveal">
         <div className="sp-wrap sp-about">
           <div className="sp-frame">
-            <Image
+            <FoldImage
               src={about.photo.src}
               alt={about.photo.alt}
               fill
@@ -106,6 +104,7 @@ export default function StarterPlumbingPage() {
           <div>
             <h2>{about.title}</h2>
             <p className="sp-lead">{about.lead}</p>
+            <p className="sp-owner">The owner says: “{ownerLine}”</p>
             <ul>
               {about.bullets.map((bullet) => (
                 <li key={bullet}>{bullet}</li>
@@ -122,7 +121,7 @@ export default function StarterPlumbingPage() {
             {work.map((shot) => (
               <figure key={shot.src}>
                 <div className="sp-shot">
-                  <Image src={shot.src} alt={shot.alt} fill sizes="(max-width: 760px) 100vw, 340px" />
+                  <FoldImage src={shot.src} alt={shot.alt} fill sizes="(max-width: 760px) 100vw, 340px" />
                 </div>
                 <figcaption>{shot.caption}</figcaption>
               </figure>

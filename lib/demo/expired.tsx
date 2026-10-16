@@ -1,20 +1,27 @@
-import Link from 'next/link';
 import {
   EXPIRED_BODY,
   EXPIRED_CTA_LABEL,
   EXPIRED_HEADING,
 } from './copy';
+import { sampleBookHref } from './sample-bar';
 
-export function ExpiredDemo() {
+export function ExpiredDemo({
+  businessId,
+}: {
+  businessId?: string | null;
+}) {
+  const href = sampleBookHref(businessId);
   return (
     <div className="demo-expired">
       <style>{EXPIRED_CSS}</style>
       <main className="demo-expired__main">
         <h1>{EXPIRED_HEADING}</h1>
         <p>{EXPIRED_BODY}</p>
-        <p className="demo-expired__cta">
-          <Link href="/#contact">{EXPIRED_CTA_LABEL}</Link>
-        </p>
+        {href ? (
+          <p className="demo-expired__cta">
+            <a href={href}>{EXPIRED_CTA_LABEL}</a>
+          </p>
+        ) : null}
       </main>
     </div>
   );

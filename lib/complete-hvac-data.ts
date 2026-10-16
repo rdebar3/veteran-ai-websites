@@ -7,9 +7,29 @@ export const thanks = 'Got it — we’ll call you back within the hour.';
 
 export const HVAC_NAME = 'Appalachian HVAC';
 export const name = HVAC_NAME;
+export const town = 'Ridgeview, WV';
 export const tagline = 'Heating and cooling for mountain homes.';
+export const line = tagline;
 export const phone = '(304) 555-0148';
 export const phoneHref = 'tel:+13045550148';
+
+const HOURS_BY_DAY: Record<string, string> = {
+  Sunday: 'Emergency calls',
+  Monday: '7:30am – 5:30pm',
+  Tuesday: '7:30am – 5:30pm',
+  Wednesday: '7:30am – 5:30pm',
+  Thursday: '7:30am – 5:30pm',
+  Friday: '7:30am – 5:30pm',
+  Saturday: '8:00am – 2:00pm',
+};
+
+export function todayHoursLine(now = new Date()): string {
+  const day = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'long',
+  }).format(now);
+  return `${day} · ${HOURS_BY_DAY[day] ?? HOURS_BY_DAY.Monday}`;
+}
 export const founded = 2009;
 export const license = 'WV HVAC Lic. #WV055842';
 export const ownership = 'Family-owned and veteran-operated';
@@ -32,8 +52,8 @@ export const hero = {
   headline: 'Heating and cooling for mountain homes.',
   sub: 'Furnaces, heat pumps, and air conditioning, sized for the way a Ridgeview house actually lives through the year.',
   photo: {
-    src: '/demos/complete-hvac/hero-fall.jpg',
-    alt: 'A mountain living room in fall light, with a sofa, a fireplace, and steam rising from a mug',
+    src: '/demos/complete-hvac/hero-job.webp',
+    alt: 'A technician working at an outdoor heat pump beside a mountain house',
   },
 };
 
@@ -84,7 +104,7 @@ const serviceSeeds = [
     id: 'emergency',
     title: 'Emergency repair',
     summary: 'No heat or no cooling, answered by someone who can be on the road.',
-    body: 'Nights and weekends included. Plan members go to the front of the list.',
+    body: 'Sunday is for emergency calls. Plan members go to the front of the list.',
     image: '/demos/complete-hvac/project-heat-pump.jpg',
     alt: 'A heat pump installed at a Ridgeview home',
     included: [

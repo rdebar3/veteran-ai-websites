@@ -40,6 +40,8 @@ export type DemoSiteRow = {
   screenshot_path: string | null;
   /** null | queued | building | ready | failed | off */
   model_status: string | null;
+  /** businesses.id. Present on demo_sites; used only for the sample booking link. */
+  business_id?: string | null;
 };
 
 /** Four-state render matrix plus killed (treated as missing). */

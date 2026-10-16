@@ -4,9 +4,10 @@ import { headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { after } from 'next/server';
 import { artTradeFor, loadArtPool } from '@/lib/demo/art';
-import { DEMO_TEMPLATE_TRADES_V2 } from '@/lib/demo/copy';
+import { DEMO_TEMPLATE_TRADES_V2, EXPIRED_HEADING } from '@/lib/demo/copy';
 import { isPreviewFlag, resolveDemoView } from '@/lib/demo/decision';
 import { ExpiredDemo } from '@/lib/demo/expired';
+import { SampleBar } from '@/lib/demo/SampleBar';
 import { parseDemoFacts } from '@/lib/demo/facts';
 import { DemoSiteView, resolveDemoTemplateKey } from '@/lib/demo/render';
 import { getDemoSiteBySlug } from '@/lib/demo/supabase';
@@ -49,7 +50,7 @@ export async function generateMetadata({
   }
 
   if (kind === 'expired') {
-    return { title: 'This sample has expired', robots: NOINDEX };
+    return { title: EXPIRED_HEADING, robots: NOINDEX };
   }
 
   const name = parseDemoFacts(site.facts).name.value;
@@ -78,7 +79,7 @@ export default async function DemoPage({ params, searchParams }: PageProps) {
   }
 
   if (kind === 'expired') {
-    return <ExpiredDemo />;
+    return <ExpiredDemo businessId={site.business_id} />;
   }
 
   if (shouldRecordDemoView(kind)) {
@@ -98,5 +99,10 @@ export default async function DemoPage({ params, searchParams }: PageProps) {
       ? await loadArtPool(artTradeFor(facts.category?.value, facts.name.value))
       : [];
 
-  return <DemoSiteView site={site} artPool={artPool} />;
+  return (
+    <>
+      <DemoSiteView site={site} artPool={artPool} />
+      <SampleBar businessId={site.business_id} />
+    </>
+  );
 }

@@ -4,10 +4,11 @@ export const HONEST_STRIP =
 
 export const HONEST_STRIP_LINK_TEXT = 'Veteran AI Websites';
 
-export const EXPIRED_HEADING = 'This sample has expired';
-export const EXPIRED_BODY =
-  'This preview is no longer available. If you still want a homepage, get in touch — nothing was published on your behalf.';
-export const EXPIRED_CTA_LABEL = 'Get in touch';
+export const EXPIRED_HEADING = 'This sample expired.';
+export const EXPIRED_BODY = 'Want a fresh look or a quick call?';
+export const SAMPLE_BAR_TEXT = 'Sample homepage by Veteran AI Websites';
+export const SAMPLE_BOOK_LABEL = 'Book a 20-minute call';
+export const EXPIRED_CTA_LABEL = SAMPLE_BOOK_LABEL;
 
 export const DEMO_X_ROBOTS_TAG = 'noindex, nofollow';
 export const DEMO_ROBOTS_DISALLOW = '/d/';

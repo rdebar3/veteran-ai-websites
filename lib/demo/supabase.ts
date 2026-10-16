@@ -46,7 +46,7 @@ export async function getDemoSiteBySlug(
 
   const url =
     `${base}/rest/v1/demo_sites?slug=eq.${encodeURIComponent(slug)}` +
-    '&select=slug,template_key,facts,hero_line,blurbs,status,expires_at,screenshot_path,model_status&limit=1';
+    '&select=slug,template_key,facts,hero_line,blurbs,status,expires_at,screenshot_path,model_status,business_id&limit=1';
 
   const res = await fetch(url, {
     method: 'GET',

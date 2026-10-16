@@ -1,8 +1,8 @@
-.hv{--ink:#2a2118;--wood:#5a3e2b;--olive:#5b6b3a;--cream:#f6f1e8;--muted:#6b5c4e;--line:#e4d8c8;min-height:100svh;background:var(--cream);color:var(--ink);font-family:var(--hv-sans),system-ui,sans-serif;line-height:1.5;overflow-x:clip;padding-bottom:80px}
+.hv{--ink:#2a2118;--wood:#5a3e2b;--olive:#5b6b3a;--cream:#f6f1e8;--muted:#6b5c4e;--line:#e4d8c8;min-height:100svh;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5;overflow-x:clip;padding-bottom:80px}
 .hv,.hv *{box-sizing:border-box}
 .hv a{color:inherit;text-decoration:none}
 .hv h1,.hv h2,.hv h3,.hv p{margin:0}
-.hv h1,.hv h2,.hv-brand{font-family:var(--hv-serif),Georgia,serif;color:var(--wood);font-weight:700}
+.hv h1,.hv h2,.hv-brand{font-family:Georgia,"Times New Roman",serif;color:var(--wood);font-weight:700}
 .hv-wrap{width:min(1100px,calc(100% - 40px));margin:0 auto}
 .hv-header{position:sticky;top:0;z-index:40;background:var(--cream);border-bottom:1px solid var(--line)}
 .hv-header-in{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:78px}
@@ -11,18 +11,20 @@
 .hv-nav a{font-weight:600;font-size:15px;min-height:48px;display:inline-flex;align-items:center}
 .hv-nav a.is-on{color:var(--olive)}
 .hv-actions{display:flex;gap:10px}
-.hv-btn{min-height:48px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--olive);font:700 16px/1 var(--hv-sans),system-ui,sans-serif;cursor:pointer;background:transparent;color:var(--olive)}
+.hv-btn{min-height:48px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--olive);font:700 16px/1 system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer;background:transparent;color:var(--olive)}
 .hv-btn--solid{background:var(--olive);color:#fff}
 .hv-btn--wide{width:100%}
 .hv-burger{display:none;width:48px;height:48px;border:1px solid var(--line);background:transparent;color:var(--wood)}
 .hv-burger svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7}
 .hv-menu{position:fixed;inset:0;z-index:70;background:var(--cream);padding:24px;display:flex;flex-direction:column;gap:8px}
 .hv-menu button{align-self:flex-end;width:48px;height:48px;border:1px solid var(--line);background:transparent}
-.hv-menu a{font-family:var(--hv-serif),Georgia,serif;font-size:32px;color:var(--wood);min-height:48px;display:flex;align-items:center}
+.hv-menu a{font-family:Georgia,"Times New Roman",serif;font-size:32px;color:var(--wood);min-height:48px;display:flex;align-items:center}
 .hv-hero{display:grid;grid-template-columns:1fr 1.05fr;gap:48px;align-items:center;padding:56px 0 20px}
 .hv h1{font-size:clamp(36px,4.4vw,62px);letter-spacing:-.03em;line-height:1.05}
 .hv-rule{display:inline-block;border-bottom:4px solid var(--olive);padding-bottom:8px}
-.hv-lead{margin-top:16px;max-width:42ch;color:var(--muted);font-size:18px}
+.hv-kicker{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--olive);margin-bottom:8px}
+.hv-lead{margin-top:12px;max-width:42ch;color:var(--muted);font-size:18px}
+.hv-today{margin-top:14px;font-weight:700}
 .hv-space{margin-top:28px}
 .hv-badge{display:inline-flex;gap:8px;align-items:baseline;margin-top:22px;padding:10px 14px;background:#fff;border:1px solid var(--line);font-weight:700}
 .hv-badge span{font-weight:400;color:var(--muted)}
@@ -49,19 +51,19 @@
 .hv-photo{position:relative;aspect-ratio:4/3;background:#ddd}
 .hv-table{width:100%;border-collapse:collapse;margin-top:28px;background:#fff}
 .hv-table th,.hv-table td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line)}
-.hv-table th{font-family:var(--hv-serif),Georgia,serif;color:var(--wood);font-size:20px}
+.hv-table th{font-family:Georgia,"Times New Roman",serif;color:var(--wood);font-size:20px}
 .hv-plans{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px}
 .hv-plan-card{background:#fff;border:1px solid var(--line);padding:24px}
-.hv-price{font-family:var(--hv-serif),Georgia,serif;font-size:40px;color:var(--wood)}
+.hv-price{font-family:Georgia,"Times New Roman",serif;font-size:40px;color:var(--wood)}
 .hv-about{display:grid;grid-template-columns:.9fr 1.1fr;gap:36px;align-items:center}
 .hv-contact{display:grid;grid-template-columns:.8fr 1.2fr;gap:36px}
 .hv-facts p{margin-top:12px}
-.hv-facts b{display:block;font-family:var(--hv-serif),Georgia,serif;color:var(--wood);font-size:20px}
+.hv-facts b{display:block;font-family:Georgia,"Times New Roman",serif;color:var(--wood);font-size:20px}
 .hv-form{display:grid;gap:14px}
 .hv-form label{display:grid;gap:6px;font-weight:700;font-size:14px}
-.hv-form input,.hv-form select,.hv-form textarea{min-height:48px;width:100%;padding:12px 14px;border:1px solid var(--line);background:#fff;font:400 16px/1.4 var(--hv-sans),system-ui,sans-serif;color:var(--ink)}
+.hv-form input,.hv-form select,.hv-form textarea{min-height:48px;width:100%;padding:12px 14px;border:1px solid var(--line);background:#fff;font:400 16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
 .hv-form textarea{min-height:120px}
-.hv-thanks{font-family:var(--hv-serif),Georgia,serif;font-size:28px;color:var(--wood);line-height:1.3}
+.hv-thanks{font-family:Georgia,"Times New Roman",serif;font-size:28px;color:var(--wood);line-height:1.3}
 .hv-footer{padding:40px 0 28px;border-top:4px solid var(--olive)}
 .hv-footer p{margin-top:8px;color:var(--muted)}
 .hv-note{font-size:13px;margin-top:18px}
@@ -71,10 +73,13 @@
   .hv{padding-bottom:72px}
   .hv-nav,.hv-actions{display:none}
   .hv-burger{display:inline-flex;align-items:center;justify-content:center}
+  .hv-header-in{min-height:56px}
   .hv-hero,.hv-plan,.hv-service,.hv-about,.hv-contact,.hv-plans,.hv-tiles,.hv-reviews{grid-template-columns:1fr}
+  .hv-hero{padding-top:16px}
+  .hv h1{font-size:32px}
   .hv-sec{padding:56px 0}
   .hv-bar{position:fixed;left:0;right:0;bottom:0;z-index:50;height:72px;display:grid;grid-template-columns:1fr 1fr;background:var(--cream);border-top:1px solid var(--line)}
-  .hv-bar a{display:flex;align-items:center;justify-content:center;font-weight:700;min-height:48px}
+  .hv-bar a{display:flex;align-items:center;justify-content:center;font-weight:700;min-height:48px;padding:0 8px;font-size:15px;text-align:center}
   .hv-bar a:first-child{background:var(--olive);color:#fff}
 }
 @media(prefers-reduced-motion:no-preference){

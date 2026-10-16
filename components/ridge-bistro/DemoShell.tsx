@@ -1,11 +1,9 @@
 'use client';
 
-import { Fraunces, Inter } from 'next/font/google';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLayoutEffect, useState, type ReactNode } from 'react';
 import {
-  callLabel,
   demoNote,
   hours,
   name,
@@ -15,21 +13,6 @@ import {
   reserveHref,
   reserveLabel,
 } from '@/lib/ridge-bistro-data';
-
-const serif = Fraunces({
-  subsets: ['latin'],
-  weight: ['300', '500'],
-  style: ['normal', 'italic'],
-  variable: '--rb-serif',
-  display: 'swap',
-});
-
-const sans = Inter({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  variable: '--rb-sans',
-  display: 'swap',
-});
 
 const home = '/examples/premium-restaurant';
 
@@ -70,15 +53,15 @@ export default function DemoShell({ children }: { children: ReactNode }) {
   const overHero = pathname === home;
 
   return (
-    <div className={`rb ${serif.variable} ${sans.variable}`}>
+    <div className="rb">
       <header className={overHero ? 'rb-header rb-header--over' : 'rb-header'}>
         <div className="rb-wrap rb-header-in">
-          <Link className="rb-brand" href={home}>
+          <Link prefetch={false} className="rb-brand" href={home}>
             {name}
           </Link>
           <nav className="rb-nav" aria-label="Pages">
             {nav.map((item) => (
-              <Link
+              <Link prefetch={false}
                 key={item.href}
                 href={item.href}
                 className={pathname === item.href ? 'is-on' : undefined}
@@ -89,9 +72,9 @@ export default function DemoShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="rb-actions">
             <a className="rb-btn rb-btn--solid" href={phoneHref}>
-              {callLabel}
+              {phone}
             </a>
-            <Link className="rb-btn" href={reserveHref}>
+            <Link prefetch={false} className="rb-btn" href={reserveHref}>
               {reserveLabel}
             </Link>
           </div>
@@ -114,7 +97,7 @@ export default function DemoShell({ children }: { children: ReactNode }) {
             Close
           </button>
           {nav.map((item) => (
-            <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
+            <Link prefetch={false} key={item.href} href={item.href} onClick={() => setOpen(false)}>
               {item.label}
             </Link>
           ))}
@@ -132,8 +115,8 @@ export default function DemoShell({ children }: { children: ReactNode }) {
         </div>
       </footer>
       <div className="rb-bar">
-        <a href={phoneHref}>{callLabel}</a>
-        <Link href={reserveHref}>{reserveLabel}</Link>
+        <a href={phoneHref}>{phone}</a>
+        <Link prefetch={false} href={reserveHref}>{reserveLabel}</Link>
       </div>
     </div>
   );

@@ -1,11 +1,9 @@
 'use client';
 
-import { Source_Sans_3, Zilla_Slab } from 'next/font/google';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLayoutEffect, useState, type ReactNode } from 'react';
 import {
-  callLabel,
   demoNote,
   hours,
   name,
@@ -15,20 +13,6 @@ import {
   requestHref,
   requestLabel,
 } from '@/lib/complete-hvac-data';
-
-const slab = Zilla_Slab({
-  subsets: ['latin'],
-  weight: ['500', '700'],
-  variable: '--hv-serif',
-  display: 'swap',
-});
-
-const sans = Source_Sans_3({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  variable: '--hv-sans',
-  display: 'swap',
-});
 
 const home = '/examples/complete-hvac';
 
@@ -68,15 +52,15 @@ export default function DemoShell({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   return (
-    <div className={`hv ${slab.variable} ${sans.variable}`}>
+    <div className="hv">
       <header className="hv-header">
         <div className="hv-wrap hv-header-in">
-          <Link className="hv-brand" href={home}>
+          <Link prefetch={false} className="hv-brand" href={home}>
             {name}
           </Link>
           <nav className="hv-nav" aria-label="Pages">
             {nav.map((item) => (
-              <Link
+              <Link prefetch={false}
                 key={item.href}
                 href={item.href}
                 className={pathname === item.href ? 'is-on' : undefined}
@@ -87,9 +71,9 @@ export default function DemoShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="hv-actions">
             <a className="hv-btn hv-btn--solid" href={phoneHref}>
-              {callLabel}
+              {phone}
             </a>
-            <Link className="hv-btn" href={requestHref}>
+            <Link prefetch={false} className="hv-btn" href={requestHref}>
               {requestLabel}
             </Link>
           </div>
@@ -112,7 +96,7 @@ export default function DemoShell({ children }: { children: ReactNode }) {
             Close
           </button>
           {nav.map((item) => (
-            <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
+            <Link prefetch={false} key={item.href} href={item.href} onClick={() => setOpen(false)}>
               {item.label}
             </Link>
           ))}
@@ -130,8 +114,8 @@ export default function DemoShell({ children }: { children: ReactNode }) {
         </div>
       </footer>
       <div className="hv-bar">
-        <a href={phoneHref}>{callLabel}</a>
-        <Link href={requestHref}>{requestLabel}</Link>
+        <a href={phoneHref}>{phone}</a>
+        <Link prefetch={false} href={requestHref}>{requestLabel}</Link>
       </div>
     </div>
   );
