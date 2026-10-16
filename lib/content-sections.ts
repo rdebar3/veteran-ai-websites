@@ -25,7 +25,7 @@ export const whyChoosePillars = [
   {
     title: 'No contract. Yours after a year.',
     body:
-      'Nothing down — your first payment is month one. Cancel anytime. If you cancel before 12 payments, the site comes down, or you can pay off the remaining months and keep it. After 12 payments you own the site, the files, and the domain. You can take it anywhere, or stay on for $29 a month.',
+      'Nothing down — your first payment is month one. Cancel anytime. If you cancel before 12 payments, the site comes down, or you can pay off the remaining months and keep it. After 12 payments you own the site, the files, and the domain. You can take it anywhere, or stay on for $39 a month.',
     image: landmarks.wvCapitol.image,
     imageAlt: landmarks.wvCapitol.imageAlt,
     imageCaption:

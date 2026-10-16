@@ -5,6 +5,7 @@ import VideoHero from '@/components/VideoHero';
 import VeteranBand from '@/components/VeteranBand';
 import Demos from '@/components/Demos';
 import Packages from '@/components/Packages';
+import Software from '@/components/Software';
 import Reviews from '@/components/Reviews';
 import LetsTalk from '@/components/LetsTalk';
 import LowerBackdrop from '@/components/LowerBackdrop';
@@ -14,7 +15,7 @@ import { scrollToY, resizeScroll } from '@/lib/scroll-driver';
 
 /**
  * Clean homepage:
- * Video hero → demos → packages → ownership → veterans → contact → reviews.
+ * Video hero → demos → packages → software → ownership → veterans → contact → reviews.
  */
 export default function Home() {
   // Return visitors to the exact spot they left from when they open a demo.
@@ -48,6 +49,7 @@ export default function Home() {
         <VeteranBand />
         <Demos />
         <Packages />
+        <Software />
         <Ownership />
         <Veterans />
         <LetsTalk />

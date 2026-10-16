@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import ScheduleCall from '@/components/ScheduleCall';
 import { SOFTWARE_REVIEW_TOPIC } from '@/lib/data';
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/contact';
 import { validateInquiry } from '@/lib/inquiry';
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -23,6 +24,8 @@ const styles = `
 .lt__callnote{margin:14px 0 0;text-align:center;font-family:var(--font-sans);font-size:12.5px;line-height:1.35;color:rgba(233,240,246,.72)}
 .lt__rule{border:0;border-top:1px solid rgba(233,240,246,.14);margin:26px 0 22px}
 .lt__type{margin:0 0 16px;font-family:var(--font-sans);font-size:clamp(18px,2vw,22px);font-weight:600;letter-spacing:-.02em;line-height:1.2;color:#fff}
+.lt__or{margin:-6px 0 16px;font-size:15px;line-height:1.5;color:rgba(233,240,246,.92)}
+.lt__or a{color:#fff;font-weight:700}
 .lt__block{margin-bottom:14px}
 .lt__label{display:block;font-size:13px;font-weight:600;color:rgba(233,240,246,.88);margin:0 0 7px}
 .lt__field{width:100%;font-family:var(--font-sans);font-size:15px;color:#eef4f8;background:rgba(255,255,255,.04);border:1px solid rgba(233,240,246,.22);border-radius:12px;padding:13px 15px;transition:border-color .2s}
@@ -142,6 +145,16 @@ export default function LetsTalk() {
             <>
               <hr className="lt__rule" />
               <h3 className="lt__type">Rather type? Send me a note.</h3>
+              {CONTACT_EMAIL ? (
+                <p className="lt__or">
+                  <a href={`mailto:${CONTACT_EMAIL}`}>Or email me: {CONTACT_EMAIL}</a>
+                </p>
+              ) : null}
+              {CONTACT_PHONE && CONTACT_PHONE_HREF ? (
+                <p className="lt__or">
+                  <a href={CONTACT_PHONE_HREF}>Or call: {CONTACT_PHONE}</a>
+                </p>
+              ) : null}
               <form className="lt__form" onSubmit={submit} noValidate>
                 <div className="lt__block">
                   <label className="lt__label" htmlFor="lt-name">

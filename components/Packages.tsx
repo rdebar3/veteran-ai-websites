@@ -6,7 +6,6 @@ import {
   formatUsd,
   allPackagesInclude,
   PAY_ONCE_LINE,
-  STORE_LINE,
 } from '@/lib/data';
 import ScheduleCall, { bookHref } from '@/components/ScheduleCall';
 
@@ -116,7 +115,6 @@ export default function Packages() {
       </div>
 
       <p className="pk__once">{PAY_ONCE_LINE}</p>
-      <p className="pk__once">{STORE_LINE}</p>
 
       <ul className="pk__every">
         {allPackagesInclude.map((item) => (

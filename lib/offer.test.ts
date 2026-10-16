@@ -6,9 +6,7 @@ import { showcaseDemos } from './cinematic';
 import {
   KEEP_RUNNING_MONTHLY,
   PAY_ONCE_LINE,
-  addOnsList,
   allPackagesInclude,
-  payOnce,
   pricingTiers,
 } from './data';
 import { heroScenes } from './hero-scenes';
@@ -20,14 +18,11 @@ describe('monthly offer', () => {
       ['Complete', 79, true],
       ['Premium', 99, false],
     ]);
-    expect(payOnce).toEqual({ Starter: 497, Complete: 797, Premium: 997 });
-    expect(KEEP_RUNNING_MONTHLY).toBe(29);
-    expect(PAY_ONCE_LINE).toBe(
-      'Rather pay once and own it outright? Starter $497 · Complete $797 · Premium $997. Your call when you approve the site.'
-    );
+    expect(KEEP_RUNNING_MONTHLY).toBe(39);
+    expect(PAY_ONCE_LINE).toBe('Want to own it outright? Ask me on the call.');
   });
 
-  it('lists what every plan includes and keeps only the store add-on', () => {
+  it('lists what every plan includes', () => {
     expect(allPackagesInclude).toEqual([
       'Nothing down — nothing is charged until you’ve approved your site',
       'Hosting, updates and small changes included',
@@ -35,7 +30,6 @@ describe('monthly offer', () => {
       'After 12 payments the site is yours to keep',
       '100% mobile-first',
     ]);
-    expect(addOnsList.map((addon) => [addon.name, addon.price])).toEqual([['Shoppable Store', 497]]);
   });
 
   it('states the briefing pricing line and names the starter demo Summit Plumbing', () => {
@@ -69,7 +63,9 @@ describe('hero scenes', () => {
       'utf8'
     );
     expect(source).toContain('height:200vh');
-    expect(source).toContain('height:160vh');
+    expect(source).toContain('min-height:100svh');
+    expect(source).not.toContain('160vh');
+    expect(source).not.toContain('hero-gorge-mobile');
     expect(source).not.toContain('340vh');
     expect(source).not.toContain('260vh');
     expect(source).toContain('heroScenes');

@@ -6,6 +6,13 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SiteChrome from '@/components/SiteChrome';
 import SmoothScroll from '@/components/SmoothScroll';
+import {
+  CONTACT_PHONE,
+  GOOGLE_LISTING_URL,
+  MAILING_ADDRESS,
+  mailingAddressFields,
+} from '@/lib/contact';
+import { SITE } from '@/lib/site';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -19,8 +26,6 @@ const geistMono = Geist_Mono({
   weight: ['400', '500', '600'],
 });
 
-const SITE = 'https://veteranaiwebsites.com';
-
 const META_TITLE =
   'Veteran AI Websites | Websites for West Virginia Small Businesses';
 
@@ -32,6 +37,8 @@ const META_DESCRIPTION =
  * Rendered in <head> of the root Server Component layout so it is present in
  * the initial HTML — not deferred via a client component.
  */
+const mailing = mailingAddressFields(MAILING_ADDRESS);
+
 const localBusinessSchema = {
   '@context': 'https://schema.org',
   '@type': ['LocalBusiness', 'ProfessionalService'],
@@ -46,10 +53,14 @@ const localBusinessSchema = {
   logo: `${SITE}/logo-mark.svg`,
   description: META_DESCRIPTION,
   priceRange: '$$',
+  sameAs: [GOOGLE_LISTING_URL],
+  ...(CONTACT_PHONE ? { telephone: CONTACT_PHONE } : {}),
   address: {
     '@type': 'PostalAddress',
     addressRegion: 'WV',
     addressCountry: 'US',
+    ...(mailing?.streetAddress ? { streetAddress: mailing.streetAddress } : {}),
+    ...(mailing?.postalCode ? { postalCode: mailing.postalCode } : {}),
   },
   areaServed: {
     '@type': 'State',

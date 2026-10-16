@@ -1,7 +1,8 @@
 import type { MetadataRoute } from 'next';
+import { SITE } from '@/lib/site';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://veteranaiwebsites.com';
+  const base = SITE;
   const now = new Date();
   return [
     { url: base, lastModified: now, changeFrequency: 'weekly', priority: 1 },

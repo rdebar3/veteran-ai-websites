@@ -1,6 +1,6 @@
 export interface PricingTier {
   name: string;
-  /** Monthly price in dollars. Pay-once amounts live on `payOnce`. */
+  /** Monthly price in dollars. */
   price: number;
   promoPrice?: number;
   promoActive?: boolean;
@@ -11,19 +11,14 @@ export interface PricingTier {
   revisions: string;
 }
 
-export const payOnce = {
-  Starter: 497,
-  Complete: 797,
-  Premium: 997,
-} as const;
+export type PlanName = 'Starter' | 'Complete' | 'Premium';
 
-export type PlanName = keyof typeof payOnce;
-
-export const PAY_ONCE_LINE =
-  'Rather pay once and own it outright? Starter $497 · Complete $797 · Premium $997. Your call when you approve the site.';
+export const PAY_ONCE_LINE = 'Want to own it outright? Ask me on the call.';
 
 /** Optional hosting and small fixes after month 12. Not charged at checkout. */
-export const KEEP_RUNNING_MONTHLY = 29;
+export const KEEP_RUNNING_MONTHLY = 39;
+
+export const GOOGLE_LISTING_LINE = 'Google listing check and clean-up included';
 
 export function getDisplayPrice(tier: PricingTier): number {
   if (tier.promoActive && tier.promoPrice != null) {
@@ -50,6 +45,7 @@ export const pricingTiers: PricingTier[] = [
       'Mobile-first',
       '1 round of revisions',
       'Delivered in 1 day',
+      GOOGLE_LISTING_LINE,
     ],
   },
   {
@@ -65,6 +61,7 @@ export const pricingTiers: PricingTier[] = [
       'Basic SEO foundation',
       '1 round of revisions',
       'Delivered in 1 day',
+      GOOGLE_LISTING_LINE,
     ],
   },
   {
@@ -79,6 +76,7 @@ export const pricingTiers: PricingTier[] = [
       'Stronger SEO foundation',
       'Priority delivery',
       '2 rounds of revisions',
+      GOOGLE_LISTING_LINE,
     ],
   },
 ];
@@ -91,28 +89,4 @@ export const allPackagesInclude = [
   '100% mobile-first',
 ];
 
-export interface AddOn {
-  id: string;
-  name: string;
-  price: number;
-  period: string;
-  desc: string;
-  features?: string[];
-}
-
-export const SHOPPABLE_STORE_PRICE = 497;
-
 export const SOFTWARE_REVIEW_TOPIC = 'software-review';
-
-export const STORE_LINE =
-  'Want to sell online? Add a store, up to 20 products, $497 one-time, billed with your first payment. Just mention it on the call.';
-
-export const addOnsList: AddOn[] = [
-  {
-    id: 'shoppable-store',
-    name: 'Shoppable Store',
-    price: SHOPPABLE_STORE_PRICE,
-    period: '',
-    desc: 'Sell online with a secure product catalog and checkout — up to 20 products, built alongside your site. Charged once at checkout.',
-  },
-];

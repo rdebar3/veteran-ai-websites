@@ -2,14 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { DEMO_NOINDEX_HEADERS } from './demo/headers';
 import { bookHref } from '../components/ScheduleCall';
 import { BUSINESS_LEGAL_NAME, CONTACT_EMAIL, CONTACT_EMAIL_HREF } from './contact';
-import { PAY_ONCE_LINE, SOFTWARE_REVIEW_TOPIC, STORE_LINE, allPackagesInclude } from './data';
+import { PAY_ONCE_LINE, SOFTWARE_REVIEW_TOPIC, allPackagesInclude } from './data';
 import { heroScenes } from './hero-scenes';
 
 describe('public copy', () => {
-  it('keeps the pay-once prices on the plan line', () => {
-    expect(PAY_ONCE_LINE).toContain('$497');
-    expect(PAY_ONCE_LINE).toContain('$797');
-    expect(PAY_ONCE_LINE).toContain('$997');
+  it('points pay-once at the call', () => {
+    expect(PAY_ONCE_LINE).toBe('Want to own it outright? Ask me on the call.');
   });
 
   it('says nothing is charged until the site is approved', () => {
@@ -24,9 +22,8 @@ describe('public copy', () => {
     expect(DEMO_NOINDEX_HEADERS.some((entry) => entry.source === '/examples/:path*')).toBe(true);
   });
 
-  it('names the software review and the store line', () => {
+  it('names the software review', () => {
     expect(SOFTWARE_REVIEW_TOPIC).toBe('software-review');
-    expect(STORE_LINE).toContain('$497');
   });
 
   it('names the business and points contact at the note form until there is an email', () => {

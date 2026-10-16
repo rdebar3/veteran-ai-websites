@@ -31,9 +31,8 @@ export default function TermsPage() {
       <h2>Scope of work</h2>
       <p>
         Scope is defined per project in writing: package tier (Starter $49/month, Complete
-        $79/month, or Premium $99/month) and the optional Shoppable Store add-on at $497. Nothing
-        down — your first payment is month one. To own it today instead, the pay-once prices are
-        Starter $497, Complete $797, and Premium $997. Nothing is charged until you’ve seen your
+        $79/month, or Premium $99/month). Nothing
+        down — your first payment is month one. A pay-once option is available on request; the price is quoted on the call and stated in your approval. Nothing is charged until you’ve seen your
         site and approved it. Anything outside the agreed scope is a change request billed
         separately.
       </p>
@@ -41,9 +40,7 @@ export default function TermsPage() {
       <h2>Payment</h2>
       <p>
         After you approve the site, I send a secure Stripe payment link. A monthly plan is a Stripe
-        subscription at that plan’s monthly price. Pay once is a single payment at the pay-once
-        price. The Shoppable Store, if you add it, is a one-time $497 charge with that first
-        payment. Failed payments may pause a monthly plan until resolved.
+        subscription at that plan’s monthly price. A pay-once option is available on request; the price is quoted on the call and stated in your approval. Failed payments may pause a monthly plan until resolved.
       </p>
 
       <h2>Revisions</h2>
@@ -65,7 +62,7 @@ export default function TermsPage() {
       </p>
       <p>
         After 12 payments you own the site, the files, and the domain. You can take it anywhere, or
-        stay on for $29 a month for hosting and small fixes.
+        stay on for $39 a month for hosting and small fixes.
       </p>
 
       <h2>Veterans</h2>

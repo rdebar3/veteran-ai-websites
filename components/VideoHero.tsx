@@ -5,17 +5,22 @@ import {
   motion,
   useScroll,
   useTransform,
-  useReducedMotion,
   useMotionValueEvent,
   type MotionValue,
 } from 'framer-motion';
 import MagneticButton from '@/components/MagneticButton';
 import ScheduleCall from '@/components/ScheduleCall';
+import { CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/contact';
 import { heroScenes, type HeroScene } from '@/lib/hero-scenes';
 
 const VIDEO = '/hero/hero-gorge-loop.mp4';
-const MOBILE_VIDEO = '/hero/hero-gorge-mobile.mp4';
 const POSTER = '/hero/hero-gorge-poster.jpg';
+const POSTER_ALT = 'West Virginia mill in autumn';
+
+/** Desktop with motion plays the film. Phones and reduced motion stay on the poster. */
+export function heroShowsVideo(isMobile: boolean, prefersReducedMotion: boolean): boolean {
+  return !isMobile && !prefersReducedMotion;
+}
 
 type Scene = HeroScene;
 
@@ -44,7 +49,7 @@ function sceneOpacityAt(s: number, i: number): number {
 const styles = `
 .vh-root{position:relative;height:200vh;background:#06090f}
 .vh-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#06090f;isolation:isolate}
-.vh-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.vh-video,.vh-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .vh-veil{position:absolute;inset:0;z-index:1;pointer-events:none;background:
   radial-gradient(78% 58% at 50% 50%,rgba(6,9,15,.52),transparent 72%),
   radial-gradient(120% 90% at 50% 55%,transparent 40%,rgba(6,9,15,.32) 74%,rgba(6,9,15,.62) 100%),
@@ -66,20 +71,30 @@ const styles = `
 .vh-cta-btn:hover{transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,0,0,.55)}
 .vh-cta-btn--line:hover{background:#fff;color:#0a0e14;border-color:#fff}
 .vh-cta__note{margin:0;font-family:var(--font-sans);font-size:13px;line-height:1.35;color:rgba(233,240,246,.72);text-align:center}
+.vh-cta__call{margin:0;font-family:var(--font-sans);font-size:15px;font-weight:700;line-height:1.35;text-align:center}
+.vh-cta__call a{color:#fff;text-decoration:underline;text-underline-offset:3px}
 .vh-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--font-sans);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(233,240,246,.72);text-align:center}
 .vh-hint i{display:block;width:1px;height:28px;margin:10px auto 0;background:linear-gradient(rgba(233,240,246,.7),transparent)}
 .vh-dots{position:absolute;top:50%;right:clamp(14px,2vw,28px);transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:12px}
 .vh-dot{width:7px;height:7px;border-radius:50%;background:rgba(233,240,246,.28);transition:background .3s,transform .3s}
 .vh-dot.is-on{background:#fff;transform:scale(1.35)}
-/* simple fallback (mobile / reduced motion) */
+/* poster fallback (phones / reduced motion): one viewport, text centered on the image */
 .vh-simple{position:relative;min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:#06090f}
-.vh-simple video,.vh-simple img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.vh-simple img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .vh-simple .vh-veil{z-index:1}
 .vh-simple .vh-stack{position:relative;z-index:2;padding:0 24px}
 @media(max-width:640px){.vh-cta__row{flex-direction:column;align-items:stretch;width:100%}.vh-cta__row .sched,.vh-cta__row .btn-magnetic{width:100%}.vh-cta-btn{width:100%;min-width:0}}
-/* mobile: shorter scroll region so the two scenes play over less scroll */
-@media(max-width:768px){.vh-root{height:160vh}}
+@media(max-width:767px){.vh-root{height:auto;min-height:100svh}.vh-stage{position:relative;height:auto;min-height:100svh}}
 `;
+
+function HeroCall() {
+  if (!CONTACT_PHONE || !CONTACT_PHONE_HREF) return null;
+  return (
+    <p className="vh-cta__call">
+      <a href={CONTACT_PHONE_HREF}>Call me: {CONTACT_PHONE}</a>
+    </p>
+  );
+}
 
 function SceneText({
   scene,
@@ -98,9 +113,19 @@ function SceneText({
 
   if (!mounted) return null;
 
+  // The page H1 already says the first headline. This copy is visual only.
+  const title =
+    i === 0 ? (
+      <div className="vh-title" aria-hidden="true">
+        {scene.title}
+      </div>
+    ) : (
+      <h2 className="vh-title">{scene.title}</h2>
+    );
+
   return (
     <motion.div className="vh-scene" style={{ opacity, visibility }} aria-hidden={false}>
-      <h2 className="vh-title">{scene.title}</h2>
+      {title}
       {scene.sub && <p className="vh-sub">{scene.sub}</p>}
     </motion.div>
   );
@@ -133,6 +158,7 @@ function CtaBlock({
         </MagneticButton>
       </div>
       <p className="vh-cta__note">20 minutes. I call you.</p>
+      <HeroCall />
     </motion.div>
   );
 }
@@ -143,10 +169,9 @@ interface VideoHeroProps {
 
 export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = useReducedMotion();
-  const [simple, setSimple] = useState(false);
+  const [posterOnly, setPosterOnly] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
   const [active, setActive] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
   // Only mount the active phrase + neighbors so faded-out copy fully unmounts.
   const [mounted, setMounted] = useState<Set<number>>(() => new Set([0]));
 
@@ -160,14 +185,25 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
   const anim = useTransform(scrollYProgress, [0, HOLD], [0, 1]);
 
   useEffect(() => {
-    // Only reduced-motion users get the static single-headline fallback.
-    setSimple(!!prefersReducedMotion);
-    // Mobile gets a purpose-built 9:16 video so the whole scene is visible.
-    const setMq = () => setIsMobile(window.matchMedia('(max-width: 767px)').matches);
-    setMq();
-    window.addEventListener('resize', setMq);
-    return () => window.removeEventListener('resize', setMq);
-  }, [prefersReducedMotion]);
+    // Phones never mount a <video>, so the mobile mp4 is not requested.
+    // Reduced motion keeps the poster on desktop too.
+    const mobileMq = window.matchMedia('(max-width: 767px)');
+    const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const apply = () => {
+      const mobile = mobileMq.matches;
+      const reduced = reduceMq.matches;
+      const video = heroShowsVideo(mobile, reduced);
+      setPosterOnly(!video);
+      setShowVideo(video);
+    };
+    apply();
+    mobileMq.addEventListener('change', apply);
+    reduceMq.addEventListener('change', apply);
+    return () => {
+      mobileMq.removeEventListener('change', apply);
+      reduceMq.removeEventListener('change', apply);
+    };
+  }, []);
 
   useMotionValueEvent(anim, 'change', (a) => {
     const s = a * (N - 1);
@@ -190,24 +226,16 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
     });
   });
 
-  // Fallback: autoplay loop + static headline (reduced motion)
-  if (simple) {
+  if (posterOnly) {
     return (
       <div className="vh-simple" id="hero">
         <style dangerouslySetInnerHTML={{ __html: styles }} />
-        <video
-          src={isMobile ? MOBILE_VIDEO : VIDEO}
-          poster={POSTER}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-        />
+        <img src={POSTER} alt={POSTER_ALT} />
         <div className="vh-veil" aria-hidden="true" />
         <div className="vh-stack">
-          <h2 className="vh-title">{scenes[0].title}</h2>
+          <div className="vh-title" aria-hidden="true">
+            {scenes[0].title}
+          </div>
           <p className="vh-sub">{scenes[0].sub}</p>
           <p className="vh-sub">{scenes[1].title}</p>
           <div className="vh-cta">
@@ -218,6 +246,7 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
               </MagneticButton>
             </div>
             <p className="vh-cta__note">20 minutes. I call you.</p>
+            <HeroCall />
           </div>
         </div>
       </div>
@@ -228,17 +257,20 @@ export default function VideoHero({ onClaimOffer }: VideoHeroProps) {
     <div className="vh-root" id="hero" ref={rootRef}>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <div className="vh-stage">
-        <video
-          className="vh-video"
-          src={isMobile ? MOBILE_VIDEO : VIDEO}
-          poster={POSTER}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          aria-hidden="true"
-        />
+        <img className="vh-poster" src={POSTER} alt={POSTER_ALT} />
+        {showVideo ? (
+          <video
+            className="vh-video"
+            src={VIDEO}
+            poster={POSTER}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+          />
+        ) : null}
         <div className="vh-veil" aria-hidden="true" />
         <div className="vh-scenes">
           <div className="vh-stack">
