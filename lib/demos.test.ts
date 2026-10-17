@@ -5,6 +5,7 @@ import { showcaseDemos } from './cinematic';
 import { demoNote as hvacNote, nav as hvacNav } from './complete-hvac-data';
 import { demoNote as bistroNote, nav as bistroNav } from './ridge-bistro-data';
 import { demoNote as plumbingNote, nav as plumbingNav } from './starter-plumbing-data';
+import { SITE_VERSION } from './version';
 
 const root = process.cwd();
 const examplesDir = path.join(root, 'app', 'examples');
@@ -78,6 +79,27 @@ describe('showcase demo facts', () => {
     expect(plumbingNote).toBe(line);
     expect(hvacNote).toBe(line);
     expect(bistroNote).toBe(line);
+  });
+
+  it('points every photo src at a file under public/', () => {
+    const photoKey = /(?:src|image):\s*'(\/[^']+)'/g;
+    const srcs: string[] = [];
+    for (const file of dataFiles) {
+      const source = fs.readFileSync(path.join(root, file), 'utf8');
+      for (const match of source.matchAll(photoKey)) {
+        const src = match[1];
+        if (src) srcs.push(src);
+      }
+    }
+    expect(srcs.length).toBeGreaterThan(0);
+    for (const src of srcs) {
+      const file = path.join(process.cwd(), 'public', src.replace(/^\//, ''));
+      expect(fs.existsSync(file), src).toBe(true);
+    }
+  });
+
+  it('stamps the public site release', () => {
+    expect(SITE_VERSION).toBe('2026-10-17-y');
   });
 
   it('keeps decorative grids and glass out of the demo CSS', () => {

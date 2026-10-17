@@ -63,7 +63,7 @@ const serviceSeeds = [
     title: 'Heating',
     summary: 'Furnaces and heat pumps that keep every room warm on the cold nights.',
     body: 'We size the system to the house, not to a catalog page. Repair when that is the honest answer, replacement when the old unit has given out.',
-    image: '/demos/complete-hvac/service-heating.jpg',
+    image: '/demos/complete-hvac/service-heating.webp',
     alt: 'A heating system in a mountain home',
     included: [
       'Furnace repair and replacement',
@@ -77,7 +77,7 @@ const serviceSeeds = [
     title: 'Cooling',
     summary: 'Central air and mini-splits for the humid stretch of a West Virginia summer.',
     body: 'A system that cools the rooms you use, without icing over or short-cycling through August.',
-    image: '/demos/complete-hvac/service-cooling.jpg',
+    image: '/demos/complete-hvac/service-cooling.webp',
     alt: 'Cooling equipment for a home',
     included: [
       'Central air install and repair',
@@ -91,7 +91,7 @@ const serviceSeeds = [
     title: 'Air quality',
     summary: 'Filtration and humidity so the air in the house feels like air, not a closet.',
     body: 'Filters, ventilation, and a straight explanation of what will actually change how the house feels.',
-    image: '/demos/complete-hvac/service-air-quality.jpg',
+    image: '/demos/complete-hvac/service-air-quality.webp',
     alt: 'Indoor air equipment beside a home comfort system',
     included: [
       'Better filtration',
@@ -105,7 +105,7 @@ const serviceSeeds = [
     title: 'Emergency repair',
     summary: 'No heat or no cooling, answered by someone who can be on the road.',
     body: 'Sunday is for emergency calls. Plan members go to the front of the list.',
-    image: '/demos/complete-hvac/project-heat-pump.jpg',
+    image: '/demos/complete-hvac/project-heat-pump.webp',
     alt: 'A heat pump installed at a Ridgeview home',
     included: [
       'No-heat and no-cool calls',
@@ -208,8 +208,8 @@ export const serviceArea = {
 
 export const about = {
   photo: {
-    src: '/demos/complete-hvac/about-team.jpg',
-    alt: 'The Appalachian HVAC crew outside a home',
+    src: '/demos/complete-hvac/about-team.webp',
+    alt: 'Three technicians beside a white van, a ridge behind them',
   },
   lead: `Appalachian HVAC has worked on Ridgeview homes since ${founded}. ${ownership}.`,
   license,

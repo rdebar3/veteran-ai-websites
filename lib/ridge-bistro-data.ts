@@ -47,19 +47,19 @@ export const hours = [
 
 export const dishes = [
   {
-    src: '/demos/ridge-bistro/dish-steak.jpg',
+    src: '/demos/ridge-bistro/dish-steak.webp',
     alt: 'A sliced ribeye on a plate',
     name: 'Dry-aged ribeye',
     text: 'Herb butter and the roots that are in this week.',
   },
   {
-    src: '/demos/ridge-bistro/dish-trout.jpg',
+    src: '/demos/ridge-bistro/dish-trout.webp',
     alt: 'Pan-seared trout with mushrooms',
     name: 'Appalachian trout',
     text: 'Brown butter, lemon, and what the stream gave up.',
   },
   {
-    src: '/demos/ridge-bistro/dish-duck.jpg',
+    src: '/demos/ridge-bistro/dish-duck.webp',
     alt: 'Seared duck breast with a dark sauce',
     name: 'Duck breast',
     text: 'Crisped skin, cherry, and roasted beets.',
@@ -107,19 +107,19 @@ export const menu = [
 ];
 
 export const gallery = [
-  { src: '/demos/ridge-bistro/hero.jpg', alt: 'A plated fish supper', caption: 'Supper, plated.' },
-  { src: '/demos/ridge-bistro/interior.jpg', alt: 'The Ridge Bistro dining room', caption: 'The dining room.' },
-  { src: '/demos/ridge-bistro/private-dining.jpg', alt: 'The private dining room', caption: 'The private room.' },
-  { src: '/demos/ridge-bistro/dish-steak.jpg', alt: 'Dry-aged ribeye', caption: 'Dry-aged ribeye.' },
-  { src: '/demos/ridge-bistro/dish-trout.jpg', alt: 'Pan-seared trout', caption: 'Trout.' },
-  { src: '/demos/ridge-bistro/dish-charcuterie.jpg', alt: 'A charcuterie board', caption: 'To start.' },
-  { src: '/demos/ridge-bistro/dish-duck.jpg', alt: 'Duck breast', caption: 'Duck.' },
-  { src: '/demos/ridge-bistro/dish-dessert.jpg', alt: 'Dark chocolate tart', caption: 'Chocolate tart.' },
+  { src: '/demos/ridge-bistro/hero.webp', alt: 'A plated fish supper', caption: 'Supper, plated.' },
+  { src: '/demos/ridge-bistro/interior.webp', alt: 'The Ridge Bistro dining room', caption: 'The dining room.' },
+  { src: '/demos/ridge-bistro/private-dining.webp', alt: 'The private dining room', caption: 'The private room.' },
+  { src: '/demos/ridge-bistro/dish-steak.webp', alt: 'Dry-aged ribeye', caption: 'Dry-aged ribeye.' },
+  { src: '/demos/ridge-bistro/dish-trout.webp', alt: 'Pan-seared trout', caption: 'Trout.' },
+  { src: '/demos/ridge-bistro/dish-charcuterie.webp', alt: 'A charcuterie board', caption: 'To start.' },
+  { src: '/demos/ridge-bistro/dish-duck.webp', alt: 'Duck breast', caption: 'Duck.' },
+  { src: '/demos/ridge-bistro/dish-dessert.webp', alt: 'Dark chocolate tart', caption: 'Chocolate tart.' },
 ];
 
 export const privateDining = {
   photo: {
-    src: '/demos/ridge-bistro/private-dining.jpg',
+    src: '/demos/ridge-bistro/private-dining.webp',
     alt: 'A private dining table set for the evening',
   },
   title: 'The room down the hall.',
@@ -132,7 +132,7 @@ export const privateDining = {
 
 export const about = {
   photo: {
-    src: '/demos/ridge-bistro/interior.jpg',
+    src: '/demos/ridge-bistro/interior.webp',
     alt: 'Tables set in the Ridge Bistro dining room',
   },
   title: 'A room Elena Marsh cooks for.',

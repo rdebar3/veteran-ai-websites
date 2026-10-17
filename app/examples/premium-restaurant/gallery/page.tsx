@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { gallery } from '@/lib/ridge-bistro-data';
 
-const wide = '/demos/ridge-bistro/private-dining.jpg';
+const wide = '/demos/ridge-bistro/private-dining.webp';
 
 export default function GalleryPage() {
   return (

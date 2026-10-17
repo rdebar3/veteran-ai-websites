@@ -38,7 +38,7 @@ export const hero = {
   town,
   line,
   photo: {
-    src: '/demos/starter-plumbing/hero-tech.jpg',
+    src: '/demos/starter-plumbing/hero-tech.webp',
     alt: 'A plumber repairing the lines under a kitchen sink, mountains outside the window',
   },
 };
@@ -79,7 +79,7 @@ export const services = [
 export const about = {
   title: 'A real local pro — not a call center.',
   photo: {
-    src: '/demos/starter-plumbing/summit-pro.jpg',
+    src: '/demos/starter-plumbing/summit-pro.webp',
     alt: 'Summit Plumbing technician at a kitchen sink',
   },
   lead: 'Summit Plumbing is a one-crew shop in Ridgeview. The person who answers is the person who shows up.',
@@ -91,18 +91,18 @@ export const about = {
 
 export const work = [
   {
-    src: '/demos/starter-plumbing/kitchen-faucet.jpg',
+    src: '/demos/starter-plumbing/kitchen-faucet.webp',
     alt: 'A kitchen faucet installed at a sink',
     caption: 'A kitchen faucet, set and sealed.',
   },
   {
-    src: '/demos/starter-plumbing/hero-bathroom.jpg',
+    src: '/demos/starter-plumbing/hero-bathroom.webp',
     alt: 'A finished bathroom with a new fixture',
     caption: 'A bathroom put back into everyday use.',
   },
   {
-    src: '/demos/starter-plumbing/entrance-leak.jpg',
-    alt: 'Plumbing repair at a home entrance',
+    src: '/demos/starter-plumbing/entrance-leak.webp',
+    alt: 'A plumber tightening copper pipe on a stone wall, hills behind',
     caption: 'A leak caught before it spread.',
   },
 ];

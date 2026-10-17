@@ -81,7 +81,7 @@ export default function BistroHomePage() {
           </div>
           <div className="rb-photo">
             <FoldImage
-              src="/demos/ridge-bistro/private-dining.jpg"
+              src="/demos/ridge-bistro/private-dining.webp"
               alt="The private dining room"
               fill
               sizes="(max-width: 760px) 100vw, 420px"
