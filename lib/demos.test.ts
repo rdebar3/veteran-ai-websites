@@ -99,7 +99,7 @@ describe('showcase demo facts', () => {
   });
 
   it('stamps the public site release', () => {
-    expect(SITE_VERSION).toBe('2026-10-17-y');
+    expect(SITE_VERSION).toBe('2026-10-17-z');
   });
 
   it('keeps decorative grids and glass out of the demo CSS', () => {
